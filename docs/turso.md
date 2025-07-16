@@ -1,0 +1,5 @@
+Move the Tech Stack database to use Drizzle ORM and Turso. Use context7.
+
+
+TURSO_CONNECTION_URL=libsql://wmsradja-budisantosodev.aws-ap-northeast-1.turso.io
+TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTI1OTA1NzUsImlkIjoiN2EwNTU3OWQtNGJjNC00NzdiLTk5ZGItNmQyM2YzMmNkNmQ4IiwicmlkIjoiMDFlYjYyMzktYTk5OS00MDVlLThmZmYtNGJjMTVlOGUzNjllIn0.KgKUB9hHvKpHczrYXxjJWnAvCuXSFkpaPjTPUrAMIvXnvXzCUDZAyi3O8Nxsg39GXtPNKfovg8ZGMWodrEigBQ

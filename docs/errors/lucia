@@ -1,0 +1,14 @@
+⨯ Error: PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in ``).
+If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report
+    at [project]/src/lib/auth.ts [middleware-edge] (ecmascript) (src/lib/auth.ts:8:41)
+    at [project]/src/middleware.ts [middleware-edge] (ecmascript) (src/middleware.ts:4:0)
+   6 | import type { Session, User } from "lucia";
+   7 |
+>  8 | const adapter = new PrismaAdapter(client.session, client.user);
+     |                                         ^
+   9 |
+  10 | export const lucia = new Lucia(adapter, {
+  11 |   sessionCookie: {
+ ✓ Compiled in 83ms
+ GET /en/auth/register 404 in 4ms
+ GET /favicon.ico 200 in 266ms
