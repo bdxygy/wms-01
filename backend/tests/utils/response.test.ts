@@ -2,19 +2,32 @@ import { describe, it, expect } from 'vitest';
 import {
   BaseResponseSchema,
   PaginatedBaseResponseSchema,
-  ErrorResponseSchema,
-  createSuccessResponse,
-  createErrorResponse,
+  createBaseResponse,
   createPaginatedResponse,
 } from '@/utils/response';
 
 describe('Response Types', () => {
   describe('BaseResponse', () => {
-    it('should validate a valid base response', () => {
+    it('should validate a valid success response', () => {
       const response = {
         success: true,
         message: 'Data retrieved successfully',
         data: { id: '123', name: 'Test Item' },
+        timestamp: new Date().toISOString(),
+      };
+
+      const result = BaseResponseSchema.safeParse(response);
+      expect(result.success).toBe(true);
+    });
+
+    it('should validate a valid error response', () => {
+      const response = {
+        success: false,
+        message: 'Validation failed',
+        error: {
+          code: 'VALIDATION_ERROR',
+          details: { field: 'email' }
+        },
         timestamp: new Date().toISOString(),
       };
 
@@ -32,7 +45,7 @@ describe('Response Types', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should allow optional data field', () => {
+    it('should allow optional data and error fields', () => {
       const response = {
         success: true,
         message: 'Operation completed',
@@ -85,71 +98,38 @@ describe('Response Types', () => {
     });
   });
 
-  describe('ErrorResponse', () => {
-    it('should validate a valid error response', () => {
-      const errorResponse = {
-        success: false,
-        message: 'Resource not found',
-        timestamp: new Date().toISOString(),
-        error: {
-          code: 'NOT_FOUND',
-          details: { resource: 'user', id: '123' },
-        },
-      };
-
-      const result = ErrorResponseSchema.safeParse(errorResponse);
-      expect(result.success).toBe(true);
-    });
-
-    it('should allow error without details', () => {
-      const errorResponse = {
-        success: false,
-        message: 'Bad request',
-        timestamp: new Date().toISOString(),
-      };
-
-      const result = ErrorResponseSchema.safeParse(errorResponse);
-      expect(result.success).toBe(true);
-    });
-  });
 
   describe('Helper Functions', () => {
-    describe('createSuccessResponse', () => {
+    describe('createBaseResponse', () => {
       it('should create a valid success response', () => {
         const data = { id: '123', name: 'Test' };
-        const response = createSuccessResponse(data, 'Test created');
+        const response = createBaseResponse(true, 'Test created', data);
 
         expect(response.success).toBe(true);
         expect(response.message).toBe('Test created');
         expect(response.data).toEqual(data);
+        expect(response.error).toBeUndefined();
         expect(response.timestamp).toBeDefined();
         expect(new Date(response.timestamp)).toBeInstanceOf(Date);
       });
 
-      it('should use default message when not provided', () => {
-        const data = { id: '123' };
-        const response = createSuccessResponse(data);
-
-        expect(response.message).toBe('Success');
-      });
-    });
-
-    describe('createErrorResponse', () => {
       it('should create a valid error response', () => {
-        const response = createErrorResponse('Validation failed', 'VALIDATION_ERROR', { field: 'email' });
+        const error = { code: 'VALIDATION_ERROR', details: { field: 'email' } };
+        const response = createBaseResponse(false, 'Validation failed', undefined, error);
 
         expect(response.success).toBe(false);
         expect(response.message).toBe('Validation failed');
-        expect(response.error?.code).toBe('VALIDATION_ERROR');
-        expect(response.error?.details).toEqual({ field: 'email' });
+        expect(response.data).toBeUndefined();
+        expect(response.error).toEqual(error);
         expect(response.timestamp).toBeDefined();
       });
 
-      it('should create error response without code and details', () => {
-        const response = createErrorResponse('Something went wrong');
+      it('should create error response without details', () => {
+        const response = createBaseResponse(false, 'Something went wrong');
 
         expect(response.success).toBe(false);
         expect(response.message).toBe('Something went wrong');
+        expect(response.data).toBeUndefined();
         expect(response.error).toBeUndefined();
       });
     });
@@ -204,5 +184,6 @@ describe('Response Types', () => {
         expect(response.pagination.hasPrev).toBe(false);
       });
     });
+
   });
 });

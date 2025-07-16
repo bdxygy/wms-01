@@ -154,28 +154,29 @@ export const UserIdForStoresParamSchema = z.object({
   }),
 });
 
-// Success response wrapper (matches createSuccessResponse format)
-export const SuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+// Base response wrapper (matches createBaseResponse format) 
+export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
     success: z.boolean().openapi({ description: 'Request success status' }),
-    message: z.string().openapi({ description: 'Success message' }),
+    message: z.string().openapi({ description: 'Response message' }),
     data: dataSchema.optional().openapi({ description: 'Response data' }),
+    error: z.object({
+      code: z.string().openapi({ description: 'Error code for client handling' }),
+      details: z.any().optional().openapi({ description: 'Additional error details' }),
+    }).optional().openapi({ description: 'Error information when success is false' }),
     timestamp: z.string().datetime().openapi({ description: 'Response timestamp' }),
   });
 
-// Error response schema (matches createErrorResponse format)
-export const ErrorResponseSchema = z.object({
-  success: z.literal(false).openapi({ description: 'Request success status' }),
-  message: z.string().openapi({ description: 'Error message' }),
-  timestamp: z.string().datetime().openapi({ description: 'Response timestamp' }),
-  error: z.object({
-    code: z.string().openapi({ description: 'Error code for client handling' }),
-    details: z.any().optional().openapi({ description: 'Additional error details' }),
-  }).optional().openapi({ description: 'Additional error information' }),
-});
-
 // Common response schemas
-export const UserSuccessResponseSchema = SuccessResponseSchema(UserResponseSchema);
+export const UserSuccessResponseSchema = ApiResponseSchema(UserResponseSchema);
 export const PaginatedUserSuccessResponseSchema = PaginatedUserResponseSchema; // This is already a complete response
-export const StoresSuccessResponseSchema = SuccessResponseSchema(z.array(StoreResponseSchema));
-export const DeleteSuccessResponseSchema = SuccessResponseSchema(z.null());
+export const StoresSuccessResponseSchema = ApiResponseSchema(z.array(StoreResponseSchema));
+export const DeleteSuccessResponseSchema = ApiResponseSchema(z.null());
+export const ErrorResponseSchema = ApiResponseSchema(z.never());
+
+// Type exports for use in controllers
+export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
+export type UpdateUserRequest = z.infer<typeof UpdateUserRequestSchema>;
+export type UpdateCurrentUserRequest = z.infer<typeof UpdateCurrentUserRequestSchema>;
+export type UserResponse = z.infer<typeof UserResponseSchema>;
+export type StoreResponse = z.infer<typeof StoreResponseSchema>;

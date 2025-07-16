@@ -321,7 +321,7 @@ const updateUserRoute = createRoute({
   summary: 'Update user',
   description: 'Update a specific user. Access and update permissions are controlled by user roles.',
   request: {
-    param: UserIdParamSchema,
+    params: UserIdParamSchema,
     body: {
       content: {
         'application/json': {

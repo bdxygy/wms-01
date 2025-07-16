@@ -5,24 +5,11 @@ import { StoreRepository } from '../repositories/store.repository';
 import { type User, type NewUser, type Role } from '../models/users';
 import { PaginatedResult, QueryOptions, PaginationOptions } from '../repositories/base.repository';
 import { PaginatedBaseRequest } from '../utils/response';
-
-export interface CreateUserRequest {
-  email: string;
-  password: string;
-  name: string;
-  role: Role;
-  ownerId?: string;
-  storeId?: string;
-}
-
-export interface UpdateUserRequest {
-  email?: string;
-  password?: string;
-  name?: string;
-  role?: Role;
-  storeId?: string;
-  isActive?: boolean;
-}
+import { 
+  CreateUserRequest, 
+  UpdateUserRequest 
+} from '../schemas/user.schemas';
+import { ValidationError, AuthorizationError, NotFoundError, ConflictError } from '../utils/errors';
 
 export class UserService {
   private userRepository: UserRepository;
@@ -87,7 +74,7 @@ export class UserService {
     const existingUser = await this.userRepository.findById(id);
     
     if (!existingUser) {
-      throw new Error('User not found');
+      throw new NotFoundError('User not found');
     }
 
     // Check permissions
@@ -118,7 +105,7 @@ export class UserService {
     const userToDelete = await this.userRepository.findById(id);
     
     if (!userToDelete) {
-      throw new Error('User not found');
+      throw new NotFoundError('User not found');
     }
 
     // Check permissions - ADMIN cannot delete users
@@ -153,7 +140,7 @@ export class UserService {
     const user = await this.getUserById(userId, requestingUser);
     
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundError('User not found');
     }
 
     // For staff and cashier users, return all stores under the same owner
@@ -193,17 +180,17 @@ export class UserService {
   private validateUserCreation(data: CreateUserRequest, requestingUser: User): void {
     // ADMIN can only create STAFF users
     if (requestingUser.role === 'ADMIN' && data.role !== 'STAFF') {
-      throw new Error('Admin users can only create STAFF users');
+      throw new ValidationError('Admin users can only create STAFF users');
     }
 
     // STAFF and CASHIER cannot create users
     if (requestingUser.role === 'STAFF' || requestingUser.role === 'CASHIER') {
-      throw new Error('Insufficient permissions to create users');
+      throw new AuthorizationError('Insufficient permissions to create users');
     }
 
     // OWNER can create any role except other OWNERS
     if (requestingUser.role === 'OWNER' && data.role === 'OWNER') {
-      throw new Error('Cannot create another OWNER user');
+      throw new ValidationError('Cannot create another OWNER user');
     }
   }
 
@@ -218,22 +205,22 @@ export class UserService {
       return requestingUser.ownerId;
     }
 
-    throw new Error('Unable to determine owner for new user');
+    throw new ValidationError('Unable to determine owner for new user');
   }
 
   private async validateStoreAssignment(storeId: string, ownerId: string): Promise<void> {
     const store = await this.storeRepository.findById(storeId);
     
     if (!store) {
-      throw new Error('Store not found');
+      throw new NotFoundError('Store not found');
     }
 
     if (store.ownerId !== ownerId) {
-      throw new Error('Store does not belong to the specified owner');
+      throw new AuthorizationError('Store does not belong to the specified owner');
     }
 
     if (!store.isActive) {
-      throw new Error('Cannot assign user to inactive store');
+      throw new ValidationError('Cannot assign user to inactive store');
     }
   }
 
@@ -241,7 +228,7 @@ export class UserService {
     // OWNER can access all users under their ownership
     if (requestingUser.role === 'OWNER') {
       if (user.ownerId !== requestingUser.id && user.id !== requestingUser.id) {
-        throw new Error('Access denied: User not under your ownership');
+        throw new AuthorizationError('Access denied: User not under your ownership');
       }
       return;
     }
@@ -249,7 +236,7 @@ export class UserService {
     // ADMIN can access users under the same owner (including other ADMINs and STAFFs)
     if (requestingUser.role === 'ADMIN') {
       if (user.ownerId !== requestingUser.ownerId && user.id !== requestingUser.id) {
-        throw new Error('Access denied: User not under same owner');
+        throw new AuthorizationError('Access denied: User not under same owner');
       }
       return;
     }
@@ -257,12 +244,12 @@ export class UserService {
     // STAFF and CASHIER can only access their own profile
     if (requestingUser.role === 'STAFF' || requestingUser.role === 'CASHIER') {
       if (user.id !== requestingUser.id) {
-        throw new Error('Access denied: Can only access own profile');
+        throw new AuthorizationError('Access denied: Can only access own profile');
       }
       return;
     }
 
-    throw new Error('Access denied');
+    throw new AuthorizationError('Access denied');
   }
 
   private validateUserUpdateAccess(userToUpdate: User, requestingUser: User): void {
@@ -273,7 +260,7 @@ export class UserService {
     if (requestingUser.role === 'ADMIN') {
       if (userToUpdate.role === 'ADMIN' || userToUpdate.role === 'OWNER') {
         if (userToUpdate.id !== requestingUser.id) {
-          throw new Error('Admin cannot modify other Admin or Owner users');
+          throw new AuthorizationError('Admin cannot modify other Admin or Owner users');
         }
       }
     }
@@ -282,49 +269,49 @@ export class UserService {
   private validateUserDeleteAccess(userToDelete: User, requestingUser: User): void {
     // ADMIN cannot delete users at all
     if (requestingUser.role === 'ADMIN') {
-      throw new Error('Admin users cannot delete users');
+      throw new AuthorizationError('Admin users cannot delete users');
     }
 
     // Only OWNER can delete users
     if (requestingUser.role !== 'OWNER') {
-      throw new Error('Only Owner can delete users');
+      throw new AuthorizationError('Only Owner can delete users');
     }
 
     // OWNER can only delete users under their ownership
     if (userToDelete.ownerId !== requestingUser.id && userToDelete.id !== requestingUser.id) {
-      throw new Error('Cannot delete user not under your ownership');
+      throw new AuthorizationError('Cannot delete user not under your ownership');
     }
 
     // Cannot delete other OWNER users
     if (userToDelete.role === 'OWNER' && userToDelete.id !== requestingUser.id) {
-      throw new Error('Cannot delete other Owner users');
+      throw new AuthorizationError('Cannot delete other Owner users');
     }
   }
 
   private validateRoleChange(newRole: Role, requestingUser: User): void {
     // ADMIN cannot change roles
     if (requestingUser.role === 'ADMIN') {
-      throw new Error('Admin users cannot change user roles');
+      throw new AuthorizationError('Admin users cannot change user roles');
     }
 
     // Only OWNER can change roles
     if (requestingUser.role !== 'OWNER') {
-      throw new Error('Only Owner can change user roles');
+      throw new AuthorizationError('Only Owner can change user roles');
     }
 
     // Cannot change role to OWNER
     if (newRole === 'OWNER') {
-      throw new Error('Cannot change role to OWNER');
+      throw new ValidationError('Cannot change role to OWNER');
     }
   }
 
   private validateOwnerAccess(ownerId: string, requestingUser: User): void {
     if (requestingUser.role === 'OWNER' && requestingUser.id !== ownerId) {
-      throw new Error('Access denied: Cannot access other owner\'s users');
+      throw new AuthorizationError('Access denied: Cannot access other owner\'s users');
     }
 
     if (requestingUser.role !== 'OWNER' && requestingUser.ownerId !== ownerId) {
-      throw new Error('Access denied: Cannot access users outside your owner scope');
+      throw new AuthorizationError('Access denied: Cannot access users outside your owner scope');
     }
   }
 
