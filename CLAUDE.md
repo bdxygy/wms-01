@@ -210,6 +210,18 @@ Based on `docs/features/backend_ut_checklist.md`:
 - **Zod imports**: Always use `z` from `@hono/zod-openapi` instead of directly importing from `zod` package for OpenAPI compatibility
 - **Testing scope**: Test services only at the controller layer - no separate service layer unit tests, focus on integration testing through HTTP endpoints
 
+### ⚠️ CRITICAL TESTING RULE ⚠️
+
+**NEVER IGNORE OR UNDERESTIMATE TESTS - NO MATTER WHAT**
+
+- **Tests are MANDATORY**: Every feature implementation MUST include comprehensive tests
+- **Test failures are CRITICAL**: All test failures must be investigated and fixed thoroughly  
+- **No shortcuts on testing**: Never dismiss tests as "working enough" or skip proper test implementation
+- **Follow established patterns**: Always use the proven test utilities and patterns from existing working tests
+- **Role-based testing is essential**: All business logic must be tested across all user roles (OWNER, ADMIN, STAFF, CASHIER)
+- **Test before deployment**: Code is not considered complete until all tests pass
+- **Quality over speed**: Take time to write proper, comprehensive tests rather than rushing implementations
+
 ## Standard Implementation Patterns
 
 ### Error Handling Pattern ✅ **REFERENCE IMPLEMENTATION**
@@ -520,43 +532,115 @@ export function createPaginatedResponse<T>(
 
 ### Testing Pattern ✅ **REFERENCE IMPLEMENTATION**
 
-Integration tests focus on HTTP endpoints with role-based scenarios:
+Integration tests focus on HTTP endpoints with role-based scenarios using proper test utilities:
 
 ```typescript
 // tests/routes/[entity].routes.test.ts
-import { testClient } from 'hono/testing';
-import { app } from '../../src/index';
+//@ts-nocheck
+import { describe, expect, it } from 'vitest';
+import {
+  createAuthHeaders,
+  createMultiOwnerUsers,
+  createTestApp,
+  createUserHierarchy,
+  setupTestDatabase
+} from '../utils';
 
-describe('Entity Routes', () => {
-  it('should create entity as OWNER', async () => {
-    const client = testClient(app);
-    
-    const response = await client.api.v1.entities.$post({
-      json: {
+setupTestDatabase();
+
+describe('Entity Routes Integration Tests', () => {
+  describe('POST /api/v1/entities - Create Entity', () => {
+    it('should create a new entity as OWNER', async () => {
+      const { owner } = await createUserHierarchy();
+      const app = createTestApp(owner);
+      
+      const newEntityData = {
+        name: 'New Entity',
+        description: 'Test Description',
+      };
+
+      const response = await app.request('/api/v1/entities', {
+        method: 'POST',
+        headers: createAuthHeaders(owner),
+        body: JSON.stringify(newEntityData),
+      });
+
+      expect(response.status).toBe(201);
+      
+      const body = await response.json();
+      expect(body.success).toBe(true);
+      expect(body.message).toBe('Entity created successfully');
+      expect(body.data).toMatchObject({
+        name: newEntityData.name,
+        description: newEntityData.description,
+        ownerId: owner.user.id,
+      });
+    });
+
+    it('should prevent STAFF from creating entities', async () => {
+      const { staff } = await createUserHierarchy();
+      const app = createTestApp(staff);
+      
+      const newEntityData = {
+        name: 'Staff Entity',
+      };
+
+      const response = await app.request('/api/v1/entities', {
+        method: 'POST',
+        headers: createAuthHeaders(staff),
+        body: JSON.stringify(newEntityData),
+      });
+
+      expect(response.status).toBe(403);
+      
+      const text = await response.text();
+      expect(text).toContain('AUTHORIZATION_ERROR');
+    });
+
+    it('should require authentication', async () => {
+      const app = createTestApp();
+      
+      const entityData = {
         name: 'Test Entity',
-        description: 'Test Description'
-      }
-    });
-    
-    expect(response.status).toBe(201);
-    const body = await response.json();
-    expect(body.success).toBe(true);
-    expect(body.data.name).toBe('Test Entity');
-  });
+      };
 
-  it('should return 403 for unauthorized role', async () => {
-    // Test with STAFF user
-    const response = await client.api.v1.entities.$post({
-      json: { name: 'Test' }
+      const response = await app.request('/api/v1/entities', {
+        method: 'POST',
+        body: JSON.stringify(entityData),
+      });
+
+      expect(response.status).toBe(401);
+      
+      const text = await response.text();
+      expect(text).toContain('UNAUTHORIZED');
     });
-    
-    expect(response.status).toBe(403);
-    const body = await response.json();
-    expect(body.success).toBe(false);
-    expect(body.error.code).toBe('AUTHORIZATION_ERROR');
+
+    it('should prevent access across different owners', async () => {
+      const { owner1, entity2 } = await createMultiOwnerUsers();
+      const app = createTestApp(owner1);
+
+      const response = await app.request(`/api/v1/entities/${entity2.entity.id}`, {
+        method: 'GET',
+        headers: createAuthHeaders(owner1),
+      });
+
+      expect(response.status).toBe(403);
+      
+      const text = await response.text();
+      expect(text).toContain('AUTHORIZATION_ERROR');
+    });
   });
 });
 ```
+
+**Critical Testing Requirements:**
+- **Use proper test utilities**: Always import from `../utils` and use `createTestApp`, `createUserHierarchy`, etc.
+- **Test all user roles**: OWNER, ADMIN, STAFF, CASHIER with appropriate permissions
+- **Test cross-owner access**: Ensure users cannot access data from different owners
+- **Test authentication**: Verify 401 responses for unauthenticated requests
+- **Test validation**: Check 400 responses for invalid input data
+- **Test error scenarios**: Cover all business rule violations and edge cases
+- **Follow established patterns**: Copy patterns from working tests like `user.routes.test.ts` and `store.routes.test.ts`
 
 ## Next Implementation Steps
 
