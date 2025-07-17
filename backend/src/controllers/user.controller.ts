@@ -485,11 +485,16 @@ export class UserController {
         );
       }
 
-      const data = (await c.req.json()) as UpdateCurrentUserRequest;
+      let data = (await c.req.json()) as UpdateCurrentUserRequest;
+
+      // Filter out role and isActive fields to prevent unauthorized updates
+      const { role, isActive, ...allowedData } = data;
+      // Cast allowedData to UpdateUserRequest to match service method signature
+      const filteredData = allowedData as Partial<UpdateUserRequest>;
 
       const user = await this.userService.updateUser(
         requestingUser.id,
-        data,
+        filteredData,
         requestingUser
       );
 

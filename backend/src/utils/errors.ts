@@ -16,6 +16,7 @@ export class ValidationError extends BusinessError {
   }
 }
 
+
 export class AuthorizationError extends BusinessError {
   constructor(message: string) {
     super(message, 403, 'AUTHORIZATION_ERROR');

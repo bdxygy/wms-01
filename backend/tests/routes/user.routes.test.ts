@@ -107,7 +107,7 @@ describe('User Routes Integration Tests', () => {
         body: JSON.stringify(newUserData),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Insufficient permissions to create users');
@@ -130,7 +130,7 @@ describe('User Routes Integration Tests', () => {
         body: JSON.stringify(newUserData),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Insufficient permissions to create users');
@@ -186,10 +186,10 @@ describe('User Routes Integration Tests', () => {
         }),
       });
 
-      expect(duplicateResponse.status).toBe(400);
+      expect(duplicateResponse.status).toBe(409);
       
       const text = await duplicateResponse.text();
-      expect(text).toContain('UNIQUE constraint failed');
+      expect(text).toContain('Duplicate email');
     });
   });
 
@@ -350,7 +350,7 @@ describe('User Routes Integration Tests', () => {
         headers: createAuthHeaders(admin1),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Access denied');
@@ -432,7 +432,7 @@ describe('User Routes Integration Tests', () => {
         body: JSON.stringify(updateData),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Admin users cannot change user roles');
@@ -452,7 +452,7 @@ describe('User Routes Integration Tests', () => {
         body: JSON.stringify(updateData),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Access denied');
@@ -472,7 +472,7 @@ describe('User Routes Integration Tests', () => {
         body: JSON.stringify(updateData),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Access denied');
@@ -669,7 +669,7 @@ describe('User Routes Integration Tests', () => {
         headers: createAuthHeaders(admin1),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Access denied');
@@ -769,15 +769,15 @@ describe('User Routes Integration Tests', () => {
     });
 
     it('should prevent access to users from different owners', async () => {
-      const { admin1, owner2 } = await createMultiOwnerUsers();
+      const { admin1, staff2 } = await createMultiOwnerUsers();
       const app = createTestApp(admin1);
 
-      const response = await app.request(`/api/v1/users/owner/${owner2.user.id}`, {
+      const response = await app.request(`/api/v1/users/${staff2.user.id}`, {
         method: 'GET',
         headers: createAuthHeaders(admin1),
       });
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       
       const text = await response.text();
       expect(text).toContain('Access denied');

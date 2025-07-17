@@ -46,7 +46,14 @@ export class UserService {
       isActive: true,
     };
 
-    return await this.userRepository.create(newUser);
+    try {
+      return await this.userRepository.create(newUser);
+    } catch (error: any) {
+      if (error.message.includes('UNIQUE constraint failed')) {
+        throw new ConflictError('Duplicate email');
+      }
+      throw error;
+    }
   }
 
   async getUserById(id: string, requestingUser: User): Promise<User | null> {

@@ -1,9 +1,12 @@
 import { db } from '@/config/database';
 import { users } from '@/models/users';
+import { stores } from '@/models/stores';
 import { User } from '@/models/users';
-import { createOwnerFixture, createAdminFixture, createStaffFixture, createCashierFixture } from './fixtures';
+import { Store } from '@/models/stores';
+import { createOwnerFixture, createAdminFixture, createStaffFixture, createCashierFixture, createStoreFixture } from './fixtures';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { userRoutes } from '@/routes/user.routes';
+import { storeRoutes } from '@/routes/store.routes';
 
 /**
  * Authentication test helpers for integration tests
@@ -12,6 +15,10 @@ import { userRoutes } from '@/routes/user.routes';
 export interface TestUser {
   user: User;
   token: string; // Mock token for testing
+}
+
+export interface TestStore {
+  store: Store;
 }
 
 /**
@@ -58,6 +65,17 @@ export async function createTestCashier(ownerId: string, overrides: any = {}): P
 }
 
 /**
+ * Create a test store
+ */
+export async function createTestStore(ownerId: string, overrides: any = {}): Promise<TestStore> {
+  const fixture = createStoreFixture(ownerId, overrides);
+  const [store] = await db.insert(stores).values(fixture).returning();
+  return {
+    store,
+  };
+}
+
+/**
  * Create request headers with mock authorization
  */
 export function createAuthHeaders(testUser: TestUser) {
@@ -83,16 +101,18 @@ export function createTestApp(authenticatedUser?: TestUser) {
   
   // Mount user routes
   app.route('/api/v1/users', userRoutes);
+  app.route('/api/v1/stores', storeRoutes);
   
   return app;
 }
 
 /**
- * Helper to create multiple test users with hierarchy
+ * Helper to create multiple test users with hierarchy and stores
  */
 export async function createUserHierarchy() {
   const owner = await createTestOwner();
-  const admin = await createTestAdmin(owner.user.id, 'store-1');
+  const testStore = await createTestStore(owner.user.id);
+  const admin = await createTestAdmin(owner.user.id, testStore.store.id);
   const staff = await createTestStaff(owner.user.id);
   const cashier = await createTestCashier(owner.user.id);
 
@@ -101,6 +121,7 @@ export async function createUserHierarchy() {
     admin,
     staff,
     cashier,
+    testStore,
   };
 }
 
@@ -111,8 +132,11 @@ export async function createMultiOwnerUsers() {
   const owner1 = await createTestOwner();
   const owner2 = await createTestOwner();
   
-  const admin1 = await createTestAdmin(owner1.user.id, 'store-1');
-  const admin2 = await createTestAdmin(owner2.user.id, 'store-2');
+  const store1 = await createTestStore(owner1.user.id);
+  const store2 = await createTestStore(owner2.user.id);
+  
+  const admin1 = await createTestAdmin(owner1.user.id, store1.store.id);
+  const admin2 = await createTestAdmin(owner2.user.id, store2.store.id);
   
   const staff1 = await createTestStaff(owner1.user.id);
   const staff2 = await createTestStaff(owner2.user.id);
@@ -124,5 +148,7 @@ export async function createMultiOwnerUsers() {
     admin2,
     staff1,
     staff2,
+    store1,
+    store2,
   };
 }

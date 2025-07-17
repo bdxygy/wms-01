@@ -7,6 +7,7 @@ import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
 import { env } from "./config/env";
 import { userRoutes } from "./routes/user.routes";
+import { storeRoutes } from "./routes/store.routes";
 
 const app = new OpenAPIHono();
 
@@ -34,7 +35,7 @@ app.get("/health", (c) => {
 // API routes
 // app.route('/api/v1/auth', authRoutes);
 app.route('/api/v1/users', userRoutes);
-// app.route('/api/v1/stores', storeRoutes);
+app.route('/api/v1/stores', storeRoutes);
 // app.route('/api/v1/products', productRoutes);
 // app.route('/api/v1/transactions', transactionRoutes);
 
