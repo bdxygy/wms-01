@@ -27,6 +27,10 @@ const envSchema = z.object({
   
   // CORS
   CORS_ORIGIN: z.string().url().default('http://localhost:3001'),
+
+  // Basic Auth
+  BASIC_AUTH_USERNAME: z.string().min(1, 'BASIC_AUTH_USERNAME is required'),
+  BASIC_AUTH_PASSWORD: z.string().min(1, 'BASIC_AUTH_PASSWORD is required'),
 });
 
 export const env = envSchema.parse(process.env);

@@ -1,29 +1,25 @@
-/**
- * Standardized API response utilities for the WMS application
- * Provides consistent response formats across all endpoints
- */
+import { Context } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { z } from "zod";
 
-import type { Context } from "hono";
-import { ErrorHandler } from "./errors";
-import { ContentfulStatusCode } from "hono/utils/http-status";
-
-/**
- * Base response interface for all API responses
- */
 export interface BaseResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: {
+  success: true;
+  data: T;
+  timestamp: string;
+}
+
+export interface ErrorResponse {
+  success: false;
+  error: {
     code: string;
     message: string;
   };
   timestamp: string;
 }
 
-/**
- * Paginated response interface for list endpoints
- */
-export interface PaginatedResponse<T = unknown> extends BaseResponse<T[]> {
+export interface PaginatedResponse<T = unknown> {
+  success: true;
+  data: T[];
   pagination: {
     page: number;
     limit: number;
@@ -32,171 +28,144 @@ export interface PaginatedResponse<T = unknown> extends BaseResponse<T[]> {
     hasNext: boolean;
     hasPrev: boolean;
   };
+  timestamp: string;
 }
 
-/**
- * Pagination parameters interface
- */
-export interface PaginationParams {
-  page: number;
-  limit: number;
-  total: number;
-}
+export type ApiResponse<T = unknown> =
+  | BaseResponse<T>
+  | ErrorResponse
+  | PaginatedResponse<T>;
 
-/**
- * Response utility class for creating standardized API responses
- */
 export class ResponseUtils {
-  /**
-   * Creates a successful response with data
-   */
-  static success<T>(data: T, statusCode: number = 200): BaseResponse<T> {
-    return {
-      success: true,
-      data,
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Creates a successful response without data
-   */
-  static successNoData(statusCode: number = 200): BaseResponse {
-    return {
-      success: true,
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Creates an error response
-   */
-  static error(error: unknown): BaseResponse {
-    const errorResponse = ErrorHandler.getErrorResponse(error);
-    return {
-      success: false,
-      error: errorResponse.error,
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Creates a paginated response
-   */
-  static paginated<T>(
-    data: T[],
-    pagination: PaginationParams
-  ): PaginatedResponse<T> {
-    const { page, limit, total } = pagination;
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      success: true,
-      data,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
-      timestamp: new Date().toISOString(),
-    };
-  }
-
-  /**
-   * Sends a successful JSON response
-   */
-  static sendSuccess<T>(
-    c: Context,
-    data: T,
-    statusCode: number = 200
-  ): Response {
+  static sendSuccess<T>(c: Context, data: T, status: number = 200): Response {
     return c.json(
-      this.success(data, statusCode),
-      statusCode as ContentfulStatusCode
+      {
+        success: true,
+        data,
+        timestamp: new Date().toISOString(),
+      } as BaseResponse<T>,
+      { status: status as any }
     );
   }
 
-  /**
-   * Sends a successful response without data
-   */
-  static sendSuccessNoData(c: Context, statusCode: number = 200): Response {
+  static sendCreated<T>(c: Context, data: T): Response {
     return c.json(
-      this.successNoData(statusCode),
-      statusCode as ContentfulStatusCode
+      {
+        success: true,
+        data,
+        timestamp: new Date().toISOString(),
+      } as BaseResponse<T>,
+      { status: 201 }
     );
   }
 
-  /**
-   * Sends an error JSON response
-   */
-  static sendError(c: Context, error: unknown): Response {
-    const errorResponse = ErrorHandler.getErrorResponse(error);
+  static sendSuccessNoData(c: Context, status: number = 204): Response {
     return c.json(
-      this.error(error),
-      errorResponse.statusCode as ContentfulStatusCode
+      {
+        success: true,
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as BaseResponse<null>,
+      { status: status as any }
     );
   }
 
-  /**
-   * Sends a paginated JSON response
-   */
   static sendPaginated<T>(
     c: Context,
     data: T[],
-    pagination: PaginationParams,
-    statusCode: number = 200
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    }
   ): Response {
     return c.json(
-      this.paginated(data, pagination),
-      statusCode as ContentfulStatusCode
+      {
+        success: true,
+        data,
+        pagination,
+        timestamp: new Date().toISOString(),
+      } as PaginatedResponse<T>,
+      { status: 200 }
     );
   }
 
-  /**
-   * Sends a created response (201)
-   */
-  static sendCreated<T>(c: Context, data: T): Response {
-    return c.json(this.success(data, 201), 201 as ContentfulStatusCode);
+  static sendError(c: Context, error: unknown): Response {
+    const timestamp = new Date().toISOString();
+
+    if (error instanceof HTTPException) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: `HTTP_${error.status}`,
+            message: error.message,
+          },
+          timestamp,
+        } as ErrorResponse,
+        { status: error.status as any }
+      );
+    }
+
+    if (error instanceof z.ZodError) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            message: error.errors
+              .map((e) => `${e.path.join(".")}: ${e.message}`)
+              .join(", "),
+          },
+          timestamp,
+        } as ErrorResponse,
+        { status: 400 }
+      );
+    }
+
+    if (error instanceof Error) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: "INTERNAL_ERROR",
+            message: error.message,
+          },
+          timestamp,
+        } as ErrorResponse,
+        { status: 500 }
+      );
+    }
+
+    return c.json(
+      {
+        success: false,
+        error: {
+          code: "UNKNOWN_ERROR",
+          message: "An unknown error occurred",
+        },
+        timestamp,
+      } as ErrorResponse,
+      { status: 500 }
+    );
   }
 
-  /**
-   * Sends a no content response (204)
-   */
-  static sendNoContent(c: Context): Response {
-    return c.body(null, 204);
+  static unauthorized(c: Context, message: string = "Unauthorized"): Response {
+    return c.json(
+      {
+        success: false,
+        error: {
+          code: "UNAUTHORIZED",
+          message,
+        },
+        timestamp: new Date().toISOString(),
+      } as ErrorResponse,
+      { status: 401 }
+    );
   }
 }
 
-/**
- * Pagination helper utilities
- */
-export class PaginationUtils {
-  /**
-   * Calculates pagination parameters from query params
-   */
-  static getParams(page?: string, limit?: string) {
-    const pageNum = Math.max(1, parseInt(page || "1", 10));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit || "10", 10)));
-    const offset = (pageNum - 1) * limitNum;
-
-    return {
-      page: pageNum,
-      limit: limitNum,
-      offset,
-    };
-  }
-
-  /**
-   * Creates pagination metadata
-   */
-  static createPagination(
-    page: number,
-    limit: number,
-    total: number
-  ): PaginationParams {
-    return { page, limit, total };
-  }
-}
+export const responses = ResponseUtils;

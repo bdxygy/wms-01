@@ -1,25 +1,54 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { relations } from 'drizzle-orm';
-import { users } from './users';
-import { products } from './products';
+import {
+  sqliteTable,
+  text,
+  integer,
+  foreignKey,
+} from "drizzle-orm/sqlite-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
+import { users } from "./users";
+import { stores } from "./stores";
 
-export const categories = sqliteTable('categories', {
-  id: text('id').primaryKey(),
-  createdBy: text('created_by').notNull().references(() => users.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
-});
+export const categories = sqliteTable(
+  "categories",
+  {
+    id: text("id").primaryKey(),
+    storeId: text("store_id").notNull(),
+    name: text("name").notNull(),
+    createdBy: text("created_by").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    deletedAt: integer("deleted_at", { mode: "timestamp" }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.storeId],
+      foreignColumns: [stores.id],
+      name: "category_store_fk",
+    }),
+    foreignKey({
+      columns: [table.createdBy],
+      foreignColumns: [users.id],
+      name: "category_created_by_fk",
+    }),
+  ]
+);
 
-export const categoriesRelations = relations(categories, ({ one, many }) => ({
+export const categoriesRelations = relations(categories, ({ one }) => ({
+  store: one(stores, {
+    fields: [categories.storeId],
+    references: [stores.id],
+    relationName: "category_store",
+  }),
   createdByUser: one(users, {
     fields: [categories.createdBy],
     references: [users.id],
+    relationName: "category_created_by",
   }),
-  products: many(products),
 }));
 
 export const insertCategorySchema = createInsertSchema(categories);

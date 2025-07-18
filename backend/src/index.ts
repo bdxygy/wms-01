@@ -1,13 +1,12 @@
-import { serve } from "@hono/node-server";
-import { swaggerUI } from "@hono/swagger-ui";
-import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
 import { env } from "./config/env";
+import { serve } from "@hono/node-server";
+import { createApp } from "./http/hono";
 
-const app = new OpenAPIHono();
+const app = createApp();
 
 // Global middleware
 app.use(
@@ -17,6 +16,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use("*", logger());
 app.use("*", prettyJSON());
 app.use("*", secureHeaders());
@@ -29,29 +29,6 @@ app.get("/health", (c) => {
     environment: env.NODE_ENV,
   });
 });
-
-// OpenAPI documentation
-app.doc("/docs", () => ({
-  openapi: "3.0.0",
-  info: {
-    version: "1.0.0",
-    title: "WMS API",
-    description: "Warehouse Management System API",
-  },
-  components: {
-    securitySchemes: {
-      Bearer: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT",
-        description:
-          "Enter your JWT access token. You can get this from the /auth/login endpoint.",
-      },
-    },
-  },
-}));
-
-app.get("/ui", swaggerUI({ url: "/docs" }));
 
 // 404 handler
 app.notFound((c) => {
@@ -74,11 +51,6 @@ app.onError((err, c) => {
 const port = env.PORT;
 
 console.log(`🚀 Server is running on http://localhost:${port}`);
-console.log(`📚 API Documentation: http://localhost:${port}/ui`);
-console.log(
-  `📊 Database: ${env.NODE_ENV === "production" ? "Turso" : "better-sqlite3"}`
-);
-
 // Only start server if not in test environment
 if (process.env.NODE_ENV !== "test") {
   serve({

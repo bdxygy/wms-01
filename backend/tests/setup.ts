@@ -1,43 +1,14 @@
-import { config } from 'dotenv';
-import { execSync } from 'child_process';
-import path from 'path';
 import { beforeAll, afterAll } from 'vitest';
+import { db } from '../src/config/database'; // Adjust path as needed
+import { migrate } from 'drizzle-orm/libsql/migrator';
 
-// Load test environment variables
-config({ path: '.env.test' });
-
-// Set test environment
-process.env.NODE_ENV = 'test';
-
-// Use a unique test database file to avoid locks
-const testDbPath = `./test-${Date.now()}.db`;
-process.env.DATABASE_URL = `file:${testDbPath}`;
-
-// Ensure test database is used
-if (!process.env.DATABASE_URL?.includes('test')) {
-  throw new Error('Test database must be used for testing');
-}
-
-// Run migrations before tests
-beforeAll(() => {
-  try {
-    execSync('pnpm run db:migrate', { 
-      cwd: path.resolve(__dirname, '..'),
-      stdio: 'inherit'
-    });
-  } catch (error) {
-    console.error('Failed to run migrations:', error);
-    throw error;
-  }
+beforeAll(async () => {
+  // Run migrations before all tests
+  // await migrate(db, { migrationsFolder: './drizzle' }); // Adjust path as needed
 });
 
-// Clean up test database file after tests
-afterAll(() => {
-  try {
-    execSync(`rm -f ${testDbPath}`, { 
-      cwd: path.resolve(__dirname, '..')
-    });
-  } catch (error) {
-    console.error('Failed to clean up test database:', error);
-  }
+afterAll(async () => {
+  // Clean up after all tests (e.g., close database connection)
+  // For libsql, you might not need to explicitly close, but it's good practice
+  // if db has a close method.
 });

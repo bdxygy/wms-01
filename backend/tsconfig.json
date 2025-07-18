@@ -23,6 +23,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "dist/postman"],
   "exclude": ["node_modules", "dist"]
 }
