@@ -1,282 +1,304 @@
-# Backend Service Implementation Checklist
+# Backend Implementation Checklist - MVP Prioritized
 
-This checklist tracks the implementation progress of all services defined in `backend_task.md` following the Clean Architecture pattern and use context7.
-
----
-
-## Phase 1: Core Services
-
-### [NO1] Authentication & Authorization Services
-- [ ] **AuthenticationService** - JWT token generation and validation
-- [ ] **Password hashing and verification** - bcrypt implementation
-- [ ] **Session management** - Token refresh handling
-- [ ] **AuthorizationService** - Role-based access control (RBAC)
-- [ ] **Owner-scoped permissions** - Hierarchical permission validation
-- [ ] **Resource access verification** - API endpoint protection
-
-### [NO2] User Management Services
-- [x] **UserService** - Business logic for user operations
-  - [x] User CRUD operations with role management
-  - [x] Owner assignment and scoping (users belong to owners, not specific stores)
-  - [x] Soft-delete with audit trail (ADMIN cannot delete users)
-  - [x] Role-based access control integration
-  - [x] ADMIN restricted to creating STAFF users only
-  - [x] Store list endpoint for staff/cashier dashboard navigation (all owner stores)
-- [x] **UserRepository** - Data persistence layer
-  - [x] User data persistence
-  - [x] Owner association management (users belong to owners)
-  - [x] Soft delete implementation
-  - [x] User-owner relationship queries
-
-### [NO3] Validation & Error Services
-- [ ] **ValidationService** - Zod schema validation
-- [ ] **Business rule enforcement** - Data integrity checks
-- [ ] **ErrorService** - Standardized error handling
-- [ ] **HTTP error classes** - Structured error responses
-- [ ] **AuditService** - Operation logging
-- [ ] **Change history maintenance**
-- [ ] **Compliance reporting**
+This checklist tracks the implementation progress of all backend services, organized by MVP priority and database models.
 
 ---
 
-## Phase 2: Business Services
+## 🎯 **MVP PHASES (1-3)** - Core Functionality
 
-### [NO4] Store Management Services
-- [ ] **StoreService**
-  - [ ] Complete CRUD operations
-  - [ ] Store configuration management
-  - [ ] Store assignment to users
+### **Phase 1: Foundation & Authentication** 🔐
+**Priority**: Critical - Must be completed first
+
+#### [P1.1] Infrastructure & Utilities
+- [ ] **Error handling utilities** - Custom error classes (ValidationError, AuthorizationError, NotFoundError)
+- [ ] **Response utilities** - Standardized API responses (BaseResponse, PaginatedResponse)
+- [ ] **Validation utilities** - Zod schema helpers and validation middleware
+- [ ] **Database utilities** - Connection management and query helpers
+
+#### [P1.2] Authentication System
+- [ ] **AuthService** - Core authentication logic
+  - [ ] User registration (OWNER role initial setup)
+  - [ ] User login with credentials validation
+  - [ ] JWT token generation and validation
+  - [ ] Password hashing with bcrypt
+  - [ ] Token refresh handling
+- [ ] **AuthRepository** - Authentication data access
+  - [ ] User credential verification
+  - [ ] Token storage and validation
+  - [ ] Password hash management
+- [ ] **AuthController** - Authentication endpoints
+  - [ ] POST /api/v1/auth/register - User registration
+  - [ ] POST /api/v1/auth/login - User login
+  - [ ] POST /api/v1/auth/refresh - Token refresh
+- [ ] **Auth Middleware** - Request authentication
+  - [ ] JWT token verification
+  - [ ] User context injection
+  - [ ] Protected route handling
+- [ ] **Auth Schemas** - Request/response validation
+  - [ ] Registration request schema
+  - [ ] Login request schema
+  - [ ] Auth response schemas
+
+### **Phase 2: User Management** 👥
+**Priority**: Critical - Required for role-based access
+
+#### [P2.1] User System (users table)
+- [ ] **UserService** - Business logic for user operations
+  - [ ] User CRUD operations with role management
+  - [ ] Owner hierarchy assignment (users belong to owners)
+  - [ ] Role-based access control (OWNER, ADMIN only in MVP)
   - [ ] Soft-delete with audit trail
-  - [ ] Store list endpoint for staff/cashier dashboard navigation (all owner stores)
-  - [ ] Store access validation per user role and owner assignment (any store under same owner)
-- [ ] **StoreRepository**
+  - [ ] User validation and business rules
+- [ ] **UserRepository** - Data persistence layer
+  - [ ] User data persistence
+  - [ ] Owner association management
+  - [ ] Soft delete implementation
+  - [ ] User-owner relationship queries
+  - [ ] Role-based data filtering
+- [ ] **UserController** - HTTP request handlers
+  - [ ] POST /api/v1/users - Create user (OWNER only)
+  - [ ] GET /api/v1/users - List users (filtered by owner)
+  - [ ] GET /api/v1/users/:id - Get user details
+  - [ ] PUT /api/v1/users/:id - Update user
+  - [ ] DELETE /api/v1/users/:id - Soft delete user (OWNER only)
+- [ ] **User Schemas** - Request/response validation
+  - [ ] Create user request schema
+  - [ ] Update user request schema
+  - [ ] User response schemas
+  - [ ] User list with pagination
+
+### **Phase 3: Product Management** 📦
+**Priority**: Critical - Core business functionality
+
+#### [P3.1] Category System (categories table)
+- [ ] **CategoryService** - Product categorization logic
+  - [ ] Category CRUD operations
+  - [ ] Owner-scoped category management
+  - [ ] Category validation and business rules
+  - [ ] Soft-delete with audit trail
+- [ ] **CategoryRepository** - Category data access
+  - [ ] Category data persistence
+  - [ ] Owner-category relationships
+  - [ ] Category hierarchy support
+- [ ] **CategoryController** - Category management endpoints
+  - [ ] POST /api/v1/categories - Create category
+  - [ ] GET /api/v1/categories - List categories
+  - [ ] GET /api/v1/categories/:id - Get category details
+  - [ ] PUT /api/v1/categories/:id - Update category
+- [ ] **Category Schemas** - Validation schemas
+  - [ ] Create category request schema
+  - [ ] Category response schemas
+
+#### [P3.2] Product System (products table)
+- [ ] **ProductService** - Core product business logic
+  - [ ] Product CRUD operations (OWNER/ADMIN only)
+  - [ ] Barcode generation with nanoid
+  - [ ] Store-scoped product management
+  - [ ] Category assignment
+  - [ ] Inventory quantity management
+  - [ ] Product validation and business rules
+  - [ ] Barcode uniqueness validation (owner-scoped)
+- [ ] **ProductRepository** - Product data persistence
+  - [ ] Product data persistence
+  - [ ] Barcode uniqueness validation
+  - [ ] Category associations
+  - [ ] Store-product relationships
+  - [ ] Inventory tracking
+- [ ] **ProductController** - Product management endpoints
+  - [ ] POST /api/v1/products - Create product (OWNER/ADMIN)
+  - [ ] GET /api/v1/products - List products (filtered by owner/store)
+  - [ ] GET /api/v1/products/:id - Get product details
+  - [ ] PUT /api/v1/products/:id - Update product (OWNER/ADMIN)
+  - [ ] GET /api/v1/products/barcode/:barcode - Find by barcode
+- [ ] **Product Schemas** - Request/response validation
+  - [ ] Create product request schema
+  - [ ] Update product request schema
+  - [ ] Product response schemas
+  - [ ] Product list with pagination
+
+---
+
+## 🚀 **EXTENDED PHASES (4-6)** - MVP Enhancements
+
+### **Phase 4: Sales Transactions** 💰
+**Priority**: High - Core business functionality
+
+#### [P4.1] Transaction System (transactions + transaction_items tables)
+- [ ] **TransactionService** - Transaction business logic
+  - [ ] SALE transaction creation (OWNER/ADMIN only)
+  - [ ] Transaction item management
+  - [ ] Photo proof handling
+  - [ ] Transaction validation and business rules
+  - [ ] Product quantity updates
+  - [ ] Amount calculations
+- [ ] **TransactionRepository** - Transaction data persistence
+  - [ ] Transaction data persistence
+  - [ ] Transaction items management
+  - [ ] Photo proof storage references
+  - [ ] Transaction status tracking
+- [ ] **TransactionController** - Sales endpoints
+  - [ ] POST /api/v1/transactions - Create SALE transaction
+  - [ ] GET /api/v1/transactions - List transactions
+  - [ ] GET /api/v1/transactions/:id - Get transaction details
+  - [ ] PUT /api/v1/transactions/:id - Update transaction
+- [ ] **Transaction Schemas** - Validation schemas
+  - [ ] Create transaction request schema
+  - [ ] Transaction item schemas
+  - [ ] Transaction response schemas
+
+### **Phase 5: Store Management** 🏪
+**Priority**: Medium - Multi-store support
+
+#### [P5.1] Store System (stores table)
+- [ ] **StoreService** - Store management logic
+  - [ ] Store CRUD operations
+  - [ ] Owner-store relationships
+  - [ ] Store configuration management
+  - [ ] User-store assignments
+  - [ ] Store validation and business rules
+- [ ] **StoreRepository** - Store data persistence
   - [ ] Store data persistence
   - [ ] Geographic and operational data
   - [ ] Store hierarchy management
   - [ ] Active/inactive status tracking
+- [ ] **StoreController** - Store management endpoints
+  - [ ] POST /api/v1/stores - Create store
+  - [ ] GET /api/v1/stores - List stores
+  - [ ] GET /api/v1/stores/:id - Get store details
+  - [ ] PUT /api/v1/stores/:id - Update store
+- [ ] **Store Schemas** - Validation schemas
+  - [ ] Create store request schema
+  - [ ] Store response schemas
 
-### [NO5] Category Management Services
-- [ ] **CategoryService**
-  - [ ] Category CRUD operations (ADMIN cannot delete)
-  - [ ] Product categorization system
-  - [ ] Category hierarchy management
-  - [ ] Category-based filtering
-  - [ ] Role-based delete restrictions for ADMIN users
-- [ ] **CategoryRepository**
-  - [ ] Category data persistence
-  - [ ] Hierarchical category structure
-  - [ ] Category-product relationship management
+### **Phase 6: Authorization & Middleware** 🛡️
+**Priority**: High - Security and access control
 
-### [NO6] Product Management Services
-- [ ] **ProductService**
-  - [ ] Product CRUD operations (ADMIN cannot delete)
-  - [ ] nanoid as Barcode generation and validation
-  - [ ] IMEI tracking for applicable products (phones, electronics)
-  - [ ] Inventory quantity management
-  - [ ] Product categorization system
-  - [ ] Role-based delete restrictions for ADMIN users
-- [ ] **ProductRepository**
-  - [ ] Product data persistence
-  - [ ] Barcode value uniqueness validation
-  - [ ] Category associations
-  - [ ] Inventory tracking
-  - [ ] IMEI tracking for applicable products
+#### [P6.1] Role-Based Access Control
+- [ ] **AuthorizationService** - RBAC implementation
+  - [ ] Owner-scoped permissions
+  - [ ] Role-based resource access
+  - [ ] Hierarchical permission validation
+  - [ ] API endpoint protection
+- [ ] **Authorization Middleware** - Request authorization
+  - [ ] Role verification
+  - [ ] Owner scope validation
+  - [ ] Resource access control
+  - [ ] Permission-based route protection
 
 ---
 
-## Phase 3: Advanced Features
+## 🔧 **FUTURE PHASES (7-10)** - Advanced Features
 
-### [NO7] Transaction Management Services
-- [ ] **TransactionService**
-  - [ ] Transaction CRUD operations (SALE, TRANSFER_IN, TRANSFER_OUT)
-  - [ ] CASHIER restricted to SALE transactions only (no TRANSFER types)
-  - [ ] ADMIN cannot delete transactions
-  - [ ] CASHIER cannot update transactions (create and read only)
-  - [ ] Transaction item management
-  - [ ] Photo proof storage for SALE transactions
-  - [ ] Barcode value validation for all transactions
-  - [ ] Transaction status tracking
-  - [ ] Role-based transaction type restrictions
-- [ ] **TransactionRepository**
-  - [ ] Transaction data persistence
-  - [ ] Transaction item management
-  - [ ] Photo proof storage
-  - [ ] Transaction status tracking
-  - [ ] Transaction type filtering
+### **Phase 7: Advanced Product Features** 📱
+**Priority**: Low - Enhanced functionality
 
-### [NO8] Product Checking Services
-- [ ] **ProductCheckService**
-  - [ ] Product status checking and updates by barcode value
+#### [P7.1] IMEI Tracking (product_imeis table)
+- [ ] **IMEIService** - IMEI management logic
+  - [ ] IMEI registration and tracking
+  - [ ] Product-IMEI associations
+  - [ ] IMEI validation and business rules
+- [ ] **IMEIRepository** - IMEI data persistence
+  - [ ] IMEI data persistence
+  - [ ] Product-IMEI relationships
+  - [ ] IMEI uniqueness validation
+- [ ] **IMEIController** - IMEI management endpoints
+  - [ ] POST /api/v1/products/:id/imeis - Add IMEI
+  - [ ] GET /api/v1/products/:id/imeis - List product IMEIs
+  - [ ] DELETE /api/v1/imeis/:id - Remove IMEI
+- [ ] **IMEI Schemas** - Validation schemas
+
+### **Phase 8: Product Checking** ✅
+**Priority**: Low - Inventory verification
+
+#### [P8.1] Product Check System (product_checks table)
+- [ ] **ProductCheckService** - Product checking logic
+  - [ ] Product status checking by barcode
   - [ ] Check history tracking
   - [ ] Status transition management (PENDING → OK/MISSING/BROKEN)
-- [ ] **ProductCheckRepository**
+  - [ ] Staff role product checking
+- [ ] **ProductCheckRepository** - Check data persistence
   - [ ] Check status persistence
   - [ ] Check history tracking
   - [ ] Status transition logging
+- [ ] **ProductCheckController** - Checking endpoints
+  - [ ] POST /api/v1/product-checks - Create check
+  - [ ] GET /api/v1/product-checks - List checks
+  - [ ] PUT /api/v1/product-checks/:id - Update check status
+- [ ] **ProductCheck Schemas** - Validation schemas
 
-### [NO9] Analytics Services
-- [ ] **AnalyticsService**
+### **Phase 9: Advanced Transactions** 🔄
+**Priority**: Low - Transfer functionality
+
+#### [P9.1] Transfer Transactions
+- [ ] **Transfer Transaction Support** - TRANSFER_IN/TRANSFER_OUT
+  - [ ] Cross-store transfer logic
+  - [ ] Transfer approval workflow
+  - [ ] Transfer proof handling
+  - [ ] Inventory synchronization
+- [ ] **Advanced Transaction Features**
+  - [ ] Transaction status workflows
+  - [ ] Multi-step transaction approval
+  - [ ] Transaction reversal/cancellation
+
+### **Phase 10: Analytics & Reporting** 📊
+**Priority**: Low - Business intelligence
+
+#### [P10.1] Analytics System
+- [ ] **AnalyticsService** - Business analytics
   - [ ] Revenue calculation and analysis
   - [ ] Inventory turnover analysis
   - [ ] Product performance metrics
   - [ ] Transaction volume analysis
   - [ ] Cross-store analytics and comparison
-- [ ] **AnalyticsRepository**
+- [ ] **AnalyticsRepository** - Analytics data access
   - [ ] Aggregated data queries
   - [ ] Performance metrics calculation
   - [ ] Time-based analytics
   - [ ] Cross-store data correlation
-
-### [NO10] Dashboard & Navigation Services
-- [ ] **DashboardService**
-  - [ ] Staff dashboard with store list endpoints (all owner stores)
-  - [ ] Cashier dashboard with transaction tab navigation (all owner stores)
-  - [ ] Role-based dashboard content filtering
-  - [ ] Store access validation for dashboard data (owner-scoped)
-- [ ] **NavigationService**
-  - [ ] Store selection workflow for staff users (any owner store)
-  - [ ] Transaction navigation for cashier users (any owner store)
-  - [ ] Role-based menu and navigation restrictions
-  - [ ] Access validation for navigation endpoints (owner-scoped)
+- [ ] **AnalyticsController** - Reporting endpoints
+  - [ ] GET /api/v1/analytics/revenue - Revenue reports
+  - [ ] GET /api/v1/analytics/inventory - Inventory reports
+  - [ ] GET /api/v1/analytics/products - Product performance
+- [ ] **Analytics Schemas** - Report schemas
 
 ---
 
-## Infrastructure Services
+## 🧪 **TESTING REQUIREMENTS** - Per Phase
 
-### [NO11] Email & Notification Services
-- [ ] **EmailService**
-  - [ ] Notification system
-  - [ ] User communication
-  - [ ] System alerts
-  - [ ] Transaction confirmations
+### **Testing Standards**
+- [ ] **Integration Tests** - HTTP endpoint testing for each controller
+- [ ] **Role-Based Testing** - OWNER, ADMIN access control validation
+- [ ] **Cross-Owner Testing** - Data isolation verification
+- [ ] **Validation Testing** - Schema validation and error handling
+- [ ] **Business Rule Testing** - Domain logic validation
+- [ ] **Security Testing** - Authentication and authorization
 
-### [NO12] Performance & Caching
-- [ ] **Caching Strategy**
-  - [ ] Frequently accessed data caching
-  - [ ] Query result caching
-  - [ ] Session data caching
-  - [ ] Cache invalidation logic
-
----
-
-## Repository Pattern Implementation
-
-### [NO13] Base Repository
-- [x] **BaseRepository**
-  - [x] Generic CRUD operations
-  - [x] Soft delete implementation
-  - [x] Pagination support
-  - [x] Common query patterns
-
-### [NO15] Entity-Specific Repositories
-- [x] **UserRepository** - User data access
-- [x] **StoreRepository** - Store data access
-- [x] **ProductRepository** - Product data access
-- [x] **CategoryRepository** - Category data access
-- [x] **TransactionRepository** - Transaction data access
-- [x] **ProductCheckRepository** - Product check data access
+### **Test Implementation Priority**
+1. **Phase 1-3 Tests**: Critical for MVP launch
+2. **Phase 4-6 Tests**: Required for production
+3. **Phase 7-10 Tests**: Enhanced quality assurance
 
 ---
 
-## Service Dependencies & DI
+## 📝 **IMPLEMENTATION NOTES**
 
-### [NO16] Dependency Injection Setup
-- [ ] **Awilix container configuration**
-- [ ] **Service lifetime management**
-- [ ] **Interface-based dependencies**
-- [ ] **Mock service support for testing**
+### **MVP Focus Areas**
+- **Database Models**: All models already implemented ✅
+- **API Layer**: Complete implementation needed ❌
+- **Authentication**: JWT-based with role validation ❌
+- **Authorization**: Owner-scoped RBAC ❌
+- **Testing**: Comprehensive integration tests ❌
 
-### [NO17] Service Interfaces
-- [ ] **Clear interface definitions**
-- [ ] **Business logic abstraction**
-- [ ] **Testability support**
-- [ ] **Implementation flexibility**
+### **Business Rules Alignment**
+- **Owner Scoping**: All data filtered by owner hierarchy
+- **Role Restrictions**: OWNER (full access), ADMIN (limited CRU)
+- **Soft Delete**: Audit trail for all deletions
+- **Barcode Uniqueness**: Owner-scoped validation
+- **Photo Proof**: Required for SALE transactions
 
----
-
-## Business Rules Enforcement
-
-### [NO18] Data Integrity
-- [ ] **Foreign key relationships**
-- [ ] **Unique constraint validation**
-- [ ] **Required field validation**
-- [ ] **Data type validation**
-- [ ] **Barcode uniqueness validation** across system
-- [ ] **IMEI uniqueness validation** for applicable products
-
-### [NO20] Business Logic
-- [ ] **Role-based operation restrictions** as per user stories
-- [ ] **Owner-scoped data access** for non-OWNER roles (access to all stores under same owner)
-- [ ] **Transaction workflow rules**
-- [ ] **Inventory consistency**
-- [ ] **Soft-delete implementation** for all entities (audit trail)
-- [ ] **Photo proof requirement** for SALE transactions
-- [ ] **Barcode scanning mandatory** for product input/output
-- [ ] **Cross-owner data restrictions** for non-OWNER roles
-- [ ] **ADMIN delete restrictions** (cannot delete users, categories, products, transactions)
-- [ ] **CASHIER transaction type restrictions** (SALE only, no TRANSFER types)
-- [ ] **CASHIER transaction operation restrictions** (create and read only, no update)
-- [ ] **Dashboard navigation rules** (staff/cashier can access all owner stores)
-
-### [NO21] Security Rules
-- [ ] **Authentication requirements**
-- [ ] **Authorization checks**
-- [ ] **Data sanitization**
-- [ ] **SQL injection prevention**
-
----
-
-## Testing Requirements
-
-### [NO22] Unit Tests
-- [ ] **All service methods**
-- [ ] **Repository operations**
-- [ ] **Business rule validation**
-- [ ] **Error handling scenarios**
-
-### [NO23] Integration Tests
-- [ ] **API endpoint testing**
-- [ ] **Database operations**
-- [ ] **Authentication/authorization**
-- [ ] **Cross-service communication**
-
-### [NO24] Performance Tests
-- [ ] **Response time limits**
-- [ ] **Large dataset handling**
-- [ ] **Concurrent request handling**
-
----
-
-## Documentation & Standards
-
-### [NO25] Code Documentation
-- [ ] **Service interface documentation**
-- [ ] **API endpoint documentation**
-- [ ] **Business rule documentation**
-- [ ] **Error code documentation**
-
-### [NO26] Implementation Guidelines
-- [ ] **Error handling standards**
-- [ ] **Validation standards**
-- [ ] **Testing standards**
-
-
----
-
-## Security & Performance
-
-### [NO27] Security Implementation
-- [ ] **SQL injection prevention**
-- [ ] **XSS prevention**
-- [ ] **Data sanitization**
-- [ ] **Rate limiting**
-- [ ] **JWT token security**
-- [ ] **Role-based access control enforcement**
-
-### [NO27] Performance Optimization
-- [ ] **Query optimization**
-- [ ] **Index management**
-- [ ] **Connection pooling**
-- [ ] **Transaction efficiency
-- [ ] **Caching for analytics queries**
-- [ ] **Pagination for large datasets**
+### **Technology Stack**
+- **API Framework**: Hono.js with OpenAPI/Swagger
+- **Database ORM**: Drizzle with SQLite/Turso
+- **Validation**: Zod schemas
+- **Testing**: Vitest integration tests
+- **Authentication**: JWT tokens with bcrypt hashing

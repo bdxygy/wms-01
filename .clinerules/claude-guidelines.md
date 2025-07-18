@@ -27,7 +27,6 @@
   - Backend uses Hono.js with Drizzle ORM on SQLite/Turso.
   - Frontend uses React with Shadcn UI, Tailwindcss, and React Query.
   - Key features include barcode scanning, photo proof for sales, product checking, cross-store transfers, and analytics.
-  - Role hierarchy: OWNER > ADMIN > STAFF > CASHIER, each with specific permissions and restrictions.
 
 ## Other guidelines
   - Enforce business rules such as barcode uniqueness, photo proof requirements, and strict RBAC.

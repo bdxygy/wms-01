@@ -10,8 +10,7 @@ Enum user_role {
 
 Enum transaction_type {
   SALE
-  TRANSFER_IN
-  TRANSFER_OUT
+  TRANSFER
 }
 
 Enum check_status_role {

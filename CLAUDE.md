@@ -36,6 +36,94 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Analytics and reporting
 - Role-based dashboards
 
+## 🎯 **MVP (Minimum Viable Product) Scope**
+
+The MVP focuses on essential functionality to get the system operational quickly:
+
+### **MVP Core Features**
+
+1. **Authentication System** 🔐
+   - User registration (OWNER role only for initial setup)
+   - User login with JWT tokens
+   - Basic role-based access control (OWNER, ADMIN)
+   - Session management
+
+2. **Product Management** 📦
+   - OWNER and ADMIN can create products
+   - Basic product information (name, barcode, price, quantity)
+   - Category assignment
+   - Store-scoped product management
+   - Barcode generation with nanoid
+
+3. **Sales Transactions** 💰
+   - OWNER and ADMIN can create SALE transactions
+   - Transaction items with product selection
+   - Basic transaction recording
+   - Photo proof upload capability
+   - Transaction history
+
+### **MVP User Roles (Simplified)**
+
+- **OWNER**: Full access to all MVP features
+- **ADMIN**: Limited access - can manage products and sales within assigned store
+- **STAFF/CASHIER**: Not included in MVP (future enhancement)
+
+### **MVP Business Rules**
+
+- Products must have unique barcodes within owner scope
+- SALE transactions require at least one product item
+- Only OWNER and ADMIN roles can create products and transactions
+- All data is owner-scoped (users only see data from their owner hierarchy)
+- Soft delete for audit trail
+
+### **MVP API Endpoints**
+
+```
+Authentication:
+POST /api/v1/auth/register - Register new user (OWNER only)
+POST /api/v1/auth/login    - User login
+
+Products:
+POST /api/v1/products      - Create product (OWNER/ADMIN)
+GET  /api/v1/products      - List products (OWNER/ADMIN)
+GET  /api/v1/products/:id  - Get product details (OWNER/ADMIN)
+PUT  /api/v1/products/:id  - Update product (OWNER/ADMIN)
+
+Transactions:
+POST /api/v1/transactions  - Create SALE transaction (OWNER/ADMIN)
+GET  /api/v1/transactions  - List transactions (OWNER/ADMIN)
+GET  /api/v1/transactions/:id - Get transaction details (OWNER/ADMIN)
+```
+
+### **MVP Implementation Priority**
+
+1. **Phase 1**: Authentication System
+   - User registration/login
+   - JWT token management
+   - Basic middleware for auth
+
+2. **Phase 2**: Product Management
+   - Product CRUD operations
+   - Category basic support
+   - Barcode generation
+
+3. **Phase 3**: Sales Transactions
+   - SALE transaction creation
+   - Transaction items management
+   - Basic photo proof handling
+
+### **MVP Exclusions (Future Features)**
+
+- ❌ STAFF and CASHIER roles (simplified to OWNER/ADMIN only)
+- ❌ Product checking system
+- ❌ Cross-store transfers (TRANSFER_IN/TRANSFER_OUT)
+- ❌ Advanced analytics and reporting
+- ❌ IMEI tracking
+- ❌ Complex store management
+- ❌ Advanced photo proof validation
+- ❌ Product quantity tracking updates
+- ❌ Transaction status workflows
+
 ### Development Commands
 
 Backend commands (from `/backend` directory):
@@ -115,6 +203,169 @@ Key entities defined in `docs/erd.md`:
 - **transactions**: SALE and TRANSFER operations with photo proof
 - **product_checks**: Regular inventory verification system
 
+## 🚫 **CRITICAL DATABASE MODEL PROTECTION RULE** 🚫
+
+**NEVER MODIFY ANY MODEL FILES WITHOUT EXPLICIT USER REQUEST**
+
+The following model files are now **FROZEN** and cannot be changed without explicit user permission:
+
+- `src/models/users.ts` - ✅ ERD Compliant
+- `src/models/stores.ts` - ✅ ERD Compliant  
+- `src/models/categories.ts` - ✅ ERD Compliant
+- `src/models/products.ts` - ✅ ERD Compliant
+- `src/models/transactions.ts` - ✅ ERD Compliant
+- `src/models/product_checks.ts` - ✅ ERD Compliant
+- `src/models/product_imeis.ts` - ✅ ERD Compliant
+
+**Protection Rules:**
+- ❌ **NO schema changes** without clear user request
+- ❌ **NO field additions/removals** without clear user request
+- ❌ **NO type changes** without clear user request
+- ❌ **NO relation modifications** without clear user request
+- ✅ **ONLY bug fixes** in business logic are allowed
+- ✅ **ONLY new files** can be created (controllers, services, tests)
+
+**Current ERD-Compliant Model Definitions:**
+
+### Users Model (FROZEN)
+```typescript
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey(),
+  ownerId: text('owner_id').references(() => users.id),
+  name: text('name').notNull(),
+  username: text('username').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  role: text('role', { enum: userRoles }).notNull(),
+  storeId: text('store_id').references(() => stores.id),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+});
+```
+
+### Stores Model (FROZEN)
+```typescript
+export const stores = sqliteTable('stores', {
+  id: text('id').primaryKey(),
+  ownerId: text('owner_id').notNull().references(() => users.id),
+  name: text('name').notNull(),
+  code: text('code').notNull().unique(),
+  type: text('type').notNull(),
+  addressLine1: text('address_line1').notNull(),
+  addressLine2: text('address_line2'),
+  city: text('city').notNull(),
+  province: text('province').notNull(),
+  postalCode: text('postal_code').notNull(),
+  country: text('country').notNull(),
+  phoneNumber: text('phone_number').notNull(),
+  email: text('email'),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  openTime: integer('open_time', { mode: 'timestamp' }),
+  closeTime: integer('close_time', { mode: 'timestamp' }),
+  timezone: text('timezone').default('Asia/Jakarta'),
+  mapLocation: text('map_location'),
+  createdBy: text('created_by').notNull().references(() => users.id),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+});
+```
+
+### Categories Model (FROZEN)
+```typescript
+export const categories = sqliteTable('categories', {
+  id: text('id').primaryKey(),
+  createdBy: text('created_by').notNull().references(() => users.id),
+  name: text('name').notNull(),
+  description: text('description'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+});
+```
+
+### Products Model (FROZEN)
+```typescript
+export const products = sqliteTable('products', {
+  id: text('id').primaryKey(),
+  createdBy: text('created_by').notNull().references(() => users.id),
+  storeId: text('store_id').notNull().references(() => stores.id),
+  name: text('name').notNull(),
+  categoryId: text('category_id').references(() => categories.id),
+  sku: text('sku').notNull(),
+  isImei: integer('is_imei', { mode: 'boolean' }).default(false),
+  barcode: text('barcode').notNull(),
+  quantity: integer('quantity').default(1).notNull(),
+  purchasePrice: real('purchase_price').notNull(),
+  salePrice: real('sale_price'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+});
+```
+
+### Transactions Model (FROZEN)
+```typescript
+export const transactionTypes = ['SALE', 'TRANSFER_IN', 'TRANSFER_OUT'] as const;
+
+export const transactions = sqliteTable('transactions', {
+  id: text('id').primaryKey(),
+  type: text('type', { enum: transactionTypes }).notNull(),
+  createdBy: text('created_by').references(() => users.id),
+  approvedBy: text('approved_by').references(() => users.id),
+  fromStoreId: text('from_store_id').references(() => stores.id),
+  toStoreId: text('to_store_id').references(() => stores.id),
+  photoProofUrl: text('photo_proof_url'),
+  transferProofUrl: text('transfer_proof_url'),
+  to: text('to'),
+  customerPhone: text('customer_phone'),
+  amount: real('amount'),
+  isFinished: integer('is_finished', { mode: 'boolean' }).default(false),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+export const transactionItems = sqliteTable('transaction_items', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  transactionId: text('transaction_id').notNull().references(() => transactions.id),
+  productId: text('product_id').notNull().references(() => products.id),
+  name: text('name').notNull(),
+  price: real('price').notNull(),
+  quantity: integer('quantity').notNull(),
+  amount: real('amount'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+```
+
+### Product Checks Model (FROZEN)
+```typescript
+export const checkStatus = ['PENDING', 'OK', 'MISSING', 'BROKEN'] as const;
+
+export const productChecks = sqliteTable('product_checks', {
+  id: text('id').primaryKey(),
+  productId: text('product_id').notNull().references(() => products.id),
+  checkedBy: text('checked_by').notNull().references(() => users.id),
+  storeId: text('store_id').notNull().references(() => stores.id),
+  status: text('status', { enum: checkStatus }).notNull(),
+  note: text('note'),
+  checkedAt: integer('checked_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+```
+
+### Product IMEIs Model (FROZEN)
+```typescript
+export const productImeis = sqliteTable('product_imeis', {
+  id: text('id').primaryKey(),
+  productId: text('product_id').notNull().references(() => products.id),
+  imei: text('imei').notNull(),
+  createdBy: text('created_by').notNull().references(() => users.id),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+```
+
+**⚠️ VIOLATION WARNING**: Any attempt to modify these models without explicit user request will be REFUSED.
+
 ### Business Rules to Enforce
 
 - **Barcode uniqueness**: System-wide for OWNER, store-scoped for ADMIN
@@ -150,56 +401,54 @@ Based on `docs/features/backend_ut_checklist.md`:
 - **stores**: Multi-store support with owner relationships
 - **categories**: Product categorization system
 - **products**: Full product management with barcode, pricing, stock levels
-- **transactions**: Support for `SALE`, `TRANSFER`, `ADJUSTMENT`, `RESTOCK`
+- **transactions**: Support for `SALE`, `TRANSFER_IN`, `TRANSFER_OUT`
 - **product_checks**: Inventory verification with status tracking
+- **product_imeis**: IMEI tracking for electronic products
 
-**Implementation Priority (Updated)**
+**MVP Implementation Priority (Current Status)**
 
-1. **Phase 1**: API Controllers & Routes ✅ **COMPLETED**
-   - ✅ **BaseResponse and PaginatedBaseResponse types completed**
-   - ✅ **Response utilities with Zod validation completed**
-   - ✅ **User management endpoints with full CRUD operations**
-   - ✅ **Zod schema validation for all requests**
-   - ✅ **Role-based authorization and error handling**
-   - ✅ **OpenAPI documentation with Swagger UI**
-   - Authentication endpoints
-   - Store management endpoints
-   - Product management endpoints
-   - Transaction endpoints
-   - Product checking endpoints
+1. **MVP Phase 1**: Authentication System ❌ **NOT IMPLEMENTED**
+   - ❌ **Auth controllers (register/login)**
+   - ❌ **JWT token management**
+   - ❌ **Auth middleware**
+   - ❌ **User registration/login routes**
+   - ❌ **Password hashing utilities**
+   - ❌ **Auth schemas and validation**
 
-2. **Phase 2**: Business Logic & Services ✅ **COMPLETED** (User Module)
-   - ✅ **Service layer implementation with business logic**
-   - ✅ **Repository layer implementation with data access**
-   - ✅ **Role-based authorization middleware**
-   - ✅ **Business rule validation with custom error types**
-   - ✅ **Comprehensive error handling system**
+2. **MVP Phase 2**: Product Management ❌ **NOT IMPLEMENTED**
+   - ❌ **Product controllers (CRUD)**
+   - ❌ **Product services and repositories**
+   - ❌ **Product routes with OWNER/ADMIN access**
+   - ❌ **Product schemas and validation**
+   - ❌ **Barcode generation with nanoid**
+   - ❌ **Category basic support**
 
-3. **Phase 3**: Testing & Documentation ✅ **COMPLETED** (User Module)
-   - ✅ **Integration tests for API endpoints**
-   - ✅ **Role-based access control testing**
-   - ✅ **API documentation with OpenAPI/Swagger**
-   - ✅ **Error handling standardization**
+3. **MVP Phase 3**: Sales Transactions ❌ **NOT IMPLEMENTED**
+   - ❌ **Transaction controllers (SALE only)**
+   - ❌ **Transaction services and repositories**
+   - ❌ **Transaction routes with OWNER/ADMIN access**
+   - ❌ **Transaction schemas and validation**
+   - ❌ **Transaction items management**
+   - ❌ **Photo proof upload handling**
 
-4. **Phase 4**: Frontend Implementation (⏳ **PENDING**)
-   - React frontend with Shadcn UI
-   - Authentication flow
-   - Role-based dashboards
-   - Product and inventory management
-   - Transaction processing
+**Foundation Status:**
+- ✅ **Database models (all entities defined)**
+- ✅ **Server infrastructure (Hono + OpenAPI)**
+- ✅ **Test framework configuration**
+- ❌ **All API implementation layers missing**
 
 ### Key Development Notes
 
-- Backend infrastructure is complete and ready for API development
-- Database schema is fully implemented with proper relationships and constraints
-- All database tables include soft delete functionality (`deletedAt` timestamp)
-- Environment configuration supports development/production/test environments
-- Testing framework (Vitest) is configured and ready for use
-- API server has OpenAPI/Swagger documentation at `/ui` endpoint
-- Next priority: Implement controllers, services, and routes for each entity
-- Use existing Zod schemas from models for request/response validation
-- Implement proper role-based access control in middleware
-- Database connections configured for both SQLite (testing) and Turso (production)
+- ✅ Backend infrastructure is complete and ready for API development
+- ✅ Database schema is fully implemented with proper relationships and constraints
+- ✅ All database tables include soft delete functionality (`deletedAt` timestamp)
+- ✅ Environment configuration supports development/production/test environments
+- ✅ Testing framework (Vitest) is configured and ready for use
+- ✅ API server has OpenAPI/Swagger documentation at `/ui` endpoint
+- ✅ Database connections configured for both SQLite (testing) and Turso (production)
+- ❌ **CRITICAL**: All implementation layers are missing (controllers, services, repositories, routes, schemas)
+- ❌ **URGENT**: API only serves health check - no functional endpoints exist
+- **Next priority**: Build complete API implementation from scratch following established patterns
 
 ### Coding Standards
 
@@ -222,417 +471,6 @@ Based on `docs/features/backend_ut_checklist.md`:
 - **Test before deployment**: Code is not considered complete until all tests pass
 - **Quality over speed**: Take time to write proper, comprehensive tests rather than rushing implementations
 
-## Standard Implementation Patterns
-
-### Error Handling Pattern ✅ **REFERENCE IMPLEMENTATION**
-
-All service methods should use custom error classes for proper HTTP status code mapping:
-
-```typescript
-// src/utils/errors.ts
-export class BusinessError extends Error {
-  constructor(
-    message: string,
-    public readonly statusCode: number = 400,
-    public readonly code: string = 'BUSINESS_ERROR'
-  ) {
-    super(message);
-    this.name = 'BusinessError';
-  }
-}
-
-export class ValidationError extends BusinessError {
-  constructor(message: string) {
-    super(message, 400, 'VALIDATION_ERROR');
-  }
-}
-
-export class AuthorizationError extends BusinessError {
-  constructor(message: string) {
-    super(message, 403, 'AUTHORIZATION_ERROR');
-  }
-}
-
-export class NotFoundError extends BusinessError {
-  constructor(message: string) {
-    super(message, 404, 'NOT_FOUND');
-  }
-}
-
-export function handleServiceError(error: unknown) {
-  if (error instanceof BusinessError) {
-    return {
-      message: error.message,
-      statusCode: error.statusCode,
-      code: error.code,
-    };
-  }
-  // Handle other error types...
-}
-```
-
-### Controller Pattern ✅ **REFERENCE IMPLEMENTATION**
-
-Controllers should handle HTTP concerns and delegate to services:
-
-```typescript
-// src/controllers/[entity].controller.ts
-import { Context } from "hono";
-import { EntityService } from "../services/entity.service";
-import { CreateEntityRequest, UpdateEntityRequest } from "../schemas/entity.schemas";
-import { createBaseResponse } from "../utils/response";
-import { handleServiceError } from "../utils/errors";
-
-export class EntityController {
-  private entityService: EntityService;
-
-  constructor() {
-    this.entityService = new EntityService();
-  }
-
-  async createEntity(c: Context) {
-    try {
-      const requestingUser = c.get("user") as User;
-      
-      if (!requestingUser) {
-        return c.json(
-          createBaseResponse(false, "Unauthorized", null, {
-            code: "UNAUTHORIZED",
-            details: "Authentication required",
-          }),
-          401
-        );
-      }
-
-      const data = (await c.req.json()) as CreateEntityRequest;
-      const entity = await this.entityService.createEntity(data, requestingUser);
-
-      return c.json(
-        createBaseResponse(true, "Entity created successfully", entity),
-        201
-      );
-    } catch (error) {
-      const { message, statusCode, code, details } = handleServiceError(error);
-      return c.json(
-        createBaseResponse(false, message, null, { code, details }),
-        statusCode
-      );
-    }
-  }
-}
-```
-
-### Service Pattern ✅ **REFERENCE IMPLEMENTATION**
-
-Services contain business logic and throw custom errors:
-
-```typescript
-// src/services/[entity].service.ts
-import { EntityRepository } from '../repositories/entity.repository';
-import { ValidationError, AuthorizationError, NotFoundError } from '../utils/errors';
-import { CreateEntityRequest, UpdateEntityRequest } from '../schemas/entity.schemas';
-
-export class EntityService {
-  private entityRepository: EntityRepository;
-
-  constructor() {
-    this.entityRepository = new EntityRepository();
-  }
-
-  async createEntity(data: CreateEntityRequest, requestingUser: User): Promise<Entity> {
-    // Business validation
-    this.validateEntityCreation(data, requestingUser);
-
-    // Create entity
-    const newEntity: NewEntity = {
-      id: nanoid(),
-      ...data,
-      ownerId: this.determineOwnerId(requestingUser),
-    };
-
-    return await this.entityRepository.create(newEntity);
-  }
-
-  private validateEntityCreation(data: CreateEntityRequest, requestingUser: User): void {
-    if (requestingUser.role === 'STAFF') {
-      throw new AuthorizationError('Staff users cannot create entities');
-    }
-    
-    if (!data.name || data.name.trim().length === 0) {
-      throw new ValidationError('Entity name is required');
-    }
-  }
-}
-```
-
-### Route Pattern ✅ **REFERENCE IMPLEMENTATION**
-
-Routes define OpenAPI schemas and delegate to controllers:
-
-```typescript
-// src/routes/[entity].routes.ts
-import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
-import { EntityController } from '../controllers/entity.controller';
-import {
-  CreateEntityRequestSchema,
-  EntitySuccessResponseSchema,
-  ErrorResponseSchema,
-} from '../schemas/entity.schemas';
-
-const entityRoutes = new OpenAPIHono();
-const entityController = new EntityController();
-
-const createEntityRoute = createRoute({
-  method: 'post',
-  path: '/',
-  tags: ['Entities'],
-  summary: 'Create a new entity',
-  request: {
-    body: {
-      content: {
-        'application/json': {
-          schema: CreateEntityRequestSchema,
-        },
-      },
-    },
-  },
-  responses: {
-    201: {
-      content: {
-        'application/json': {
-          schema: EntitySuccessResponseSchema,
-        },
-      },
-      description: 'Entity created successfully',
-    },
-    400: {
-      content: {
-        'application/json': {
-          schema: ErrorResponseSchema,
-        },
-      },
-      description: 'Validation error',
-    },
-    401: {
-      content: {
-        'application/json': {
-          schema: ErrorResponseSchema,
-        },
-      },
-      description: 'Authentication required',
-    },
-  },
-});
-
-entityRoutes.openapi(createEntityRoute, async (c) => await entityController.createEntity(c));
-
-export { entityRoutes };
-```
-
-### Schema Pattern ✅ **REFERENCE IMPLEMENTATION**
-
-Schemas define Zod validation and TypeScript types:
-
-```typescript
-// src/schemas/[entity].schemas.ts
-import { z } from '@hono/zod-openapi';
-
-// Request schemas
-export const CreateEntityRequestSchema = z.object({
-  name: z.string().min(1).openapi({
-    description: 'Entity name',
-    example: 'Sample Entity'
-  }),
-  description: z.string().optional().openapi({
-    description: 'Entity description'
-  }),
-});
-
-// Response schemas
-export const EntityResponseSchema = z.object({
-  id: z.string().openapi({ description: 'Entity ID' }),
-  name: z.string().openapi({ description: 'Entity name' }),
-  ownerId: z.string().openapi({ description: 'Owner ID' }),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
-
-// Type exports
-export type CreateEntityRequest = z.infer<typeof CreateEntityRequestSchema>;
-export type EntityResponse = z.infer<typeof EntityResponseSchema>;
-
-// API response wrappers
-export const EntitySuccessResponseSchema = ApiResponseSchema(EntityResponseSchema);
-export const ErrorResponseSchema = ApiResponseSchema(z.never());
-```
-
-### Response Utilities ✅ **REFERENCE IMPLEMENTATION**
-
-Standardized response creation:
-
-```typescript
-// src/utils/response.ts
-export interface BaseResponse {
-  success: boolean;
-  message: string;
-  data?: any;
-  error?: { code: string; details?: any };
-  timestamp: string;
-}
-
-export function createBaseResponse<T>(
-  success: boolean,
-  message: string,
-  data?: T,
-  error?: { code: string; details?: any },
-  timestamp: string = new Date().toISOString()
-): BaseResponse {
-  return {
-    success,
-    message,
-    data,
-    error,
-    timestamp,
-  };
-}
-
-export function createPaginatedResponse<T>(
-  data: T[],
-  page: number,
-  limit: number,
-  total: number,
-  message: string = "Data retrieved successfully"
-) {
-  const totalPages = Math.ceil(total / limit);
-  return {
-    success: true,
-    message,
-    data,
-    timestamp: new Date().toISOString(),
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1,
-    },
-  };
-}
-```
-
-### Validation & Error Mapping ✅ **ESTABLISHED STANDARDS**
-
-- **400 Bad Request**: Input validation errors (handled by Zod automatically)
-- **401 Unauthorized**: Authentication required
-- **403 Forbidden**: Authorization/permission errors (use `AuthorizationError`)
-- **404 Not Found**: Resource not found (use `NotFoundError`)
-- **409 Conflict**: Resource conflicts like duplicate emails (use `ConflictError`)
-- **500 Internal Server Error**: Unexpected errors
-
-### Testing Pattern ✅ **REFERENCE IMPLEMENTATION**
-
-Integration tests focus on HTTP endpoints with role-based scenarios using proper test utilities:
-
-```typescript
-// tests/routes/[entity].routes.test.ts
-//@ts-nocheck
-import { describe, expect, it } from 'vitest';
-import {
-  createAuthHeaders,
-  createMultiOwnerUsers,
-  createTestApp,
-  createUserHierarchy,
-  setupTestDatabase
-} from '../utils';
-
-setupTestDatabase();
-
-describe('Entity Routes Integration Tests', () => {
-  describe('POST /api/v1/entities - Create Entity', () => {
-    it('should create a new entity as OWNER', async () => {
-      const { owner } = await createUserHierarchy();
-      const app = createTestApp(owner);
-      
-      const newEntityData = {
-        name: 'New Entity',
-        description: 'Test Description',
-      };
-
-      const response = await app.request('/api/v1/entities', {
-        method: 'POST',
-        headers: createAuthHeaders(owner),
-        body: JSON.stringify(newEntityData),
-      });
-
-      expect(response.status).toBe(201);
-      
-      const body = await response.json();
-      expect(body.success).toBe(true);
-      expect(body.message).toBe('Entity created successfully');
-      expect(body.data).toMatchObject({
-        name: newEntityData.name,
-        description: newEntityData.description,
-        ownerId: owner.user.id,
-      });
-    });
-
-    it('should prevent STAFF from creating entities', async () => {
-      const { staff } = await createUserHierarchy();
-      const app = createTestApp(staff);
-      
-      const newEntityData = {
-        name: 'Staff Entity',
-      };
-
-      const response = await app.request('/api/v1/entities', {
-        method: 'POST',
-        headers: createAuthHeaders(staff),
-        body: JSON.stringify(newEntityData),
-      });
-
-      expect(response.status).toBe(403);
-      
-      const text = await response.text();
-      expect(text).toContain('AUTHORIZATION_ERROR');
-    });
-
-    it('should require authentication', async () => {
-      const app = createTestApp();
-      
-      const entityData = {
-        name: 'Test Entity',
-      };
-
-      const response = await app.request('/api/v1/entities', {
-        method: 'POST',
-        body: JSON.stringify(entityData),
-      });
-
-      expect(response.status).toBe(401);
-      
-      const text = await response.text();
-      expect(text).toContain('UNAUTHORIZED');
-    });
-
-    it('should prevent access across different owners', async () => {
-      const { owner1, entity2 } = await createMultiOwnerUsers();
-      const app = createTestApp(owner1);
-
-      const response = await app.request(`/api/v1/entities/${entity2.entity.id}`, {
-        method: 'GET',
-        headers: createAuthHeaders(owner1),
-      });
-
-      expect(response.status).toBe(403);
-      
-      const text = await response.text();
-      expect(text).toContain('AUTHORIZATION_ERROR');
-    });
-  });
-});
-```
-
 **Critical Testing Requirements:**
 - **Use proper test utilities**: Always import from `../utils` and use `createTestApp`, `createUserHierarchy`, etc.
 - **Test all user roles**: OWNER, ADMIN, STAFF, CASHIER with appropriate permissions
@@ -651,5 +489,3 @@ When implementing new modules (stores, products, transactions, etc.), follow the
 3. **Implement controller** with proper error handling in `src/controllers/[entity].controller.ts`
 4. **Create service** with business logic and custom errors in `src/services/[entity].service.ts`
 5. **Add integration tests** covering all roles and scenarios in `tests/routes/[entity].routes.test.ts`
-
-All patterns are based on the **User module implementation** which serves as the reference standard.
