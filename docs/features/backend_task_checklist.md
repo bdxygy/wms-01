@@ -49,12 +49,12 @@ This checklist tracks the implementation progress of all backend services, organ
   - [ ] Role-based access control (OWNER, ADMIN only in MVP)
   - [ ] Soft-delete with audit trail
   - [ ] User validation and business rules
-- [ ] **UserRepository** - Data persistence layer
-  - [ ] User data persistence
-  - [ ] Owner association management
-  - [ ] Soft delete implementation
-  - [ ] User-owner relationship queries
-  - [ ] Role-based data filtering
+- [x] **UserRepository** - Data persistence layer
+  - [x] User data persistence
+  - [x] Owner association management
+  - [x] Soft delete implementation
+  - [x] User-owner relationship queries
+  - [x] Role-based data filtering
 - [ ] **UserController** - HTTP request handlers
   - [ ] POST /api/v1/users - Create user (OWNER only)
   - [ ] GET /api/v1/users - List users (filtered by owner)
