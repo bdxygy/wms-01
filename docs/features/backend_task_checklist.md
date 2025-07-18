@@ -19,12 +19,12 @@ This checklist tracks the implementation progress of all backend services, organ
 
 #### [P1.2] Authentication System
 
-- [ ] **AuthService** - Core authentication logic
-  - [ ] User registration (OWNER role initial setup)
-  - [ ] User login with credentials validation
-  - [ ] JWT token generation and validation
-  - [ ] Password hashing with bcrypt
-  - [ ] Token refresh handling
+- [x] **AuthService** - Core authentication logic
+  - [x] User registration (OWNER role initial setup)
+  - [x] User login with credentials validation
+  - [x] JWT token generation and validation
+  - [x] Password hashing with bcrypt
+  - [x] Token refresh handling
 - [x] **AuthRepository** - Authentication data access
   - [x] User credential verification
   - [x] Token storage and validation
@@ -38,10 +38,10 @@ This checklist tracks the implementation progress of all backend services, organ
   - [ ] JWT token verification
   - [ ] User context injection
   - [ ] Protected route handling
-- [ ] **Auth Schemas** - Request/response validation
-  - [ ] Registration request schema
-  - [ ] Login request schema
-  - [ ] Auth response schemas
+- [x] **Auth Schemas** - Request/response validation
+  - [x] Registration request schema
+  - [x] Login request schema
+  - [x] Auth response schemas
 
 ### **Phase 2: User Management** 👥
 

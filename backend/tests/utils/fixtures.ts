@@ -4,14 +4,14 @@ import { Category, NewCategory } from '@/models/categories';
 import { Product, NewProduct } from '@/models/products';
 import { Transaction, NewTransaction } from '@/models/transactions';
 import { ProductCheck, NewProductCheck } from '@/models/product_checks';
-import { nanoid } from 'nanoid';
+import { randomUUID } from 'crypto';
 import bcrypt from 'bcryptjs';
 
 /**
  * Generate test user data
  */
 export function createUserFixture(overrides: Partial<NewUser> = {}): NewUser {
-  const id = nanoid();
+  const id = randomUUID();
   // Hash the default password synchronously for tests
   const hashedPassword = bcrypt.hashSync('password123', 12);
   return {
@@ -75,15 +75,27 @@ export function createCashierFixture(ownerId: string, overrides: Partial<NewUser
  * Generate test store data
  */
 export function createStoreFixture(ownerId: string, overrides: Partial<NewStore> = {}): NewStore {
-  const id = nanoid();
+  const id = randomUUID();
   return {
     id,
-    name: `Test Store ${id}`,
-    address: `123 Test St, Suite ${id.slice(0, 3)}`,
-    phone: `+1234567890`,
-    email: `store-${id}@example.com`,
     ownerId,
+    name: `Test Store ${id}`,
+    code: `STORE-${id.slice(0, 8).toUpperCase()}`,
+    type: 'RETAIL',
+    addressLine1: `123 Test St, Suite ${id.slice(0, 3)}`,
+    addressLine2: null,
+    city: 'Test City',
+    province: 'Test Province',
+    postalCode: '12345',
+    country: 'Test Country',
+    phoneNumber: `+1234567890`,
+    email: `store-${id}@example.com`,
     isActive: true,
+    openTime: null,
+    closeTime: null,
+    timezone: 'Asia/Jakarta',
+    mapLocation: null,
+    createdBy: ownerId,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -94,13 +106,13 @@ export function createStoreFixture(ownerId: string, overrides: Partial<NewStore>
 /**
  * Generate test category data
  */
-export function createCategoryFixture(ownerId: string, overrides: Partial<NewCategory> = {}): NewCategory {
-  const id = nanoid();
+export function createCategoryFixture(createdBy: string, overrides: Partial<NewCategory> = {}): NewCategory {
+  const id = randomUUID();
   return {
     id,
+    createdBy,
     name: `Test Category ${id}`,
     description: `Description for test category ${id}`,
-    ownerId,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -111,24 +123,20 @@ export function createCategoryFixture(ownerId: string, overrides: Partial<NewCat
 /**
  * Generate test product data
  */
-export function createProductFixture(ownerId: string, storeId: string, categoryId: string, overrides: Partial<NewProduct> = {}): NewProduct {
-  const id = nanoid();
+export function createProductFixture(createdBy: string, storeId: string, categoryId?: string, overrides: Partial<NewProduct> = {}): NewProduct {
+  const id = randomUUID();
   return {
     id,
-    barcode: `TEST${id}`,
-    name: `Test Product ${id}`,
-    description: `Description for test product ${id}`,
-    price: 29.99,
-    cost: 19.99,
-    quantity: 100,
-    minStock: 0,
-    maxStock: null,
-    status: 'ACTIVE',
+    createdBy,
     storeId,
-    categoryId,
-    ownerId,
-    imageUrl: null,
-    isActive: true,
+    name: `Test Product ${id}`,
+    categoryId: categoryId || null,
+    sku: `SKU-${id.slice(0, 8).toUpperCase()}`,
+    isImei: false,
+    barcode: `TEST${id}`,
+    quantity: 100,
+    purchasePrice: 19.99,
+    salePrice: 29.99,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -140,29 +148,25 @@ export function createProductFixture(ownerId: string, storeId: string, categoryI
  * Generate test transaction data
  */
 export function createTransactionFixture(
-  userId: string,
-  productId: string,
-  ownerId: string,
+  createdBy: string,
+  type: 'SALE' | 'TRANSFER' = 'SALE',
   overrides: Partial<NewTransaction> = {}
 ): NewTransaction {
-  const id = nanoid();
+  const id = randomUUID();
   return {
     id,
-    type: 'SALE',
-    status: 'PENDING',
-    quantity: 1,
-    price: 29.99,
-    total: 29.99,
-    notes: `Test transaction ${id}`,
-    photoProof: 'https://example.com/photo.jpg',
-    productId,
+    type,
+    createdBy,
+    approvedBy: null,
     fromStoreId: null,
     toStoreId: null,
-    userId,
-    ownerId,
+    photoProofUrl: 'https://example.com/photo.jpg',
+    transferProofUrl: null,
+    to: null,
+    customerPhone: null,
+    amount: 29.99,
+    isFinished: false,
     createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
     ...overrides,
   };
 }
@@ -172,25 +176,19 @@ export function createTransactionFixture(
  */
 export function createProductCheckFixture(
   productId: string,
-  userId: string,
+  checkedBy: string,
   storeId: string,
-  ownerId: string,
   overrides: Partial<NewProductCheck> = {}
 ): NewProductCheck {
-  const id = nanoid();
+  const id = randomUUID();
   return {
     id,
-    status: 'PENDING',
-    expectedQuantity: 100,
-    actualQuantity: null,
-    notes: `Test product check ${id}`,
     productId,
+    checkedBy,
     storeId,
-    userId,
-    ownerId,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
+    status: 'PENDING',
+    note: `Test product check ${id}`,
+    checkedAt: new Date(),
     ...overrides,
   };
 }

@@ -3,23 +3,22 @@
  * Handles user operations, role validation, authentication, and owner hierarchy management
  */
 
-import { hashPassword, verifyPassword } from "../utils/auth";
-import {
-  ValidationError,
-  AuthenticationError,
-  AuthorizationError,
-  ConflictError,
-  NotFoundError,
-  InternalServerError,
-} from "../utils/errors";
-import { DatabaseUtils, DatabaseTransactionUtils } from "../utils/database";
+import { type NewUser, type Role, type User } from "../models/users";
 import {
   userRepository,
   type IUserRepository,
-  type ListUsersOptions,
-  type CountUsersOptions,
+  type ListUsersOptions
 } from "../repositories/user.repository";
-import { users, type NewUser, type User, type Role } from "../models/users";
+import { hashPassword, verifyPassword } from "../utils/auth";
+import { DatabaseTransactionUtils, DatabaseUtils } from "../utils/database";
+import {
+  AuthenticationError,
+  AuthorizationError,
+  ConflictError,
+  InternalServerError,
+  NotFoundError,
+  ValidationError,
+} from "../utils/errors";
 
 /**
  * Interface for user creation data
