@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Tech Stack
 
 - **Frontend**: React, Shadcn, Zod, React Query, Tailwindcss, Rsbuild
-- **Backend**: Hono, Node.js, @hono/swagger-ui, @hono/zod-openapi, Drizzle, SQLite Turso
+- **Backend**: Hono, Node.js, Zod, Drizzle, SQLite Turso
 - **Database**: SQLite with Drizzle ORM
 - **Authentication**: JWT-based with role-based access control
 
@@ -44,12 +44,14 @@ The MVP focuses on essential functionality to get the system operational quickly
 ### **MVP Core Features**
 
 1. **Authentication System** 🔐
+
    - User registration (OWNER role only for initial setup)
    - User login with JWT tokens
    - Basic role-based access control (OWNER, ADMIN)
    - Session management
 
 2. **Product Management** 📦
+
    - OWNER and ADMIN can create products
    - Basic product information (name, barcode, price, quantity)
    - Category assignment
@@ -99,11 +101,13 @@ GET  /api/v1/transactions/:id - Get transaction details (OWNER/ADMIN)
 ### **MVP Implementation Priority**
 
 1. **Phase 1**: Authentication System
+
    - User registration/login
    - JWT token management
    - Basic middleware for auth
 
 2. **Phase 2**: Product Management
+
    - Product CRUD operations
    - Category basic support
    - Barcode generation
@@ -171,12 +175,9 @@ When implementing, follow this structure:
 /
 ├── backend/                 # Hono.js API server
 │   ├── src/
-│   │   ├── controllers/     # HTTP request handlers
-│   │   ├── services/        # Business logic layer
-│   │   ├── repositories/    # Data access layer
 │   │   ├── models/          # Drizzle schema definitions
 │   │   ├── middleware/      # Auth, validation, error handling
-│   │   ├── routes/          # API route definitions
+│   │   ├── routes/          # API route definitions and handlers
 │   │   ├── utils/           # Shared utilities
 │   │   └── config/          # Configuration files
 │   ├── tests/               # Backend test files
@@ -211,7 +212,7 @@ Key entities defined in `docs/erd.md`:
 The following model files are now **FROZEN** and cannot be changed without explicit user permission:
 
 - `src/models/users.ts` - ✅ ERD Compliant
-- `src/models/stores.ts` - ✅ ERD Compliant  
+- `src/models/stores.ts` - ✅ ERD Compliant
 - `src/models/categories.ts` - ✅ ERD Compliant
 - `src/models/products.ts` - ✅ ERD Compliant
 - `src/models/transactions.ts` - ✅ ERD Compliant
@@ -219,6 +220,7 @@ The following model files are now **FROZEN** and cannot be changed without expli
 - `src/models/product_imeis.ts` - ✅ ERD Compliant
 
 **Protection Rules:**
+
 - ❌ **NO schema changes** without clear user request
 - ❌ **NO field additions/removals** without clear user request
 - ❌ **NO type changes** without clear user request
@@ -229,139 +231,193 @@ The following model files are now **FROZEN** and cannot be changed without expli
 **Current ERD-Compliant Model Definitions:**
 
 ### Users Model (FROZEN)
+
 ```typescript
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey(),
-  ownerId: text('owner_id').references(() => users.id),
-  name: text('name').notNull(),
-  username: text('username').notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
-  role: text('role', { enum: userRoles }).notNull(),
-  storeId: text('store_id').references(() => stores.id),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id"),
+  name: text("name").notNull(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password").notNull(),
+  role: text("role", { enum: roles }).notNull(),
+  isActive: integer("is_active", { mode: "boolean" }).default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  deletedAt: integer("deleted_at", { mode: "timestamp" }),
 });
 ```
 
 ### Stores Model (FROZEN)
+
 ```typescript
-export const stores = sqliteTable('stores', {
-  id: text('id').primaryKey(),
-  ownerId: text('owner_id').notNull().references(() => users.id),
-  name: text('name').notNull(),
-  code: text('code').notNull().unique(),
-  type: text('type').notNull(),
-  addressLine1: text('address_line1').notNull(),
-  addressLine2: text('address_line2'),
-  city: text('city').notNull(),
-  province: text('province').notNull(),
-  postalCode: text('postal_code').notNull(),
-  country: text('country').notNull(),
-  phoneNumber: text('phone_number').notNull(),
-  email: text('email'),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  openTime: integer('open_time', { mode: 'timestamp' }),
-  closeTime: integer('close_time', { mode: 'timestamp' }),
-  timezone: text('timezone').default('Asia/Jakarta'),
-  mapLocation: text('map_location'),
-  createdBy: text('created_by').notNull().references(() => users.id),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+export const stores = sqliteTable("stores", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  addressLine1: text("address_line1").notNull(),
+  addressLine2: text("address_line2"),
+  city: text("city").notNull(),
+  province: text("province").notNull(),
+  postalCode: text("postal_code").notNull(),
+  country: text("country").notNull(),
+  phoneNumber: text("phone_number").notNull(),
+  email: text("email"),
+  isActive: integer("is_active", { mode: "boolean" }).default(true),
+  openTime: integer("open_time", { mode: "timestamp" }),
+  closeTime: integer("close_time", { mode: "timestamp" }),
+  timezone: text("timezone").default("Asia/Jakarta"),
+  mapLocation: text("map_location"),
+  createdBy: text("created_by")
+    .notNull()
+    .references(() => users.id),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  deletedAt: integer("deleted_at", { mode: "timestamp" }),
 });
 ```
 
 ### Categories Model (FROZEN)
+
 ```typescript
-export const categories = sqliteTable('categories', {
-  id: text('id').primaryKey(),
-  createdBy: text('created_by').notNull().references(() => users.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+export const categories = sqliteTable("categories", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull(),
+  name: text("name").notNull(),
+  createdBy: text("created_by").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  deletedAt: integer("deleted_at", { mode: "timestamp" }),
 });
 ```
 
 ### Products Model (FROZEN)
+
 ```typescript
-export const products = sqliteTable('products', {
-  id: text('id').primaryKey(),
-  createdBy: text('created_by').notNull().references(() => users.id),
-  storeId: text('store_id').notNull().references(() => stores.id),
-  name: text('name').notNull(),
-  categoryId: text('category_id').references(() => categories.id),
-  sku: text('sku').notNull(),
-  isImei: integer('is_imei', { mode: 'boolean' }).default(false),
-  barcode: text('barcode').notNull(),
-  quantity: integer('quantity').default(1).notNull(),
-  purchasePrice: real('purchase_price').notNull(),
-  salePrice: real('sale_price'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+export const products = sqliteTable("products", {
+  id: text("id").primaryKey(),
+  createdBy: text("created_by").notNull().references(() => users.id),
+  storeId: text("store_id").notNull().references(() => stores.id),
+  name: text("name").notNull(),
+  categoryId: text("category_id").references(() => categories.id),
+  sku: text("sku").notNull(),
+  isImei: integer("is_imei", { mode: "boolean" }).default(false),
+  barcode: text("barcode").notNull(),
+  quantity: integer("quantity").default(1).notNull(),
+  purchasePrice: real("purchase_price").notNull(),
+  salePrice: real("sale_price"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  deletedAt: integer("deleted_at", { mode: "timestamp" }),
 });
 ```
 
 ### Transactions Model (FROZEN)
-```typescript
-export const transactionTypes = ['SALE', 'TRANSFER_IN', 'TRANSFER_OUT'] as const;
 
-export const transactions = sqliteTable('transactions', {
-  id: text('id').primaryKey(),
-  type: text('type', { enum: transactionTypes }).notNull(),
-  createdBy: text('created_by').references(() => users.id),
-  approvedBy: text('approved_by').references(() => users.id),
-  fromStoreId: text('from_store_id').references(() => stores.id),
-  toStoreId: text('to_store_id').references(() => stores.id),
-  photoProofUrl: text('photo_proof_url'),
-  transferProofUrl: text('transfer_proof_url'),
-  to: text('to'),
-  customerPhone: text('customer_phone'),
-  amount: real('amount'),
-  isFinished: integer('is_finished', { mode: 'boolean' }).default(false),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+```typescript
+export const transactionTypes = [
+  "SALE",
+  "TRANSFER",
+] as const;
+
+export const transactions = sqliteTable("transactions", {
+  id: text("id").primaryKey(),
+  type: text("type", { enum: transactionTypes }).notNull(),
+  createdBy: text("created_by").references(() => users.id),
+  approvedBy: text("approved_by").references(() => users.id),
+  fromStoreId: text("from_store_id").references(() => stores.id),
+  toStoreId: text("to_store_id").references(() => stores.id),
+  photoProofUrl: text("photo_proof_url"),
+  transferProofUrl: text("transfer_proof_url"),
+  to: text("to"),
+  customerPhone: text("customer_phone"),
+  amount: real("amount"),
+  isFinished: integer("is_finished", { mode: "boolean" }).default(false),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
-export const transactionItems = sqliteTable('transaction_items', {
-  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
-  transactionId: text('transaction_id').notNull().references(() => transactions.id),
-  productId: text('product_id').notNull().references(() => products.id),
-  name: text('name').notNull(),
-  price: real('price').notNull(),
-  quantity: integer('quantity').notNull(),
-  amount: real('amount'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+export const transactionItems = sqliteTable("transaction_items", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  transactionId: text("transaction_id")
+    .notNull()
+    .references(() => transactions.id),
+  productId: text("product_id")
+    .notNull()
+    .references(() => products.id),
+  name: text("name").notNull(),
+  price: real("price").notNull(),
+  quantity: integer("quantity").notNull(),
+  amount: real("amount"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 ```
 
 ### Product Checks Model (FROZEN)
-```typescript
-export const checkStatus = ['PENDING', 'OK', 'MISSING', 'BROKEN'] as const;
 
-export const productChecks = sqliteTable('product_checks', {
-  id: text('id').primaryKey(),
-  productId: text('product_id').notNull().references(() => products.id),
-  checkedBy: text('checked_by').notNull().references(() => users.id),
-  storeId: text('store_id').notNull().references(() => stores.id),
-  status: text('status', { enum: checkStatus }).notNull(),
-  note: text('note'),
-  checkedAt: integer('checked_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+```typescript
+export const checkStatus = ["PENDING", "OK", "MISSING", "BROKEN"] as const;
+
+export const productChecks = sqliteTable("product_checks", {
+  id: text("id").primaryKey(),
+  productId: text("product_id")
+    .notNull()
+    .references(() => products.id),
+  checkedBy: text("checked_by")
+    .notNull()
+    .references(() => users.id),
+  storeId: text("store_id")
+    .notNull()
+    .references(() => stores.id),
+  status: text("status", { enum: checkStatus }).notNull(),
+  note: text("note"),
+  checkedAt: integer("checked_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 ```
 
 ### Product IMEIs Model (FROZEN)
+
 ```typescript
-export const productImeis = sqliteTable('product_imeis', {
-  id: text('id').primaryKey(),
-  productId: text('product_id').notNull().references(() => products.id),
-  imei: text('imei').notNull(),
-  createdBy: text('created_by').notNull().references(() => users.id),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+export const productImeis = sqliteTable("product_imeis", {
+  id: text("id").primaryKey(),
+  productId: text("product_id")
+    .notNull()
+    .references(() => products.id),
+  imei: text("imei").notNull(),
+  createdBy: text("created_by")
+    .notNull()
+    .references(() => users.id),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 ```
 
@@ -390,6 +446,7 @@ Based on `docs/features/backend_ut_checklist.md`:
 ### Implementation Status
 
 **Backend Infrastructure** ✅ **COMPLETED**
+
 - Hono.js server setup with OpenAPI/Swagger documentation
 - Environment configuration with Zod validation
 - Database setup with Drizzle ORM (SQLite/Turso)
@@ -398,6 +455,7 @@ Based on `docs/features/backend_ut_checklist.md`:
 - Code quality tools (ESLint, TypeScript) configured
 
 **Database Schema** ✅ **COMPLETED**
+
 - **users**: Role-based user management (`OWNER`, `ADMIN`, `STAFF`, `CASHIER`)
 - **stores**: Multi-store support with owner relationships
 - **categories**: Product categorization system
@@ -409,6 +467,7 @@ Based on `docs/features/backend_ut_checklist.md`:
 **MVP Implementation Priority (Current Status)**
 
 1. **MVP Phase 1**: Authentication System ❌ **NOT IMPLEMENTED**
+
    - ❌ **Auth controllers (register/login)**
    - ❌ **JWT token management**
    - ❌ **Auth middleware**
@@ -417,6 +476,7 @@ Based on `docs/features/backend_ut_checklist.md`:
    - ❌ **Auth schemas and validation**
 
 2. **MVP Phase 2**: Product Management ❌ **NOT IMPLEMENTED**
+
    - ❌ **Product controllers (CRUD)**
    - ❌ **Product services and repositories**
    - ❌ **Product routes with OWNER/ADMIN access**
@@ -433,23 +493,9 @@ Based on `docs/features/backend_ut_checklist.md`:
    - ❌ **Photo proof upload handling**
 
 **Foundation Status:**
+
 - ✅ **Database models (all entities defined)**
-- ✅ **Server infrastructure (Hono + OpenAPI)**
-- ✅ **Test framework configuration**
 - ❌ **All API implementation layers missing**
-
-### Key Development Notes
-
-- ✅ Backend infrastructure is complete and ready for API development
-- ✅ Database schema is fully implemented with proper relationships and constraints
-- ✅ All database tables include soft delete functionality (`deletedAt` timestamp)
-- ✅ Environment configuration supports development/production/test environments
-- ✅ Testing framework (Vitest) is configured and ready for use
-- ✅ API server has OpenAPI/Swagger documentation at `/ui` endpoint
-- ✅ Database connections configured for both SQLite (testing) and Turso (production)
-- ❌ **CRITICAL**: All implementation layers are missing (controllers, services, repositories, routes, schemas)
-- ❌ **URGENT**: API only serves health check - no functional endpoints exist
-- **Next priority**: Build complete API implementation from scratch following established patterns
 
 ### Coding Standards
 
@@ -457,33 +503,41 @@ Based on `docs/features/backend_ut_checklist.md`:
 - **KISS (Keep It Simple, Stupid)**: Favor simple, straightforward solutions over complex ones
 - **Modular**: Keep code organized in logical modules/files, even without strict Clean Architecture
 - **Consistent naming**: Use clear, descriptive variable and function names
-- **Zod imports**: Always use `z` from `@hono/zod-openapi` instead of directly importing from `zod` package for OpenAPI compatibility
+- **Zod imports**: Always use `z` from `Zod` instead of directly importing from `zod` package for OpenAPI compatibility
 - **Testing scope**: Test services only at the controller layer - no separate service layer unit tests, focus on integration testing through HTTP endpoints
 - **Drizzle ORM select statements**: Always use `.select()` without arguments to avoid TypeScript strict mode issues. Use `.select({ field: table.field })` pattern only when absolutely necessary for specific field selection, but prefer full record selection with `.select()` for consistency
+- **🔑 ID Generation Rules**: 
+  - **✅ ALWAYS use `randomUUID()` from `crypto` module** for all database table primary keys (id fields)
+  - **✅ ALWAYS use `nanoid({ alphabet: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ' })` for barcode generation** - numeric-alphabetical only
+  - **❌ NEVER use `nanoid()` for database primary keys** - reserved for barcodes only
+  - **❌ NEVER use sequential numbers or predictable IDs** for security reasons
 
 ### 🔧 **MANDATORY API RESPONSE STANDARDS** 🔧
 
 **ALL API endpoints MUST follow these standardized response patterns:**
 
 #### **Response Format Requirements:**
+
 - **✅ ALWAYS use `ResponseUtils`** from `src/utils/responses.ts` for ALL API responses
-- **✅ ALWAYS use Zod schemas** from `@hono/zod-openapi` for request/response validation
+- **✅ ALWAYS use Zod schemas** from `Zod` for request/response validation
 - **✅ ALWAYS handle errors** through `ResponseUtils.sendError()` for consistent error formatting
 - **✅ NEVER return raw data** - all responses must use `BaseResponse<T>` or `PaginatedResponse<T>` format
 
 #### **Required Response Methods:**
+
 ```typescript
 // ✅ SUCCESS responses
-ResponseUtils.sendSuccess(c, data, 200)           // Standard success
-ResponseUtils.sendCreated(c, data)                // 201 Created
-ResponseUtils.sendSuccessNoData(c, 204)           // 204 No Content
-ResponseUtils.sendPaginated(c, data, pagination)  // Paginated lists
+ResponseUtils.sendSuccess(c, data, 200); // Standard success
+ResponseUtils.sendCreated(c, data); // 201 Created
+ResponseUtils.sendSuccessNoData(c, 204); // 204 No Content
+ResponseUtils.sendPaginated(c, data, pagination); // Paginated lists
 
 // ✅ ERROR responses
-ResponseUtils.sendError(c, error)                 // All errors
+ResponseUtils.sendError(c, error); // All errors
 ```
 
 #### **Required Response Structure:**
+
 ```typescript
 // ✅ Success Response Format
 {
@@ -492,7 +546,7 @@ ResponseUtils.sendError(c, error)                 // All errors
   "timestamp": "2024-01-01T00:00:00.000Z"
 }
 
-// ✅ Error Response Format  
+// ✅ Error Response Format
 {
   "success": false,
   "error": {
@@ -519,17 +573,22 @@ ResponseUtils.sendError(c, error)                 // All errors
 ```
 
 #### **Schema Validation Requirements:**
+
 - **✅ Request validation**: Use `ValidationMiddleware.body()`, `ValidationMiddleware.query()`, `ValidationMiddleware.params()`
 - **✅ Response schemas**: Define OpenAPI response schemas using `z.object()` patterns
 - **✅ Error handling**: All validation errors automatically formatted through `ValidationError` class
 - **✅ Type safety**: Use `getValidated<T>(c, 'validatedBody')` helper to extract validated data
 
 #### **Example Implementation Pattern:**
+
 ```typescript
 // ✅ CORRECT Implementation
 export const createProduct = async (c: Context) => {
   try {
-    const validatedData = getValidated<CreateProductRequest>(c, 'validatedBody');
+    const validatedData = getValidated<CreateProductRequest>(
+      c,
+      "validatedBody"
+    );
     const product = await ProductService.create(validatedData);
     return ResponseUtils.sendCreated(c, product);
   } catch (error) {
@@ -541,14 +600,15 @@ export const createProduct = async (c: Context) => {
 export const createProduct = async (c: Context) => {
   try {
     const product = await ProductService.create(data);
-    return c.json({ data: product, status: 'ok' }); // ❌ Wrong format
+    return c.json({ data: product, status: "ok" }); // ❌ Wrong format
   } catch (error) {
-    return c.json({ error: error.message }, 500);   // ❌ Wrong format
+    return c.json({ error: error.message }, 500); // ❌ Wrong format
   }
 };
 ```
 
 #### **Enforcement Rules:**
+
 - **🚫 NO direct `c.json()` calls** - always use `ResponseUtils` methods
 - **🚫 NO custom response formats** - stick to `BaseResponse`/`PaginatedResponse` interfaces
 - **🚫 NO manual error formatting** - always use `ResponseUtils.sendError()`
@@ -562,15 +622,10 @@ export const createProduct = async (c: Context) => {
 
 **NEVER IGNORE OR UNDERESTIMATE TESTS - NO MATTER WHAT**
 
-- **Tests are MANDATORY**: Every feature implementation MUST include comprehensive tests
-- **Test failures are CRITICAL**: All test failures must be investigated and fixed thoroughly  
-- **No shortcuts on testing**: Never dismiss tests as "working enough" or skip proper test implementation
-- **Follow established patterns**: Always use the proven test utilities and patterns from existing working tests
-- **Role-based testing is essential**: All business logic must be tested across all user roles (OWNER, ADMIN, STAFF, CASHIER)
-- **Test before deployment**: Code is not considered complete until all tests pass
-- **Quality over speed**: Take time to write proper, comprehensive tests rather than rushing implementations
+- **Tests are MANDATORY**: Every feature implementation MUST include comprehensive tests in application layer in index.ts
 
 **Critical Testing Requirements:**
+
 - **Use proper test utilities**: Always import from `../utils` and use `createTestApp`, `createUserHierarchy`, etc.
 - **Test all user roles**: OWNER, ADMIN, STAFF, CASHIER with appropriate permissions
 - **Test cross-owner access**: Ensure users cannot access data from different owners
@@ -584,7 +639,6 @@ export const createProduct = async (c: Context) => {
 When implementing new modules (stores, products, transactions, etc.), follow these established patterns:
 
 1. **Create Zod schemas** in `src/schemas/[entity].schemas.ts`
-2. **Define routes** with OpenAPI documentation in `src/routes/[entity].routes.ts`  
-3. **Implement controller** with proper error handling in `src/controllers/[entity].controller.ts`
-4. **Create service** with business logic and custom errors in `src/services/[entity].service.ts`
-5. **Add integration tests** covering all roles and scenarios in `tests/routes/[entity].routes.test.ts`
+2. **Define routes** with OpenAPI documentation in `src/routes/[entity].routes.ts`
+3. **Create service** with business logic and custom errors in `src/services/[entity].service.ts`
+4. **Add integration tests** covering all roles and scenarios in `tests/routes/[entity].routes.test.ts`
