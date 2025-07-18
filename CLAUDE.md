@@ -18,6 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Service layer** for business logic
 - **Soft delete** for audit trail
 - **Owner-scoped data access** for non-owner roles
+- **Hono best practice pattern** - no controller layer, routes use service layer directly
 
 ### Role Hierarchy & Permissions
 
