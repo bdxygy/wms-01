@@ -18,7 +18,7 @@ export const authMiddleware = createMiddleware<Applications>(async (c, next) => 
     const token = authHeader.slice(7); // Remove "Bearer " prefix
 
     // Verify JWT token
-    const decoded = JwtUtils.verifyAccessToken(token);
+    const decoded = await JwtUtils.verifyAccessToken(token);
 
     // Find user in database
     const user = await db
@@ -55,7 +55,7 @@ export const optionalAuthMiddleware = createMiddleware<Applications>(async (c, n
     
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.slice(7);
-      const decoded = JwtUtils.verifyAccessToken(token);
+      const decoded = await JwtUtils.verifyAccessToken(token);
       
       const user = await db
         .select()

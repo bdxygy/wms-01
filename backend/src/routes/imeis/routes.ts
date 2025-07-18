@@ -1,16 +1,18 @@
 import { Hono } from "hono";
 import { ValidationMiddleware } from "../../utils/validation";
 import { authMiddleware } from "../../middleware/auth.middleware";
-import { 
-  addImeiSchema, 
-  productIdParamSchema, 
-  imeiIdParamSchema, 
-  listProductImeisQuerySchema 
+import {
+  addImeiSchema,
+  productIdParamSchema,
+  imeiIdParamSchema,
+  listProductImeisQuerySchema,
+  createProductWithImeisSchema,
 } from "../../schemas/imei.schemas";
-import { 
-  addImeiHandler, 
-  listProductImeisHandler, 
-  removeImeiHandler 
+import {
+  addImeiHandler,
+  listProductImeisHandler,
+  removeImeiHandler,
+  createProductWithImeisHandler,
 } from "./imei.handlers";
 
 const imeis = new Hono();
@@ -39,6 +41,14 @@ imeis.delete(
   authMiddleware,
   ValidationMiddleware.params(imeiIdParamSchema),
   removeImeiHandler
+);
+
+// Create product with IMEIs endpoint (OWNER/ADMIN only)
+imeis.post(
+  "/products/imeis",
+  authMiddleware,
+  ValidationMiddleware.body(createProductWithImeisSchema),
+  createProductWithImeisHandler
 );
 
 export { imeis as imeiRoutes };

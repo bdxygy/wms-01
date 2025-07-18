@@ -49,7 +49,7 @@ export class AuthService {
     }
 
     // Generate tokens
-    const tokens = JwtUtils.generateTokenPair({
+    const tokens = await JwtUtils.generateTokenPair({
       userId: user[0].id,
       role: user[0].role,
       ownerId: user[0].ownerId || undefined,
@@ -124,7 +124,7 @@ export class AuthService {
     }
 
     // Generate tokens
-    const tokens = JwtUtils.generateTokenPair({
+    const tokens = await JwtUtils.generateTokenPair({
       userId: user[0].id,
       role: user[0].role,
       ownerId: user[0].ownerId || undefined,
@@ -172,7 +172,7 @@ export class AuthService {
     }
 
     // Generate tokens
-    const tokens = JwtUtils.generateTokenPair({
+    const tokens = await JwtUtils.generateTokenPair({
       userId: user[0].id,
       role: user[0].role,
       ownerId: user[0].ownerId || undefined,
@@ -196,7 +196,7 @@ export class AuthService {
   static async refresh(data: RefreshTokenRequest) {
     try {
       // Verify refresh token
-      const decoded = JwtUtils.verifyRefreshToken(data.refreshToken);
+      const decoded = await JwtUtils.verifyRefreshToken(data.refreshToken);
 
       // Find user to ensure they still exist and are active
       const user = await db
