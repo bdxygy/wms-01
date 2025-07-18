@@ -23,7 +23,7 @@ export const loginSchema = z.object({
 
 // Refresh token schema
 export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1, "Refresh token is required"),
+  refreshToken: z.string().min(1, "Refresh token is required").optional(),
 });
 
 // Response schemas
@@ -40,7 +40,7 @@ export const authResponseSchema = z.object({
   }),
   tokens: z.object({
     accessToken: z.string(),
-    refreshToken: z.string(),
+    refreshToken: z.string().optional(),
   }),
 });
 

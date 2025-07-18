@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { db } from "../config/database";
 import { users } from "../models/users";
 import { JwtUtils } from "../utils/jwt";
+import { CookieUtils } from "../utils/cookies";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type {
@@ -11,9 +12,10 @@ import type {
   RefreshTokenRequest,
 } from "../schemas/auth.schemas";
 import { randomUUID } from "crypto";
+import type { Context } from "hono";
 
 export class AuthService {
-  static async devRegister(data: DevRegisterRequest) {
+  static async devRegister(data: DevRegisterRequest, c?: Context) {
     // Check if user already exists
     const existingUser = await db
       .select()
@@ -55,6 +57,11 @@ export class AuthService {
       ownerId: user[0].ownerId || undefined,
     });
 
+    // Set refresh token in cookie if context is provided
+    if (c) {
+      CookieUtils.setRefreshTokenCookie(c, tokens.refreshToken);
+    }
+
     return {
       user: {
         id: user[0].id,
@@ -66,11 +73,14 @@ export class AuthService {
         createdAt: user[0].createdAt,
         updatedAt: user[0].updatedAt,
       },
-      tokens,
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: c ? undefined : tokens.refreshToken, // Only return refresh token if no context (backward compatibility)
+      },
     };
   }
 
-  static async register(data: RegisterRequest, createdBy: string) {
+  static async register(data: RegisterRequest, createdBy: string, c?: Context) {
     // Check if user already exists
     const existingUser = await db
       .select()
@@ -130,6 +140,11 @@ export class AuthService {
       ownerId: user[0].ownerId || undefined,
     });
 
+    // Set refresh token in cookie if context is provided
+    if (c) {
+      CookieUtils.setRefreshTokenCookie(c, tokens.refreshToken);
+    }
+
     return {
       user: {
         id: user[0].id,
@@ -141,11 +156,14 @@ export class AuthService {
         createdAt: user[0].createdAt,
         updatedAt: user[0].updatedAt,
       },
-      tokens,
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: c ? undefined : tokens.refreshToken, // Only return refresh token if no context (backward compatibility)
+      },
     };
   }
 
-  static async login(data: LoginRequest) {
+  static async login(data: LoginRequest, c?: Context) {
     // Find user by username
     const user = await db
       .select()
@@ -178,6 +196,11 @@ export class AuthService {
       ownerId: user[0].ownerId || undefined,
     });
 
+    // Set refresh token in cookie if context is provided
+    if (c) {
+      CookieUtils.setRefreshTokenCookie(c, tokens.refreshToken);
+    }
+
     return {
       user: {
         id: user[0].id,
@@ -189,14 +212,30 @@ export class AuthService {
         createdAt: user[0].createdAt,
         updatedAt: user[0].updatedAt,
       },
-      tokens,
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: c ? undefined : tokens.refreshToken, // Only return refresh token if no context (backward compatibility)
+      },
     };
   }
 
-  static async refresh(data: RefreshTokenRequest) {
+  static async refresh(data: RefreshTokenRequest, c?: Context) {
     try {
+      // Get refresh token from cookie if available, otherwise from request body
+      let refreshToken = data.refreshToken;
+      if (c && !refreshToken) {
+        const cookieToken = CookieUtils.getRefreshTokenFromCookie(c);
+        if (cookieToken) {
+          refreshToken = cookieToken;
+        }
+      }
+
+      if (!refreshToken) {
+        throw new HTTPException(401, { message: "Refresh token not provided" });
+      }
+
       // Verify refresh token
-      const decoded = await JwtUtils.verifyRefreshToken(data.refreshToken);
+      const decoded = await JwtUtils.verifyRefreshToken(refreshToken);
 
       // Find user to ensure they still exist and are active
       const user = await db
@@ -213,11 +252,16 @@ export class AuthService {
       }
 
       // Generate new tokens
-      const tokens = JwtUtils.generateTokenPair({
+      const tokens = await JwtUtils.generateTokenPair({
         userId: user[0].id,
         role: user[0].role,
         ownerId: user[0].ownerId || undefined,
       });
+
+      // Set new refresh token in cookie if context is provided
+      if (c) {
+        CookieUtils.setRefreshTokenCookie(c, tokens.refreshToken);
+      }
 
       return {
         user: {
@@ -230,10 +274,24 @@ export class AuthService {
           createdAt: user[0].createdAt,
           updatedAt: user[0].updatedAt,
         },
-        tokens,
+        tokens: {
+          accessToken: tokens.accessToken,
+          refreshToken: c ? undefined : tokens.refreshToken, // Only return refresh token if no context (backward compatibility)
+        },
       };
     } catch (error) {
       throw new HTTPException(401, { message: "Invalid refresh token" });
     }
+  }
+
+  static async logout(c?: Context) {
+    // Clear refresh token cookie if context is provided
+    if (c) {
+      CookieUtils.clearRefreshTokenCookie(c);
+    }
+    
+    return {
+      message: "Logged out successfully",
+    };
   }
 }

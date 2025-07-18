@@ -3,7 +3,7 @@ import { ValidationMiddleware } from "../../utils/validation";
 import { basicAuthMiddleware } from "../../middleware/basic-auth.middleware";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { devRegisterSchema, registerSchema, loginSchema, refreshTokenSchema } from "../../schemas/auth.schemas";
-import { devRegisterHandler, registerHandler, loginHandler, refreshHandler } from "./auth.handlers";
+import { devRegisterHandler, registerHandler, loginHandler, refreshHandler, logoutHandler } from "./auth.handlers";
 
 const auth = new Hono();
 
@@ -35,6 +35,13 @@ auth.post(
   "/refresh",
   ValidationMiddleware.body(refreshTokenSchema),
   refreshHandler
+);
+
+// Logout endpoint
+auth.post(
+  "/logout",
+  authMiddleware,
+  logoutHandler
 );
 
 export { auth as authRoutes };
