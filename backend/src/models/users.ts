@@ -15,7 +15,6 @@ export const users = sqliteTable(
   {
     id: text("id").primaryKey(),
     ownerId: text("owner_id"),
-    storeId: text("store_id"),
     name: text("name").notNull(),
     username: text("username").notNull().unique(),
     passwordHash: text("password").notNull(),

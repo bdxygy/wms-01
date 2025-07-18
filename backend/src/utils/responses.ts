@@ -3,8 +3,9 @@
  * Provides consistent response formats across all endpoints
  */
 
-import type { Context } from 'hono';
-import { ErrorHandler } from './errors';
+import type { Context } from "hono";
+import { ErrorHandler } from "./errors";
+import { ContentfulStatusCode } from "hono/utils/http-status";
 
 /**
  * Base response interface for all API responses
@@ -112,14 +113,20 @@ export class ResponseUtils {
     data: T,
     statusCode: number = 200
   ): Response {
-    return c.json(this.success(data, statusCode), statusCode as any);
+    return c.json(
+      this.success(data, statusCode),
+      statusCode as ContentfulStatusCode
+    );
   }
 
   /**
    * Sends a successful response without data
    */
   static sendSuccessNoData(c: Context, statusCode: number = 200): Response {
-    return c.json(this.successNoData(statusCode), statusCode as any);
+    return c.json(
+      this.successNoData(statusCode),
+      statusCode as ContentfulStatusCode
+    );
   }
 
   /**
@@ -127,7 +134,10 @@ export class ResponseUtils {
    */
   static sendError(c: Context, error: unknown): Response {
     const errorResponse = ErrorHandler.getErrorResponse(error);
-    return c.json(this.error(error), errorResponse.statusCode as any);
+    return c.json(
+      this.error(error),
+      errorResponse.statusCode as ContentfulStatusCode
+    );
   }
 
   /**
@@ -139,14 +149,17 @@ export class ResponseUtils {
     pagination: PaginationParams,
     statusCode: number = 200
   ): Response {
-    return c.json(this.paginated(data, pagination), statusCode as any);
+    return c.json(
+      this.paginated(data, pagination),
+      statusCode as ContentfulStatusCode
+    );
   }
 
   /**
    * Sends a created response (201)
    */
   static sendCreated<T>(c: Context, data: T): Response {
-    return c.json(this.success(data, 201), 201 as any);
+    return c.json(this.success(data, 201), 201 as ContentfulStatusCode);
   }
 
   /**
@@ -165,8 +178,8 @@ export class PaginationUtils {
    * Calculates pagination parameters from query params
    */
   static getParams(page?: string, limit?: string) {
-    const pageNum = Math.max(1, parseInt(page || '1', 10));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit || '10', 10)));
+    const pageNum = Math.max(1, parseInt(page || "1", 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit || "10", 10)));
     const offset = (pageNum - 1) * limitNum;
 
     return {

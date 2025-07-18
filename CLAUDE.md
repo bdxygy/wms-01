@@ -459,6 +459,103 @@ Based on `docs/features/backend_ut_checklist.md`:
 - **Zod imports**: Always use `z` from `@hono/zod-openapi` instead of directly importing from `zod` package for OpenAPI compatibility
 - **Testing scope**: Test services only at the controller layer - no separate service layer unit tests, focus on integration testing through HTTP endpoints
 
+### 🔧 **MANDATORY API RESPONSE STANDARDS** 🔧
+
+**ALL API endpoints MUST follow these standardized response patterns:**
+
+#### **Response Format Requirements:**
+- **✅ ALWAYS use `ResponseUtils`** from `src/utils/responses.ts` for ALL API responses
+- **✅ ALWAYS use Zod schemas** from `@hono/zod-openapi` for request/response validation
+- **✅ ALWAYS handle errors** through `ResponseUtils.sendError()` for consistent error formatting
+- **✅ NEVER return raw data** - all responses must use `BaseResponse<T>` or `PaginatedResponse<T>` format
+
+#### **Required Response Methods:**
+```typescript
+// ✅ SUCCESS responses
+ResponseUtils.sendSuccess(c, data, 200)           // Standard success
+ResponseUtils.sendCreated(c, data)                // 201 Created
+ResponseUtils.sendSuccessNoData(c, 204)           // 204 No Content
+ResponseUtils.sendPaginated(c, data, pagination)  // Paginated lists
+
+// ✅ ERROR responses
+ResponseUtils.sendError(c, error)                 // All errors
+```
+
+#### **Required Response Structure:**
+```typescript
+// ✅ Success Response Format
+{
+  "success": true,
+  "data": T,                    // Actual response data
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+
+// ✅ Error Response Format  
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",  // Standardized error code
+    "message": "Descriptive error message"
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+
+// ✅ Paginated Response Format
+{
+  "success": true,
+  "data": T[],                  // Array of items
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5,
+    "hasNext": true,
+    "hasPrev": false
+  },
+  "timestamp": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### **Schema Validation Requirements:**
+- **✅ Request validation**: Use `ValidationMiddleware.body()`, `ValidationMiddleware.query()`, `ValidationMiddleware.params()`
+- **✅ Response schemas**: Define OpenAPI response schemas using `z.object()` patterns
+- **✅ Error handling**: All validation errors automatically formatted through `ValidationError` class
+- **✅ Type safety**: Use `getValidated<T>(c, 'validatedBody')` helper to extract validated data
+
+#### **Example Implementation Pattern:**
+```typescript
+// ✅ CORRECT Implementation
+export const createProduct = async (c: Context) => {
+  try {
+    const validatedData = getValidated<CreateProductRequest>(c, 'validatedBody');
+    const product = await ProductService.create(validatedData);
+    return ResponseUtils.sendCreated(c, product);
+  } catch (error) {
+    return ResponseUtils.sendError(c, error);
+  }
+};
+
+// ❌ INCORRECT - Never do this
+export const createProduct = async (c: Context) => {
+  try {
+    const product = await ProductService.create(data);
+    return c.json({ data: product, status: 'ok' }); // ❌ Wrong format
+  } catch (error) {
+    return c.json({ error: error.message }, 500);   // ❌ Wrong format
+  }
+};
+```
+
+#### **Enforcement Rules:**
+- **🚫 NO direct `c.json()` calls** - always use `ResponseUtils` methods
+- **🚫 NO custom response formats** - stick to `BaseResponse`/`PaginatedResponse` interfaces
+- **🚫 NO manual error formatting** - always use `ResponseUtils.sendError()`
+- **🚫 NO skipping validation** - all endpoints must validate input with Zod schemas
+- **✅ CONSISTENT timestamps** - all responses include standardized timestamp
+- **✅ PROPER HTTP status codes** - use semantic status codes (200, 201, 400, 401, 403, 404, 500)
+
+**⚠️ VIOLATION WARNING**: Any endpoint that doesn't follow these response standards will be REFUSED and must be refactored.
+
 ### ⚠️ CRITICAL TESTING RULE ⚠️
 
 **NEVER IGNORE OR UNDERESTIMATE TESTS - NO MATTER WHAT**

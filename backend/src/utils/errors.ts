@@ -3,6 +3,8 @@
  * Provides standardized error handling with HTTP status codes
  */
 
+import { ContentfulStatusCode } from "hono/utils/http-status";
+
 export abstract class BaseError extends Error {
   abstract readonly statusCode: number;
   abstract readonly code: string;
@@ -26,7 +28,7 @@ export abstract class BaseError extends Error {
 
 export class ValidationError extends BaseError {
   readonly statusCode = 400;
-  readonly code = 'VALIDATION_ERROR';
+  readonly code = "VALIDATION_ERROR";
 
   constructor(message: string, cause?: Error) {
     super(message, cause);
@@ -35,34 +37,34 @@ export class ValidationError extends BaseError {
 
 export class AuthenticationError extends BaseError {
   readonly statusCode = 401;
-  readonly code = 'AUTHENTICATION_ERROR';
+  readonly code = "AUTHENTICATION_ERROR";
 
-  constructor(message: string = 'Authentication required', cause?: Error) {
+  constructor(message: string = "Authentication required", cause?: Error) {
     super(message, cause);
   }
 }
 
 export class AuthorizationError extends BaseError {
   readonly statusCode = 403;
-  readonly code = 'AUTHORIZATION_ERROR';
+  readonly code = "AUTHORIZATION_ERROR";
 
-  constructor(message: string = 'Insufficient permissions', cause?: Error) {
+  constructor(message: string = "Insufficient permissions", cause?: Error) {
     super(message, cause);
   }
 }
 
 export class NotFoundError extends BaseError {
   readonly statusCode = 404;
-  readonly code = 'NOT_FOUND';
+  readonly code = "NOT_FOUND";
 
-  constructor(resource: string = 'Resource', cause?: Error) {
+  constructor(resource: string = "Resource", cause?: Error) {
     super(`${resource} not found`, cause);
   }
 }
 
 export class ConflictError extends BaseError {
   readonly statusCode = 409;
-  readonly code = 'CONFLICT';
+  readonly code = "CONFLICT";
 
   constructor(message: string, cause?: Error) {
     super(message, cause);
@@ -71,9 +73,9 @@ export class ConflictError extends BaseError {
 
 export class InternalServerError extends BaseError {
   readonly statusCode = 500;
-  readonly code = 'INTERNAL_SERVER_ERROR';
+  readonly code = "INTERNAL_SERVER_ERROR";
 
-  constructor(message: string = 'Internal server error', cause?: Error) {
+  constructor(message: string = "Internal server error", cause?: Error) {
     super(message, cause);
   }
 }
@@ -101,7 +103,7 @@ export class ErrorHandler {
       return new InternalServerError(error.message, error);
     }
 
-    return new InternalServerError('An unexpected error occurred');
+    return new InternalServerError("An unexpected error occurred");
   }
 
   /**
@@ -115,7 +117,7 @@ export class ErrorHandler {
         code: normalizedError.code,
         message: normalizedError.message,
       },
-      statusCode: normalizedError.statusCode,
+      statusCode: normalizedError.statusCode as ContentfulStatusCode,
     };
   }
 }
