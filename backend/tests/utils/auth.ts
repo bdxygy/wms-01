@@ -43,8 +43,8 @@ export async function createTestOwner(overrides: any = {}): Promise<TestUser> {
 /**
  * Create a test admin user
  */
-export async function createTestAdmin(ownerId: string, storeId: string, overrides: any = {}): Promise<TestUser> {
-  const fixture = createAdminFixture(ownerId, storeId, overrides);
+export async function createTestAdmin(ownerId: string, overrides: any = {}): Promise<TestUser> {
+  const fixture = createAdminFixture(ownerId, overrides);
   return await createTestUser(fixture);
 }
 
@@ -88,7 +88,7 @@ export function createAuthHeaders(testUser: TestUser) {
 /**
  * Create a test app with mocked authentication middleware
  */
-export function createTestApp(authenticatedUser?: TestUser) {
+export async function createTestApp(authenticatedUser?: TestUser) {
   const app = new OpenAPIHono();
   
   // Mock authentication middleware
@@ -103,6 +103,18 @@ export function createTestApp(authenticatedUser?: TestUser) {
   app.route('/api/v1/users', userRoutes);
   app.route('/api/v1/stores', storeRoutes);
   
+  // Mount auth routes
+  const { authRoutes } = await import('@/routes/auth.routes');
+  app.route('/api/v1/auth', authRoutes);
+  
+  // Mount category routes
+  const { categoryRoutes } = await import('@/routes/category.routes');
+  app.route('/api/v1/categories', categoryRoutes);
+  
+  // Mount product routes
+  const { productRoutes } = await import('@/routes/product.routes');
+  app.route('/api/v1/products', productRoutes);
+  
   return app;
 }
 
@@ -112,7 +124,7 @@ export function createTestApp(authenticatedUser?: TestUser) {
 export async function createUserHierarchy() {
   const owner = await createTestOwner();
   const testStore = await createTestStore(owner.user.id);
-  const admin = await createTestAdmin(owner.user.id, testStore.store.id);
+  const admin = await createTestAdmin(owner.user.id);
   const staff = await createTestStaff(owner.user.id);
   const cashier = await createTestCashier(owner.user.id);
 
@@ -121,7 +133,7 @@ export async function createUserHierarchy() {
     admin,
     staff,
     cashier,
-    testStore,
+    store: testStore,
   };
 }
 
@@ -135,8 +147,8 @@ export async function createMultiOwnerUsers() {
   const store1 = await createTestStore(owner1.user.id);
   const store2 = await createTestStore(owner2.user.id);
   
-  const admin1 = await createTestAdmin(owner1.user.id, store1.store.id);
-  const admin2 = await createTestAdmin(owner2.user.id, store2.store.id);
+  const admin1 = await createTestAdmin(owner1.user.id);
+  const admin2 = await createTestAdmin(owner2.user.id);
   
   const staff1 = await createTestStaff(owner1.user.id);
   const staff2 = await createTestStaff(owner2.user.id);

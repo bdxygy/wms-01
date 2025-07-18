@@ -4,28 +4,25 @@ import { relations } from 'drizzle-orm';
 import { users } from './users';
 import { stores } from './stores';
 import { categories } from './categories';
-import { transactions } from './transactions';
+import { transactionItems } from './transactions';
 import { productChecks } from './product_checks';
+import { productImeis } from './product_imeis';
 
 export const productStatus = ['ACTIVE', 'INACTIVE', 'DISCONTINUED'] as const;
 export type ProductStatus = typeof productStatus[number];
 
 export const products = sqliteTable('products', {
   id: text('id').primaryKey(),
-  barcode: text('barcode').notNull(),
-  name: text('name').notNull(),
-  description: text('description'),
-  price: real('price').notNull(),
-  cost: real('cost'),
-  quantity: integer('quantity').notNull().default(0),
-  minStock: integer('min_stock').default(0),
-  maxStock: integer('max_stock'),
-  status: text('status', { enum: productStatus }).default('ACTIVE'),
+  createdBy: text('created_by').notNull().references(() => users.id),
   storeId: text('store_id').notNull().references(() => stores.id),
+  name: text('name').notNull(),
   categoryId: text('category_id').references(() => categories.id),
-  ownerId: text('owner_id').notNull().references(() => users.id),
-  imageUrl: text('image_url'),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  sku: text('sku').notNull(),
+  isImei: integer('is_imei', { mode: 'boolean' }).default(false),
+  barcode: text('barcode').notNull(),
+  quantity: integer('quantity').default(1).notNull(),
+  purchasePrice: real('purchase_price').notNull(),
+  salePrice: real('sale_price'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   deletedAt: integer('deleted_at', { mode: 'timestamp' }),
@@ -40,12 +37,13 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.categoryId],
     references: [categories.id],
   }),
-  owner: one(users, {
-    fields: [products.ownerId],
+  createdByUser: one(users, {
+    fields: [products.createdBy],
     references: [users.id],
   }),
-  transactions: many(transactions),
+  transactionItems: many(transactionItems),
   productChecks: many(productChecks),
+  productImeis: many(productImeis),
 }));
 
 export const insertProductSchema = createInsertSchema(products);

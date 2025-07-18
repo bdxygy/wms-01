@@ -6,18 +6,17 @@ import { products } from './products';
 
 export const categories = sqliteTable('categories', {
   id: text('id').primaryKey(),
+  createdBy: text('created_by').notNull().references(() => users.id),
   name: text('name').notNull(),
   description: text('description'),
-  ownerId: text('owner_id').notNull().references(() => users.id),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   deletedAt: integer('deleted_at', { mode: 'timestamp' }),
 });
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
-  owner: one(users, {
-    fields: [categories.ownerId],
+  createdByUser: one(users, {
+    fields: [categories.createdBy],
     references: [users.id],
   }),
   products: many(products),

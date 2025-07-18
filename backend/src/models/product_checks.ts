@@ -10,17 +10,12 @@ export type CheckStatus = typeof checkStatus[number];
 
 export const productChecks = sqliteTable('product_checks', {
   id: text('id').primaryKey(),
-  status: text('status', { enum: checkStatus }).notNull(),
-  expectedQuantity: integer('expected_quantity').notNull(),
-  actualQuantity: integer('actual_quantity'),
-  notes: text('notes'),
   productId: text('product_id').notNull().references(() => products.id),
+  checkedBy: text('checked_by').notNull().references(() => users.id),
   storeId: text('store_id').notNull().references(() => stores.id),
-  userId: text('user_id').notNull().references(() => users.id),
-  ownerId: text('owner_id').notNull().references(() => users.id),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  deletedAt: integer('deleted_at', { mode: 'timestamp' }),
+  status: text('status', { enum: checkStatus }).notNull(),
+  note: text('note'),
+  checkedAt: integer('checked_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
 export const productChecksRelations = relations(productChecks, ({ one }) => ({
@@ -32,12 +27,8 @@ export const productChecksRelations = relations(productChecks, ({ one }) => ({
     fields: [productChecks.storeId],
     references: [stores.id],
   }),
-  user: one(users, {
-    fields: [productChecks.userId],
-    references: [users.id],
-  }),
-  owner: one(users, {
-    fields: [productChecks.ownerId],
+  checkedByUser: one(users, {
+    fields: [productChecks.checkedBy],
     references: [users.id],
   }),
 }));

@@ -1,6 +1,7 @@
 import { config } from 'dotenv';
 import { execSync } from 'child_process';
 import path from 'path';
+import { beforeAll, afterAll } from 'vitest';
 
 // Load test environment variables
 config({ path: '.env.test' });

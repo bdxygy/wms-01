@@ -8,7 +8,7 @@ import {
   productChecks,
 } from "@/models";
 import { sql } from "drizzle-orm";
-import { beforeEach } from "vitest";
+import { beforeEach, afterEach } from "vitest";
 
 /**
  * Clean all test data from the database

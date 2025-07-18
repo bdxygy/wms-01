@@ -5,21 +5,22 @@ import { Product, NewProduct } from '@/models/products';
 import { Transaction, NewTransaction } from '@/models/transactions';
 import { ProductCheck, NewProductCheck } from '@/models/product_checks';
 import { nanoid } from 'nanoid';
+import bcrypt from 'bcryptjs';
 
 /**
  * Generate test user data
  */
 export function createUserFixture(overrides: Partial<NewUser> = {}): NewUser {
   const id = nanoid();
+  // Hash the default password synchronously for tests
+  const hashedPassword = bcrypt.hashSync('password123', 12);
   return {
     id,
-    email: `test-${id}@example.com`,
-    password: 'hashedpassword123',
+    username: `test_user_${id}`,
+    passwordHash: hashedPassword,
     name: `Test User ${id}`,
     role: 'STAFF' as Role,
     ownerId: null,
-    storeId: null,
-    isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -40,11 +41,10 @@ export function createOwnerFixture(overrides: Partial<NewUser> = {}): NewUser {
 /**
  * Generate test admin user data
  */
-export function createAdminFixture(ownerId: string, storeId: string, overrides: Partial<NewUser> = {}): NewUser {
+export function createAdminFixture(ownerId: string, overrides: Partial<NewUser> = {}): NewUser {
   return createUserFixture({
     role: 'ADMIN' as Role,
     ownerId,
-    storeId,
     ...overrides,
   });
 }
@@ -79,7 +79,7 @@ export function createStoreFixture(ownerId: string, overrides: Partial<NewStore>
   return {
     id,
     name: `Test Store ${id}`,
-    address: `123 Test St, Test City ${id}`,
+    address: `123 Test St, Suite ${id.slice(0, 3)}`,
     phone: `+1234567890`,
     email: `store-${id}@example.com`,
     ownerId,
@@ -115,17 +115,17 @@ export function createProductFixture(ownerId: string, storeId: string, categoryI
   const id = nanoid();
   return {
     id,
+    barcode: `TEST${id}`,
     name: `Test Product ${id}`,
     description: `Description for test product ${id}`,
-    barcode: `TEST${id}`,
     price: 29.99,
     cost: 19.99,
     quantity: 100,
-    minStock: 10,
-    maxStock: 500,
+    minStock: 0,
+    maxStock: null,
     status: 'ACTIVE',
-    categoryId,
     storeId,
+    categoryId,
     ownerId,
     imageUrl: null,
     isActive: true,
