@@ -5,6 +5,12 @@ import { secureHeaders } from "hono/secure-headers";
 import { env } from "./config/env";
 import { serve } from "@hono/node-server";
 import { createApp } from "./http/hono";
+import { authRoutes } from "./routes/auth/routes";
+import { userRoutes } from "./routes/users/routes";
+import { categoryRoutes } from "./routes/categories/routes";
+import { productRoutes } from "./routes/products/routes";
+import { transactionRoutes } from "./routes/transactions/routes";
+import { storeRoutes } from "./routes/stores/routes";
 
 const app = createApp();
 
@@ -20,6 +26,14 @@ app.use(
 app.use("*", logger());
 app.use("*", prettyJSON());
 app.use("*", secureHeaders());
+
+// Routes
+app.route("/api/v1/auth", authRoutes);
+app.route("/api/v1/users", userRoutes);
+app.route("/api/v1/categories", categoryRoutes);
+app.route("/api/v1/products", productRoutes);
+app.route("/api/v1/transactions", transactionRoutes);
+app.route("/api/v1/stores", storeRoutes);
 
 // Health check endpoint
 app.get("/health", (c) => {

@@ -1,0 +1,40 @@
+import { Hono } from "hono";
+import { ValidationMiddleware } from "../../utils/validation";
+import { basicAuthMiddleware } from "../../middleware/basic-auth.middleware";
+import { authMiddleware } from "../../middleware/auth.middleware";
+import { devRegisterSchema, registerSchema, loginSchema, refreshTokenSchema } from "../../schemas/auth.schemas";
+import { devRegisterHandler, registerHandler, loginHandler, refreshHandler } from "./auth.handlers";
+
+const auth = new Hono();
+
+// Developer registration endpoint (protected with basic auth)
+auth.post(
+  "/dev/register",
+  basicAuthMiddleware,
+  ValidationMiddleware.body(devRegisterSchema),
+  devRegisterHandler
+);
+
+// Regular user registration endpoint (requires authentication)
+auth.post(
+  "/register",
+  authMiddleware,
+  ValidationMiddleware.body(registerSchema),
+  registerHandler
+);
+
+// Login endpoint
+auth.post(
+  "/login",
+  ValidationMiddleware.body(loginSchema),
+  loginHandler
+);
+
+// Token refresh endpoint
+auth.post(
+  "/refresh",
+  ValidationMiddleware.body(refreshTokenSchema),
+  refreshHandler
+);
+
+export { auth as authRoutes };
