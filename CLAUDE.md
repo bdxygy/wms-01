@@ -458,6 +458,7 @@ Based on `docs/features/backend_ut_checklist.md`:
 - **Consistent naming**: Use clear, descriptive variable and function names
 - **Zod imports**: Always use `z` from `@hono/zod-openapi` instead of directly importing from `zod` package for OpenAPI compatibility
 - **Testing scope**: Test services only at the controller layer - no separate service layer unit tests, focus on integration testing through HTTP endpoints
+- **Drizzle ORM select statements**: Always use `.select()` without arguments to avoid TypeScript strict mode issues. Use `.select({ field: table.field })` pattern only when absolutely necessary for specific field selection, but prefer full record selection with `.select()` for consistency
 
 ### 🔧 **MANDATORY API RESPONSE STANDARDS** 🔧
 

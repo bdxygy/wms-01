@@ -22,10 +22,10 @@ This checklist tracks the implementation progress of all backend services, organ
   - [ ] JWT token generation and validation
   - [ ] Password hashing with bcrypt
   - [ ] Token refresh handling
-- [ ] **AuthRepository** - Authentication data access
-  - [ ] User credential verification
-  - [ ] Token storage and validation
-  - [ ] Password hash management
+- [x] **AuthRepository** - Authentication data access
+  - [x] User credential verification
+  - [x] Token storage and validation
+  - [x] Password hash management
 - [ ] **AuthController** - Authentication endpoints
   - [ ] POST /api/v1/auth/register - User registration
   - [ ] POST /api/v1/auth/login - User login
@@ -43,12 +43,12 @@ This checklist tracks the implementation progress of all backend services, organ
 **Priority**: Critical - Required for role-based access
 
 #### [P2.1] User System (users table)
-- [ ] **UserService** - Business logic for user operations
-  - [ ] User CRUD operations with role management
-  - [ ] Owner hierarchy assignment (users belong to owners)
-  - [ ] Role-based access control (OWNER, ADMIN only in MVP)
-  - [ ] Soft-delete with audit trail
-  - [ ] User validation and business rules
+- [x] **UserService** - Business logic for user operations
+  - [x] User CRUD operations with role management
+  - [x] Owner hierarchy assignment (users belong to owners)
+  - [x] Role-based access control (OWNER, ADMIN only in MVP)
+  - [x] Soft-delete with audit trail
+  - [x] User validation and business rules
 - [x] **UserRepository** - Data persistence layer
   - [x] User data persistence
   - [x] Owner association management
@@ -56,16 +56,16 @@ This checklist tracks the implementation progress of all backend services, organ
   - [x] User-owner relationship queries
   - [x] Role-based data filtering
 - [ ] **UserController** - HTTP request handlers
-  - [ ] POST /api/v1/users - Create user (OWNER only)
+  - [ ] POST /api/v1/users - Create user (OWNER or ADMIN (Admin just available to create user STAFF role))
   - [ ] GET /api/v1/users - List users (filtered by owner)
   - [ ] GET /api/v1/users/:id - Get user details
   - [ ] PUT /api/v1/users/:id - Update user
   - [ ] DELETE /api/v1/users/:id - Soft delete user (OWNER only)
-- [ ] **User Schemas** - Request/response validation
-  - [ ] Create user request schema
-  - [ ] Update user request schema
-  - [ ] User response schemas
-  - [ ] User list with pagination
+- [x] **User Schemas** - Request/response validation
+  - [x] Create user request schema
+  - [x] Update user request schema
+  - [x] User response schemas
+  - [x] User list with pagination
 
 ### **Phase 3: Product Management** 📦
 **Priority**: Critical - Core business functionality
