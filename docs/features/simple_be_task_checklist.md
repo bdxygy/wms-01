@@ -114,13 +114,21 @@ This document consolidates all unit test cases from user stories organized by ro
 
 #### [P6.1] Role-Based Access Control
 
-- [ ] **AuthorizationService** - RBAC implementation
-  - [ ] Owner-scoped permissions
-  - [ ] Role-based resource access
-  - [ ] Hierarchical permission validation
-  - [ ] API endpoint protection
-- [ ] **Authorization Middleware** - Request authorization
-  - [ ] Role verification
-  - [ ] Owner scope validation
-  - [ ] Resource access control
-  - [ ] Permission-based route protection
+- [x] **AuthorizationService** - RBAC implementation
+  - [x] Owner-scoped permissions
+  - [x] Role-based resource access
+  - [x] Hierarchical permission validation
+  - [x] API endpoint protection
+- [x] **Authorization Middleware** - Request authorization
+  - [x] Role verification
+  - [x] Owner scope validation
+  - [x] Resource access control
+  - [x] Permission-based route protection
+
+#### [P7.1] IMEI Tracking (product_imeis table)
+
+- [x] **IMEIRoutes** - IMEI management endpoints
+  - [x] POST /api/v1/products/:id/imeis - Add IMEI
+  - [x] GET /api/v1/products/:id/imeis - List product IMEIs
+  - [x] DELETE /api/v1/imeis/:id - Remove IMEI
+- [x] **IMEI Schemas** - Validation schemas
