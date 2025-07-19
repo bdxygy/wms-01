@@ -67,6 +67,8 @@ class Store {
     return parts.join(', ');
   }
 
+  String get address => fullAddress;
+
   String get displayName => '$name ($city)';
 
   bool get hasOperatingHours => openTime != null && closeTime != null;

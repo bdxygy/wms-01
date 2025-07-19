@@ -3,6 +3,7 @@ import '../api/api_client.dart';
 import '../api/api_endpoints.dart';
 import '../api/api_exceptions.dart';
 import '../models/auth_response.dart';
+import '../models/store.dart';
 import '../models/user.dart';
 import '../utils/app_config.dart';
 import 'secure_storage.dart';
@@ -301,6 +302,40 @@ class AuthService {
   // Clear selected store
   Future<void> clearSelectedStore() async {
     await _storage.clearSelectedStore();
+  }
+
+  // Get user stores
+  Future<List<Store>> getUserStores() async {
+    try {
+      final response = await _apiClient.get<Map<String, dynamic>>(
+        ApiEndpoints.stores,
+      );
+
+      if (response.data != null && response.data!['success'] == true) {
+        final data = response.data!['data'];
+        
+        if (data is Map<String, dynamic> && data['stores'] is List) {
+          final storesJson = data['stores'] as List;
+          return storesJson
+              .map((store) => Store.fromJson(store as Map<String, dynamic>))
+              .toList();
+        } else if (data is List) {
+          return data
+              .map((store) => Store.fromJson(store as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      
+      return [];
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return []; // No stores found
+      }
+      throw ApiException(
+        message: e.response?.data?['message'] ?? 'Failed to fetch stores',
+        code: 'FETCH_STORES_FAILED',
+      );
+    }
   }
 }
 

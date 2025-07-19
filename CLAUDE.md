@@ -9,10 +9,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Tech Stack
 
 - **Backend**: Hono, Node.js, Zod, Drizzle, SQLite Turso ✅ **PRODUCTION READY**
-- **Database**: SQLite with Drizzle ORM ✅ **PRODUCTION READY**
+- **Database**: SQLite with Drizzle ORM ✅ **PRODUCTION READY**  
 - **Authentication**: JWT-based with role-based access control ✅ **PRODUCTION READY**
 - **Frontend Web**: React, Shadcn, Zod, React Query, Tailwindcss, Rsbuild 📋 **PLANNED**
-- **Mobile**: Flutter (cross-platform mobile development) ✅ **PHASE 4 COMPLETE - CORE AUTHENTICATION READY**
+- **Mobile**: Flutter (cross-platform mobile development) ✅ **PHASE 4 COMPLETE - CORE FOUNDATION READY**
 
 ### Architecture
 
@@ -185,14 +185,21 @@ The backend API is **production-ready** and fully functional. Frontend teams can
 - **Desktop applications** (Electron, Tauri)
 - **Integration tools** (any HTTP client)
 
-## 📱 **MOBILE APPLICATION STATUS - PHASE 3 & 4 COMPLETE**
+## 📱 **MOBILE APPLICATION STATUS - PHASE 4 COMPLETE + LATEST UPDATES**
 
-### **Flutter Mobile Development Status: Phases 3 & 4 Complete**
+### **Flutter Mobile Development Status: Phase 4 Complete + Recent Updates**
 
-**Current Phase**: ✅ **Phase 3: API Client & Network Layer - COMPLETED**  
 **Current Phase**: ✅ **Phase 4: Core Authentication System - COMPLETED**  
+**Latest Update**: ✅ **Updated thermal printing dependencies and Android build configuration**  
 **Next Phase**: 📋 **Phase 5: Authentication UI & User Management**  
 **Overall Progress**: **20% Complete (4/20 phases)**
+
+### **Latest Configuration Updates (January 2025)**
+- ✅ **Android NDK Version**: Updated to `27.0.12077973`
+- ✅ **Android MinSDK**: Updated to `33` for enhanced security and compatibility  
+- ✅ **Thermal Printing Dependencies**: Updated to latest versions
+  - `print_bluetooth_thermal: ^1.1.4` (replaces esc_pos_bluetooth)
+  - `esc_pos_utils_plus: ^2.0.5` (replaces esc_pos_utils)
 
 ### **Phase 4 Implementation Summary**
 
@@ -420,27 +427,28 @@ pnpm run preview      # Preview production build
 pnpm run test         # Run frontend tests
 ```
 
-## 🎯 **CURRENT PROJECT STATUS SUMMARY**
+## 🎯 **CURRENT PROJECT STATUS SUMMARY - UPDATED JANUARY 2025**
 
-**🚀 BACKEND: PRODUCTION READY**
+**🚀 BACKEND: PRODUCTION READY (51 TypeScript files)**
 - ✅ **40+ API endpoints** fully implemented and tested
-- ✅ **Complete authentication system** with JWT and refresh tokens
+- ✅ **Complete authentication system** with JWT and refresh tokens  
 - ✅ **Full RBAC implementation** with owner-scoped data access
 - ✅ **All CRUD operations** for users, stores, categories, products, transactions
 - ✅ **Advanced features**: IMEI tracking, barcode generation, photo proof
 - ✅ **Production infrastructure**: validation, error handling, pagination, filtering
 - ✅ **Comprehensive testing** with integration test coverage
+- ✅ **Latest dependencies**: Hono 4.5.0, Drizzle ORM 0.44.3, Zod 3.23.8
 
-**📱 MOBILE: PHASE 2 COMPLETE - UI FOUNDATION READY**
-- ✅ **Project Foundation & Setup** completed (Phase 1 of 20)
-- ✅ **UI Foundation & Theme System** completed (Phase 2 of 20)
+**📱 MOBILE: PHASE 4 COMPLETE - CORE FOUNDATION READY (43 Dart files)**
+- ✅ **Phase 1**: Project Foundation & Setup completed
+- ✅ **Phase 2**: UI Foundation & Theme System completed  
+- ✅ **Phase 3**: API Client & Network Layer completed
+- ✅ **Phase 4**: Core Authentication System completed
 - ✅ **Professional Design System** with Material Design 3
-- ✅ **Comprehensive Component Library** ready for feature development
-- ✅ **Theme Management** with light/dark modes and system detection
-- ✅ **Responsive Design** utilities and layout foundation
-- ✅ **Security Foundation** with certificate pinning and secure storage
+- ✅ **Complete API Integration** with all 40+ backend endpoints mapped
+- ✅ **Security Implementation** with certificate pinning and secure storage
 - ✅ **State Management** with Provider pattern and role-based access
-- ✅ **Testing Infrastructure** with passing widget tests
+- ✅ **Updated Dependencies**: Latest thermal printing libs, Android NDK 27.0.12077973
 
 **🎯 MOBILE DEVELOPMENT STATUS: Phase 4 Complete (20%)**
 - 🚀 **Current Phase**: Ready for Phase 5 - Authentication UI & User Management

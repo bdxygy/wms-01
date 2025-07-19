@@ -50,8 +50,8 @@ dependencies:
   image_picker: ^1.0.4
 
   # Thermal Printing
-  esc_pos_bluetooth: ^0.4.1
-  esc_pos_utils: ^1.1.0
+  print_bluetooth_thermal: ^1.1.4
+  esc_pos_utils_plus: ^2.0.4
 
   # Serialization & UI
   json_annotation: ^4.8.1

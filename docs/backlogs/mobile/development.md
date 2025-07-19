@@ -441,42 +441,42 @@ class ApiValidator {
 Create complete authentication flow including login screen and store selection for non-owner users.
 
 ### **Features to Implement**
-- [ ] **Login Screen**
-  - [ ] Username/password form with validation
-  - [ ] Show/hide password functionality
-  - [ ] Loading states during authentication
-  - [ ] Error display with proper messaging
-  - [ ] Remember login option preparation
+- [x] **Login Screen**
+  - [x] Username/password form with validation
+  - [x] Show/hide password functionality
+  - [x] Loading states during authentication
+  - [x] Error display with proper messaging
+  - [x] Remember login option preparation
 
-- [ ] **Welcoming Choose Store Screen** (`WelcomingChooseStoreScreen`)
-  - [ ] Display available stores for non-owner users
-  - [ ] Store list with name, address, and status
-  - [ ] Store selection with confirmation
-  - [ ] Error handling for users with no stores
-  - [ ] Loading states while fetching stores
+- [x] **Welcoming Choose Store Screen** (`WelcomingChooseStoreScreen`)
+  - [x] Display available stores for non-owner users
+  - [x] Store list with name, address, and status
+  - [x] Store selection with confirmation
+  - [x] Error handling for users with no stores
+  - [x] Loading states while fetching stores
 
-- [ ] **Authentication Flow**
-  - [ ] Splash screen with auth state checking
-  - [ ] Auto-login with stored tokens
-  - [ ] Role-based navigation:
-    - [ ] NON-OWNER: Login → Store Selection → Dashboard
-    - [ ] OWNER: Login → Full Dashboard (bypass store selection)
-  - [ ] Token refresh on app resume
-  - [ ] Session timeout handling
+- [x] **Authentication Flow**
+  - [x] Splash screen with auth state checking
+  - [x] Auto-login with stored tokens
+  - [x] Role-based navigation:
+    - [x] NON-OWNER: Login → Store Selection → Dashboard
+    - [x] OWNER: Login → Full Dashboard (bypass store selection)
+  - [x] Token refresh on app resume
+  - [x] Session timeout handling
 
-- [ ] **Form Validation**
-  - [ ] Real-time field validation
-  - [ ] Username format validation
-  - [ ] Password requirements checking
-  - [ ] Network error handling
-  - [ ] API error display
+- [x] **Form Validation**
+  - [x] Real-time field validation
+  - [x] Username format validation
+  - [x] Password requirements checking
+  - [x] Network error handling
+  - [x] API error display
 
-- [ ] **UI/UX Polish**
-  - [ ] Professional login screen design
-  - [ ] Proper keyboard handling
-  - [ ] Loading animations
-  - [ ] Error state animations
-  - [ ] Accessibility support
+- [x] **UI/UX Polish**
+  - [x] Professional login screen design
+  - [x] Proper keyboard handling
+  - [x] Loading animations
+  - [x] Error state animations
+  - [x] Accessibility support
 
 ### **Success Criteria**
 - ✅ Functional login screen with validation

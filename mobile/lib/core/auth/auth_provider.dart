@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
+import '../models/store.dart';
 import '../models/auth_response.dart';
 import '../api/api_exceptions.dart';
 import '../utils/app_config.dart';
@@ -25,6 +26,7 @@ class AuthProvider extends ChangeNotifier {
   // Getters
   AuthState get state => _state;
   User? get user => _user;
+  User? get currentUser => _user;
   String? get selectedStoreId => _selectedStoreId;
   String? get error => _error;
   bool get isAuthenticated => _state == AuthState.authenticated;
@@ -345,6 +347,22 @@ class AuthProvider extends ChangeNotifier {
       return await _authService.isAuthenticated();
     } catch (e) {
       return false;
+    }
+  }
+
+  // Get user stores
+  Future<List<Store>> getUserStores() async {
+    if (_user == null || !isAuthenticated) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      // For OWNER users, they can see all their stores
+      // For non-OWNER users, they see stores they're assigned to
+      return await _authService.getUserStores();
+    } catch (e) {
+      _setError('Failed to fetch user stores: ${e.toString()}');
+      rethrow;
     }
   }
 
