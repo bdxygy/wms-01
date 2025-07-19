@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
@@ -331,7 +332,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _handleChangeStore() {
-    Navigator.of(context).pushReplacementNamed('/store-selection');
+    context.goNamed('store-selection');
   }
 
   Future<void> _handleLogout() async {
@@ -340,7 +341,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       await authProvider.logout();
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        context.goNamed('login');
       }
     } catch (e) {
       if (mounted) {

@@ -7,10 +7,7 @@ import 'core/providers/app_provider.dart';
 import 'core/auth/auth_provider.dart';
 import 'core/providers/store_context_provider.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/screens/splash_screen.dart';
-import 'features/auth/screens/login_screen.dart';
-import 'features/auth/screens/welcoming_choose_store_screen.dart';
-import 'features/dashboard/screens/dashboard_screen.dart';
+import 'core/routing/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +31,7 @@ class WMSApp extends StatelessWidget {
       ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, child) {
-          return MaterialApp(
+          return MaterialApp.router(
             title: 'WMS Mobile',
             debugShowCheckedModeBanner: false,
             
@@ -55,16 +52,8 @@ class WMSApp extends StatelessWidget {
             ],
             locale: appProvider.locale,
             
-            // Initial route
-            home: const SplashScreen(),
-            
-            // Routes
-            routes: {
-              '/splash': (context) => const SplashScreen(),
-              '/login': (context) => const LoginScreen(),
-              '/store-selection': (context) => const WelcomingChooseStoreScreen(),
-              '/dashboard': (context) => const DashboardScreen(),
-            },
+            // Router configuration
+            routerConfig: AppRouter.createRouter(),
             
             // Material app configuration
             builder: (context, child) {

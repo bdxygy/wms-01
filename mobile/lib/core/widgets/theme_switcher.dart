@@ -232,7 +232,6 @@ class WMSThemeModeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, appProvider, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
         String modeText;
         IconData modeIcon;
         Color indicatorColor;

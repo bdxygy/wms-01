@@ -493,24 +493,24 @@ Create complete authentication flow including login screen and store selection f
 ### **Objective**
 Set up comprehensive navigation system and store context management after authentication.
 
-- [ ] **Store Context Management**
-  - [ ] StoreContextProvider for selected store
-  - [ ] Store context persistence across app sessions
-  - [ ] Store switching logic for OWNER users
-  - [ ] Store-scoped data filtering
+- [x] **Store Context Management**
+  - [x] StoreContextProvider for selected store
+  - [x] Store context persistence across app sessions
+  - [x] Store switching logic for OWNER users
+  - [x] Store-scoped data filtering
 
-- [ ] **Navigation System with GoRouter**
-  - [ ] Declarative route configuration
-  - [ ] Authentication route guards
-  - [ ] Store selection requirement guards
-  - [ ] Role-based route access control
-  - [ ] Deep linking preparation
+- [x] **Navigation System with GoRouter**
+  - [x] Declarative route configuration
+  - [x] Authentication route guards
+  - [x] Store selection requirement guards
+  - [x] Role-based route access control
+  - [x] Deep linking preparation
 
-- [ ] **User Flow Implementation**
-  - [ ] NON-OWNER: Login → Store Selection → Dashboard
-  - [ ] OWNER: Login → Full Dashboard (skip store selection)
-  - [ ] Proper navigation state management
-  - [ ] Back button handling
+- [x] **User Flow Implementation**
+  - [x] NON-OWNER: Login → Store Selection → Dashboard
+  - [x] OWNER: Login → Full Dashboard (skip store selection)
+  - [x] Proper navigation state management
+  - [x] Back button handling
 
 ### **Technical Implementation**
 ```dart
@@ -543,6 +543,7 @@ Create role-specific dashboard screens with relevant widgets, quick actions, and
   - [ ] Quick actions (Add Store, Manage Users, View Reports)
   - [ ] Recent activity across all stores
   - [ ] Store management shortcuts
+  - [ ] For go to selecting store page, owner can go to settings page
 
 - [ ] **ADMIN Dashboard**
   - [ ] Single-store view (based on selected store)

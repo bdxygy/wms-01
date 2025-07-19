@@ -1,165 +1,154 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 import '../models/store.dart';
+import '../models/store_context.dart';
 import '../constants/app_constants.dart';
+import '../auth/auth_service.dart';
+import '../utils/app_config.dart';
 
 class StoreContextProvider extends ChangeNotifier {
-  Store? _selectedStore;
-  List<Store> _availableStores = [];
-  bool _isLoading = false;
-  String? _error;
+  final AuthService _authService = AuthService();
+  StoreContext _context = StoreContext.initial();
 
-  // Getters
-  Store? get selectedStore => _selectedStore;
-  List<Store> get availableStores => _availableStores;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-  bool get hasStoreSelected => _selectedStore != null;
+  // Getters for backward compatibility and convenience
+  StoreContext get context => _context;
+  Store? get selectedStore => _context.selectedStore;
+  List<Store> get availableStores => _context.availableStores;
+  bool get isLoading => _context.isLoading;
+  String? get error => _context.error;
+  bool get hasStoreSelected => _context.hasStoreSelected;
+  bool get needsStoreSelection => _context.needsStoreSelection;
+  String? get selectedStoreId => _context.selectedStoreId;
+  String? get selectedStoreName => _context.selectedStoreName;
 
-  // Helper getters
-  String? get selectedStoreId => _selectedStore?.id;
-  String? get selectedStoreName => _selectedStore?.name;
-
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  // Update context and notify listeners
+  void _updateContext(StoreContext newContext) {
+    _context = newContext;
     notifyListeners();
-  }
-
-  void _setError(String? error) {
-    _error = error;
-    notifyListeners();
-  }
-
-  void clearError() {
-    _error = null;
-    notifyListeners();
-  }
-
-  // Initialize store context
-  Future<void> initialize() async {
-    _setLoading(true);
-    _setError(null);
-
-    try {
-      // Load selected store from preferences
-      final prefs = await SharedPreferences.getInstance();
-      final storeId = prefs.getString(AppConstants.selectedStoreKey);
-      
-      if (storeId != null) {
-        // TODO: Load store details from API or local cache
-        // For now, simulate store loading
-        await Future.delayed(const Duration(milliseconds: 500));
-        
-        // Create demo store
-        _selectedStore = Store(
-          id: storeId,
-          ownerId: 'demo-owner-id',
-          name: 'Demo Store',
-          type: 'Retail',
-          addressLine1: '123 Main Street',
-          city: 'Jakarta',
-          province: 'DKI Jakarta',
-          postalCode: '12345',
-          country: 'Indonesia',
-          phoneNumber: '+62-21-1234567',
-          isActive: true,
-          timezone: 'Asia/Jakarta',
-          createdBy: 'demo-user-id',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-      }
-    } catch (e) {
-      _setError('Failed to load store context: ${e.toString()}');
-    } finally {
-      _setLoading(false);
+    
+    if (AppConfig.isDebugMode) {
+      print('🏪 StoreContext updated: $newContext');
     }
   }
 
-  // Load available stores for user
-  Future<void> loadAvailableStores() async {
-    _setLoading(true);
-    _setError(null);
+  void clearError() {
+    _updateContext(_context.copyWith(clearError: true));
+  }
+
+  // Initialize store context from persisted data
+  Future<void> initialize() async {
+    _updateContext(StoreContext.loading());
 
     try {
-      // TODO: Load stores from API based on user permissions
-      await Future.delayed(const Duration(seconds: 1));
+      // Load persisted store context
+      final prefs = await SharedPreferences.getInstance();
+      final contextJson = prefs.getString(AppConstants.storeContextKey);
       
-      // Create demo stores
-      _availableStores = [
-        Store(
-          id: 'store-1',
-          ownerId: 'demo-owner-id',
-          name: 'Main Store',
-          type: 'Retail',
-          addressLine1: '123 Main Street',
-          city: 'Jakarta',
-          province: 'DKI Jakarta',
-          postalCode: '12345',
-          country: 'Indonesia',
-          phoneNumber: '+62-21-1234567',
-          isActive: true,
-          timezone: 'Asia/Jakarta',
-          createdBy: 'demo-user-id',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        Store(
-          id: 'store-2',
-          ownerId: 'demo-owner-id',
-          name: 'Branch Store',
-          type: 'Retail',
-          addressLine1: '456 Second Street',
-          city: 'Bandung',
-          province: 'West Java',
-          postalCode: '54321',
-          country: 'Indonesia',
-          phoneNumber: '+62-22-7654321',
-          isActive: true,
-          timezone: 'Asia/Jakarta',
-          createdBy: 'demo-user-id',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-      ];
+      if (contextJson != null) {
+        final persistedData = json.decode(contextJson) as Map<String, dynamic>;
+        final persistedContext = StoreContext.fromPersistedJson(persistedData);
+        
+        // Validate persisted store is still valid
+        if (persistedContext.selectedStore != null) {
+          final isValid = await _validateStorePersistence(persistedContext.selectedStore!);
+          if (isValid) {
+            _updateContext(persistedContext);
+            
+            if (AppConfig.isDebugMode) {
+              print('🏪 Restored store context: ${persistedContext.selectedStoreName}');
+            }
+            return;
+          }
+        }
+      }
+      
+      // If no valid persisted context, start fresh
+      _updateContext(StoreContext.initial());
+      
     } catch (e) {
-      _setError('Failed to load available stores: ${e.toString()}');
-    } finally {
-      _setLoading(false);
+      _updateContext(StoreContext.error('Failed to initialize store context: ${e.toString()}'));
+      
+      if (AppConfig.isDebugMode) {
+        print('❌ Store context initialization failed: $e');
+      }
+    }
+  }
+
+  // Validate that a persisted store is still valid
+  Future<bool> _validateStorePersistence(Store store) async {
+    try {
+      // Check if store still exists and user has access
+      // For now, assume valid - in production this would call API
+      return store.isActive;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Load available stores for the current user
+  Future<void> loadAvailableStores() async {
+    _updateContext(_context.copyWith(isLoading: true, clearError: true));
+
+    try {
+      final stores = await _authService.getUserStores();
+      
+      _updateContext(StoreContext.loaded(
+        stores: stores,
+        selectedStore: _context.selectedStore,
+      ));
+      
+      if (AppConfig.isDebugMode) {
+        print('🏪 Loaded ${stores.length} available stores');
+      }
+      
+    } catch (e) {
+      _updateContext(StoreContext.error('Failed to load available stores: ${e.toString()}'));
+      
+      if (AppConfig.isDebugMode) {
+        print('❌ Failed to load stores: $e');
+      }
     }
   }
 
   // Select a store
   Future<void> selectStore(Store store) async {
-    _setLoading(true);
-    _setError(null);
-
-    try {
-      _selectedStore = store;
-      
-      // Persist selection
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(AppConstants.selectedStoreKey, store.id);
-      
-      notifyListeners();
-    } catch (e) {
-      _setError('Failed to select store: ${e.toString()}');
-    } finally {
-      _setLoading(false);
+    if (!_context.canSelectStore(store.id)) {
+      _updateContext(_context.copyWith(
+        error: 'Cannot select inactive or unauthorized store',
+      ));
+      return;
     }
-  }
 
-  // Clear store selection
-  Future<void> clearStoreSelection() async {
+    _updateContext(_context.copyWith(isLoading: true, clearError: true));
+
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(AppConstants.selectedStoreKey);
+      // Update context with selected store
+      final newContext = _context.copyWith(
+        selectedStore: store,
+        selectedStoreId: store.id,
+        isLoading: false,
+      );
       
-      _selectedStore = null;
-      notifyListeners();
+      // Persist the selection
+      await _persistStoreContext(newContext);
+      
+      _updateContext(newContext);
+      
+      if (AppConfig.isDebugMode) {
+        print('🏪 Selected store: ${store.name}');
+      }
+      
     } catch (e) {
-      _setError('Failed to clear store selection: ${e.toString()}');
+      _updateContext(_context.copyWith(
+        isLoading: false,
+        error: 'Failed to select store: ${e.toString()}',
+      ));
+      
+      if (AppConfig.isDebugMode) {
+        print('❌ Failed to select store: $e');
+      }
     }
   }
 
@@ -168,30 +157,111 @@ class StoreContextProvider extends ChangeNotifier {
     await selectStore(store);
   }
 
+  // Clear store selection
+  Future<void> clearStoreSelection() async {
+    try {
+      final newContext = _context.copyWith(
+        clearSelectedStore: true,
+        clearError: true,
+      );
+      
+      await _persistStoreContext(newContext);
+      _updateContext(newContext);
+      
+      if (AppConfig.isDebugMode) {
+        print('🏪 Cleared store selection');
+      }
+      
+    } catch (e) {
+      _updateContext(_context.copyWith(
+        error: 'Failed to clear store selection: ${e.toString()}',
+      ));
+    }
+  }
+
   // Get store by ID from available stores
   Store? getStoreById(String storeId) {
-    try {
-      return _availableStores.firstWhere((store) => store.id == storeId);
-    } catch (e) {
-      return null;
-    }
+    return _context.getStoreById(storeId);
   }
 
   // Refresh store data
   Future<void> refreshStoreData() async {
-    if (_selectedStore != null) {
-      // TODO: Refresh store data from API
-      // For now, just notify listeners
-      notifyListeners();
+    if (_context.hasStoreSelected) {
+      // Reload available stores which will refresh the selected store
+      await loadAvailableStores();
+    }
+  }
+
+  // Persist store context to SharedPreferences
+  Future<void> _persistStoreContext(StoreContext context) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final contextJson = json.encode(context.toPersistedJson());
+      await prefs.setString(AppConstants.storeContextKey, contextJson);
+      
+      if (AppConfig.isDebugMode) {
+        print('🏪 Persisted store context');
+      }
+      
+    } catch (e) {
+      if (AppConfig.isDebugMode) {
+        print('❌ Failed to persist store context: $e');
+      }
     }
   }
 
   // Reset store context (for logout)
-  void reset() {
-    _selectedStore = null;
-    _availableStores = [];
-    _isLoading = false;
-    _error = null;
-    notifyListeners();
+  Future<void> reset() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(AppConstants.storeContextKey);
+      await prefs.remove(AppConstants.selectedStoreKey); // Remove legacy key
+      
+      _updateContext(StoreContext.initial());
+      
+      if (AppConfig.isDebugMode) {
+        print('🏪 Reset store context');
+      }
+      
+    } catch (e) {
+      if (AppConfig.isDebugMode) {
+        print('❌ Failed to reset store context: $e');
+      }
+    }
+  }
+
+  // Check if user needs to select a store
+  bool requiresStoreSelection() {
+    return _context.needsStoreSelection;
+  }
+
+  // Set available stores (for manual updates)
+  void setAvailableStores(List<Store> stores) {
+    _updateContext(StoreContext.loaded(
+      stores: stores,
+      selectedStore: _context.selectedStore,
+    ));
+  }
+
+  // Update selected store without persistence (for temporary updates)
+  void updateSelectedStore(Store store) {
+    if (_context.canSelectStore(store.id)) {
+      _updateContext(_context.copyWith(selectedStore: store));
+    }
+  }
+
+  // Check if store context is stale and needs refresh
+  bool isStale() {
+    if (_context.lastUpdated == null) return true;
+    
+    final staleThreshold = DateTime.now().subtract(const Duration(minutes: 30));
+    return _context.lastUpdated!.isBefore(staleThreshold);
+  }
+
+  // Refresh if stale
+  Future<void> refreshIfStale() async {
+    if (isStale()) {
+      await loadAvailableStores();
+    }
   }
 }

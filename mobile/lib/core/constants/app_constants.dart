@@ -16,7 +16,8 @@ class AppConstants {
   static const String refreshTokenKey = 'refresh_token';
   static const String tokenExpiryKey = 'token_expiry';
   static const String userDataKey = 'user_data';
-  static const String selectedStoreKey = 'selected_store';
+  static const String selectedStoreKey = 'selected_store'; // Legacy - use storeContextKey
+  static const String storeContextKey = 'store_context';
   static const String printerDeviceKey = 'printer_device';
   static const String biometricEnabledKey = 'biometric_enabled';
   

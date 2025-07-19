@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
@@ -31,13 +32,18 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
     });
 
     try {
-      final authProvider = context.read<AuthProvider>();
-      final stores = await authProvider.getUserStores();
+      final storeProvider = context.read<StoreContextProvider>();
+      await storeProvider.loadAvailableStores();
 
       if (mounted) {
         setState(() {
-          _stores = stores;
+          _stores = storeProvider.availableStores;
           _isLoading = false;
+          
+          // Check for errors from store provider
+          if (storeProvider.error != null) {
+            _errorMessage = storeProvider.error;
+          }
         });
       }
     } catch (e) {
@@ -385,7 +391,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
       await storeProvider.selectStore(_selectedStore!);
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/dashboard');
+        context.goNamed('dashboard');
       }
     } catch (e) {
       if (mounted) {
@@ -405,7 +411,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
       await authProvider.logout();
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        context.goNamed('login');
       }
     } catch (e) {
       if (mounted) {

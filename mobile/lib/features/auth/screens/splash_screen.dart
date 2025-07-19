@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/app_provider.dart';
@@ -58,13 +59,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!authProvider.isAuthenticated) {
       // Navigate to login
-      Navigator.of(context).pushReplacementNamed('/login');
+      context.goNamed('login');
     } else if (authProvider.needsStoreSelection && !storeProvider.hasStoreSelected) {
       // Navigate to store selection
-      Navigator.of(context).pushReplacementNamed('/store-selection');
+      context.goNamed('store-selection');
     } else {
       // Navigate to main dashboard
-      Navigator.of(context).pushReplacementNamed('/dashboard');
+      context.goNamed('dashboard');
     }
   }
 
