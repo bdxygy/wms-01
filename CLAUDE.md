@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Database**: SQLite with Drizzle ORM ✅ **PRODUCTION READY**
 - **Authentication**: JWT-based with role-based access control ✅ **PRODUCTION READY**
 - **Frontend Web**: React, Shadcn, Zod, React Query, Tailwindcss, Rsbuild 📋 **PLANNED**
-- **Mobile**: Flutter (cross-platform mobile development) ✅ **PHASE 2 COMPLETE - UI FOUNDATION READY**
+- **Mobile**: Flutter (cross-platform mobile development) ✅ **PHASE 4 COMPLETE - CORE AUTHENTICATION READY**
 
 ### Architecture
 
@@ -185,49 +185,64 @@ The backend API is **production-ready** and fully functional. Frontend teams can
 - **Desktop applications** (Electron, Tauri)
 - **Integration tools** (any HTTP client)
 
-## 📱 **MOBILE APPLICATION STATUS - PHASE 2 COMPLETE**
+## 📱 **MOBILE APPLICATION STATUS - PHASE 4 COMPLETE**
 
-### **Flutter Mobile Development Status: Phase 2 Complete**
+### **Flutter Mobile Development Status: Phase 4 Complete**
 
-**Current Phase**: ✅ **Phase 2: UI Foundation & Theme System - COMPLETED**  
-**Next Phase**: 📋 **Phase 3: API Client & Network Layer**  
-**Overall Progress**: **10% Complete (2/20 phases)**
+**Current Phase**: ✅ **Phase 4: Core Authentication System - COMPLETED**  
+**Next Phase**: 📋 **Phase 5: Authentication UI & User Management**  
+**Overall Progress**: **20% Complete (4/20 phases)**
 
-### **Phase 2 Implementation Summary**
+### **Phase 4 Implementation Summary**
 
-All Phase 2 requirements have been successfully implemented:
+All Phase 4 requirements have been successfully implemented:
 
-**✅ Comprehensive Theme System**
-- Material Design 3 with `flex_color_scheme` integration
-- WMS brand colors and custom color schemes
-- Light and dark theme configurations with system detection
-- Professional typography system with Poppins font
+**✅ API Client Foundation**
+- Complete Dio HTTP client with base configuration and interceptors
+- Generic HTTP methods (GET, POST, PUT, DELETE) with type safety
+- File upload and download capabilities with progress tracking
+- Singleton pattern with secure configuration management
 
-**✅ Core UI Components**
-- Custom button library (Primary, Secondary, Text, Icon, FAB, Destructive, Success)
-- Loading indicators and skeleton screens for all data types
-- Card components (Product, Transaction, User, Stats cards)
-- Form components with validation (Text, Dropdown, Switch, Checkbox, Date/Time)
-- Custom app bars (Standard, Search, Role-based, Sliver)
+**✅ Security Interceptors**
+- Certificate pinning configuration (disabled for development)
+- API endpoint validation for trusted hosts only
+- Bearer token injection with automatic refresh
+- Security exception handling for certificate failures
 
-**✅ Layout Foundation**
-- Responsive breakpoint system (Mobile, Tablet, Desktop)
-- Safe area handling and keyboard behavior management
-- Grid layouts (Responsive, Staggered) for card display
-- Empty and error state components
-- Spacing constants and layout utilities
+**✅ Enhanced Error Handling Interceptors**
+- Exponential backoff retry logic with jitter (1s, 2s, 4s, 8s...)
+- Network connectivity monitoring with connectivity_plus
+- Rate limiting support (429 status code handling)
+- Comprehensive timeout handling (connection, send, receive)
+- Performance monitoring with request duration tracking
 
-**✅ Icon System**
-- Comprehensive icon library covering all WMS features
-- Role-based icons (Owner, Admin, Staff, Cashier)
-- Status and connectivity icons with dynamic helpers
-- Context-aware icon sizing and styling
+**✅ Response Models with JSON Serialization**
+- ApiResponse<T> for standard API responses
+- PaginatedResponse<T> for paginated data
+- ApiError for structured error information
+- PaginationMeta for pagination metadata
+- Complete JSON serialization with code generation
 
-**✅ Theme Management**
-- Advanced theme switcher with Light/Dark/System modes
-- Theme persistence with SharedPreferences
-- Theme mode indicators and settings tiles
-- System theme detection and manual toggle
+**✅ Data Models**
+- User model with role-based permissions (OWNER/ADMIN/STAFF/CASHIER)
+- Store model with address and operational details
+- Product model with IMEI tracking support
+- Category model for product organization
+- Transaction model with items and photo proof
+- All models include JSON serialization with build_runner
+
+**✅ API Endpoints Integration**
+- All 40+ backend endpoints mapped and typed
+- Authentication endpoints (login, register, refresh, logout)
+- CRUD operations for users, stores, categories, products, transactions
+- Advanced filtering and pagination support
+- IMEI management and product search capabilities
+
+**✅ Comprehensive Error Handling System**
+- Custom exception hierarchy (ApiException, NetworkException, etc.)
+- Specific exceptions for auth, validation, security, server errors
+- Detailed error codes and messages
+- Error context preservation for debugging
 
 ### **Current Mobile Codebase Structure**
 
@@ -314,12 +329,14 @@ mobile/
 
 ### **Mobile Security Implementation**
 
-**✅ Security Foundation Complete**
-- Certificate pinning configuration ready
-- API endpoint validation for trusted hosts
-- Secure token storage with FlutterSecureStorage
-- Bearer token injection with auto-refresh
+**✅ Production-Ready Security System**
+- Certificate pinning interceptor (disabled for development, production-ready)
+- API endpoint validation preventing unauthorized hosts
+- Secure token storage with FlutterSecureStorage encryption
+- Automatic bearer token injection with refresh capability
 - Environment-based security configurations
+- Security exception handling with detailed error reporting
+- Request timeout enforcement and connection monitoring
 
 ### **Mobile State Management Architecture**
 
@@ -424,22 +441,27 @@ pnpm run test         # Run frontend tests
 - ✅ **State Management** with Provider pattern and role-based access
 - ✅ **Testing Infrastructure** with passing widget tests
 
-**🎯 MOBILE DEVELOPMENT STATUS: Phase 2 Complete (10%)**
-- 🚀 **Current Phase**: Ready for Phase 3 - API Client & Network Layer
-- 📱 **Development Plan**: 18 remaining phases over 6-8 weeks
-- 🏗️ **Architecture**: Clean Architecture with feature-based structure established
-- 📋 **User Flows**: Authentication flow foundation implemented
-- 🖨️ **Business Workflows**: Dependencies configured, ready for implementation
+**🎯 MOBILE DEVELOPMENT STATUS: Phase 4 Complete (20%)**
+- 🚀 **Current Phase**: Ready for Phase 5 - Authentication UI & User Management
+- 📱 **Development Plan**: 16 remaining phases over 6-8 weeks
+- 🏗️ **Architecture**: Clean Architecture with robust API foundation
+- 📋 **API Integration**: Complete HTTP client with security and error handling
+- 🔐 **Authentication System**: JWT token management and refresh mechanisms
+- 🛡️ **Security**: Production-ready interceptors and validation
+- 🔄 **Error Handling**: Comprehensive retry logic and network monitoring
+- 📊 **Data Models**: All business entities with JSON serialization
+- 🖨️ **Business Workflows**: API client ready for UI implementation
 - 📷 **Scanning**: Dependencies configured, ready for implementation
 - 🔗 **Thermal Printing**: Dependencies configured, ready for implementation
 
 **📊 NEXT STEPS:**
-1. **Mobile Development Phase 3**: API Client & Network Layer (3-4 days)
-2. **Mobile Development Phase 4**: Core Authentication System (3-4 days)  
-3. **Mobile Development Phase 5**: Login & Store Selection Flow (3-4 days)
-4. **Web Frontend Development**: Build UI using the API contract (optional)
-5. **Testing**: Backend API integration testing
-6. **Deployment**: Backend is ready for production deployment
+1. **Mobile Development Phase 5**: Authentication UI & User Management (3-4 days)
+2. **Mobile Development Phase 6**: Store Management & Selection (2-3 days)  
+3. **Mobile Development Phase 7**: Product Management & Scanning (4-5 days)
+4. **Mobile Development Phase 8**: Transaction Management & Sales (4-5 days)
+5. **Web Frontend Development**: Build UI using the API contract (optional)
+6. **Testing**: Mobile app integration testing with backend API
+7. **Deployment**: Backend is ready for production deployment
 
 ### Project Structure
 
