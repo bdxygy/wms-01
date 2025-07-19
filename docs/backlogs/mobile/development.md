@@ -43,24 +43,53 @@ Set up Flutter project from scratch with complete architecture, dependencies, an
   - [ ] Create new Flutter project with proper package name
   - [ ] Configure clean architecture folder structure (`core/`, `features/`, `ui/`)
   - [ ] Set up environment configuration (dev, staging, prod)
-  - [ ] Configure Android and iOS project settings
+  - [ ] **Platform-Specific Configurations**
+    - [ ] Android permissions (Camera, Bluetooth, Location)
+    - [ ] iOS usage descriptions (Camera, Bluetooth)
+    - [ ] SDK constraints (Flutter >=3.10.0, Dart >=3.0.0)
+    - [ ] ProGuard rules for release builds
+  - [ ] **Security Foundation**
+    - [ ] Certificate pinning configuration
+    - [ ] API endpoint validation setup
+    - [ ] Secure token storage preparation
+    - [ ] Biometric authentication foundation
 
 - [ ] **Dependencies Configuration**
-  - [ ] HTTP client: `dio: ^5.3.2` with interceptors
-  - [ ] State management: `provider: ^6.0.5`
-  - [ ] Navigation: `go_router: ^12.1.1`
-  - [ ] Forms: `flutter_form_builder: ^9.1.1`, `form_builder_validators: ^9.1.0`
-  - [ ] Storage: `flutter_secure_storage: ^9.0.0`, `shared_preferences: ^2.2.2`
-  - [ ] Scanning: `mobile_scanner: ^3.5.2` (barcode/QR)
-  - [ ] Camera: `camera: ^0.10.5`, `image_picker: ^1.0.4`
-  - [ ] Thermal printing: `blue_thermal_printer: ^2.1.1`, `esc_pos_bluetooth: ^0.4.1`
-  - [ ] Serialization: `json_annotation: ^4.8.1`, `json_serializable: ^6.7.1`
-  - [ ] UI: `flex_color_scheme: ^7.3.1` (Material Design 3)
+  - [ ] **Core Dependencies**
+    - [ ] HTTP client: `dio: ^5.3.2` with interceptors
+    - [ ] State management: `provider: ^6.0.5`
+    - [ ] Navigation: `go_router: ^12.1.1`
+    - [ ] Forms: `flutter_form_builder: ^9.1.1`, `form_builder_validators: ^9.1.0`
+    - [ ] Storage: `flutter_secure_storage: ^9.0.0`, `shared_preferences: ^2.2.2`
+  - [ ] **Platform Integration**
+    - [ ] Permissions: `permission_handler: ^11.0.1` (Camera/Bluetooth)
+    - [ ] Device info: `device_info_plus: ^9.1.0`
+    - [ ] Connectivity: `connectivity_plus: ^5.0.1`
+    - [ ] App info: `package_info_plus: ^4.2.0`
+    - [ ] File paths: `path_provider: ^2.1.1`
+  - [ ] **Scanning & Camera**
+    - [ ] Barcode scanning: `mobile_scanner: ^3.5.2`
+    - [ ] Camera: `camera: ^0.10.5`
+    - [ ] Image picker: `image_picker: ^1.0.4`
+  - [ ] **Thermal Printing (Choose Strategy)**
+    - [ ] Primary: `esc_pos_bluetooth: ^0.4.1`
+    - [ ] Fallback: `blue_thermal_printer: ^2.1.1`
+    - [ ] Utilities: `esc_pos_utils: ^1.1.0`
+  - [ ] **Serialization & UI**
+    - [ ] JSON: `json_annotation: ^4.8.1`, `json_serializable: ^6.7.1`
+    - [ ] Theme: `flex_color_scheme: ^7.3.1` (Material Design 3)
+    - [ ] Fonts: `google_fonts: ^6.1.0`
+    - [ ] i18n: `flutter_localizations: ^0.1.0`, `intl: ^0.18.1`
 
 - [ ] **Development Tools**
   - [ ] Code generation: `build_runner: ^2.4.6`
   - [ ] Linting: `flutter_lints: ^3.0.1`
   - [ ] Testing: `flutter_test`, `integration_test`
+  - [ ] **Testing Infrastructure**
+    - [ ] Mock data generators: `mockito: ^5.4.2`
+    - [ ] Network mocking: `http_mock_adapter: ^0.4.4`
+    - [ ] Widget testing utilities: `flutter_test`
+    - [ ] Integration testing: `integration_test`
 
 - [ ] **API Integration Setup**
   - [ ] Set up API client with Dio configuration
@@ -76,38 +105,76 @@ Set up Flutter project from scratch with complete architecture, dependencies, an
   - [ ] Provider setup for state management
   - [ ] Authentication provider initialization
 
+- [ ] **Internationalization Setup**
+  - [ ] Configure Flutter localization delegates
+  - [ ] Set up ARB file structure for translations
+  - [ ] Create English and Indonesian language files
+  - [ ] Implement AppLocalizations delegate
+  - [ ] Add language switching functionality
+  - [ ] Configure MaterialApp with localizationsDelegates
+
+- [ ] **Poppins Font Configuration**
+  - [ ] Download and configure Poppins font files
+  - [ ] Set up font assets in pubspec.yaml
+  - [ ] Create custom text theme with Poppins font
+  - [ ] Configure font weights (Regular, Medium, Bold, SemiBold)
+  - [ ] Implement font fallback system
+  - [ ] Test font rendering across different devices
+
 ### **Technical Implementation**
 ```dart
-// Project structure (aligned with Flutter API Contract):
+// Project structure with enhanced architecture:
 lib/
 ├── core/
 │   ├── api/
-│   │   ├── api_client.dart      // Complete API client from contract
-│   │   ├── api_endpoints.dart   // All 40+ endpoint definitions
-│   │   └── api_response.dart    // Base response models
+│   │   ├── api_client.dart         // Complete API client from contract
+│   │   ├── api_endpoints.dart      // All 40+ endpoint definitions
+│   │   ├── api_response.dart       // Base response models
+│   │   ├── api_interceptors.dart   // Auth, error, retry interceptors
+│   │   └── certificate_pinning.dart // Security implementation
 │   ├── auth/
-│   │   ├── auth_service.dart    // JWT authentication service
-│   │   └── auth_provider.dart   // State management
+│   │   ├── auth_service.dart       // JWT authentication service
+│   │   ├── auth_provider.dart      // State management
+│   │   └── secure_storage.dart     // Token storage
 │   ├── models/
-│   │   ├── user.dart           // User model with roles
-│   │   ├── product.dart        // Product with IMEI support
-│   │   ├── transaction.dart    // Transaction with items
-│   │   └── store.dart          // Store model
+│   │   ├── user.dart              // User model with roles
+│   │   ├── product.dart           // Product with IMEI support
+│   │   ├── transaction.dart       // Transaction with items
+│   │   ├── store.dart             // Store model
+│   │   └── api_error.dart         // Error handling models
 │   ├── services/
-│   │   ├── camera_service.dart    // Photo capture
-│   │   ├── scanner_service.dart   // Barcode/IMEI scanning
-│   │   └── printer_service.dart   // Thermal printing
-│   └── utils/
-│       └── image_utils.dart
+│   │   ├── camera_service.dart     // Photo capture
+│   │   ├── scanner_service.dart    // Barcode/IMEI scanning
+│   │   ├── printer_service.dart    // Thermal printing
+│   │   ├── connectivity_service.dart // Network monitoring
+│   │   └── cache_service.dart      // Data caching
+│   ├── providers/
+│   │   ├── store_context_provider.dart  // Store context
+│   │   ├── printer_status_provider.dart // Printer status
+│   │   └── app_config_provider.dart     // App configuration
+│   ├── utils/
+│   │   ├── image_utils.dart       // Image processing
+│   │   ├── validation_utils.dart  // Form validation
+│   │   ├── error_handler.dart     // Global error handling
+│   │   └── performance_monitor.dart // Performance tracking
+│   └── constants/
+│       ├── app_constants.dart     // App-wide constants
+│       └── error_codes.dart       // Error code definitions
 ├── features/
 │   ├── auth/
 │   │   ├── screens/
-│   │   └── widgets/
+│   │   ├── widgets/
+│   │   └── tests/                 // Feature-specific tests
 │   ├── dashboard/
 │   ├── products/
 │   ├── transactions/
 │   ├── scanner/
 │   └── settings/
+├── test/
+│   ├── unit/                      // Unit tests
+│   ├── widget/                    // Widget tests
+│   ├── integration/               // Integration tests
+│   └── mocks/                     // Mock data and services
 └── main.dart
 ```
 
@@ -118,10 +185,48 @@ lib/
 - **Error handling**: Comprehensive error handling with user-friendly messages
 - **Mobile features**: Barcode scanning, camera integration, thermal printing
 
+### **Platform-Specific Configuration Details**
+
+**Android Configuration (android/app/src/main/AndroidManifest.xml)**
+```xml
+<!-- Camera and Bluetooth permissions -->
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.BLUETOOTH" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+```
+
+**iOS Configuration (ios/Runner/Info.plist)**
+```xml
+<!-- Usage descriptions -->
+<key>NSCameraUsageDescription</key>
+<string>Camera access required for product photos and barcode scanning</string>
+<key>NSBluetoothAlwaysUsageDescription</key>
+<string>Bluetooth access required for thermal printer connectivity</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Location access for Bluetooth device discovery</string>
+```
+
+**Environment Configuration (pubspec.yaml)**
+```yaml
+name: wms_mobile
+description: Warehouse Management System Mobile App
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+```
+
 ### **Success Criteria**
 - ✅ Flutter project builds and runs on both iOS and Android
-- ✅ All dependencies configured and working
+- ✅ All dependencies configured and working without conflicts
+- ✅ Platform-specific permissions and configurations complete
+- ✅ Security foundation and certificate pinning ready
 - ✅ Clean architecture structure established
+- ✅ Testing infrastructure setup complete
 - ✅ Development environment ready for feature development
 
 ---
@@ -169,11 +274,13 @@ Create comprehensive design system with Material Design 3, dark/light themes, an
 
 ---
 
-## 🔐 **Phase 3: Core Authentication System**
+## 🌐 **Phase 3: API Client & Network Layer**
 *Duration: 3-4 days | Priority: CRITICAL*
 
 ### **Objective**
-Implement JWT-based authentication with secure storage and role-based access control foundation.
+Create comprehensive API client with proper error handling, response wrappers, and integration with all 40+ backend endpoints.
+
+**Note: API Client must be implemented before Authentication Service to provide HTTP foundation.**
 
 ### **Features to Implement**
 - [ ] **Authentication Models**
@@ -219,19 +326,30 @@ Implement JWT-based authentication with secure storage and role-based access con
 
 ---
 
-## 🌐 **Phase 4: API Client & Network Layer**
+## 🔐 **Phase 4: Core Authentication System**
 *Duration: 3-4 days | Priority: CRITICAL*
 
 ### **Objective**
-Create comprehensive API client with proper error handling, response wrappers, and integration with all 40+ backend endpoints.
+Implement JWT-based authentication with secure storage and role-based access control foundation.
+
+**Note: Authentication Service depends on API Client from Phase 3.**
 
 ### **Features to Implement**
 - [ ] **API Client Foundation**
   - [ ] Dio HTTP client with base configuration
-  - [ ] Authentication interceptor (Bearer token injection)
-  - [ ] Error handling interceptor with custom exceptions
-  - [ ] Request/response logging interceptor
-  - [ ] Retry logic and timeout configuration
+  - [ ] **Security Interceptors**
+    - [ ] Certificate pinning implementation
+    - [ ] API endpoint validation
+    - [ ] Bearer token injection
+  - [ ] **Error Handling Interceptors**
+    - [ ] Custom exception handling with retry logic
+    - [ ] Network timeout handling (>30 seconds)
+    - [ ] Connection loss recovery
+    - [ ] Rate limiting and throttling
+  - [ ] **Monitoring Interceptors**
+    - [ ] Request/response logging
+    - [ ] Performance monitoring
+    - [ ] Network connectivity detection
 
 - [ ] **Response Models**
   - [ ] BaseResponse<T> wrapper for single items
@@ -257,17 +375,62 @@ Create comprehensive API client with proper error handling, response wrappers, a
   - [ ] Transaction management (SALE/TRANSFER)
   - [ ] IMEI management (add, remove, search)
 
-- [ ] **Error Handling System**
-  - [ ] ApiException class with error codes
-  - [ ] Network error detection
-  - [ ] API error response parsing
-  - [ ] User-friendly error messages
+- [ ] **Comprehensive Error Handling System**
+  - [ ] **Core Error Classes**
+    - [ ] ApiException with standardized error codes
+    - [ ] NetworkException for connectivity issues
+    - [ ] AuthException for authentication failures
+    - [ ] ValidationException for input errors
+  - [ ] **Error Scenarios Coverage**
+    - [ ] Network timeout (>30 seconds)
+    - [ ] Connection lost during requests
+    - [ ] Invalid API responses
+    - [ ] Server maintenance mode
+    - [ ] Storage full scenarios
+  - [ ] **Retry Mechanisms**
+    - [ ] Exponential backoff for failed requests
+    - [ ] Token refresh retry on 401 errors
+    - [ ] Network reconnection retry
+    - [ ] User-guided retry with feedback
+
+### **Security Implementation Details**
+
+**Certificate Pinning Setup**
+```dart
+// core/api/certificate_pinning.dart
+class CertificatePinning {
+  static const String API_FINGERPRINT = 'SHA256:...'; // Production API cert
+  static const String DEV_FINGERPRINT = 'SHA256:...'; // Development API cert
+  
+  static bool validateCertificate(X509Certificate cert, String host, int port) {
+    // Implement certificate validation logic
+  }
+}
+```
+
+**API Endpoint Validation**
+```dart
+// Ensure all API calls go to trusted endpoints
+class ApiValidator {
+  static final List<String> TRUSTED_HOSTS = [
+    'api.wms.example.com',
+    'dev-api.wms.example.com'
+  ];
+  
+  static bool isValidEndpoint(String url) {
+    // Validate endpoint against whitelist
+  }
+}
+```
 
 ### **Success Criteria**
 - ✅ Complete API client covering all backend endpoints
-- ✅ Proper error handling and user feedback
+- ✅ Certificate pinning and endpoint validation working
+- ✅ Comprehensive error handling with retry mechanisms
+- ✅ Network monitoring and connectivity detection
 - ✅ Type-safe models with JSON serialization
-- ✅ Bearer token authentication working
+- ✅ Performance monitoring and logging active
+- ✅ Bearer token authentication with secure refresh
 
 ---
 
@@ -415,6 +578,26 @@ Create role-specific dashboard screens with relevant widgets, quick actions, and
 - ✅ Quick actions navigate to relevant screens
 - ✅ Professional dashboard UI/UX
 
+### **🧪 Testing Milestone: Authentication & Basic UI**
+*Duration: 1 day | After Phase 7*
+
+**Critical Testing Requirements:**
+- [ ] **Authentication Flow Testing**
+  - [ ] Login with all user roles (OWNER, ADMIN, STAFF, CASHIER)
+  - [ ] Store selection flow for non-owner users
+  - [ ] Token refresh mechanism validation
+  - [ ] Session timeout handling
+- [ ] **Role-Based Dashboard Testing**
+  - [ ] Verify role-specific dashboard content
+  - [ ] Test navigation restrictions per role
+  - [ ] Validate store context switching (OWNER)
+  - [ ] Confirm data scoping works correctly
+- [ ] **API Integration Testing**
+  - [ ] All authentication endpoints working
+  - [ ] Error handling for network failures
+  - [ ] Certificate pinning validation
+  - [ ] Bearer token injection verification
+
 ---
 
 ## 📱 **Phase 8: Bottom Navigation & Screen Structure**
@@ -516,7 +699,12 @@ Implement camera functionality for product photos and transaction proof capture.
   - [ ] Photo capture with quality settings
   - [ ] Front/back camera switching
   - [ ] Flash control and settings
-  - [ ] Camera permissions handling
+  - [ ] **Enhanced Camera Features**
+    - [ ] Camera permissions handling with user guidance
+    - [ ] Memory management during photo capture
+    - [ ] Camera failure recovery mechanisms
+    - [ ] Photo quality optimization
+    - [ ] Background camera task handling
 
 - [ ] **Photo Capture Screen**
   - [ ] Custom camera UI with controls
@@ -525,12 +713,23 @@ Implement camera functionality for product photos and transaction proof capture.
   - [ ] Multiple photo capture mode
   - [ ] Photo gallery preview
 
-- [ ] **Image Management**
-  - [ ] Image compression and optimization
-  - [ ] Local image storage in app directory
-  - [ ] Image upload preparation (for API)
-  - [ ] Image cache management
-  - [ ] Image deletion and cleanup
+- [ ] **Advanced Image Management**
+  - [ ] **Compression & Optimization**
+    - [ ] Intelligent image compression algorithms
+    - [ ] Size optimization for different use cases
+    - [ ] Quality vs file size balancing
+    - [ ] Format conversion (JPEG, PNG, WebP)
+  - [ ] **Storage & Cache Management**
+    - [ ] Local image storage in app directory
+    - [ ] Image cache with LRU eviction
+    - [ ] Storage full detection and cleanup
+    - [ ] Image metadata management
+    - [ ] Automatic cleanup of old images
+  - [ ] **Performance Optimization**
+    - [ ] Lazy image loading
+    - [ ] Image preloading strategies
+    - [ ] Memory leak prevention
+    - [ ] Background image processing
 
 - [ ] **Integration Preparation**
   - [ ] Product photo capture workflow
@@ -580,6 +779,12 @@ Implement comprehensive barcode scanning for product search and transaction item
   - [ ] Add products to transactions via scan
   - [ ] Quick product lookup from any screen
   - [ ] Inventory checking via scan
+  - [ ] **Enhanced Error Handling**
+    - [ ] Invalid barcode format detection
+    - [ ] Scanner retry on detection failure
+    - [ ] Camera permission denied handling
+    - [ ] Low light scanning optimization
+    - [ ] Manual barcode entry fallback
 
 - [ ] **Scanner Utilities**
   - [ ] Barcode validation and formatting
@@ -640,6 +845,30 @@ Implement IMEI-specific scanning and product search functionality.
 - ✅ Product search by IMEI functional
 - ✅ IMEI integration with product workflows
 - ✅ Proper IMEI validation and formatting
+
+### **🧪 Testing Milestone: Scanning Integration**
+*Duration: 1 day | After Phase 12*
+
+**Critical Testing Requirements:**
+- [ ] **Barcode Scanner Testing**
+  - [ ] Multiple format support (EAN, UPC, Code128, QR)
+  - [ ] Real-time detection accuracy
+  - [ ] Camera controls (torch, zoom, focus)
+  - [ ] Performance under different lighting
+- [ ] **IMEI Scanner Testing**
+  - [ ] IMEI format validation (15-16 digits)
+  - [ ] Luhn algorithm validation
+  - [ ] Duplicate IMEI detection
+  - [ ] Integration with product search
+- [ ] **Camera Service Testing**
+  - [ ] Photo capture quality and compression
+  - [ ] Front/back camera switching
+  - [ ] Permission handling validation
+  - [ ] Memory management during capture
+- [ ] **Integration Testing**
+  - [ ] Scanner results with product search
+  - [ ] Navigation flow from scanning
+  - [ ] Error handling for invalid scans
 
 ---
 
@@ -793,6 +1022,34 @@ Implement complete transaction creation workflow with barcode scanning for item 
 - ✅ IMEI scanning integration working
 - ✅ Auto-navigation to detail after creation
 
+### **🧪 Testing Milestone: Core Business Workflows**
+*Duration: 1-2 days | After Phase 15*
+
+**Critical Testing Requirements:**
+- [ ] **Product Workflow Testing**
+  - [ ] Complete product creation flow
+  - [ ] Auto-navigation to product detail
+  - [ ] Photo capture integration
+  - [ ] Form validation and error handling
+  - [ ] Role-based access control (OWNER/ADMIN)
+- [ ] **Transaction Workflow Testing**
+  - [ ] SALE transaction creation with items
+  - [ ] TRANSFER transaction between stores
+  - [ ] Barcode scanning item addition
+  - [ ] IMEI scanning item addition
+  - [ ] Photo proof capture requirement
+  - [ ] Amount calculation accuracy
+- [ ] **End-to-End Business Flow Testing**
+  - [ ] Product creation → Detail → Edit workflow
+  - [ ] Transaction creation → Items → Completion
+  - [ ] Cross-role workflow testing
+  - [ ] Store context validation
+- [ ] **Data Validation Testing**
+  - [ ] Form validation rules
+  - [ ] Business rule enforcement
+  - [ ] API data consistency
+  - [ ] Error recovery mechanisms
+
 ---
 
 ## 🖨️ **Phase 16: Thermal Printer Foundation**
@@ -920,17 +1177,62 @@ Implement receipt printing for transactions with auto-print and manual print opt
   - [ ] Print history tracking
   - [ ] Print job status display
 
-- [ ] **Print Error Handling**
-  - [ ] Printer connectivity error handling
-  - [ ] Paper out detection and user notification
-  - [ ] Print queue management
-  - [ ] Retry mechanisms with user feedback
+- [ ] **Comprehensive Print Error Handling**
+  - [ ] **Connection Issues**
+    - [ ] Bluetooth connection lost during print
+    - [ ] Printer device not found errors
+    - [ ] Pairing failure recovery
+    - [ ] Auto-reconnection with exponential backoff
+  - [ ] **Hardware Issues**
+    - [ ] Paper out detection and user notification
+    - [ ] Printer jam detection
+    - [ ] Low battery warnings
+    - [ ] Overheating protection
+  - [ ] **Print Job Management**
+    - [ ] Print queue with job prioritization
+    - [ ] Failed print job retry mechanisms
+    - [ ] Print job cancellation
+    - [ ] Print status tracking and user feedback
+  - [ ] **Offline Printing**
+    - [ ] Local print job storage
+    - [ ] Retry when connection restored
+    - [ ] Print job expiration handling
 
 ### **Success Criteria**
 - ✅ Auto-receipt printing after transaction creation
 - ✅ "Print Payment Note" button working in detail screen
 - ✅ Receipt templates formatted correctly
 - ✅ Comprehensive print error handling
+
+### **🧪 Testing Milestone: Thermal Printing Integration**
+*Duration: 1-2 days | After Phase 18*
+
+**Critical Testing Requirements:**
+- [ ] **Bluetooth Printer Testing**
+  - [ ] Device discovery and pairing
+  - [ ] Connection stability testing
+  - [ ] Multiple printer device support
+  - [ ] Auto-reconnection functionality
+- [ ] **Print Job Testing**
+  - [ ] Barcode printing from product detail
+  - [ ] Auto-receipt printing after transactions
+  - [ ] Print queue management
+  - [ ] Print job retry mechanisms
+- [ ] **Error Scenario Testing**
+  - [ ] Printer paper out detection
+  - [ ] Bluetooth connection loss during print
+  - [ ] Print job failure recovery
+  - [ ] User feedback for print errors
+- [ ] **Template and Format Testing**
+  - [ ] Barcode template formatting
+  - [ ] Receipt template layout
+  - [ ] ESC/POS command generation
+  - [ ] Print quality validation
+- [ ] **Integration Testing**
+  - [ ] Product creation → Auto-print barcode
+  - [ ] Transaction completion → Auto-print receipt
+  - [ ] "Print Payment Note" functionality
+  - [ ] Print settings persistence
 
 ---
 
@@ -1076,12 +1378,28 @@ Implement complete category management system with CRUD operations and store ass
   - [ ] API endpoint configuration
   - [ ] Printer settings integration
 
-- [ ] **Production Polish**
-  - [ ] Loading skeleton screens
-  - [ ] Advanced error handling with retry
-  - [ ] Performance optimizations
-  - [ ] Memory management
-  - [ ] Accessibility improvements
+- [ ] **Production Polish & Performance**
+  - [ ] **UI/UX Enhancements**
+    - [ ] Loading skeleton screens
+    - [ ] Smooth animations and transitions
+    - [ ] Accessibility improvements (screen readers, high contrast)
+    - [ ] Responsive design validation
+  - [ ] **Performance Optimizations**
+    - [ ] App startup time optimization
+    - [ ] Memory usage profiling and optimization
+    - [ ] Battery usage optimization
+    - [ ] Network request optimization
+    - [ ] Image loading and caching optimization
+  - [ ] **Memory Management**
+    - [ ] Memory leak detection and fixes
+    - [ ] Large dataset pagination optimization
+    - [ ] Background task memory management
+    - [ ] Cache size limits and cleanup
+  - [ ] **Advanced Error Handling**
+    - [ ] Global error boundary implementation
+    - [ ] User-friendly error messages
+    - [ ] Error reporting and analytics
+    - [ ] Offline error handling
 
 - [ ] **Testing & Quality Assurance**
   - [ ] Critical path testing
@@ -1090,11 +1408,44 @@ Implement complete category management system with CRUD operations and store ass
   - [ ] Performance testing
   - [ ] Error scenario testing
 
+### **🧪 Final Testing Milestone: Production Readiness**
+*Duration: 2-3 days | After Phase 20*
+
+**Critical Production Testing:**
+- [ ] **Performance Testing**
+  - [ ] App startup time (target: <3 seconds)
+  - [ ] Memory usage under load
+  - [ ] Battery consumption monitoring
+  - [ ] Network efficiency testing
+- [ ] **Device Compatibility Testing**
+  - [ ] Multiple Android versions (API 21+)
+  - [ ] iOS versions (iOS 12+)
+  - [ ] Different screen sizes and densities
+  - [ ] Low-end device performance
+- [ ] **Stress Testing**
+  - [ ] Large dataset handling (1000+ products)
+  - [ ] Multiple concurrent users
+  - [ ] Extended usage sessions
+  - [ ] Memory leak detection
+- [ ] **Security Testing**
+  - [ ] Certificate pinning validation
+  - [ ] Token security and refresh
+  - [ ] Local data encryption
+  - [ ] Permission handling
+- [ ] **Integration Testing**
+  - [ ] All API endpoints functional
+  - [ ] Offline/online mode transitions
+  - [ ] Cross-role workflow validation
+  - [ ] Thermal printer compatibility
+
 ### **Success Criteria**
 - ✅ Complete user and store management
 - ✅ Category management functional
-- ✅ Enhanced settings screen
-- ✅ Production-ready application with polish
+- ✅ Enhanced settings screen with performance monitoring
+- ✅ Production-ready application with comprehensive polish
+- ✅ Performance benchmarks met
+- ✅ Device compatibility validated
+- ✅ Security measures verified
 - ✅ Comprehensive testing completed
 
 ---
@@ -1102,12 +1453,14 @@ Implement complete category management system with CRUD operations and store ass
 ## 📊 **Phase Dependencies & Critical Path**
 
 ### **Critical Path (Must Complete in Order)**
-1. **Phases 1-5**: Foundation → Theme → Auth → API → Login
+1. **Phases 1-5**: Foundation → Theme → API → Auth → Login
 2. **Phase 6**: Store Selection (enables user flows)
 3. **Phases 7-12**: Core UI → Scanning Integration
 4. **Phases 13-15**: Product & Transaction Forms
 5. **Phases 16-18**: Thermal Printing Integration
 6. **Phases 19-20**: Management & Polish
+
+**Note**: Phase order corrected - API Client (Phase 3) now comes before Authentication (Phase 4)
 
 ### **Parallel Development Opportunities**
 - **Phase 10** (Camera) can be parallel with Phase 9 (Product List)
@@ -1142,14 +1495,19 @@ Implement complete category management system with CRUD operations and store ass
 - ✅ **Role-Based Access**: Complete RBAC with store context
 
 ### **Production Readiness**
-- ✅ **Performance**: Optimized for mobile devices
-- ✅ **Error Handling**: Comprehensive error management
-- ✅ **User Experience**: Professional UI/UX with proper feedback
-- ✅ **Integration**: Complete API integration with backend
+- ✅ **Performance**: Optimized for mobile devices with monitoring
+- ✅ **Memory Management**: Leak prevention and efficient resource usage
+- ✅ **Error Handling**: Comprehensive error management with user guidance
+- ✅ **Offline Capability**: Essential functions work without connectivity
+- ✅ **User Experience**: Professional UI/UX with accessibility support
+- ✅ **Security**: Certificate pinning and secure data handling
+- ✅ **Integration**: Complete API integration with backend and monitoring
+- ✅ **Device Compatibility**: Tested across multiple platforms and devices
 
 ---
 
 *Last Updated: 2025-01-19*  
-*Status: Ready to start Phase 1*  
-*Total Phases: 20*  
-*Estimated Duration: 8-10 weeks*
+*Status: Ready to start Phase 1 - Enhanced with security, performance, and testing*  
+*Total Phases: 20 + 4 Testing Milestones*  
+*Estimated Duration: 8-10 weeks + 1 week testing*  
+*Fixed Issues: Phase dependencies, security implementation, comprehensive error handling*
