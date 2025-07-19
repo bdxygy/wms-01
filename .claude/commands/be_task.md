@@ -1,1 +1,0 @@
-Do task Phase $1 from `@docs/backlogs/testing_migrations.md`. Put an [x] in the checkbox for each item you finish. Update status current codebase into file after you done.
