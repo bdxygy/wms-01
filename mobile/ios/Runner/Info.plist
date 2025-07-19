@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Mobile</string>
+	<string>Wms Mobile</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>mobile</string>
+	<string>wms_mobile</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,5 +45,14 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Usage descriptions for permissions -->
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access required for product photos and barcode scanning</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Bluetooth access required for thermal printer connectivity</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location access for Bluetooth device discovery</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access for selecting product images</string>
 </dict>
 </plist>

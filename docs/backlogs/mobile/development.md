@@ -11,7 +11,7 @@ Complete Flutter mobile application development from zero with focus on business
 **Platform**: Flutter (iOS & Android)  
 **Backend Integration**: 40+ production-ready API endpoints  
 **Timeline**: 20 phases over 8-10 weeks  
-**Architecture**: Clean Architecture with feature-based structure
+**Architecture**: Clean Architecture folder structures with feature-based structure
 
 ---
 

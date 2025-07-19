@@ -1,4 +1,4 @@
-package com.example.mobile
+package com.wms.wms_mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

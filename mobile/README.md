@@ -1,6 +1,6 @@
-# mobile
+# wms_mobile
 
-A new Flutter project.
+Warehouse Management System Mobile App
 
 ## Getting Started
 
