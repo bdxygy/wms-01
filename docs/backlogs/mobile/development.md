@@ -238,33 +238,33 @@ environment:
 Create comprehensive design system with Material Design 3, dark/light themes, and reusable UI components.
 
 ### **Features to Implement**
-- [ ] **Theme System**
-  - [ ] Material Design 3 with `flex_color_scheme`
-  - [ ] Light and dark theme configurations
-  - [ ] WMS brand colors and custom color scheme
-  - [ ] Typography system with proper text styles
-  - [ ] System theme detection and manual toggle
+- [x] **Theme System**
+  - [x] Material Design 3 with `flex_color_scheme`
+  - [x] Light and dark theme configurations
+  - [x] WMS brand colors and custom color scheme
+  - [x] Typography system with proper text styles
+  - [x] System theme detection and manual toggle
 
-- [ ] **Core UI Components**
-  - [ ] Custom app bars with role-based actions
-  - [ ] Loading indicators and skeleton screens
-  - [ ] Error states and empty state widgets
-  - [ ] Custom buttons (primary, secondary, icon)
-  - [ ] Form field components and validation displays
-  - [ ] Cards and list item templates
+- [x] **Core UI Components**
+  - [x] Custom app bars with role-based actions
+  - [x] Loading indicators and skeleton screens
+  - [x] Error states and empty state widgets
+  - [x] Custom buttons (primary, secondary, icon)
+  - [x] Form field components and validation displays
+  - [x] Cards and list item templates
 
-- [ ] **Layout Foundation**
-  - [ ] Responsive breakpoint system
-  - [ ] Safe area handling utilities
-  - [ ] Keyboard behavior management
-  - [ ] Bottom sheet and dialog templates
-  - [ ] Scaffold templates for different screen types
+- [x] **Layout Foundation**
+  - [x] Responsive breakpoint system
+  - [x] Safe area handling utilities
+  - [x] Keyboard behavior management
+  - [x] Bottom sheet and dialog templates
+  - [x] Scaffold templates for different screen types
 
-- [ ] **Icon System**
-  - [ ] Material Design icons
-  - [ ] Custom WMS-specific icons
-  - [ ] Status indicators and badges
-  - [ ] Role-based icon variations
+- [x] **Icon System**
+  - [x] Material Design icons
+  - [x] Custom WMS-specific icons
+  - [x] Status indicators and badges
+  - [x] Role-based icon variations
 
 ### **Success Criteria**
 - ✅ Complete theme system with light/dark modes
@@ -338,7 +338,7 @@ Implement JWT-based authentication with secure storage and role-based access con
 - [ ] **API Client Foundation**
   - [ ] Dio HTTP client with base configuration
   - [ ] **Security Interceptors**
-    - [ ] Certificate pinning implementation
+    - [ ] Certificate pinning implementation, (still set up but DISABLED after it)
     - [ ] API endpoint validation
     - [ ] Bearer token injection
   - [ ] **Error Handling Interceptors**

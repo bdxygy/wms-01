@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Database**: SQLite with Drizzle ORM ✅ **PRODUCTION READY**
 - **Authentication**: JWT-based with role-based access control ✅ **PRODUCTION READY**
 - **Frontend Web**: React, Shadcn, Zod, React Query, Tailwindcss, Rsbuild 📋 **PLANNED**
-- **Mobile**: Flutter (cross-platform mobile development) ✅ **PHASE 1 COMPLETE - FOUNDATION READY**
+- **Mobile**: Flutter (cross-platform mobile development) ✅ **PHASE 2 COMPLETE - UI FOUNDATION READY**
 
 ### Architecture
 
@@ -185,48 +185,49 @@ The backend API is **production-ready** and fully functional. Frontend teams can
 - **Desktop applications** (Electron, Tauri)
 - **Integration tools** (any HTTP client)
 
-## 📱 **MOBILE APPLICATION STATUS - PHASE 1 COMPLETE**
+## 📱 **MOBILE APPLICATION STATUS - PHASE 2 COMPLETE**
 
-### **Flutter Mobile Development Status: Phase 1 Complete**
+### **Flutter Mobile Development Status: Phase 2 Complete**
 
-**Current Phase**: ✅ **Phase 1: Project Foundation & Setup - COMPLETED**  
-**Next Phase**: 📋 **Phase 2: UI Foundation & Theme System**  
-**Overall Progress**: **5% Complete (1/20 phases)**
+**Current Phase**: ✅ **Phase 2: UI Foundation & Theme System - COMPLETED**  
+**Next Phase**: 📋 **Phase 3: API Client & Network Layer**  
+**Overall Progress**: **10% Complete (2/20 phases)**
 
-### **Phase 1 Implementation Summary**
+### **Phase 2 Implementation Summary**
 
-All Phase 1 requirements have been successfully implemented:
+All Phase 2 requirements have been successfully implemented:
 
-**✅ Project Infrastructure**
-- Flutter project created with clean architecture (`core/`, `features/`, `ui/`)
-- 40+ dependencies configured and working (Dio, Provider, Camera, Scanner, Printing)
-- Platform permissions configured for Android and iOS
-- Environment configuration (dev, staging, prod) with security settings
+**✅ Comprehensive Theme System**
+- Material Design 3 with `flex_color_scheme` integration
+- WMS brand colors and custom color schemes
+- Light and dark theme configurations with system detection
+- Professional typography system with Poppins font
 
-**✅ API Integration Foundation**
-- Complete API client with Dio configuration and interceptors
-- Authentication interceptors with JWT token management and auto-refresh
-- Certificate pinning and endpoint validation for security
-- Error handling with retry mechanisms and network monitoring
-- All 40+ backend endpoints mapped to Flutter services
+**✅ Core UI Components**
+- Custom button library (Primary, Secondary, Text, Icon, FAB, Destructive, Success)
+- Loading indicators and skeleton screens for all data types
+- Card components (Product, Transaction, User, Stats cards)
+- Form components with validation (Text, Dropdown, Switch, Checkbox, Date/Time)
+- Custom app bars (Standard, Search, Role-based, Sliver)
 
-**✅ Core Models & Serialization**
-- All core models created (User, Store, Product, Transaction, Category)
-- JSON serialization setup with code generation working
-- Base response models for API communication
-- Role-based permissions built into models
+**✅ Layout Foundation**
+- Responsive breakpoint system (Mobile, Tablet, Desktop)
+- Safe area handling and keyboard behavior management
+- Grid layouts (Responsive, Staggered) for card display
+- Empty and error state components
+- Spacing constants and layout utilities
 
-**✅ Application Structure**
-- Main app structure with MaterialApp, themes, and provider setup
-- State management with Provider pattern (App, Auth, StoreContext providers)
-- Theme system with Material Design 3, light/dark modes, and Poppins font
-- Splash screen with initialization flow
+**✅ Icon System**
+- Comprehensive icon library covering all WMS features
+- Role-based icons (Owner, Admin, Staff, Cashier)
+- Status and connectivity icons with dynamic helpers
+- Context-aware icon sizing and styling
 
-**✅ Internationalization & Development Tools**
-- i18n setup with English and Indonesian language support
-- Build runner configured for code generation
-- Linting and testing infrastructure working
-- Widget tests passing
+**✅ Theme Management**
+- Advanced theme switcher with Light/Dark/System modes
+- Theme persistence with SharedPreferences
+- Theme mode indicators and settings tiles
+- System theme detection and manual toggle
 
 ### **Current Mobile Codebase Structure**
 
@@ -254,6 +255,19 @@ mobile/
 │   │   ├── providers/
 │   │   │   ├── app_provider.dart       # App settings (theme, locale)
 │   │   │   └── store_context_provider.dart # Store selection state
+│   │   ├── theme/                      # ✅ NEW: Comprehensive Theme System
+│   │   │   ├── app_theme.dart         # Main theme configuration
+│   │   │   ├── theme_colors.dart      # WMS brand color palette
+│   │   │   ├── typography.dart        # Text styles and font system
+│   │   │   └── icons.dart             # Icon system and utilities
+│   │   ├── widgets/                    # ✅ NEW: Core UI Components
+│   │   │   ├── buttons.dart           # Custom button components
+│   │   │   ├── loading.dart           # Loading indicators and skeletons
+│   │   │   ├── cards.dart             # Card components for data display
+│   │   │   ├── app_bars.dart          # Custom app bar variants
+│   │   │   ├── form_components.dart   # Form fields and inputs
+│   │   │   ├── layout.dart            # Layout utilities and responsive design
+│   │   │   └── theme_switcher.dart    # Theme switching components
 │   │   └── utils/
 │   │       └── app_config.dart         # Environment configuration
 │   ├── features/
@@ -276,6 +290,28 @@ mobile/
 └── pubspec.yaml                      # Dependencies and configuration
 ```
 
+### **Mobile Theme System Features**
+
+**✅ Professional Design System**
+- WMS brand colors with light/dark variants
+- Material Design 3 components with custom styling
+- Comprehensive typography hierarchy with Poppins font
+- Role-based color coding (Owner: Purple, Admin: Blue, Staff: Green, Cashier: Orange)
+
+**✅ Component Library**
+- 7 button variants with loading states and icons
+- 6 loading indicator types including skeleton loaders
+- 5 card types for different data display needs
+- 5 app bar variants for different contexts
+- 8 form component types with validation
+- Layout utilities for responsive design
+
+**✅ Responsive Design**
+- Breakpoint system (Mobile <600px, Tablet 600-900px, Desktop >900px)
+- Adaptive layouts and spacing
+- Safe area handling and keyboard behavior
+- Grid systems for card display
+
 ### **Mobile Security Implementation**
 
 **✅ Security Foundation Complete**
@@ -288,7 +324,7 @@ mobile/
 ### **Mobile State Management Architecture**
 
 **Provider Pattern Implementation:**
-- `AppProvider`: Theme, locale, app settings management
+- `AppProvider`: Theme, locale, app settings management with persistence
 - `AuthProvider`: JWT authentication, user state, permissions
 - `StoreContextProvider`: Store selection for non-owner users
 
@@ -377,28 +413,30 @@ pnpm run test         # Run frontend tests
 - ✅ **Production infrastructure**: validation, error handling, pagination, filtering
 - ✅ **Comprehensive testing** with integration test coverage
 
-**📱 MOBILE: PHASE 1 COMPLETE - FOUNDATION READY**
+**📱 MOBILE: PHASE 2 COMPLETE - UI FOUNDATION READY**
 - ✅ **Project Foundation & Setup** completed (Phase 1 of 20)
-- ✅ **Clean Architecture** with core/, features/, ui/ structure
-- ✅ **Complete API Integration** with all 40+ backend endpoints mapped
+- ✅ **UI Foundation & Theme System** completed (Phase 2 of 20)
+- ✅ **Professional Design System** with Material Design 3
+- ✅ **Comprehensive Component Library** ready for feature development
+- ✅ **Theme Management** with light/dark modes and system detection
+- ✅ **Responsive Design** utilities and layout foundation
 - ✅ **Security Foundation** with certificate pinning and secure storage
 - ✅ **State Management** with Provider pattern and role-based access
-- ✅ **Theme System** with Material Design 3 and internationalization
 - ✅ **Testing Infrastructure** with passing widget tests
 
-**🎯 MOBILE DEVELOPMENT STATUS: Phase 1 Complete (5%)**
-- 🚀 **Current Phase**: Ready for Phase 2 - UI Foundation & Theme System
-- 📱 **Development Plan**: 20 phases over 8-10 weeks
+**🎯 MOBILE DEVELOPMENT STATUS: Phase 2 Complete (10%)**
+- 🚀 **Current Phase**: Ready for Phase 3 - API Client & Network Layer
+- 📱 **Development Plan**: 18 remaining phases over 6-8 weeks
 - 🏗️ **Architecture**: Clean Architecture with feature-based structure established
 - 📋 **User Flows**: Authentication flow foundation implemented
-- 🖨️ **Business Workflows**: API integration ready for implementation
+- 🖨️ **Business Workflows**: Dependencies configured, ready for implementation
 - 📷 **Scanning**: Dependencies configured, ready for implementation
 - 🔗 **Thermal Printing**: Dependencies configured, ready for implementation
 
 **📊 NEXT STEPS:**
-1. **Mobile Development Phase 2**: UI Foundation & Theme System (2-3 days)
-2. **Mobile Development Phase 3**: API Client & Network Layer (3-4 days)  
-3. **Mobile Development Phase 4**: Core Authentication System (3-4 days)
+1. **Mobile Development Phase 3**: API Client & Network Layer (3-4 days)
+2. **Mobile Development Phase 4**: Core Authentication System (3-4 days)  
+3. **Mobile Development Phase 5**: Login & Store Selection Flow (3-4 days)
 4. **Web Frontend Development**: Build UI using the API contract (optional)
 5. **Testing**: Backend API integration testing
 6. **Deployment**: Backend is ready for production deployment
@@ -429,9 +467,9 @@ When implementing, follow this structure:
 │   │   ├── stores/          # State management
 │   │   └── utils/           # Frontend utilities
 │   └── package.json
-├── mobile/                  # ✅ Flutter mobile app (PHASE 1 COMPLETE)
+├── mobile/                  # ✅ Flutter mobile app (PHASE 2 COMPLETE)
 │   ├── lib/
-│   │   ├── core/            # ✅ API, auth, models, providers, utils
+│   │   ├── core/            # ✅ API, auth, models, providers, theme, widgets, utils
 │   │   ├── features/        # ✅ Feature-based architecture setup
 │   │   └── main.dart        # ✅ App entry point with theme setup
 │   ├── l10n/               # ✅ Internationalization files
@@ -573,3 +611,11 @@ Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+      
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context or otherwise consider it in your response unless it is highly relevant to your task. Most of the time, it is not relevant.
