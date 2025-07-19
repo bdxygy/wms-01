@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
+import '../widgets/owner_dashboard.dart';
+import '../widgets/admin_dashboard.dart';
+import '../widgets/staff_dashboard.dart';
+import '../widgets/cashier_dashboard.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -21,40 +25,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('WMS Dashboard'),
+        title: Text(_getDashboardTitle(user?.role.toString() ?? 'UNKNOWN')),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
+          // Settings action for OWNER
+          if (authProvider.isOwner)
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => _navigateToSettings(),
+              tooltip: 'Settings',
+            ),
+          // Logout action
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => _handleLogout(),
+            tooltip: 'Logout',
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome Section
-            _buildWelcomeSection(user?.name ?? 'User', user?.role.toString() ?? 'UNKNOWN'),
-            
-            const SizedBox(height: 24),
-            
-            // Store Context Section (for non-owner users)
-            if (!authProvider.isOwner && storeProvider.selectedStore != null)
-              _buildStoreContextSection(storeProvider.selectedStore?.name ?? 'Unknown Store'),
-            
-            const SizedBox(height: 24),
-            
-            // Quick Actions
-            _buildQuickActions(authProvider),
-            
-            const SizedBox(height: 24),
-            
-            // Role-specific Dashboard Content
-            _buildRoleSpecificContent(authProvider),
-          ],
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Section
+              _buildWelcomeSection(user?.name ?? 'User', user?.role.toString() ?? 'UNKNOWN'),
+              
+              const SizedBox(height: 24),
+              
+              // Store Context Section (for non-owner users)
+              if (!authProvider.isOwner && storeProvider.selectedStore != null)
+                _buildStoreContextSection(storeProvider.selectedStore?.name ?? 'Unknown Store'),
+              
+              if (!authProvider.isOwner && storeProvider.selectedStore != null)
+                const SizedBox(height: 24),
+              
+              // Role-specific Dashboard Content
+              _buildRoleSpecificDashboard(user?.role.toString() ?? 'UNKNOWN'),
+            ],
+          ),
         ),
       ),
     );
@@ -153,138 +166,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildQuickActions(AuthProvider authProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Quick Actions',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.5,
+  Widget _buildRoleSpecificDashboard(String role) {
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return const OwnerDashboard();
+      case 'ADMIN':
+        return const AdminDashboard();
+      case 'STAFF':
+        return const StaffDashboard();
+      case 'CASHIER':
+        return const CashierDashboard();
+      default:
+        return _buildUnknownRoleDashboard();
+    }
+  }
+
+  Widget _buildUnknownRoleDashboard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
           children: [
-            if (authProvider.canCreateProducts)
-              _buildActionCard(
-                icon: Icons.add_box,
-                title: 'Add Product',
-                subtitle: 'Create new product',
-                onTap: () => _navigateToCreateProduct(),
-              ),
-            if (authProvider.canCreateTransactions)
-              _buildActionCard(
-                icon: Icons.point_of_sale,
-                title: 'New Sale',
-                subtitle: 'Create transaction',
-                onTap: () => _navigateToCreateTransaction(),
-              ),
-            _buildActionCard(
-              icon: Icons.qr_code_scanner,
-              title: 'Scan Barcode',
-              subtitle: 'Scan product',
-              onTap: () => _navigateToScanner(),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
             ),
-            _buildActionCard(
-              icon: Icons.search,
-              title: 'Search Products',
-              subtitle: 'Find products',
-              onTap: () => _navigateToProducts(),
+            const SizedBox(height: 16),
+            Text(
+              'Unknown Role',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Your user role is not recognized. Please contact your administrator.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: () => _handleLogout(),
+              child: const Text('Logout'),
             ),
           ],
         ),
-      ],
-    );
-  }
-
-  Widget _buildActionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 32,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
       ),
-    );
-  }
-
-  Widget _buildRoleSpecificContent(AuthProvider authProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Recent Activity',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.inbox_outlined,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'No recent activity',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Your recent activities will appear here',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -303,31 +234,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  void _navigateToCreateProduct() {
-    // TODO: Navigate to create product screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Product feature coming soon!')),
-    );
+  String _getDashboardTitle(String role) {
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return 'Owner Dashboard';
+      case 'ADMIN':
+        return 'Admin Dashboard';
+      case 'STAFF':
+        return 'Staff Dashboard';
+      case 'CASHIER':
+        return 'Cashier Dashboard';
+      default:
+        return 'WMS Dashboard';
+    }
   }
 
-  void _navigateToCreateTransaction() {
-    // TODO: Navigate to create transaction screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Transaction feature coming soon!')),
-    );
+  Future<void> _handleRefresh() async {
+    // TODO: Implement refresh logic
+    await Future.delayed(const Duration(seconds: 1));
   }
 
-  void _navigateToScanner() {
-    // TODO: Navigate to scanner screen
+  void _navigateToSettings() {
+    // TODO: Navigate to settings screen
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Scanner feature coming soon!')),
-    );
-  }
-
-  void _navigateToProducts() {
-    // TODO: Navigate to products screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Products feature coming soon!')),
+      const SnackBar(content: Text('Settings feature coming soon!')),
     );
   }
 
