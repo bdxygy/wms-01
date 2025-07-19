@@ -1,0 +1,939 @@
+{
+  "info": {
+    "name": "WMS API Collection",
+    "description": "Warehouse Management System API - Complete collection with all endpoints",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "apiUrl",
+      "value": "{{baseUrl}}/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "storeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-extract tokens from login responses",
+          "if (pm.response.json() && pm.response.json().data) {",
+          "    const data = pm.response.json().data;",
+          "    if (data.accessToken) {",
+          "        pm.collectionVariables.set('accessToken', data.accessToken);",
+          "    }",
+          "    if (data.refreshToken) {",
+          "        pm.collectionVariables.set('refreshToken', data.refreshToken);",
+          "    }",
+          "    if (data.user && data.user.id) {",
+          "        pm.collectionVariables.set('userId', data.user.id);",
+          "    }",
+          "    // Auto-extract IDs from create responses",
+          "    if (data.id) {",
+          "        const endpoint = pm.request.url.getPath();",
+          "        if (endpoint.includes('/stores')) {",
+          "            pm.collectionVariables.set('storeId', data.id);",
+          "        } else if (endpoint.includes('/products')) {",
+          "            pm.collectionVariables.set('productId', data.id);",
+          "        } else if (endpoint.includes('/categories')) {",
+          "            pm.collectionVariables.set('categoryId', data.id);",
+          "        } else if (endpoint.includes('/transactions')) {",
+          "            pm.collectionVariables.set('transactionId', data.id);",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health status"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Developer Register",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "dev",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "dev123",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Owner User\",\n  \"username\": \"owner\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/auth/dev/register",
+              "host": ["{{apiUrl}}"],
+              "path": ["auth", "dev", "register"]
+            },
+            "description": "Register first owner user (development only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"owner\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/auth/login",
+              "host": ["{{apiUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login user and get JWT tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"username\": \"admin1\",\n  \"password\": \"password123\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/auth/register",
+              "host": ["{{apiUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register new user (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/auth/refresh",
+              "host": ["{{apiUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Refresh access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/auth/logout",
+              "host": ["{{apiUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Logout current user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Staff User\",\n  \"username\": \"staff1\",\n  \"password\": \"password123\",\n  \"role\": \"STAFF\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/users",
+              "host": ["{{apiUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Create new user"
+          },
+          "response": []
+        },
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/users?page=1&limit=10",
+              "host": ["{{apiUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of users"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/users/{{userId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Get specific user by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated User Name\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/users/{{userId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Update user information"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/users/{{userId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Delete user (OWNER only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stores",
+      "item": [
+        {
+          "name": "Create Store",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Store\",\n  \"type\": \"Retail\",\n  \"addressLine1\": \"123 Main Street\",\n  \"addressLine2\": \"Suite 100\",\n  \"city\": \"Jakarta\",\n  \"province\": \"DKI Jakarta\",\n  \"postalCode\": \"12345\",\n  \"country\": \"Indonesia\",\n  \"phoneNumber\": \"+62-21-1234567\",\n  \"email\": \"store@example.com\",\n  \"timezone\": \"Asia/Jakarta\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/stores",
+              "host": ["{{apiUrl}}"],
+              "path": ["stores"]
+            },
+            "description": "Create new store (OWNER only)"
+          },
+          "response": []
+        },
+        {
+          "name": "List Stores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/stores?page=1&limit=10",
+              "host": ["{{apiUrl}}"],
+              "path": ["stores"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "province",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of stores"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Store by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/stores/{{storeId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["stores", "{{storeId}}"]
+            },
+            "description": "Get specific store by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Store",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Store Name\",\n  \"phoneNumber\": \"+62-21-9876543\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/stores/{{storeId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["stores", "{{storeId}}"]
+            },
+            "description": "Update store information (OWNER only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electronics\",\n  \"storeId\": \"{{storeId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/categories",
+              "host": ["{{apiUrl}}"],
+              "path": ["categories"]
+            },
+            "description": "Create new category (OWNER/ADMIN only)"
+          },
+          "response": []
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/categories?page=1&limit=10",
+              "host": ["{{apiUrl}}"],
+              "path": ["categories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "storeId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/categories/{{categoryId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Get specific category by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Electronics\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/categories/{{categoryId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Update category (OWNER/ADMIN only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 14\",\n  \"storeId\": \"{{storeId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"sku\": \"IPHONE14-001\",\n  \"isImei\": true,\n  \"quantity\": 10,\n  \"purchasePrice\": 800.00,\n  \"salePrice\": 999.00\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/products",
+              "host": ["{{apiUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Create new product (OWNER/ADMIN only)"
+          },
+          "response": []
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/products?page=1&limit=10",
+              "host": ["{{apiUrl}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "storeId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "categoryId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isImei",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of products"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/products/{{productId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["products", "{{productId}}"]
+            },
+            "description": "Get specific product by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product by Barcode",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/products/barcode/EXAMPLE123",
+              "host": ["{{apiUrl}}"],
+              "path": ["products", "barcode", "EXAMPLE123"]
+            },
+            "description": "Get product by barcode"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 14 Pro\",\n  \"salePrice\": 1099.00,\n  \"quantity\": 15\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/products/{{productId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["products", "{{productId}}"]
+            },
+            "description": "Update product (OWNER/ADMIN only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Create Sale Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"SALE\",\n  \"fromStoreId\": \"{{storeId}}\",\n  \"customerPhone\": \"+62-812-3456789\",\n  \"photoProofUrl\": \"https://example.com/proof.jpg\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"name\": \"iPhone 14\",\n      \"price\": 999.00,\n      \"quantity\": 1,\n      \"amount\": 999.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/transactions",
+              "host": ["{{apiUrl}}"],
+              "path": ["transactions"]
+            },
+            "description": "Create new sale transaction (OWNER/ADMIN only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Transfer Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"TRANSFER\",\n  \"fromStoreId\": \"{{storeId}}\",\n  \"toStoreId\": \"{{storeId}}\",\n  \"transferProofUrl\": \"https://example.com/transfer-proof.jpg\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"name\": \"iPhone 14\",\n      \"price\": 800.00,\n      \"quantity\": 2,\n      \"amount\": 1600.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/transactions",
+              "host": ["{{apiUrl}}"],
+              "path": ["transactions"]
+            },
+            "description": "Create new transfer transaction (OWNER/ADMIN only)"
+          },
+          "response": []
+        },
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/transactions?page=1&limit=10",
+              "host": ["{{apiUrl}}"],
+              "path": ["transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "fromStoreId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "toStoreId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isFinished",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of transactions"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transaction by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/transactions/{{transactionId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["transactions", "{{transactionId}}"]
+            },
+            "description": "Get specific transaction by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Transaction",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isFinished\": true,\n  \"customerPhone\": \"+62-812-9876543\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/transactions/{{transactionId}}",
+              "host": ["{{apiUrl}}"],
+              "path": ["transactions", "{{transactionId}}"]
+            },
+            "description": "Update transaction (OWNER/ADMIN only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "IMEIs",
+      "item": [
+        {
+          "name": "Add IMEI to Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imei\": \"123456789012345\"\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/products/{{productId}}/imeis",
+              "host": ["{{apiUrl}}"],
+              "path": ["products", "{{productId}}", "imeis"]
+            },
+            "description": "Add IMEI to product (OWNER/ADMIN only)"
+          },
+          "response": []
+        },
+        {
+          "name": "List Product IMEIs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/products/{{productId}}/imeis?page=1&limit=10",
+              "host": ["{{apiUrl}}"],
+              "path": ["products", "{{productId}}", "imeis"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get paginated list of product IMEIs"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove IMEI",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{apiUrl}}/imeis/IMEI_ID_HERE",
+              "host": ["{{apiUrl}}"],
+              "path": ["imeis", "IMEI_ID_HERE"]
+            },
+            "description": "Remove IMEI (OWNER/ADMIN only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product with IMEIs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Samsung Galaxy S23\",\n  \"storeId\": \"{{storeId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"sku\": \"GALAXY-S23-001\",\n  \"isImei\": true,\n  \"quantity\": 5,\n  \"purchasePrice\": 700.00,\n  \"salePrice\": 899.00,\n  \"imeis\": [\n    \"123456789012345\",\n    \"123456789012346\",\n    \"123456789012347\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{apiUrl}}/products/imeis",
+              "host": ["{{apiUrl}}"],
+              "path": ["products", "imeis"]
+            },
+            "description": "Create product with IMEIs (OWNER/ADMIN only)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

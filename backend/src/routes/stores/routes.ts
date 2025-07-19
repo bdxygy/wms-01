@@ -2,6 +2,11 @@ import { Hono } from "hono";
 import { ValidationMiddleware } from "../../utils/validation";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { 
+  requireOwnerRole,
+  requireStoreAccess,
+  extractParamId
+} from "../../middleware/authorization.middleware";
+import { 
   createStoreSchema, 
   updateStoreSchema, 
   listStoresQuerySchema, 
@@ -21,6 +26,7 @@ stores.post(
   "/",
   authMiddleware,
   ValidationMiddleware.body(createStoreSchema),
+  requireOwnerRole(),
   createStoreHandler
 );
 
@@ -37,6 +43,7 @@ stores.get(
   "/:id",
   authMiddleware,
   ValidationMiddleware.params(storeIdParamSchema),
+  requireStoreAccess(extractParamId("id")),
   getStoreHandler
 );
 
@@ -46,6 +53,7 @@ stores.put(
   authMiddleware,
   ValidationMiddleware.params(storeIdParamSchema),
   ValidationMiddleware.body(updateStoreSchema),
+  requireOwnerRole(),
   updateStoreHandler
 );
 

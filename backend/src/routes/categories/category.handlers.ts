@@ -18,8 +18,7 @@ export const createCategoryHandler = async (c: Context) => {
 export const getCategoryHandler = async (c: Context) => {
   try {
     const { id } = getValidated<CategoryIdParam>(c, "validatedParams");
-    const user = c.get("user");
-    const result = await CategoryService.getCategoryById(id, user);
+    const result = await CategoryService.getCategoryById(id);
     return ResponseUtils.sendSuccess(c, result);
   } catch (error) {
     return ResponseUtils.sendError(c, error);

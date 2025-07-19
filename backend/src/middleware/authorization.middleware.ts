@@ -1,7 +1,9 @@
 import { createMiddleware } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
 import { AuthorizationService, Permission, Resource, Action } from "../services/authorization.service";
 import type { Applications } from "../http/hono";
 import type { User } from "../models/users";
+import { getValidated } from "../utils/context";
 
 export const requirePermission = (permission: Permission) => {
   return createMiddleware<Applications>(async (c, next) => {
@@ -86,7 +88,7 @@ export const requireOwnerRole = () => {
   return createMiddleware<Applications>(async (c, next) => {
     const user: User = c.get("user");
     if (user.role !== "OWNER") {
-      throw new Error("Only OWNER can perform this action");
+      throw new HTTPException(403, { message: "Only OWNER can perform this action" });
     }
     await next();
   });
@@ -96,7 +98,7 @@ export const requireOwnerOrAdmin = () => {
   return createMiddleware<Applications>(async (c, next) => {
     const user: User = c.get("user");
     if (user.role !== "OWNER" && user.role !== "ADMIN") {
-      throw new Error("Only OWNER or ADMIN can perform this action");
+      throw new HTTPException(403, { message: "Only OWNER or ADMIN can perform this action" });
     }
     await next();
   });
@@ -110,7 +112,7 @@ export const requireMinRole = (minRole: "OWNER" | "ADMIN" | "STAFF" | "CASHIER")
     const minRoleLevel = roleHierarchy.indexOf(minRole);
     
     if (userRoleLevel === -1 || userRoleLevel > minRoleLevel) {
-      throw new Error(`Insufficient role. Required: ${minRole} or higher`);
+      throw new HTTPException(403, { message: `Insufficient role. Required: ${minRole} or higher` });
     }
     await next();
   });
@@ -139,3 +141,39 @@ export const requireUserManagement = () => requirePermission("CREATE_USER");
 export const requireStoreManagement = () => requirePermission("CREATE_STORE");
 export const requireProductManagement = () => requireResourceAccess("PRODUCT", "CREATE");
 export const requireTransactionManagement = () => requireResourceAccess("TRANSACTION", "CREATE");
+
+// Specific role-based middleware for common patterns
+export const requireAdminCanOnlyCreateStaff = () => {
+  return createMiddleware<Applications>(async (c, next) => {
+    const user: User = c.get("user");
+    const data = getValidated<any>(c, "validatedBody");
+    
+    if (user.role === "ADMIN" && data.role !== "STAFF") {
+      throw new HTTPException(403, { message: "Admin can only create STAFF users" });
+    }
+    await next();
+  });
+};
+
+export const requireAdminCanOnlySetStaffRole = () => {
+  return createMiddleware<Applications>(async (c, next) => {
+    const user: User = c.get("user");
+    const data = getValidated<any>(c, "validatedBody");
+    
+    if (data.role && user.role === "ADMIN" && data.role !== "STAFF") {
+      throw new HTTPException(403, { message: "Admin can only set role to STAFF" });
+    }
+    await next();
+  });
+};
+
+export const requireStaffCannotCreateUsers = () => {
+  return createMiddleware<Applications>(async (c, next) => {
+    const user: User = c.get("user");
+    
+    if (user.role === "STAFF" || user.role === "CASHIER") {
+      throw new HTTPException(403, { message: "STAFF and CASHIER cannot create users" });
+    }
+    await next();
+  });
+};

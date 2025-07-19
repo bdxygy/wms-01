@@ -9,12 +9,7 @@ import type { User } from "../models/users";
 
 export class CategoryService {
   static async createCategory(data: CreateCategoryRequest, createdBy: User) {
-    // Check if user has permission to create categories
-    if (createdBy.role !== "OWNER" && createdBy.role !== "ADMIN") {
-      throw new HTTPException(403, { message: "Only OWNER and ADMIN can create categories" });
-    }
-
-    // Verify store exists and user has access to it
+    // Verify store exists (authorization middleware has already checked role and access)
     const store = await db
       .select()
       .from(stores)
@@ -22,18 +17,6 @@ export class CategoryService {
 
     if (!store[0]) {
       throw new HTTPException(404, { message: "Store not found" });
-    }
-
-    // Check store access based on user role
-    if (createdBy.role === "OWNER") {
-      if (store[0].ownerId !== createdBy.id) {
-        throw new HTTPException(403, { message: "Access denied to this store" });
-      }
-    } else {
-      // For ADMIN users, check if store belongs to same owner
-      if (store[0].ownerId !== createdBy.ownerId) {
-        throw new HTTPException(403, { message: "Access denied to this store" });
-      }
     }
 
     // Check if category name already exists in the store
@@ -77,7 +60,7 @@ export class CategoryService {
     };
   }
 
-  static async getCategoryById(id: string, requestingUser: User) {
+  static async getCategoryById(id: string) {
     const category = await db
       .select({
         id: categories.id,
@@ -86,10 +69,8 @@ export class CategoryService {
         createdBy: categories.createdBy,
         createdAt: categories.createdAt,
         updatedAt: categories.updatedAt,
-        storeOwnerId: stores.ownerId,
       })
       .from(categories)
-      .innerJoin(stores, eq(categories.storeId, stores.id))
       .where(
         and(
           eq(categories.id, id),
@@ -99,18 +80,6 @@ export class CategoryService {
 
     if (!category[0]) {
       throw new HTTPException(404, { message: "Category not found" });
-    }
-
-    // Check if user can access this category (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (category[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // For non-OWNER users, check if they belong to the same owner
-      if (category[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
     }
 
     return {
@@ -191,22 +160,15 @@ export class CategoryService {
   }
 
   static async updateCategory(id: string, data: UpdateCategoryRequest, requestingUser: User) {
-    // Check if user has permission to update categories
-    if (requestingUser.role !== "OWNER" && requestingUser.role !== "ADMIN") {
-      throw new HTTPException(403, { message: "Only OWNER and ADMIN can update categories" });
-    }
-
-    // Find category to update
+    // Find category to update (authorization middleware has already checked access)
     const existingCategory = await db
       .select({
         id: categories.id,
         name: categories.name,
         storeId: categories.storeId,
         createdBy: categories.createdBy,
-        storeOwnerId: stores.ownerId,
       })
       .from(categories)
-      .innerJoin(stores, eq(categories.storeId, stores.id))
       .where(
         and(
           eq(categories.id, id),
@@ -216,18 +178,6 @@ export class CategoryService {
 
     if (!existingCategory[0]) {
       throw new HTTPException(404, { message: "Category not found" });
-    }
-
-    // Check if user can update this category (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (existingCategory[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // For ADMIN users, check if they belong to the same owner
-      if (existingCategory[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
     }
 
     // Check if category name already exists in the store (if name is being updated)

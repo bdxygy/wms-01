@@ -19,14 +19,6 @@ export class UserService {
       throw new HTTPException(400, { message: "Username already exists" });
     }
 
-    // Role-based permission check
-    if (createdBy.role === "ADMIN" && data.role !== "STAFF") {
-      throw new HTTPException(403, { message: "Admin can only create STAFF users" });
-    }
-
-    if (createdBy.role === "STAFF" || createdBy.role === "CASHIER") {
-      throw new HTTPException(403, { message: "Insufficient permissions to create users" });
-    }
 
     // Determine owner ID based on creator's role
     let ownerId: string;
@@ -79,17 +71,6 @@ export class UserService {
       throw new HTTPException(404, { message: "User not found" });
     }
 
-    // Check if user can access this user (owner scoped)
-    if (requestingUser.role !== "OWNER") {
-      if (user[0].ownerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // Owner can access their own users
-      if (user[0].ownerId !== requestingUser.id && user[0].id !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    }
 
     return {
       id: user[0].id,
@@ -198,22 +179,6 @@ export class UserService {
       throw new HTTPException(404, { message: "User not found" });
     }
 
-    // Check if user can update this user (owner scoped)
-    if (requestingUser.role !== "OWNER") {
-      if (existingUser[0].ownerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // Owner can update their own users
-      if (existingUser[0].ownerId !== requestingUser.id && existingUser[0].id !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    }
-
-    // Role-based permission check for role updates
-    if (data.role && requestingUser.role === "ADMIN" && data.role !== "STAFF") {
-      throw new HTTPException(403, { message: "Admin can only set role to STAFF" });
-    }
 
     // Check username uniqueness if updating username
     if (data.username && data.username !== existingUser[0].username) {
@@ -269,10 +234,6 @@ export class UserService {
   }
 
   static async deleteUser(id: string, requestingUser: User) {
-    // Only OWNER can delete users
-    if (requestingUser.role !== "OWNER") {
-      throw new HTTPException(403, { message: "Only OWNER can delete users" });
-    }
 
     // Find user to delete
     const existingUser = await db
@@ -284,10 +245,6 @@ export class UserService {
       throw new HTTPException(404, { message: "User not found" });
     }
 
-    // Check if user can delete this user (owner scoped)
-    if (existingUser[0].ownerId !== requestingUser.id && existingUser[0].id !== requestingUser.id) {
-      throw new HTTPException(403, { message: "Access denied" });
-    }
 
     // Cannot delete self
     if (existingUser[0].id === requestingUser.id) {

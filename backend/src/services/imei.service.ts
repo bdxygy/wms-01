@@ -1,13 +1,13 @@
 import { randomUUID } from "crypto";
 import { and, count, eq, inArray, isNull } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import { customAlphabet } from "nanoid";
 import { db } from "../config/database";
 import { categories } from "../models/categories";
 import { productImeis } from "../models/product_imeis";
 import { products } from "../models/products";
 import { stores } from "../models/stores";
 import type { User } from "../models/users";
+import { generateBarcode } from "../utils/barcode";
 import type {
   AddImeiRequest,
   CreateProductWithImeisRequest,
@@ -15,23 +15,11 @@ import type {
 } from "../schemas/imei.schemas";
 
 export class ImeiService {
-  // Generate barcode using nanoid with numeric-alphabetical chars
-  private static generateBarcode = customAlphabet(
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    12
-  );
   static async addImei(
     productId: string,
     data: AddImeiRequest,
     createdBy: User
   ) {
-    // Check if user has permission to add IMEIs
-    if (createdBy.role !== "OWNER" && createdBy.role !== "ADMIN") {
-      throw new HTTPException(403, {
-        message: "Only OWNER and ADMIN can add IMEIs",
-      });
-    }
-
     // Verify product exists and user has access to it
     const product = await db
       .select({
@@ -56,16 +44,7 @@ export class ImeiService {
       });
     }
 
-    // Check if user can access this product (owner scoped)
-    if (createdBy.role === "OWNER") {
-      if (product[0].storeOwnerId !== createdBy.id) {
-        throw new HTTPException(403, { message: "Access denied to product" });
-      }
-    } else {
-      if (product[0].storeOwnerId !== createdBy.ownerId) {
-        throw new HTTPException(403, { message: "Access denied to product" });
-      }
-    }
+    // Authorization middleware has already checked product access
 
     // Check if IMEI already exists
     const existingImei = await db
@@ -184,41 +163,20 @@ export class ImeiService {
     };
   }
 
-  static async removeImei(imeiId: string, requestingUser: User) {
-    // Check if user has permission to remove IMEIs
-    if (requestingUser.role !== "OWNER" && requestingUser.role !== "ADMIN") {
-      throw new HTTPException(403, {
-        message: "Only OWNER and ADMIN can remove IMEIs",
-      });
-    }
-
-    // Find IMEI to remove
+  static async removeImei(imeiId: string) {
+    // Find IMEI to remove (authorization middleware has already checked access)
     const imei = await db
       .select({
         id: productImeis.id,
         productId: productImeis.productId,
         imei: productImeis.imei,
         createdBy: productImeis.createdBy,
-        storeOwnerId: stores.ownerId,
       })
       .from(productImeis)
-      .innerJoin(products, eq(productImeis.productId, products.id))
-      .innerJoin(stores, eq(products.storeId, stores.id))
       .where(eq(productImeis.id, imeiId));
 
     if (!imei[0]) {
       throw new HTTPException(404, { message: "IMEI not found" });
-    }
-
-    // Check if user can access this IMEI (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (imei[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied to IMEI" });
-      }
-    } else {
-      if (imei[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied to IMEI" });
-      }
     }
 
     // Remove IMEI
@@ -235,8 +193,8 @@ export class ImeiService {
     };
   }
 
-  static async getImeiById(imeiId: string, requestingUser: User) {
-    // Find IMEI
+  static async getImeiById(imeiId: string) {
+    // Find IMEI (authorization middleware has already checked access)
     const imei = await db
       .select({
         id: productImeis.id,
@@ -245,26 +203,12 @@ export class ImeiService {
         createdBy: productImeis.createdBy,
         createdAt: productImeis.createdAt,
         updatedAt: productImeis.updatedAt,
-        storeOwnerId: stores.ownerId,
       })
       .from(productImeis)
-      .innerJoin(products, eq(productImeis.productId, products.id))
-      .innerJoin(stores, eq(products.storeId, stores.id))
       .where(eq(productImeis.id, imeiId));
 
     if (!imei[0]) {
       throw new HTTPException(404, { message: "IMEI not found" });
-    }
-
-    // Check if user can access this IMEI (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (imei[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied to IMEI" });
-      }
-    } else {
-      if (imei[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied to IMEI" });
-      }
     }
 
     return {
@@ -281,14 +225,7 @@ export class ImeiService {
     data: CreateProductWithImeisRequest,
     createdBy: User
   ) {
-    // Check if user has permission to create products
-    if (createdBy.role !== "OWNER" && createdBy.role !== "ADMIN") {
-      throw new HTTPException(403, {
-        message: "Only OWNER and ADMIN can create products",
-      });
-    }
-
-    // Verify store exists and user has access to it
+    // Verify store exists (authorization middleware has already checked access)
     const store = await db
       .select()
       .from(stores)
@@ -296,17 +233,6 @@ export class ImeiService {
 
     if (!store[0]) {
       throw new HTTPException(404, { message: "Store not found" });
-    }
-
-    // Check if user can access this store (owner scoped)
-    if (createdBy.role === "OWNER") {
-      if (store[0].ownerId !== createdBy.id) {
-        throw new HTTPException(403, { message: "Access denied to store" });
-      }
-    } else {
-      if (store[0].ownerId !== createdBy.ownerId) {
-        throw new HTTPException(403, { message: "Access denied to store" });
-      }
     }
 
     // Verify category exists if provided
@@ -319,6 +245,24 @@ export class ImeiService {
       if (!category[0]) {
         throw new HTTPException(404, { message: "Category not found" });
       }
+    }
+
+    // Check if SKU already exists in the store
+    const existingSku = await db
+      .select()
+      .from(products)
+      .where(
+        and(
+          eq(products.sku, data.sku),
+          eq(products.storeId, data.storeId),
+          isNull(products.deletedAt)
+        )
+      );
+
+    if (existingSku.length > 0) {
+      throw new HTTPException(400, {
+        message: "SKU already exists in this store",
+      });
     }
 
     // Validate IMEI uniqueness
@@ -335,9 +279,9 @@ export class ImeiService {
     }
 
     // Validate quantity matches IMEI count
-    if (data.quantity !== data.imeis.length) {
+    if (data.quantity !== 1) {
       throw new HTTPException(400, {
-        message: `Quantity (${data.quantity}) must match number of IMEIs (${data.imeis.length})`,
+        message: `Product quantity must be 1 for IMEI tracking`,
       });
     }
 
@@ -348,7 +292,7 @@ export class ImeiService {
     const maxAttempts = 10;
 
     while (barcodeExists && attempts < maxAttempts) {
-      barcode = this.generateBarcode();
+      barcode = generateBarcode();
 
       // Check if barcode exists in owner's scope
       const existingProduct = await db

@@ -2,6 +2,10 @@ import { Hono } from "hono";
 import { ValidationMiddleware } from "../../utils/validation";
 import { basicAuthMiddleware } from "../../middleware/basic-auth.middleware";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import {
+  requireStaffCannotCreateUsers,
+  requireAdminCanOnlyCreateStaff,
+} from "../../middleware/authorization.middleware";
 import { devRegisterSchema, registerSchema, loginSchema, refreshTokenSchema } from "../../schemas/auth.schemas";
 import { devRegisterHandler, registerHandler, loginHandler, refreshHandler, logoutHandler } from "./auth.handlers";
 
@@ -19,6 +23,8 @@ auth.post(
 auth.post(
   "/register",
   authMiddleware,
+  requireStaffCannotCreateUsers(),
+  requireAdminCanOnlyCreateStaff(),
   ValidationMiddleware.body(registerSchema),
   registerHandler
 );

@@ -18,6 +18,14 @@ export const imeiIdParamSchema = z.object({
   id: z.string().uuid("Invalid IMEI ID format"),
 });
 
+// IMEI search parameter schema
+export const imeiSearchParamSchema = z.object({
+  imei: z
+    .string()
+    .min(15, "IMEI must be at least 15 characters")
+    .max(17, "IMEI must be at most 17 characters"),
+});
+
 // List product IMEIs query schema
 export const listProductImeisQuerySchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -73,6 +81,7 @@ export const createProductWithImeisSchema = z.object({
 export type AddImeiRequest = z.infer<typeof addImeiSchema>;
 export type ProductIdParam = z.infer<typeof productIdParamSchema>;
 export type ImeiIdParam = z.infer<typeof imeiIdParamSchema>;
+export type ImeiSearchParam = z.infer<typeof imeiSearchParamSchema>;
 export type ListProductImeisQuery = z.infer<typeof listProductImeisQuerySchema>;
 export type ImeiResponse = z.infer<typeof imeiResponseSchema>;
 

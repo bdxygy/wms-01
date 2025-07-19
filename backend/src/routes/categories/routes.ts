@@ -1,6 +1,11 @@
 import { Hono } from "hono";
 import { ValidationMiddleware } from "../../utils/validation";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import {
+  requireOwnerOrAdmin,
+  requireCategoryAccess,
+  extractParamId,
+} from "../../middleware/authorization.middleware";
 import { 
   createCategorySchema, 
   updateCategorySchema, 
@@ -20,6 +25,7 @@ const categories = new Hono();
 categories.post(
   "/",
   authMiddleware,
+  requireOwnerOrAdmin(),
   ValidationMiddleware.body(createCategorySchema),
   createCategoryHandler
 );
@@ -37,6 +43,7 @@ categories.get(
   "/:id",
   authMiddleware,
   ValidationMiddleware.params(categoryIdParamSchema),
+  requireCategoryAccess(extractParamId("id")),
   getCategoryHandler
 );
 
@@ -44,7 +51,9 @@ categories.get(
 categories.put(
   "/:id",
   authMiddleware,
+  requireOwnerOrAdmin(),
   ValidationMiddleware.params(categoryIdParamSchema),
+  requireCategoryAccess(extractParamId("id")),
   ValidationMiddleware.body(updateCategorySchema),
   updateCategoryHandler
 );

@@ -2,6 +2,14 @@ import { Hono } from "hono";
 import { ValidationMiddleware } from "../../utils/validation";
 import { authMiddleware } from "../../middleware/auth.middleware";
 import { 
+  requireOwnerRole,
+  requireStaffCannotCreateUsers,
+  requireAdminCanOnlyCreateStaff,
+  requireAdminCanOnlySetStaffRole,
+  requireUserAccess,
+  extractParamId
+} from "../../middleware/authorization.middleware";
+import { 
   createUserSchema, 
   updateUserSchema, 
   listUsersQuerySchema, 
@@ -22,6 +30,8 @@ users.post(
   "/",
   authMiddleware,
   ValidationMiddleware.body(createUserSchema),
+  requireStaffCannotCreateUsers(),
+  requireAdminCanOnlyCreateStaff(),
   createUserHandler
 );
 
@@ -38,6 +48,7 @@ users.get(
   "/:id",
   authMiddleware,
   ValidationMiddleware.params(userIdParamSchema),
+  requireUserAccess(extractParamId("id")),
   getUserHandler
 );
 
@@ -47,6 +58,8 @@ users.put(
   authMiddleware,
   ValidationMiddleware.params(userIdParamSchema),
   ValidationMiddleware.body(updateUserSchema),
+  requireUserAccess(extractParamId("id")),
+  requireAdminCanOnlySetStaffRole(),
   updateUserHandler
 );
 
@@ -55,6 +68,7 @@ users.delete(
   "/:id",
   authMiddleware,
   ValidationMiddleware.params(userIdParamSchema),
+  requireOwnerRole(),
   deleteUserHandler
 );
 

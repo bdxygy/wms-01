@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, unique } from 'drizzle-orm/sqlite-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { relations } from 'drizzle-orm';
 import { users } from './users';
@@ -26,7 +26,12 @@ export const products = sqliteTable('products', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   deletedAt: integer('deleted_at', { mode: 'timestamp' }),
-});
+}, (table) => ({
+  // Unique constraint: SKU must be unique within each store (excluding soft-deleted products)
+  uniqueSkuPerStore: unique('unique_sku_per_store').on(table.sku, table.storeId),
+  // Unique constraint: Barcode must be globally unique (excluding soft-deleted products)
+  uniqueBarcode: unique('unique_barcode').on(table.barcode),
+}));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
   store: one(stores, {

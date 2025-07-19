@@ -4,6 +4,7 @@ import { db } from "../config/database";
 import { products } from "../models/products";
 import { stores } from "../models/stores";
 import { categories } from "../models/categories";
+import { productImeis } from "../models/product_imeis";
 import { eq, and, like, isNull, count, gte, lte } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type {
@@ -12,23 +13,11 @@ import type {
   ListProductsQuery,
 } from "../schemas/product.schemas";
 import type { User } from "../models/users";
+import { generateBarcode } from "@/utils/barcode";
 
 export class ProductService {
-  // Generate barcode using nanoid with numeric-alphabetical characters only
-  private static generateBarcode = customAlphabet(
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    12
-  );
-
   static async createProduct(data: CreateProductRequest, createdBy: User) {
-    // Check if user has permission to create products
-    if (createdBy.role !== "OWNER" && createdBy.role !== "ADMIN") {
-      throw new HTTPException(403, {
-        message: "Only OWNER and ADMIN can create products",
-      });
-    }
-
-    // Verify store exists and user has access to it
+    // Verify store exists (authorization middleware has already checked role and access)
     const store = await db
       .select()
       .from(stores)
@@ -36,22 +25,6 @@ export class ProductService {
 
     if (!store[0]) {
       throw new HTTPException(404, { message: "Store not found" });
-    }
-
-    // Check store access based on user role
-    if (createdBy.role === "OWNER") {
-      if (store[0].ownerId !== createdBy.id) {
-        throw new HTTPException(403, {
-          message: "Access denied to this store",
-        });
-      }
-    } else {
-      // For ADMIN users, check if store belongs to same owner
-      if (store[0].ownerId !== createdBy.ownerId) {
-        throw new HTTPException(403, {
-          message: "Access denied to this store",
-        });
-      }
     }
 
     // Verify category exists and belongs to the same store (if provided)
@@ -98,7 +71,7 @@ export class ProductService {
     let attempts = 0;
 
     while (barcodeExists && attempts < 10) {
-      barcode = this.generateBarcode();
+      barcode = generateBarcode();
       const existingBarcode = await db
         .select()
         .from(products)
@@ -156,7 +129,7 @@ export class ProductService {
     };
   }
 
-  static async getProductById(id: string, requestingUser: User) {
+  static async getProductById(id: string) {
     const product = await db
       .select({
         id: products.id,
@@ -172,26 +145,12 @@ export class ProductService {
         createdBy: products.createdBy,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
-        storeOwnerId: stores.ownerId,
       })
       .from(products)
-      .innerJoin(stores, eq(products.storeId, stores.id))
       .where(and(eq(products.id, id), isNull(products.deletedAt)));
 
     if (!product[0]) {
       throw new HTTPException(404, { message: "Product not found" });
-    }
-
-    // Check if user can access this product (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (product[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // For non-OWNER users, check if they belong to the same owner
-      if (product[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
     }
 
     return {
@@ -364,14 +323,7 @@ export class ProductService {
     data: UpdateProductRequest,
     requestingUser: User
   ) {
-    // Check if user has permission to update products
-    if (requestingUser.role !== "OWNER" && requestingUser.role !== "ADMIN") {
-      throw new HTTPException(403, {
-        message: "Only OWNER and ADMIN can update products",
-      });
-    }
-
-    // Find product to update
+    // Find product to update (authorization middleware has already checked access)
     const existingProduct = await db
       .select({
         id: products.id,
@@ -383,23 +335,10 @@ export class ProductService {
         storeOwnerId: stores.ownerId,
       })
       .from(products)
-      .innerJoin(stores, eq(products.storeId, stores.id))
       .where(and(eq(products.id, id), isNull(products.deletedAt)));
 
     if (!existingProduct[0]) {
       throw new HTTPException(404, { message: "Product not found" });
-    }
-
-    // Check if user can update this product (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (existingProduct[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // For ADMIN users, check if they belong to the same owner
-      if (existingProduct[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
     }
 
     // Verify category exists and belongs to the same store (if provided)
@@ -481,6 +420,79 @@ export class ProductService {
       createdBy: updatedProduct[0].createdBy,
       createdAt: updatedProduct[0].createdAt,
       updatedAt: updatedProduct[0].updatedAt,
+    };
+  }
+
+  static async getProductByImei(imei: string, requestingUser: User) {
+    // First find the product by IMEI
+    const productWithImei = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        storeId: products.storeId,
+        categoryId: products.categoryId,
+        sku: products.sku,
+        isImei: products.isImei,
+        barcode: products.barcode,
+        quantity: products.quantity,
+        purchasePrice: products.purchasePrice,
+        salePrice: products.salePrice,
+        createdBy: products.createdBy,
+        createdAt: products.createdAt,
+        updatedAt: products.updatedAt,
+        storeOwnerId: stores.ownerId,
+      })
+      .from(productImeis)
+      .innerJoin(products, eq(productImeis.productId, products.id))
+      .innerJoin(stores, eq(products.storeId, stores.id))
+      .where(
+        and(
+          eq(productImeis.imei, imei),
+          isNull(products.deletedAt)
+        )
+      );
+
+    if (!productWithImei[0]) {
+      throw new HTTPException(404, { message: "Product with IMEI not found" });
+    }
+
+    const product = productWithImei[0];
+
+    // Check if user can access this product (owner scoped)
+    if (requestingUser.role === "OWNER") {
+      if (product.storeOwnerId !== requestingUser.id) {
+        throw new HTTPException(403, { message: "Access denied" });
+      }
+    } else {
+      // For non-OWNER users, check if they belong to the same owner
+      if (product.storeOwnerId !== requestingUser.ownerId) {
+        throw new HTTPException(403, { message: "Access denied" });
+      }
+    }
+
+    // Get all IMEIs for this product
+    const allImeis = await db
+      .select({
+        imei: productImeis.imei,
+      })
+      .from(productImeis)
+      .where(eq(productImeis.productId, product.id));
+
+    return {
+      id: product.id,
+      name: product.name,
+      storeId: product.storeId,
+      categoryId: product.categoryId,
+      sku: product.sku,
+      isImei: product.isImei,
+      barcode: product.barcode,
+      quantity: product.quantity,
+      purchasePrice: product.purchasePrice,
+      salePrice: product.salePrice,
+      createdBy: product.createdBy,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+      imeis: allImeis.map(item => item.imei),
     };
   }
 }

@@ -1,6 +1,11 @@
 import { Hono } from "hono";
 import { ValidationMiddleware } from "../../utils/validation";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import {
+  requireOwnerOrAdmin,
+  requireProductAccess,
+  extractParamId,
+} from "../../middleware/authorization.middleware";
 import { 
   createProductSchema, 
   updateProductSchema, 
@@ -22,6 +27,7 @@ const products = new Hono();
 products.post(
   "/",
   authMiddleware,
+  requireOwnerOrAdmin(),
   ValidationMiddleware.body(createProductSchema),
   createProductHandler
 );
@@ -35,6 +41,8 @@ products.get(
 );
 
 // Get product by barcode endpoint (must be before /:id to avoid conflicts)
+// Note: No product access middleware here since we're searching by barcode
+// Owner scoping will be handled in the service layer
 products.get(
   "/barcode/:barcode",
   authMiddleware,
@@ -47,6 +55,7 @@ products.get(
   "/:id",
   authMiddleware,
   ValidationMiddleware.params(productIdParamSchema),
+  requireProductAccess(extractParamId("id")),
   getProductHandler
 );
 
@@ -54,7 +63,9 @@ products.get(
 products.put(
   "/:id",
   authMiddleware,
+  requireOwnerOrAdmin(),
   ValidationMiddleware.params(productIdParamSchema),
+  requireProductAccess(extractParamId("id")),
   ValidationMiddleware.body(updateProductSchema),
   updateProductHandler
 );

@@ -31,6 +31,9 @@ const envSchema = z.object({
   // Basic Auth
   BASIC_AUTH_USERNAME: z.string().min(1, 'BASIC_AUTH_USERNAME is required'),
   BASIC_AUTH_PASSWORD: z.string().min(1, 'BASIC_AUTH_PASSWORD is required'),
+  
+  // Barcode
+  BARCODE_PREFIX: z.string().min(1, 'BARCODE_PREFIX is required').default('RADJA-'),
 });
 
 export const env = envSchema.parse(process.env);

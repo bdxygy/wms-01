@@ -18,8 +18,7 @@ export const createTransactionHandler = async (c: Context) => {
 export const getTransactionHandler = async (c: Context) => {
   try {
     const { id } = getValidated<TransactionIdParam>(c, "validatedParams");
-    const user = c.get("user");
-    const result = await TransactionService.getTransactionById(id, user);
+    const result = await TransactionService.getTransactionById(id);
     return ResponseUtils.sendSuccess(c, result);
   } catch (error) {
     return ResponseUtils.sendError(c, error);

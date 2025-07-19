@@ -12,10 +12,6 @@ import type { User } from "../models/users";
 
 export class StoreService {
   static async createStore(data: CreateStoreRequest, createdBy: User) {
-    // Check if user has permission to create stores
-    if (createdBy.role !== "OWNER") {
-      throw new HTTPException(403, { message: "Only OWNER can create stores" });
-    }
 
     // Create store
     const storeId = randomUUID();
@@ -83,17 +79,6 @@ export class StoreService {
       throw new HTTPException(404, { message: "Store not found" });
     }
 
-    // Check if user can access this store (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (store[0].ownerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // For non-OWNER users, check if they belong to the same owner
-      if (store[0].ownerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    }
 
     return {
       id: store[0].id,
@@ -221,10 +206,6 @@ export class StoreService {
     data: UpdateStoreRequest,
     requestingUser: User
   ) {
-    // Check if user has permission to update stores
-    if (requestingUser.role !== "OWNER") {
-      throw new HTTPException(403, { message: "Only OWNER can update stores" });
-    }
 
     // Find store to update
     const existingStore = await db
@@ -236,10 +217,6 @@ export class StoreService {
       throw new HTTPException(404, { message: "Store not found" });
     }
 
-    // Check if user can update this store (owner scoped)
-    if (existingStore[0].ownerId !== requestingUser.id) {
-      throw new HTTPException(403, { message: "Access denied" });
-    }
 
     // Prepare update data
     const updateData: any = {

@@ -1,11 +1,13 @@
 import { Context } from "hono";
 import { ImeiService } from "../../services/imei.service";
+import { ProductService } from "../../services/product.service";
 import { ResponseUtils } from "../../utils/responses";
 import { getValidated } from "../../utils/context";
 import type {
   AddImeiRequest,
   ProductIdParam,
   ImeiIdParam,
+  ImeiSearchParam,
   ListProductImeisQuery,
   CreateProductWithImeisRequest,
 } from "../../schemas/imei.schemas";
@@ -43,8 +45,7 @@ export const listProductImeisHandler = async (c: Context) => {
 export const removeImeiHandler = async (c: Context) => {
   try {
     const { id: imeiId } = getValidated<ImeiIdParam>(c, "validatedParams");
-    const user = c.get("user");
-    const result = await ImeiService.removeImei(imeiId, user);
+    const result = await ImeiService.removeImei(imeiId);
     return ResponseUtils.sendSuccess(c, result);
   } catch (error) {
     return ResponseUtils.sendError(c, error);
@@ -63,6 +64,17 @@ export const createProductWithImeisHandler = async (c: Context) => {
       user
     );
     return ResponseUtils.sendCreated(c, result);
+  } catch (error) {
+    return ResponseUtils.sendError(c, error);
+  }
+};
+
+export const getProductByImeiHandler = async (c: Context) => {
+  try {
+    const { imei } = getValidated<ImeiSearchParam>(c, "validatedParams");
+    const user = c.get("user");
+    const result = await ProductService.getProductByImei(imei, user);
+    return ResponseUtils.sendSuccess(c, result);
   } catch (error) {
     return ResponseUtils.sendError(c, error);
   }

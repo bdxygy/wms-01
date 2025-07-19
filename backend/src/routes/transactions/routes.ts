@@ -1,6 +1,11 @@
 import { Hono } from "hono";
 import { ValidationMiddleware } from "../../utils/validation";
 import { authMiddleware } from "../../middleware/auth.middleware";
+import {
+  requireOwnerOrAdmin,
+  requireTransactionAccess,
+  extractParamId,
+} from "../../middleware/authorization.middleware";
 import { 
   createTransactionSchema, 
   updateTransactionSchema, 
@@ -20,6 +25,7 @@ const transactions = new Hono();
 transactions.post(
   "/",
   authMiddleware,
+  requireOwnerOrAdmin(),
   ValidationMiddleware.body(createTransactionSchema),
   createTransactionHandler
 );
@@ -37,6 +43,7 @@ transactions.get(
   "/:id",
   authMiddleware,
   ValidationMiddleware.params(transactionIdParamSchema),
+  requireTransactionAccess(extractParamId("id")),
   getTransactionHandler
 );
 
@@ -44,7 +51,9 @@ transactions.get(
 transactions.put(
   "/:id",
   authMiddleware,
+  requireOwnerOrAdmin(),
   ValidationMiddleware.params(transactionIdParamSchema),
+  requireTransactionAccess(extractParamId("id")),
   ValidationMiddleware.body(updateTransactionSchema),
   updateTransactionHandler
 );

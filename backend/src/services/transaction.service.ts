@@ -11,12 +11,7 @@ import type { User } from "../models/users";
 
 export class TransactionService {
   static async createTransaction(data: CreateTransactionRequest, createdBy: User) {
-    // Check if user has permission to create transactions
-    if (createdBy.role !== "OWNER" && createdBy.role !== "ADMIN") {
-      throw new HTTPException(403, { message: "Only OWNER and ADMIN can create transactions" });
-    }
-
-    // Verify stores exist and user has access to them
+    // Verify stores exist (authorization middleware has already checked role and access)
     const storeChecks = [];
     
     if (data.fromStoreId) {
@@ -43,19 +38,7 @@ export class TransactionService {
       storeChecks.push(toStore[0]);
     }
 
-    // Check store access based on user role
-    for (const store of storeChecks) {
-      if (createdBy.role === "OWNER") {
-        if (store.ownerId !== createdBy.id) {
-          throw new HTTPException(403, { message: "Access denied to store" });
-        }
-      } else {
-        // For ADMIN users, check if store belongs to same owner
-        if (store.ownerId !== createdBy.ownerId) {
-          throw new HTTPException(403, { message: "Access denied to store" });
-        }
-      }
-    }
+    // Store access checks have been handled by authorization middleware
 
     // Verify all products exist and calculate total amount
     let totalAmount = 0;
@@ -85,16 +68,7 @@ export class TransactionService {
         throw new HTTPException(404, { message: `Product ${item.productId} not found` });
       }
 
-      // Check if user can access this product (owner scoped)
-      if (createdBy.role === "OWNER") {
-        if (product[0].storeOwnerId !== createdBy.id) {
-          throw new HTTPException(403, { message: "Access denied to product" });
-        }
-      } else {
-        if (product[0].storeOwnerId !== createdBy.ownerId) {
-          throw new HTTPException(403, { message: "Access denied to product" });
-        }
-      }
+      // Product access checks have been handled by authorization middleware
 
       // Check if sufficient quantity is available
       if (product[0].quantity < item.quantity) {
@@ -175,7 +149,7 @@ export class TransactionService {
     };
   }
 
-  static async getTransactionById(id: string, requestingUser: User) {
+  static async getTransactionById(id: string) {
     const transaction = await db
       .select({
         id: transactions.id,
@@ -201,45 +175,7 @@ export class TransactionService {
       throw new HTTPException(404, { message: "Transaction not found" });
     }
 
-    // Check if user can access this transaction (owner scoped)
-    // For transactions, we need to check both fromStore and toStore access
-    let hasAccess = false;
-
-    if (requestingUser.role === "OWNER") {
-      // Check if user owns any of the stores involved
-      const storeIds = [transaction[0].fromStoreId, transaction[0].toStoreId].filter(Boolean);
-      if (storeIds.length > 0) {
-        const userStores = await db
-          .select()
-          .from(stores)
-          .where(
-            and(
-              eq(stores.ownerId, requestingUser.id),
-              or(...storeIds.map(storeId => eq(stores.id, storeId!)))
-            )
-          );
-        hasAccess = userStores.length > 0;
-      }
-    } else {
-      // For non-OWNER users, check if they belong to the same owner
-      const storeIds = [transaction[0].fromStoreId, transaction[0].toStoreId].filter(Boolean);
-      if (storeIds.length > 0) {
-        const userStores = await db
-          .select()
-          .from(stores)
-          .where(
-            and(
-              eq(stores.ownerId, requestingUser.ownerId!),
-              or(...storeIds.map(storeId => eq(stores.id, storeId!)))
-            )
-          );
-        hasAccess = userStores.length > 0;
-      }
-    }
-
-    if (!hasAccess) {
-      throw new HTTPException(403, { message: "Access denied" });
-    }
+    // Authorization middleware has already checked transaction access
 
     // Get transaction items
     const items = await db
@@ -446,10 +382,6 @@ export class TransactionService {
   }
 
   static async updateTransaction(id: string, data: UpdateTransactionRequest, requestingUser: User) {
-    // Check if user has permission to update transactions
-    if (requestingUser.role !== "OWNER" && requestingUser.role !== "ADMIN") {
-      throw new HTTPException(403, { message: "Only OWNER and ADMIN can update transactions" });
-    }
 
     // Find transaction to update
     const existingTransaction = await db
@@ -461,44 +393,7 @@ export class TransactionService {
       throw new HTTPException(404, { message: "Transaction not found" });
     }
 
-    // Check if user can update this transaction (owner scoped)
-    let hasAccess = false;
-
-    if (requestingUser.role === "OWNER") {
-      // Check if user owns any of the stores involved
-      const storeIds = [existingTransaction[0].fromStoreId, existingTransaction[0].toStoreId].filter(Boolean);
-      if (storeIds.length > 0) {
-        const userStores = await db
-          .select()
-          .from(stores)
-          .where(
-            and(
-              eq(stores.ownerId, requestingUser.id),
-              or(...storeIds.map(storeId => eq(stores.id, storeId!)))
-            )
-          );
-        hasAccess = userStores.length > 0;
-      }
-    } else {
-      // For non-OWNER users, check if they belong to the same owner
-      const storeIds = [existingTransaction[0].fromStoreId, existingTransaction[0].toStoreId].filter(Boolean);
-      if (storeIds.length > 0) {
-        const userStores = await db
-          .select()
-          .from(stores)
-          .where(
-            and(
-              eq(stores.ownerId, requestingUser.ownerId!),
-              or(...storeIds.map(storeId => eq(stores.id, storeId!)))
-            )
-          );
-        hasAccess = userStores.length > 0;
-      }
-    }
-
-    if (!hasAccess) {
-      throw new HTTPException(403, { message: "Access denied" });
-    }
+    // Authorization middleware has already checked transaction access
 
     // If updating items, validate them
     if (data.items) {
