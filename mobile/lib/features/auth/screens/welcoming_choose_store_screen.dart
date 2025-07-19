@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../generated/app_localizations.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
@@ -49,7 +50,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to load stores. Please try again.';
+          _errorMessage = AppLocalizations.of(context)!.failedToLoadStoresRetry;
           _isLoading = false;
         });
       }
@@ -116,7 +117,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
         
         // Welcome Message
         Text(
-          'Welcome, $userName!',
+          AppLocalizations.of(context)!.welcomeUser(userName),
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.onSurface,
@@ -127,7 +128,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
         const SizedBox(height: 8),
         
         Text(
-          'Please select a store to continue',
+          AppLocalizations.of(context)!.pleaseSelectStoreToContine,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
           ),
@@ -139,13 +140,13 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
 
   Widget _buildStoreSelectionContent() {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading available stores...'),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(AppLocalizations.of(context)!.loadingAvailableStores),
           ],
         ),
       );
@@ -172,7 +173,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loadStores,
-              child: const Text('Retry'),
+              child: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),
@@ -191,14 +192,14 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'No stores available',
+              AppLocalizations.of(context)!.noStoresAvailableTitle,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Please contact your administrator to assign you to a store.',
+              AppLocalizations.of(context)!.contactAdminForStoreAssignment,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
@@ -207,7 +208,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
             const SizedBox(height: 24),
             OutlinedButton(
               onPressed: () => _handleLogout(),
-              child: const Text('Sign Out'),
+              child: Text(AppLocalizations.of(context)!.signOut),
             ),
           ],
         ),
@@ -218,7 +219,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Available Stores (${_stores.length})',
+          AppLocalizations.of(context)!.availableStoresCount(_stores.length),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -319,7 +320,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        store.isActive ? 'Active' : 'Inactive',
+                        store.isActive ? AppLocalizations.of(context)!.active : AppLocalizations.of(context)!.inactive,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: store.isActive ? Colors.green[700] : Colors.orange[700],
                           fontWeight: FontWeight.w500,
@@ -358,7 +359,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
           elevation: 2,
         ),
         child: Text(
-          'Continue to Dashboard',
+          AppLocalizations.of(context)!.continueToDashboard,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.onPrimary,
@@ -373,7 +374,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
       child: TextButton(
         onPressed: _handleLogout,
         child: Text(
-          'Sign out and use different account',
+          AppLocalizations.of(context)!.signOutAndUseDifferentAccount,
           style: TextStyle(
             color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w500,
@@ -397,7 +398,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to select store: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.failedToSelectStore(e.toString())),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -417,7 +418,7 @@ class _WelcomingChooseStoreScreenState extends State<WelcomingChooseStoreScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to sign out: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.failedToSignOut(e.toString())),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

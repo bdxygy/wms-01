@@ -4,10 +4,12 @@ import 'package:provider/provider.dart';
 
 import '../auth/auth_provider.dart';
 import '../providers/store_context_provider.dart';
+import '../../generated/app_localizations.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/welcoming_choose_store_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
 
 class AppRouter {
 
@@ -46,6 +48,14 @@ class AppRouter {
           builder: (context, state) => const DashboardScreen(),
         ),
 
+        // Settings Route (for all authenticated users)
+        GoRoute(
+          path: '/settings',
+          name: 'settings',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) => const SettingsScreen(),
+        ),
+
         // Error Routes
         GoRoute(
           path: '/error',
@@ -59,7 +69,7 @@ class AppRouter {
 
       // Global error handling
       errorBuilder: (context, state) => ErrorScreen(
-        error: 'Page not found: ${state.matchedLocation}',
+        error: AppLocalizations.of(context)!.pageNotFound(state.matchedLocation),
       ),
 
       // Debug logging
@@ -161,6 +171,10 @@ class AppRouter {
     context.goNamed('dashboard');
   }
 
+  static void goToSettings(BuildContext context) {
+    context.goNamed('settings');
+  }
+
   static void goToSplash(BuildContext context) {
     context.goNamed('splash');
   }
@@ -215,7 +229,7 @@ class ErrorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Error'),
+        title: Text(AppLocalizations.of(context)!.error),
         backgroundColor: Theme.of(context).colorScheme.error,
         foregroundColor: Theme.of(context).colorScheme.onError,
       ),
@@ -234,7 +248,7 @@ class ErrorScreen extends StatelessWidget {
               const SizedBox(height: 24),
               
               Text(
-                'Oops! Something went wrong',
+                AppLocalizations.of(context)!.oopsWentWrong,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -253,14 +267,14 @@ class ErrorScreen extends StatelessWidget {
               
               ElevatedButton(
                 onPressed: () => _handleRetry(context),
-                child: const Text('Go to Dashboard'),
+                child: Text(AppLocalizations.of(context)!.goToDashboard),
               ),
               
               const SizedBox(height: 16),
               
               TextButton(
                 onPressed: () => _handleLogout(context),
-                child: const Text('Logout'),
+                child: Text(AppLocalizations.of(context)!.logout),
               ),
             ],
           ),

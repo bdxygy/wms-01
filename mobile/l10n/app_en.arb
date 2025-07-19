@@ -1,26 +1,8 @@
 {
   "appTitle": "WMS Mobile",
   "appTagline": "Warehouse Management System",
+  
   "initializing": "Initializing...",
-  "login": "Login",
-  "logout": "Logout",
-  "username": "Username",
-  "password": "Password",
-  "forgotPassword": "Forgot Password?",
-  "loginError": "Login failed. Please check your credentials.",
-  "networkError": "Network error. Please check your connection.",
-  "dashboard": "Dashboard",
-  "products": "Products",
-  "transactions": "Transactions",
-  "stores": "Stores",
-  "users": "Users",
-  "settings": "Settings",
-  "scanner": "Scanner",
-  "categories": "Categories",
-  "selectStore": "Select Store",
-  "welcomeChooseStore": "Welcome! Please choose a store to continue.",
-  "noStoresAvailable": "No stores available for your account.",
-  "contactAdmin": "Please contact your administrator.",
   "loading": "Loading...",
   "retry": "Retry",
   "save": "Save",
@@ -37,5 +19,347 @@
   "error": "Error",
   "success": "Success",
   "warning": "Warning",
-  "info": "Information"
+  "info": "Information",
+  "change": "Change",
+  "details": "Details",
+  "manage": "Manage",
+  "viewAll": "View All",
+  
+  "login": "Login",
+  "logout": "Logout",
+  "username": "Username",
+  "password": "Password",
+  "email": "Email",
+  "name": "Name",
+  "welcomeToWMS": "Welcome to WMS",
+  "signInDescription": "Sign in to access your warehouse management system",
+  "enterUsername": "Enter your username",
+  "usernameRequired": "Username is required",
+  "usernameMinLength": "Username must be at least 3 characters",
+  "enterPassword": "Enter your password",
+  "passwordRequired": "Password is required",
+  "passwordMinLength": "Password must be at least 4 characters",
+  "signIn": "Sign In",
+  "needHelpSigningIn": "Need help signing in?",
+  "contactSupport": "Contact Support",
+  "contactSupportTitle": "Contact Support",
+  "contactSupportMessage": "For login assistance, please contact your system administrator or IT support team.",
+  "invalidCredentials": "Invalid username or password. Please try again.",
+  "networkConnectionError": "Network error. Please check your internet connection.",
+  "requestTimeout": "Request timeout. Please try again.",
+  "serverError": "Server error. Please try again later.",
+  "loginFailed": "Login failed. Please try again.",
+  "forgotPassword": "Forgot Password?",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "loginError": "Login failed. Please check your credentials.",
+  "networkError": "Network error. Please check your connection.",
+  "loginInProgress": "Logging in...",
+  "pleaseWait": "Please wait...",
+  
+  "dashboard": "Dashboard",
+  "ownerDashboard": "Owner Dashboard",
+  "adminDashboard": "Admin Dashboard",
+  "staffDashboard": "Staff Dashboard",
+  "cashierDashboard": "Cashier Dashboard",
+  "wmsDashboard": "WMS Dashboard",
+  
+  "products": "Products",
+  "newSale": "New Sale",
+  "scanBarcode": "Scan Barcode",
+  "scanAndSell": "Scan & Sell",
+  "productCheck": "Product Check",
+  "findProduct": "Find Product",
+  "addProduct": "Add Product",
+  "viewProducts": "View & manage products",
+  "viewProductsReadOnly": "View products (read-only)",
+  "viewProductsForSale": "View products for sale",
+  "quickProductLookup": "Quick product lookup",
+  "qualityVerification": "Quality verification",
+  "searchProducts": "Search products",
+  "productsList": "Products List",
+  "productsListReadOnly": "Products List (read-only) page coming soon!",
+  "productsListForSales": "Products List (for sales) page coming soon!",
+  "productsListComingSoon": "Products List page coming soon!",
+  "productSearchComingSoon": "Product Search feature coming soon!",
+  "scannerComingSoon": "Scanner feature coming soon!",
+  "addProductComingSoon": "Add Product feature coming soon!",
+  "productCheckComingSoon": "Product Check feature coming soon!",
+  
+  "transactions": "Transactions",
+  "createSale": "Create sale transaction",
+  "quickBarcodeSale": "Quick barcode sale",
+  "newSaleComingSoon": "New Sale feature coming soon!",
+  "createSaleComingSoon": "Create Sale feature coming soon!",
+  "scanAndSellComingSoon": "Scan & Sell feature coming soon!",
+  "createTransactionComingSoon": "Create Transaction feature coming soon!",
+  "transactionsListComingSoon": "Transactions List page coming soon!",
+  "myTransactionsListComingSoon": "My Transactions List page coming soon!",
+  "allTransactionsComingSoon": "All Transactions feature coming soon!",
+  "viewTransactions": "View & manage transactions",
+  "viewMyTransactions": "View my transactions",
+  
+  "stores": "Stores",
+  "selectStore": "Select Store",
+  "currentStore": "Current Store",
+  "noStoreSelected": "No store selected",
+  "changeStore": "Change Store",
+  "storeSelection": "Store Selection",
+  "welcomeChooseStore": "Welcome! Please choose a store to continue.",
+  "noStoresAvailable": "No stores available for your account.",
+  "contactAdmin": "Please contact your administrator.",
+  "storeManagement": "Store Management",
+  "multiStoreOverview": "Multi-Store Overview",
+  "noStoresCreated": "No stores created yet",
+  "createFirstStore": "Create your first store to start managing inventory",
+  "createStore": "Create Store",
+  "addStore": "Add Store",
+  "selectStoreToView": "Select store to view details ({count} total)",
+  "@selectStoreToView": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storeDetailsComingSoon": "Store Details feature coming soon!",
+  "storeManagementComingSoon": "Store Management feature coming soon!",
+  "addStoreComingSoon": "Add Store feature coming soon!",
+  "viewStores": "View & manage stores",
+  "storesListComingSoon": "Stores List page coming soon!",
+  
+  "users": "Users",
+  "manageStaff": "Manage Staff",
+  "staffManagement": "Staff management",
+  "manageStaffComingSoon": "Manage Staff feature coming soon!",
+  "userManagementComingSoon": "User Management feature coming soon!",
+  "usersListComingSoon": "Users List page coming soon!",
+  "viewUsers": "View & manage users",
+  
+  "categories": "Categories",
+  "viewCategories": "View & manage categories",
+  "categoriesListComingSoon": "Categories List page coming soon!",
+  "categoriesComingSoon": "Categories feature coming soon!",
+  
+  "settings": "Settings",
+  "appSettings": "App settings & store",
+  "appConfiguration": "App configuration",
+  "userProfile": "User Profile",
+  "accountSettings": "Account Settings",
+  "appSettingsSection": "App Settings",
+  "about": "About",
+  "editProfile": "Edit Profile",
+  "changePassword": "Change Password",
+  "updatePassword": "Update your account password",
+  "emailSettings": "Email Settings",
+  "manageEmailPreferences": "Manage email preferences",
+  "notifications": "Notifications",
+  "manageNotificationPreferences": "Manage notification preferences",
+  "theme": "Theme",
+  "themeDescription": "Light, Dark, or System",
+  "language": "Language",
+  "changeAppLanguage": "Change app language",
+  "storage": "Storage",
+  "manageLocalData": "Manage local data and cache",
+  "appVersion": "App Version",
+  "helpAndSupport": "Help & Support",
+  "getHelpOrSupport": "Get help or contact support",
+  "privacyPolicy": "Privacy Policy",
+  "viewPrivacyPolicy": "View privacy policy",
+  "appInformation": "App Information",
+  "warehouseManagementSystem": "Warehouse Management System",
+  "appVersionNumber": "WMS Mobile v1.0.0",
+  "appDescription": "A complete inventory management system for tracking goods across multiple stores.",
+  "editProfileComingSoon": "Edit Profile feature coming soon!",
+  "changePasswordComingSoon": "Change Password feature coming soon!",
+  "emailSettingsComingSoon": "Email Settings feature coming soon!",
+  "notificationSettingsComingSoon": "Notification Settings feature coming soon!",
+  "themeSettingsComingSoon": "Theme Settings feature coming soon!",
+  "languageSettingsComingSoon": "Language Settings feature coming soon!",
+  "storageSettingsComingSoon": "Storage Settings feature coming soon!",
+  "helpAndSupportComingSoon": "Help & Support feature coming soon!",
+  "privacyPolicyComingSoon": "Privacy Policy feature coming soon!",
+  
+  "welcomeBackUser": "Welcome back, {name}!",
+  "@welcomeBackUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "roleOwner": "OWNER",
+  "roleAdmin": "ADMIN",
+  "roleStaff": "STAFF",
+  "roleCashier": "CASHIER",
+  "roleUnknown": "UNKNOWN",
+  
+  "storeOverviewReadOnly": "Store Overview (Read-Only)",
+  "viewMode": "View Mode",
+  "salesMode": "Sales Mode",
+  "pointOfSale": "Point of Sale",
+  
+  "storePerformance": "Store Performance",
+  "todaySales": "Today Sales",
+  "totalRevenue": "Total revenue",
+  "averageTransaction": "Average transaction",
+  "numberOfSales": "Number of sales",
+  "averageSale": "Avg. Sale",
+  "itemsSold": "Items Sold",
+  "totalItems": "Total items",
+  "lowStock": "Low Stock",
+  "inStock": "In Stock",
+  "myChecksToday": "My Checks Today",
+  "pendingChecks": "Pending Checks",
+  "totalProducts": "Total Products",
+  "businessIntelligenceDashboard": "Business Intelligence Dashboard",
+  "comprehensiveAnalytics": "Comprehensive Analytics for {storeName}",
+  "@comprehensiveAnalytics": {
+    "placeholders": {
+      "storeName": {
+        "type": "String"
+      }
+    }
+  },
+  "salesPerformance": "Sales Performance",
+  "inventoryManagement": "Inventory Management",
+  "operationsQualityControl": "Operations & Quality Control",
+  "productChecks": "Product Checks",
+  "totalChecksToday": "Total checks today",
+  "requiresAttention": "Requires attention",
+  "activeUsers": "Active Users",
+  "totalStores": "Total Stores",
+  
+  "quickNavigation": "Quick Navigation",
+  "quickNavigationFullAccess": "Quick Navigation (Full Access)",
+  "quickNavigationAdminAccess": "Quick Navigation (Admin Access)",
+  "quickNavigationReadOnlyAccess": "Quick Navigation (Read-Only Access)",
+  "quickNavigationTransactionFocus": "Quick Navigation (Transaction Focus)",
+  "quickActions": "Quick Actions",
+  "fastSaleOptions": "Fast Sale Options",
+  "selectPreferredMethod": "Select your preferred method to create a sale:",
+  "createNewSale": "Create New Sale",
+  "lastSale": "Last Sale",
+  "reprintReceipt": "Reprint Receipt",
+  "dailyReport": "Daily Report",
+  "lastSaleComingSoon": "Last Sale feature coming soon!",
+  "reprintReceiptComingSoon": "Reprint Receipt feature coming soon!",
+  "dailyReportComingSoon": "Daily Report feature coming soon!",
+  
+  "todaysSalesSummary": "Today's Sales Summary",
+  "productChecking": "Product Checking",
+  "quickProductCheck": "Quick Product Check",
+  "useButtonsToCheck": "Use the buttons below to quickly check product status:",
+  "storeInformation": "Store Information",
+  "inventoryOverview": "Inventory Overview",
+  
+  "checkStatusPending": "PENDING",
+  "checkStatusOk": "OK",
+  "checkStatusMissing": "MISSING",
+  "checkStatusBroken": "BROKEN",
+  "itemsCount": "{count} items",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusProductsComingSoon": "{status} products feature coming soon!",
+  "@statusProductsComingSoon": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "recentActivity": "Recent Activity",
+  "recentTransactions": "Recent Transactions",
+  "recentTransactionsAllStores": "Recent Transactions (All Stores)",
+  "recentProductChecks": "Recent Product Checks",
+  "myRecentTransactions": "My Recent Transactions",
+  "storeOperationsActivity": "Store Operations Activity",
+  "multiStoreSummary": "Multi-Store Summary",
+  "allChecksComingSoon": "All Checks feature coming soon!",
+  "allProductChecksComingSoon": "All Product Checks feature coming soon!",
+  "pendingChecksComingSoon": "Pending Checks feature coming soon!",
+  "mySalesComingSoon": "My Sales feature coming soon!",
+  "storeActivityComingSoon": "Store Activity feature coming soon!",
+  "allActivityComingSoon": "All Activity feature coming soon!",
+  "reportsComingSoon": "Reports feature coming soon!",
+  "inventoryComingSoon": "Inventory feature coming soon!",
+  "lowStockComingSoon": "Low Stock feature coming soon!",
+  "salesReportComingSoon": "Sales Report feature coming soon!",
+  
+  "reports": "Reports",
+  "businessAnalytics": "Business analytics",
+  
+  "active": "Active",
+  "inactive": "Inactive",
+  
+  "unknownRole": "Unknown Role",
+  "roleNotRecognized": "Your user role is not recognized. Please contact your administrator.",
+  
+  "oopsWentWrong": "Oops! Something went wrong",
+  "goToDashboard": "Go to Dashboard",
+  "pageNotFound": "Page not found: {location}",
+  "@pageNotFound": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "failedToLogout": "Failed to logout: {error}",
+  "@failedToLogout": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "welcomeUser": "Welcome, {name}!",
+  "@welcomeUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseSelectStoreToContine": "Please select a store to continue",
+  "loadingAvailableStores": "Loading available stores...",
+  "failedToLoadStoresRetry": "Failed to load stores. Please try again.",
+  "availableStoresCount": "Available Stores ({count})",
+  "@availableStoresCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noStoresAvailableTitle": "No stores available",
+  "contactAdminForStoreAssignment": "Please contact your administrator to assign you to a store.",
+  "signOut": "Sign Out",
+  "continueToDashboard": "Continue to Dashboard",
+  "signOutAndUseDifferentAccount": "Sign out and use different account",
+  "failedToSelectStore": "Failed to select store: {error}",
+  "@failedToSelectStore": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSignOut": "Failed to sign out: {error}",
+  "@failedToSignOut": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

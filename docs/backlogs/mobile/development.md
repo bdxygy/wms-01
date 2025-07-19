@@ -615,8 +615,8 @@ Implement bottom navigation with role-based tabs and screen structure foundation
   - [ ] Persistent navigation shell
 
 - [ ] **Navigation Tabs by Role**
-  - [ ] OWNER: Dashboard, Stores, Users, Products, Transactions, Settings
-  - [ ] ADMIN: Dashboard, Products, Transactions, Users, Settings
+  - [ ] OWNER: Dashboard, Stores, Users, Products, Transactions, Categories, Settings
+  - [ ] ADMIN: Dashboard, Products, Transactions, Users, Categories, Settings
   - [ ] STAFF: Dashboard, Products, Checks, Settings
   - [ ] CASHIER: Dashboard, Transactions, Products, Settings
 

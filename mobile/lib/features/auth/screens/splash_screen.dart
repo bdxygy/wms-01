@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
+import '../../../generated/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -74,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Initialization Error'),
+        title: Text(AppLocalizations.of(context)!.error),
         content: Text('Failed to initialize app: $error'),
         actions: [
           TextButton(
@@ -82,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Navigator.of(context).pop();
               _initializeApp();
             },
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)!.retry),
           ),
         ],
       ),
@@ -116,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> {
             
             // App name
             Text(
-              'WMS Mobile',
+              AppLocalizations.of(context)!.appTitle,
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary,
                 fontWeight: FontWeight.bold,
@@ -127,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen> {
             
             // App tagline
             Text(
-              'Warehouse Management System',
+              AppLocalizations.of(context)!.appTagline,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
               ),
@@ -151,7 +152,7 @@ class _SplashScreenState extends State<SplashScreen> {
             
             // Loading text
             Text(
-              'Initializing...',
+              AppLocalizations.of(context)!.initializing,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
               ),

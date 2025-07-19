@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/providers/store_context_provider.dart';
+import '../../../core/routing/app_router.dart';
 import 'dashboard_metric_card.dart';
 import 'dashboard_quick_actions.dart';
 import 'recent_activity_card.dart';
@@ -82,6 +83,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
               subtitle: 'Staff management',
               color: Colors.orange,
               onTap: () => _navigateToManageStaff(),
+            ),
+            QuickAction(
+              icon: Icons.settings,
+              title: 'Settings',
+              subtitle: 'App settings & store',
+              color: Colors.grey,
+              onTap: () => _navigateToSettings(),
             ),
           ],
         ),
@@ -427,5 +435,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Low Stock feature coming soon!')),
     );
+  }
+
+  void _navigateToSettings() {
+    AppRouter.goToSettings(context);
   }
 }

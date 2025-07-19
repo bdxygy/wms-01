@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_provider.dart';
+import '../../../generated/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -81,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
         
         // Welcome Text
         Text(
-          'Welcome to WMS',
+          AppLocalizations.of(context)!.welcomeToWMS,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.onSurface,
@@ -91,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 8),
         
         Text(
-          'Sign in to access your warehouse management system',
+          AppLocalizations.of(context)!.signInDescription,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
           ),
@@ -111,8 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
           FormBuilderTextField(
             name: 'username',
             decoration: InputDecoration(
-              labelText: 'Username',
-              hintText: 'Enter your username',
+              labelText: AppLocalizations.of(context)!.username,
+              hintText: AppLocalizations.of(context)!.enterUsername,
               prefixIcon: const Icon(Icons.person_outline),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -121,8 +122,8 @@ class _LoginScreenState extends State<LoginScreen> {
               fillColor: Theme.of(context).colorScheme.surface,
             ),
             validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(errorText: 'Username is required'),
-              FormBuilderValidators.minLength(3, errorText: 'Username must be at least 3 characters'),
+              FormBuilderValidators.required(errorText: AppLocalizations.of(context)!.usernameRequired),
+              FormBuilderValidators.minLength(3, errorText: AppLocalizations.of(context)!.usernameMinLength),
             ]),
             textInputAction: TextInputAction.next,
           ),
@@ -134,8 +135,8 @@ class _LoginScreenState extends State<LoginScreen> {
             name: 'password',
             obscureText: _obscurePassword,
             decoration: InputDecoration(
-              labelText: 'Password',
-              hintText: 'Enter your password',
+              labelText: AppLocalizations.of(context)!.password,
+              hintText: AppLocalizations.of(context)!.enterPassword,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -154,8 +155,8 @@ class _LoginScreenState extends State<LoginScreen> {
               fillColor: Theme.of(context).colorScheme.surface,
             ),
             validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(errorText: 'Password is required'),
-              FormBuilderValidators.minLength(4, errorText: 'Password must be at least 4 characters'),
+              FormBuilderValidators.required(errorText: AppLocalizations.of(context)!.passwordRequired),
+              FormBuilderValidators.minLength(4, errorText: AppLocalizations.of(context)!.passwordMinLength),
             ]),
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _handleLogin(),
@@ -181,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 elevation: 2,
               ),
               child: Text(
-                'Sign In',
+                AppLocalizations.of(context)!.signIn,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onPrimary,
@@ -226,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       children: [
         Text(
-          'Need help signing in?',
+          AppLocalizations.of(context)!.needHelpSigningIn,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
@@ -240,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _showContactSupport();
           },
           child: Text(
-            'Contact Support',
+            AppLocalizations.of(context)!.contactSupport,
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
@@ -252,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
         
         // Version info
         Text(
-          'WMS Mobile v1.0.0',
+          AppLocalizations.of(context)!.appVersionNumber,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
@@ -265,14 +266,14 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Contact Support'),
-        content: const Text(
-          'For login assistance, please contact your system administrator or IT support team.',
+        title: Text(AppLocalizations.of(context)!.contactSupportTitle),
+        content: Text(
+          AppLocalizations.of(context)!.contactSupportMessage,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.ok),
           ),
         ],
       ),
@@ -337,18 +338,20 @@ class _LoginScreenState extends State<LoginScreen> {
   String _getErrorMessage(dynamic error) {
     final errorStr = error.toString().toLowerCase();
     
+    final localizations = AppLocalizations.of(context)!;
+    
     if (errorStr.contains('invalid credentials') || 
         errorStr.contains('unauthorized') ||
         errorStr.contains('401')) {
-      return 'Invalid username or password. Please try again.';
+      return localizations.invalidCredentials;
     } else if (errorStr.contains('network') || errorStr.contains('connection')) {
-      return 'Network error. Please check your internet connection.';
+      return localizations.networkConnectionError;
     } else if (errorStr.contains('timeout')) {
-      return 'Request timeout. Please try again.';
+      return localizations.requestTimeout;
     } else if (errorStr.contains('server') || errorStr.contains('500')) {
-      return 'Server error. Please try again later.';
+      return localizations.serverError;
     } else {
-      return 'Login failed. Please try again.';
+      return localizations.loginFailed;
     }
   }
 }

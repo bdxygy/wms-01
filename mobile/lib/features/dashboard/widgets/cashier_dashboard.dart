@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/providers/store_context_provider.dart';
+import '../../../core/routing/app_router.dart';
 import 'dashboard_metric_card.dart';
 import 'dashboard_quick_actions.dart';
 import 'recent_activity_card.dart';
@@ -68,6 +69,13 @@ class _CashierDashboardState extends State<CashierDashboard> {
               subtitle: 'Quick barcode sale',
               color: Colors.orange,
               onTap: () => _navigateToScanAndSell(),
+            ),
+            QuickAction(
+              icon: Icons.settings,
+              title: 'Settings',
+              subtitle: 'App settings & store',
+              color: Colors.grey,
+              onTap: () => _navigateToSettings(),
             ),
           ],
         ),
@@ -433,5 +441,9 @@ class _CashierDashboardState extends State<CashierDashboard> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Daily Report feature coming soon!')),
     );
+  }
+
+  void _navigateToSettings() {
+    AppRouter.goToSettings(context);
   }
 }

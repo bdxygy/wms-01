@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/utils/app_config.dart';
+import 'generated/app_localizations.dart';
 import 'core/providers/app_provider.dart';
 import 'core/auth/auth_provider.dart';
 import 'core/providers/store_context_provider.dart';
@@ -41,15 +41,8 @@ class WMSApp extends StatelessWidget {
             themeMode: appProvider.themeMode,
             
             // Localization
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en', 'US'), // English
-              Locale('id', 'ID'), // Indonesian
-            ],
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             locale: appProvider.locale,
             
             // Router configuration

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/models/store.dart';
+import '../../../core/routing/app_router.dart';
 import 'dashboard_metric_card.dart';
 import 'dashboard_quick_actions.dart';
 import 'recent_activity_card.dart';
@@ -646,10 +647,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   void _navigateToSettings() {
-    // TODO: Navigate to settings screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Settings feature coming soon!')),
-    );
+    AppRouter.goToSettings(context);
   }
 
   void _navigateToAllActivity() {

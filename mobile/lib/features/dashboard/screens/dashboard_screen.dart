@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
+import '../../../core/routing/app_router.dart';
+import '../../../generated/app_localizations.dart';
 import '../widgets/owner_dashboard.dart';
 import '../widgets/admin_dashboard.dart';
 import '../widgets/staff_dashboard.dart';
@@ -29,18 +31,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         actions: [
-          // Settings action for OWNER
-          if (authProvider.isOwner)
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () => _navigateToSettings(),
-              tooltip: 'Settings',
-            ),
+          // Settings action for all roles
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => _navigateToSettings(),
+            tooltip: AppLocalizations.of(context)!.settings,
+          ),
           // Logout action
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => _handleLogout(),
-            tooltip: 'Logout',
+            tooltip: AppLocalizations.of(context)!.logout,
           ),
         ],
       ),
@@ -94,7 +95,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome back, $userName!',
+                    AppLocalizations.of(context)!.welcomeBackUser(userName),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -107,7 +108,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      role,
+                      _getLocalizedRole(role),
                       style: TextStyle(
                         color: _getRoleColor(role),
                         fontWeight: FontWeight.w600,
@@ -141,7 +142,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Current Store',
+                    AppLocalizations.of(context)!.currentStore,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.7),
                     ),
@@ -158,7 +159,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             TextButton(
               onPressed: () => _handleChangeStore(),
-              child: Text('Change'),
+              child: Text(AppLocalizations.of(context)!.change),
             ),
           ],
         ),
@@ -194,7 +195,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Unknown Role',
+              AppLocalizations.of(context)!.unknownRole,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.error,
@@ -202,7 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Your user role is not recognized. Please contact your administrator.',
+              AppLocalizations.of(context)!.roleNotRecognized,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
@@ -211,12 +212,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: () => _handleLogout(),
-              child: const Text('Logout'),
+              child: Text(AppLocalizations.of(context)!.logout),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _getLocalizedRole(String role) {
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return AppLocalizations.of(context)!.roleOwner;
+      case 'ADMIN':
+        return AppLocalizations.of(context)!.roleAdmin;
+      case 'STAFF':
+        return AppLocalizations.of(context)!.roleStaff;
+      case 'CASHIER':
+        return AppLocalizations.of(context)!.roleCashier;
+      default:
+        return AppLocalizations.of(context)!.roleUnknown;
+    }
   }
 
   Color _getRoleColor(String role) {
@@ -237,15 +253,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _getDashboardTitle(String role) {
     switch (role.toUpperCase()) {
       case 'OWNER':
-        return 'Owner Dashboard';
+        return AppLocalizations.of(context)!.ownerDashboard;
       case 'ADMIN':
-        return 'Admin Dashboard';
+        return AppLocalizations.of(context)!.adminDashboard;
       case 'STAFF':
-        return 'Staff Dashboard';
+        return AppLocalizations.of(context)!.staffDashboard;
       case 'CASHIER':
-        return 'Cashier Dashboard';
+        return AppLocalizations.of(context)!.cashierDashboard;
       default:
-        return 'WMS Dashboard';
+        return AppLocalizations.of(context)!.wmsDashboard;
     }
   }
 
@@ -255,10 +271,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _navigateToSettings() {
-    // TODO: Navigate to settings screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Settings feature coming soon!')),
-    );
+    AppRouter.goToSettings(context);
   }
 
   void _handleChangeStore() {
@@ -277,7 +290,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to logout: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.failedToLogout(e.toString())),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
