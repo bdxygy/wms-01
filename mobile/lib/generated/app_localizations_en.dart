@@ -844,4 +844,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String failedToSignOut(String error) {
     return 'Failed to sign out: $error';
   }
+
+  @override
+  String get userManagement => 'User Management';
+
+  @override
+  String get productManagement => 'Product Management';
+
+  @override
+  String get transactionManagement => 'Transaction Management';
+
+  @override
+  String get categoryManagement => 'Category Management';
+
+  @override
+  String get productSearch => 'Product Search';
+
+  @override
+  String get checks => 'Checks';
+
+  @override
+  String get saleTransactions => 'Sale Transactions';
 }

@@ -10,6 +10,12 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/welcoming_choose_store_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/products/screens/products_screen.dart';
+import '../../features/transactions/screens/transactions_screen.dart';
+import '../../features/stores/screens/stores_screen.dart';
+import '../../features/users/screens/users_screen.dart';
+import '../../features/categories/screens/categories_screen.dart';
+import '../../features/checks/screens/checks_screen.dart';
 
 class AppRouter {
 
@@ -54,6 +60,54 @@ class AppRouter {
           name: 'settings',
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const SettingsScreen(),
+        ),
+
+        // Products Route
+        GoRoute(
+          path: '/products',
+          name: 'products',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) => const ProductsScreen(),
+        ),
+
+        // Transactions Route
+        GoRoute(
+          path: '/transactions',
+          name: 'transactions',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) => const TransactionsScreen(),
+        ),
+
+        // Stores Route (OWNER only)
+        GoRoute(
+          path: '/stores',
+          name: 'stores',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) => const StoresScreen(),
+        ),
+
+        // Users Route (OWNER/ADMIN only)
+        GoRoute(
+          path: '/users',
+          name: 'users',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) => const UsersScreen(),
+        ),
+
+        // Categories Route
+        GoRoute(
+          path: '/categories',
+          name: 'categories',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) => const CategoriesScreen(),
+        ),
+
+        // Checks Route (Product Checks)
+        GoRoute(
+          path: '/checks',
+          name: 'checks',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) => const ChecksScreen(),
         ),
 
         // Error Routes

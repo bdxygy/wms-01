@@ -361,5 +361,13 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "userManagement": "User Management",
+  "productManagement": "Product Management", 
+  "transactionManagement": "Transaction Management",
+  "categoryManagement": "Category Management",
+  "productSearch": "Product Search",
+  "checks": "Checks",
+  "saleTransactions": "Sale Transactions"
 }

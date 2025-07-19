@@ -5,6 +5,7 @@ import '../../../generated/app_localizations.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/widgets/main_navigation_scaffold.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -21,12 +22,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final storeProvider = context.watch<StoreContextProvider>();
     final user = authProvider.currentUser;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settings),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-      ),
+    return NavigationAwareScaffold(
+      title: l10n.settings,
+      currentRoute: 'settings',
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/widgets/main_navigation_scaffold.dart';
 import '../../../generated/app_localizations.dart';
 import '../widgets/owner_dashboard.dart';
 import '../widgets/admin_dashboard.dart';
@@ -25,26 +26,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final storeProvider = context.watch<StoreContextProvider>();
     final user = authProvider.currentUser;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_getDashboardTitle(user?.role.toString() ?? 'UNKNOWN')),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        actions: [
-          // Settings action for all roles
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => _navigateToSettings(),
-            tooltip: AppLocalizations.of(context)!.settings,
-          ),
-          // Logout action
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _handleLogout(),
-            tooltip: AppLocalizations.of(context)!.logout,
-          ),
-        ],
-      ),
+    return NavigationAwareScaffold(
+      title: _getDashboardTitle(user?.role.toString() ?? 'UNKNOWN'),
+      currentRoute: 'dashboard',
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
         child: SingleChildScrollView(
