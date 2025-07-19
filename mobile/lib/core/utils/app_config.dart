@@ -4,13 +4,13 @@ enum Environment { dev, staging, prod }
 
 class AppConfig {
   static Environment _environment = Environment.dev;
-  
+
   static Environment get environment => _environment;
-  
+
   static void setEnvironment(Environment env) {
     _environment = env;
   }
-  
+
   static String get baseUrl {
     switch (_environment) {
       case Environment.dev:
@@ -21,27 +21,30 @@ class AppConfig {
         return AppConstants.baseUrlProd;
     }
   }
-  
+
   static String get apiUrl => baseUrl + AppConstants.apiVersion;
-  
+
   static bool get isDev => _environment == Environment.dev;
   static bool get isStaging => _environment == Environment.staging;
   static bool get isProd => _environment == Environment.prod;
-  
+
   static bool get isDebugMode => isDev || isStaging;
-  
+
   // Certificate pinning fingerprints
-  static String get certificateFingerprint {
+  static String? get certificateFingerprint {
     switch (_environment) {
       case Environment.dev:
-        return 'SHA256:DEV_CERT_FINGERPRINT_HERE';
+        // return 'SHA256:DEV_CERT_FINGERPRINT_HERE';
+        return null;
       case Environment.staging:
-        return 'SHA256:STAGING_CERT_FINGERPRINT_HERE';
+        // return 'SHA256:STAGING_CERT_FINGERPRINT_HERE';
+        return null;
       case Environment.prod:
-        return 'SHA256:PROD_CERT_FINGERPRINT_HERE';
+        // return 'SHA256:PROD_CERT_FINGERPRINT_HERE';
+        return null;
     }
   }
-  
+
   // Allowed API hosts for security validation
   static List<String> get allowedHosts {
     switch (_environment) {
