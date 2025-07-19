@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Warehouse Management System (WMS)** - A web-based inventory management system for tracking goods across multiple stores with role-based access control.
+**Warehouse Management System (WMS)** - A complete inventory management system for tracking goods across multiple stores with role-based access control, featuring web and mobile applications.
 
 ### Tech Stack
 
-- **Frontend**: React, Shadcn, Zod, React Query, Tailwindcss, Rsbuild
-- **Backend**: Hono, Node.js, Zod, Drizzle, SQLite Turso
-- **Database**: SQLite with Drizzle ORM
-- **Authentication**: JWT-based with role-based access control
-- **Mobile**: Flutter (cross-platform mobile development)
+- **Backend**: Hono, Node.js, Zod, Drizzle, SQLite Turso ✅ **PRODUCTION READY**
+- **Database**: SQLite with Drizzle ORM ✅ **PRODUCTION READY**
+- **Authentication**: JWT-based with role-based access control ✅ **PRODUCTION READY**
+- **Frontend Web**: React, Shadcn, Zod, React Query, Tailwindcss, Rsbuild 📋 **PLANNED**
+- **Mobile**: Flutter (cross-platform mobile development) 📋 **PHASE 1 READY - 0% COMPLETE**
 
 ### Architecture
 
@@ -234,16 +234,25 @@ pnpm run test         # Run frontend tests
 - ✅ **Production infrastructure**: validation, error handling, pagination, filtering
 - ✅ **Comprehensive testing** with integration test coverage
 
-**📱 FRONTEND: READY TO BUILD**
+**📱 MOBILE: READY TO START DEVELOPMENT**
+- 📋 **Comprehensive 20-phase development plan** completed (`docs/backlogs/mobile/development.md`)
 - 📋 **API contract documentation** completed (`docs/frontend-api-contract.md`)
-- 📋 **Web integration guide** with TypeScript examples
-- 📋 **Flutter/mobile integration guide** with complete implementation examples
-- 📋 **Multiple platform support**: Web, Mobile, Desktop
+- 📋 **Flutter integration guide** with complete implementation examples
+- 📋 **Mobile project deleted and ready for fresh start from Phase 1**
+
+**🎯 MOBILE DEVELOPMENT STATUS: 0% COMPLETE - PHASE 1 READY**
+- 🚀 **Current Phase**: Phase 1 - Project Foundation & Setup
+- 📱 **Development Plan**: 20 phases over 8-10 weeks
+- 🏗️ **Architecture**: Clean Architecture with feature-based structure
+- 📋 **User Flows**: NON-OWNER store selection → OWNER bypass flows planned
+- 🖨️ **Business Workflows**: Product creation → barcode printing, Transaction → receipt printing
+- 📷 **Scanning**: Barcode and IMEI scanning for products and transactions
+- 🔗 **Thermal Printing**: Bluetooth printer integration for receipts and barcodes
 
 **📊 NEXT STEPS:**
-1. **Frontend Development**: Start building UI using the API contract
-2. **Mobile Development**: Use Flutter guide for cross-platform mobile apps
-3. **Testing**: Frontend teams can immediately start API integration
+1. **Mobile Development Phase 1**: Start Flutter project foundation and setup
+2. **Web Frontend Development**: Build UI using the API contract (optional)
+3. **Testing**: Backend API integration testing
 4. **Deployment**: Backend is ready for production deployment
 
 ### Project Structure
@@ -272,15 +281,8 @@ When implementing, follow this structure:
 │   │   ├── stores/          # State management
 │   │   └── utils/           # Frontend utilities
 │   └── package.json
-├── mobile/                  # 📋 Flutter mobile app (READY TO IMPLEMENT)
-│   ├── lib/
-│   │   ├── core/            # Core functionality (API, auth, models)
-│   │   ├── features/        # Feature modules
-│   │   ├── shared/          # Shared widgets and utilities
-│   │   └── main.dart
-│   ├── android/             # Android-specific files
-│   ├── ios/                 # iOS-specific files
-│   └── pubspec.yaml
+├── mobile/                  # 📋 Flutter mobile app (DELETED - READY FOR PHASE 1)
+│   └── [To be created in Phase 1 - Project Foundation & Setup]
 ├── docs/                    # ✅ Project documentation
 │   ├── frontend-api-contract.md  # ✅ Complete API documentation
 │   └── erd.md               # Database schema documentation
