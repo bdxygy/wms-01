@@ -14,9 +14,11 @@ class AppConstants {
   // Storage Keys
   static const String accessTokenKey = 'access_token';
   static const String refreshTokenKey = 'refresh_token';
+  static const String tokenExpiryKey = 'token_expiry';
   static const String userDataKey = 'user_data';
   static const String selectedStoreKey = 'selected_store';
   static const String printerDeviceKey = 'printer_device';
+  static const String biometricEnabledKey = 'biometric_enabled';
   
   // Network Configuration
   static const Duration connectionTimeout = Duration(seconds: 30);

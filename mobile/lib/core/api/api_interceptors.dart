@@ -126,8 +126,8 @@ class ErrorHandlingInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Check network connectivity for network-related errors
     if (_isNetworkError(err)) {
-      final connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
+      final connectivityResults = await _connectivity.checkConnectivity();
+      if (connectivityResults.contains(ConnectivityResult.none)) {
         if (AppConfig.isDebugMode) {
           print('📶 No network connectivity detected');
         }
