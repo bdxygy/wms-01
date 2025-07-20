@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../theme/theme_colors.dart';
 import '../theme/typography.dart';
+import '../utils/imei_utils.dart';
 
 /// Form components for the WMS application
 /// Provides consistent form field styles and validation
@@ -506,6 +507,393 @@ class WMSTimeFormField extends StatelessWidget {
       validator: validator != null 
           ? (String? text) => validator!(value)
           : null,
+    );
+  }
+}
+
+/// Photo picker form field
+class WMSPhotoFormField extends StatelessWidget {
+  final String? label;
+  final String? imageUrl;
+  final ValueChanged<String?>? onChanged;
+  final FormFieldValidator<String>? validator;
+  final bool enabled;
+  final VoidCallback? onImagePicked;
+
+  const WMSPhotoFormField({
+    super.key,
+    this.label,
+    this.imageUrl,
+    this.onChanged,
+    this.validator,
+    this.enabled = true,
+    this.onImagePicked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FormField<String>(
+      initialValue: imageUrl,
+      validator: validator,
+      builder: (FormFieldState<String> state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (label != null) ...[
+              Text(
+                label!,
+                style: WMSTypography.formLabel,
+              ),
+              const SizedBox(height: 8),
+            ],
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: state.hasError ? WMSColors.errorRed : WMSColors.outline,
+                  width: state.hasError ? 2 : 1,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).colorScheme.surface,
+              ),
+              child: state.value != null && state.value!.isNotEmpty
+                  ? Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            state.value!,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildPlaceholder(context);
+                            },
+                          ),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: IconButton(
+                            onPressed: enabled ? () {
+                              state.didChange(null);
+                              onChanged?.call(null);
+                            } : null,
+                            icon: const Icon(Icons.close),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.black.withValues(alpha: 0.5),
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : InkWell(
+                      onTap: enabled ? onImagePicked : null,
+                      borderRadius: BorderRadius.circular(12),
+                      child: _buildPlaceholder(context),
+                    ),
+            ),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  state.errorText!,
+                  style: WMSTypography.formError,
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPlaceholder(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: WMSColors.surfaceVariant,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_a_photo,
+            size: 48,
+            color: WMSColors.textSecondary,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Tap to add photo',
+            style: WMSTypography.bodyMedium.copyWith(
+              color: WMSColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dynamic IMEI array form field
+class WMSImeiArrayFormField extends StatefulWidget {
+  final String? label;
+  final List<String> initialImeis;
+  final ValueChanged<List<String>>? onChanged;
+  final FormFieldValidator<List<String>>? validator;
+  final bool enabled;
+  final int? expectedQuantity;
+
+  const WMSImeiArrayFormField({
+    super.key,
+    this.label,
+    this.initialImeis = const [],
+    this.onChanged,
+    this.validator,
+    this.enabled = true,
+    this.expectedQuantity,
+  });
+
+  @override
+  State<WMSImeiArrayFormField> createState() => _WMSImeiArrayFormFieldState();
+}
+
+class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
+  late List<TextEditingController> _controllers;
+  late List<String> _imeis;
+
+  @override
+  void initState() {
+    super.initState();
+    _imeis = List.from(widget.initialImeis);
+    if (_imeis.isEmpty && widget.expectedQuantity != null) {
+      _imeis = List.filled(widget.expectedQuantity!, '');
+    }
+    if (_imeis.isEmpty) {
+      _imeis = [''];
+    }
+    _controllers = _imeis.map((imei) => TextEditingController(text: imei)).toList();
+  }
+
+  @override
+  void didUpdateWidget(WMSImeiArrayFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.expectedQuantity != oldWidget.expectedQuantity && 
+        widget.expectedQuantity != null) {
+      _updateImeiCount(widget.expectedQuantity!);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _updateImeiCount(int count) {
+    setState(() {
+      final currentCount = _controllers.length;
+      
+      if (count > currentCount) {
+        // Add more IMEI fields
+        for (int i = currentCount; i < count; i++) {
+          _controllers.add(TextEditingController());
+          _imeis.add('');
+        }
+      } else if (count < currentCount) {
+        // Remove excess IMEI fields
+        for (int i = currentCount - 1; i >= count; i--) {
+          _controllers[i].dispose();
+          _controllers.removeAt(i);
+          _imeis.removeAt(i);
+        }
+      }
+      _notifyChange();
+    });
+  }
+
+  void _addImeiField() {
+    setState(() {
+      _controllers.add(TextEditingController());
+      _imeis.add('');
+      _notifyChange();
+    });
+  }
+
+  void _removeImeiField(int index) {
+    if (_controllers.length > 1) {
+      setState(() {
+        _controllers[index].dispose();
+        _controllers.removeAt(index);
+        _imeis.removeAt(index);
+        _notifyChange();
+      });
+    }
+  }
+
+  void _notifyChange() {
+    final validImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+    widget.onChanged?.call(validImeis);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FormField<List<String>>(
+      initialValue: _imeis,
+      validator: widget.validator,
+      builder: (FormFieldState<List<String>> state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.label != null) ...[
+              Row(
+                children: [
+                  Text(
+                    widget.label!,
+                    style: WMSTypography.formLabel,
+                  ),
+                  const Spacer(),
+                  if (widget.expectedQuantity != null)
+                    Text(
+                      '${_imeis.where((imei) => imei.trim().isNotEmpty).length}/${widget.expectedQuantity}',
+                      style: WMSTypography.bodySmall.copyWith(
+                        color: WMSColors.textSecondary,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            ...List.generate(_controllers.length, (index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: WMSTextFormField(
+                        controller: _controllers[index],
+                        hint: 'Enter IMEI ${index + 1}',
+                        keyboardType: TextInputType.number,
+                        enabled: widget.enabled,
+                        onChanged: (value) {
+                          _imeis[index] = value;
+                          _notifyChange();
+                          state.didChange(_imeis);
+                        },
+                        validator: (value) {
+                          if (value != null && value.trim().isNotEmpty) {
+                            // Only validate non-empty IMEIs
+                            if (!ImeiUtils.isValidImei(value.trim())) {
+                              return 'Invalid IMEI';
+                            }
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (_controllers.length > 1)
+                      IconButton(
+                        onPressed: widget.enabled ? () => _removeImeiField(index) : null,
+                        icon: const Icon(Icons.remove_circle_outline),
+                        color: WMSColors.errorRed,
+                      ),
+                  ],
+                ),
+              );
+            }),
+            if (widget.enabled && (widget.expectedQuantity == null || _controllers.length < widget.expectedQuantity!))
+              TextButton.icon(
+                onPressed: _addImeiField,
+                icon: const Icon(Icons.add),
+                label: const Text('Add IMEI'),
+              ),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  state.errorText!,
+                  style: WMSTypography.formError,
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Currency input form field with formatting
+class WMSCurrencyFormField extends StatefulWidget {
+  final String? label;
+  final String? hint;
+  final double? initialValue;
+  final TextEditingController? controller;
+  final FormFieldValidator<String>? validator;
+  final ValueChanged<double?>? onChanged;
+  final bool enabled;
+  final String currencySymbol;
+
+  const WMSCurrencyFormField({
+    super.key,
+    this.label,
+    this.hint,
+    this.initialValue,
+    this.controller,
+    this.validator,
+    this.onChanged,
+    this.enabled = true,
+    this.currencySymbol = '\$',
+  });
+
+  @override
+  State<WMSCurrencyFormField> createState() => _WMSCurrencyFormFieldState();
+}
+
+class _WMSCurrencyFormFieldState extends State<WMSCurrencyFormField> {
+  late TextEditingController _controller;
+  bool _isControllerOwned = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller != null) {
+      _controller = widget.controller!;
+    } else {
+      _controller = TextEditingController(
+        text: widget.initialValue?.toStringAsFixed(2) ?? '',
+      );
+      _isControllerOwned = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_isControllerOwned) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WMSTextFormField(
+      label: widget.label,
+      hint: widget.hint,
+      controller: _controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      enabled: widget.enabled,
+      prefixText: widget.currencySymbol,
+      validator: widget.validator,
+      onChanged: (value) {
+        final parsedValue = double.tryParse(value);
+        widget.onChanged?.call(parsedValue);
+      },
     );
   }
 }

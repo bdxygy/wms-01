@@ -64,11 +64,11 @@ class _CashierDashboardState extends State<CashierDashboard> {
               onTap: () => _navigateToNewSale(),
             ),
             QuickAction(
-              icon: Icons.qr_code_scanner,
-              title: 'Scan & Sell',
-              subtitle: 'Quick barcode sale',
+              icon: Icons.search,
+              title: 'Search Products',
+              subtitle: 'Barcode, IMEI & text search',
               color: Colors.orange,
-              onTap: () => _navigateToScanAndSell(),
+              onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.settings,
@@ -414,9 +414,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
   }
 
   void _navigateToProductSearch() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Product Search feature coming soon!')),
-    );
+    AppRouter.goToProductSearch(context);
   }
 
   void _navigateToMySales() {

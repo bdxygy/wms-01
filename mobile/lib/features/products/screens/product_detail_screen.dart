@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/models/product.dart';
+import '../../../core/models/user.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/app_bars.dart';
 import '../../../core/widgets/cards.dart';
+import '../../../core/routing/app_router.dart';
 import '../../../generated/app_localizations.dart';
+import '../widgets/imei_management_section.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -58,25 +61,92 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _editProduct() {
-    context.pushNamed('edit-product', pathParameters: {'id': widget.productId});
+    AppRouter.goToEditProduct(context, widget.productId);
   }
 
   void _printBarcode() {
     // TODO: Implement barcode printing in Phase 17
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Barcode printing will be implemented in Phase 17'),
+      SnackBar(
+        content: const Text('Print Barcode ready - Thermal printing in Phase 17'),
+        backgroundColor: Colors.orange,
+        action: SnackBarAction(
+          label: 'OK',
+          onPressed: () {},
+        ),
       ),
     );
   }
 
   void _shareProduct() {
-    // TODO: Implement product sharing
+    final productInfo = '''Product Details:
+Name: ${_product!.name}
+SKU: ${_product!.sku}
+Barcode: ${_product!.barcode}
+Price: \$${(_product!.salePrice ?? _product!.purchasePrice).toStringAsFixed(2)}
+Quantity: ${_product!.quantity}''';
+    
+    Clipboard.setData(ClipboardData(text: productInfo));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Product sharing coming soon'),
+        content: Text('Product information copied to clipboard'),
+        backgroundColor: Colors.green,
       ),
     );
+  }
+
+  void _deleteProduct() async {
+    final user = context.read<AuthProvider>().user;
+    if (user?.role != UserRole.owner) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Only owners can delete products'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Show confirmation dialog
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Product'),
+        content: Text('Are you sure you want to delete "${_product!.name}"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      try {
+        // TODO: Implement delete product API call when available
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product deletion will be implemented when API is available'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete product: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -104,6 +174,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   case 'share':
                     _shareProduct();
                     break;
+                  case 'delete':
+                    _deleteProduct();
+                    break;
                 }
               },
               itemBuilder: (context) => [
@@ -127,6 +200,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                   ),
                 ),
+                if (user?.role == UserRole.owner)
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Delete Product', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
               ],
             ),
         ],
@@ -190,12 +274,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           _buildPricingInfo(),
           const SizedBox(height: 16),
           _buildInventoryInfo(),
+          
+          // IMEI Management for IMEI products
           if (_product!.isImei) ...[
             const SizedBox(height: 16),
-            _buildImeiInfo(),
+            ImeiManagementSection(
+              productId: _product!.id,
+              productName: _product!.name,
+              expectedQuantity: _product!.quantity,
+            ),
           ],
+          
+          const SizedBox(height: 16),
+          _buildStoreInfo(),
           const SizedBox(height: 16),
           _buildAdditionalInfo(),
+          const SizedBox(height: 16),
+          _buildActionButtons(),
         ],
       ),
     );
@@ -269,7 +364,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildImeiInfo() {
+  Widget _buildStoreInfo() {
     return WMSCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -277,19 +372,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'IMEI Information',
+              'Store & Category',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'IMEI management will be implemented in Phase 14',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
-              ),
-            ),
+            _buildInfoRow('Store ID', _product!.storeId),
+            if (_product!.categoryId != null)
+              _buildInfoRow('Category ID', _product!.categoryId!),
           ],
         ),
       ),
@@ -343,6 +434,70 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    final user = context.watch<AuthProvider>().user;
+    final canEdit = user?.canCreateProducts == true;
+    final isOwner = user?.role == UserRole.owner;
+
+    return Row(
+      children: [
+        if (canEdit) ...[ 
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _editProduct,
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.edit, size: 18),
+                  SizedBox(width: 8),
+                  Text('Edit Product'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _printBarcode,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.print, size: 18),
+                SizedBox(width: 8),
+                Text('Print Barcode'),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _shareProduct,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.share, size: 18),
+                SizedBox(width: 8),
+                Text('Share'),
+              ],
+            ),
+          ),
+        ),
+        if (isOwner) ...[ 
+          const SizedBox(width: 12),
+          OutlinedButton(
+            onPressed: _deleteProduct,
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.red.withValues(alpha: 0.1),
+            ),
+            child: const Icon(Icons.delete, color: Colors.red, size: 18),
+          ),
+        ],
+      ],
     );
   }
 

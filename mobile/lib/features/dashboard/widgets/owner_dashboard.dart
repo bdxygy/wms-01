@@ -101,13 +101,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           title: 'Quick Navigation (Full Access)',
           actions: [
             // List Page Navigation (OWNER has full access)
-            QuickAction(
-              icon: Icons.store,
-              title: 'Stores',
-              subtitle: 'View & manage stores',
-              color: Colors.purple,
-              onTap: () => _navigateToStoresList(),
-            ),
+
             QuickAction(
               icon: Icons.people,
               title: 'Users',
@@ -123,13 +117,6 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
               onTap: () => _navigateToProductsList(),
             ),
             QuickAction(
-              icon: Icons.category,
-              title: 'Categories',
-              subtitle: 'View & manage categories',
-              color: Colors.blue,
-              onTap: () => _navigateToCategoriesList(),
-            ),
-            QuickAction(
               icon: Icons.receipt_long,
               title: 'Transactions',
               subtitle: 'View & manage transactions',
@@ -140,17 +127,17 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             // Quick Actions (Creation & Tools)
             QuickAction(
               icon: Icons.add_shopping_cart,
-              title: 'New Sale',
+              title: 'New Sale!!',
               subtitle: 'Create quick sale',
               color: Colors.green,
               onTap: () => _navigateToCreateSale(),
             ),
             QuickAction(
-              icon: Icons.qr_code_scanner,
-              title: 'Scan Barcode',
-              subtitle: 'Quick product lookup',
+              icon: Icons.search,
+              title: 'Search Products',
+              subtitle: 'Barcode, IMEI & text search',
               color: Colors.orange,
-              onTap: () => _navigateToScanner(),
+              onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.fact_check,
@@ -777,22 +764,14 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     );
   }
 
-  // Staff Features
-  void _navigateToScanner() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Scanner feature coming soon!')),
-    );
+  // Product Search Features
+  void _navigateToProductSearch() {
+    AppRouter.goToProductSearch(context);
   }
 
   void _navigateToProductCheck() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Product Check feature coming soon!')),
-    );
-  }
-
-  void _navigateToProductSearch() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Product Search feature coming soon!')),
     );
   }
 

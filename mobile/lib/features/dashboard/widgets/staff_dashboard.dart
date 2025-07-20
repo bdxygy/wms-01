@@ -50,11 +50,11 @@ class _StaffDashboardState extends State<StaffDashboard> {
             
             // Staff Tools
             QuickAction(
-              icon: Icons.qr_code_scanner,
-              title: 'Scan Barcode',
-              subtitle: 'Quick product lookup',
+              icon: Icons.search,
+              title: 'Search Products',
+              subtitle: 'Barcode, IMEI & text search',
               color: Colors.orange,
-              onTap: () => _navigateToScanner(),
+              onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.fact_check,
@@ -62,13 +62,6 @@ class _StaffDashboardState extends State<StaffDashboard> {
               subtitle: 'Quality verification',
               color: Colors.orange,
               onTap: () => _navigateToProductCheck(),
-            ),
-            QuickAction(
-              icon: Icons.search,
-              title: 'Find Product',
-              subtitle: 'Search products',
-              color: Colors.green,
-              onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.settings,
@@ -376,16 +369,9 @@ class _StaffDashboardState extends State<StaffDashboard> {
   }
 
   void _navigateToProductSearch() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Product Search feature coming soon!')),
-    );
+    AppRouter.goToProductSearch(context);
   }
 
-  void _navigateToScanner() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Scanner feature coming soon!')),
-    );
-  }
 
   void _navigateToProductCheck() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -393,11 +379,6 @@ class _StaffDashboardState extends State<StaffDashboard> {
     );
   }
 
-  void _navigateToInventory() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Inventory feature coming soon!')),
-    );
-  }
 
   void _navigateToAllChecks() {
     ScaffoldMessenger.of(context).showSnackBar(

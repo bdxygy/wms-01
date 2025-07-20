@@ -1,9 +1,87 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/app_bars.dart';
-import '../../../generated/app_localizations.dart';
+import 'package:provider/provider.dart';
 
-class CreateProductScreen extends StatelessWidget {
+import '../../../core/widgets/app_bars.dart';
+import '../../../core/services/product_service.dart';
+import '../../../core/models/api_requests.dart';
+import '../../../core/routing/app_router.dart';
+import '../../../core/auth/auth_provider.dart';
+import '../../../generated/app_localizations.dart';
+import '../widgets/product_form.dart';
+
+class CreateProductScreen extends StatefulWidget {
   const CreateProductScreen({super.key});
+
+  @override
+  State<CreateProductScreen> createState() => _CreateProductScreenState();
+}
+
+class _CreateProductScreenState extends State<CreateProductScreen> {
+  final ProductService _productService = ProductService();
+
+  Future<void> _createProduct(ProductFormData formData) async {
+    final authProvider = context.read<AuthProvider>();
+    
+    // Validate permissions
+    if (!authProvider.canCreateProducts) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You do not have permission to create products'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Create product request
+      final request = CreateProductRequest(
+        name: formData.productName,
+        storeId: formData.storeId,
+        categoryId: formData.categoryId,
+        sku: formData.sku,
+        isImei: formData.isImei,
+        barcode: formData.barcode,
+        quantity: formData.quantity,
+        purchasePrice: formData.purchasePrice,
+        salePrice: formData.salePrice,
+      );
+      
+      final product = await _productService.createProduct(request);
+      
+      // Success feedback
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Product "${product.name}" created successfully!'),
+            backgroundColor: Colors.green,
+            action: SnackBarAction(
+              label: 'View',
+              onPressed: () {
+                AppRouter.goToProductDetail(context, product.id);
+              },
+            ),
+          ),
+        );
+        
+        // Navigate to product detail screen as per business workflow
+        AppRouter.goToProductDetail(context, product.id);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create product: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _cancelCreation() {
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,34 +91,10 @@ class CreateProductScreen extends StatelessWidget {
       appBar: WMSAppBar(
         title: l10n.addProduct,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_business,
-                size: 64,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                l10n.addProductComingSoon,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Product creation forms will be implemented in Phase 13',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+      body: ProductForm(
+        isEditing: false,
+        onSave: _createProduct,
+        onCancel: _cancelCreation,
       ),
     );
   }

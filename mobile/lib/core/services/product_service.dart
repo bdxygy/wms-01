@@ -3,6 +3,7 @@ import '../api/api_endpoints.dart';
 import '../models/api_response.dart';
 import '../models/api_requests.dart';
 import '../models/product.dart';
+import '../validators/product_validators.dart';
 
 class ProductService {
   final ApiClient _apiClient = ApiClient.instance;
@@ -127,4 +128,66 @@ class ProductService {
       rethrow;
     }
   }
+
+  /// Get paginated list of IMEIs for a product
+  Future<PaginatedResponse<Map<String, dynamic>>> getProductImeis(
+    String productId, {
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final queryParams = ApiEndpoints.paginationParams(page: page, limit: limit);
+    
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.productsListImeis(productId),
+        queryParameters: queryParams,
+      );
+      return PaginatedResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (json) => json as Map<String, dynamic>,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Add IMEI to product (OWNER/ADMIN only)
+  Future<Map<String, dynamic>> addImeiToProduct(
+    String productId,
+    String imei,
+  ) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.productsAddImei(productId),
+        data: {'imei': imei},
+      );
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (json) => json as Map<String, dynamic>,
+      );
+      if (!apiResponse.success || apiResponse.data == null) {
+        throw Exception(apiResponse.error?.message ?? 'Failed to add IMEI');
+      }
+      return apiResponse.data!;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Remove IMEI from product (OWNER/ADMIN only)
+  Future<void> removeImei(String imeiId) async {
+    try {
+      final response = await _apiClient.delete(ApiEndpoints.imeisDelete(imeiId));
+      final apiResponse = ApiResponse<void>.fromJson(
+        response.data,
+        (json) => null,
+      );
+      if (!apiResponse.success) {
+        throw Exception(apiResponse.error?.message ?? 'Failed to remove IMEI');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

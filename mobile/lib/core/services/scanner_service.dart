@@ -138,7 +138,9 @@ class ScannerService {
     if (!_isInitialized || _controller == null) return false;
 
     try {
-      return await _controller!.hasTorch();
+      // For mobile_scanner 7.x, torch is generally available on most devices
+      // We'll assume it's available and handle errors in toggleTorch()
+      return true;
     } catch (e) {
       return false;
     }

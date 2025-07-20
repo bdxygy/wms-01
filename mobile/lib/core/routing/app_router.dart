@@ -19,6 +19,7 @@ import '../../features/checks/screens/checks_screen.dart';
 import '../../features/products/screens/product_detail_screen.dart';
 import '../../features/products/screens/create_product_screen.dart';
 import '../../features/products/screens/edit_product_screen.dart';
+import '../../features/products/screens/product_search_screen.dart';
 import '../../features/scanner/screens/barcode_scanner_screen.dart';
 import '../../features/scanner/screens/imei_scanner_screen.dart';
 
@@ -102,6 +103,20 @@ class AppRouter {
               },
             ),
           ],
+        ),
+
+        // Product Search Route
+        GoRoute(
+          path: '/product-search',
+          name: 'product-search',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
+            return ProductSearchScreen(
+              initialQuery: extra?['initialQuery'],
+              searchType: extra?['searchType'],
+            );
+          },
         ),
 
         // Transactions Route
@@ -329,6 +344,16 @@ class AppRouter {
     context.goNamed('edit-product', pathParameters: {'id': productId});
   }
 
+  static void goToProductSearch(BuildContext context, {
+    String? initialQuery,
+    String? searchType,
+  }) {
+    context.goNamed('product-search', extra: {
+      if (initialQuery != null) 'initialQuery': initialQuery,
+      if (searchType != null) 'searchType': searchType,
+    });
+  }
+
   // Scanner navigation helpers
   static void goToScanner(BuildContext context, {
     String? title,
@@ -371,11 +396,25 @@ class AppRouter {
     });
   }
 
+  // Transaction navigation helpers
+  static void goToCreateTransaction(BuildContext context) {
+    context.goNamed('create-transaction');
+  }
+
+  static void goToTransactionDetail(BuildContext context, String transactionId) {
+    context.goNamed('transaction-detail', pathParameters: {'id': transactionId});
+  }
+
+  static void goToEditTransaction(BuildContext context, String transactionId) {
+    context.goNamed('edit-transaction', pathParameters: {'id': transactionId});
+  }
+
   // Check if current route requires authentication
   static bool isProtectedRoute(String location) {
     const protectedRoutes = [
       '/dashboard',
       '/products',
+      '/product-search',
       '/transactions',
       '/settings',
       '/categories',

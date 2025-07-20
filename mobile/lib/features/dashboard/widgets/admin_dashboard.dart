@@ -71,11 +71,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
               onTap: () => _navigateToCreateSale(),
             ),
             QuickAction(
-              icon: Icons.qr_code_scanner,
-              title: 'Scan Barcode',
-              subtitle: 'Quick product lookup',
+              icon: Icons.search,
+              title: 'Search Products',
+              subtitle: 'Barcode, IMEI & text search',
               color: Colors.orange,
-              onTap: () => _navigateToScanner(),
+              onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.people_outline,
@@ -401,10 +401,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  void _navigateToScanner() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Scanner feature coming soon!')),
-    );
+  void _navigateToProductSearch() {
+    AppRouter.goToProductSearch(context);
   }
 
   void _navigateToInventory() {
