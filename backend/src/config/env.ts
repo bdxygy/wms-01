@@ -26,7 +26,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   
   // CORS
-  CORS_ORIGIN: z.string().url().default('http://localhost:3001'),
+  CORS_ORIGIN: z.string().default('*'),
 
   // Basic Auth
   BASIC_AUTH_USERNAME: z.string().min(1, 'BASIC_AUTH_USERNAME is required'),
