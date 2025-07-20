@@ -66,7 +66,7 @@ class ImageUtils {
       final compressedSize = compressedBytes.length;
       final compressionRatio = ((originalSize - compressedSize) / originalSize * 100).round();
       
-      print('✅ ImageUtils: Compressed ${formatBytes(originalSize)} → ${formatBytes(compressedSize)} (${compressionRatio}% reduction)');
+      print('✅ ImageUtils: Compressed ${formatBytes(originalSize)} → ${formatBytes(compressedSize)} ($compressionRatio% reduction)');
       
       return Uint8List.fromList(compressedBytes);
     } catch (e) {
@@ -143,7 +143,7 @@ class ImageUtils {
       final thumbnail = img.copyResizeCropSquare(image, size: size);
       final thumbnailBytes = img.encodeJpg(thumbnail, quality: quality);
       
-      print('✅ ImageUtils: Thumbnail created: ${size}x${size} (${formatBytes(thumbnailBytes.length)})');
+      print('✅ ImageUtils: Thumbnail created: ${size}x$size (${formatBytes(thumbnailBytes.length)})');
       return Uint8List.fromList(thumbnailBytes);
     } catch (e) {
       print('❌ ImageUtils: Failed to create thumbnail: $e');
@@ -197,7 +197,7 @@ class ImageUtils {
         case ImageFormat.png:
           return Uint8List.fromList(img.encodePng(image));
         case ImageFormat.webp:
-          return Uint8List.fromList(img.encodeWebP(image, quality: quality));
+          return Uint8List.fromList(img.encodeJpg(image, quality: quality));
       }
     } catch (e) {
       print('❌ ImageUtils: Failed to convert image format: $e');
@@ -225,17 +225,17 @@ class ImageUtils {
 
       // Apply auto-level if requested
       if (autoLevel) {
-        enhancedImage = img.normalize(enhancedImage);
+        enhancedImage = img.normalize(enhancedImage, min: 0, max: 255);
       }
 
       // Apply brightness
       if (brightness != 0.0) {
-        enhancedImage = img.brightness(enhancedImage, brightness);
+        enhancedImage = img.adjustColor(enhancedImage, brightness: brightness / 100.0);
       }
 
       // Apply contrast
       if (contrast != 0.0) {
-        enhancedImage = img.contrast(enhancedImage, contrast);
+        enhancedImage = img.adjustColor(enhancedImage, contrast: contrast / 100.0);
       }
 
       // Apply saturation

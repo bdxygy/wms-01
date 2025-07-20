@@ -865,4 +865,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saleTransactions => 'Sale Transactions';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get capturePhoto => 'Capture Photo';
+
+  @override
+  String get photoCapture => 'Photo Capture';
+
+  @override
+  String get photoPreview => 'Photo Preview';
+
+  @override
+  String get photoViewer => 'Photo Viewer';
+
+  @override
+  String get retake => 'Retake';
+
+  @override
+  String get usePhoto => 'Use Photo';
+
+  @override
+  String get photoCaptured => 'Photo captured successfully';
+
+  @override
+  String get cameraInitializationFailed => 'Failed to initialize camera';
+
+  @override
+  String get photoCaptureFailed => 'Failed to capture photo';
+
+  @override
+  String get initializingCamera => 'Initializing camera...';
+
+  @override
+  String get storageInfo => 'Storage Info';
+
+  @override
+  String get totalSize => 'Total Size';
+
+  @override
+  String get photoCount => 'Photo Count';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get imageInfo => 'Image Info';
+
+  @override
+  String get fileName => 'File Name';
+
+  @override
+  String get fileSize => 'File Size';
+
+  @override
+  String get dateModified => 'Date Modified';
+
+  @override
+  String get deletePhoto => 'Delete Photo';
+
+  @override
+  String get deletePhotoConfirmation =>
+      'Are you sure you want to delete this photo?';
+
+  @override
+  String get failedToLoadImage => 'Failed to load image';
 }

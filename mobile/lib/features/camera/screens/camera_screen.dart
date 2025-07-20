@@ -34,7 +34,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   bool _isInitialized = false;
   bool _isCapturing = false;
   FlashMode _currentFlashMode = FlashMode.off;
-  List<File> _capturedPhotos = [];
+  final List<File> _capturedPhotos = [];
 
   @override
   void initState() {

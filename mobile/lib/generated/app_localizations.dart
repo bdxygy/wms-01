@@ -1717,6 +1717,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sale Transactions'**
   String get saleTransactions;
+
+  /// No description provided for @camera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// No description provided for @capturePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Photo'**
+  String get capturePhoto;
+
+  /// No description provided for @photoCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Capture'**
+  String get photoCapture;
+
+  /// No description provided for @photoPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Preview'**
+  String get photoPreview;
+
+  /// No description provided for @photoViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Viewer'**
+  String get photoViewer;
+
+  /// No description provided for @retake.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get retake;
+
+  /// No description provided for @usePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Photo'**
+  String get usePhoto;
+
+  /// No description provided for @photoCaptured.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo captured successfully'**
+  String get photoCaptured;
+
+  /// No description provided for @cameraInitializationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to initialize camera'**
+  String get cameraInitializationFailed;
+
+  /// No description provided for @photoCaptureFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to capture photo'**
+  String get photoCaptureFailed;
+
+  /// No description provided for @initializingCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing camera...'**
+  String get initializingCamera;
+
+  /// No description provided for @storageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Info'**
+  String get storageInfo;
+
+  /// No description provided for @totalSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Size'**
+  String get totalSize;
+
+  /// No description provided for @photoCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Count'**
+  String get photoCount;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @imageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Info'**
+  String get imageInfo;
+
+  /// No description provided for @fileName.
+  ///
+  /// In en, this message translates to:
+  /// **'File Name'**
+  String get fileName;
+
+  /// No description provided for @fileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'File Size'**
+  String get fileSize;
+
+  /// No description provided for @dateModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Modified'**
+  String get dateModified;
+
+  /// No description provided for @deletePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Photo'**
+  String get deletePhoto;
+
+  /// No description provided for @deletePhotoConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this photo?'**
+  String get deletePhotoConfirmation;
+
+  /// No description provided for @failedToLoadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image'**
+  String get failedToLoadImage;
 }
 
 class _AppLocalizationsDelegate

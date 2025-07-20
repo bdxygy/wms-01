@@ -220,7 +220,7 @@ class AuthService {
     try {
       // Make a simple authenticated API call to verify token is valid
       // Using the users endpoint which requires authentication
-      final response = await _apiClient.get(ApiEndpoints.usersList + '?limit=1');
+      final response = await _apiClient.get('${ApiEndpoints.usersList}?limit=1');
       
       // If we get a successful response, token is valid
       return response.statusCode == 200;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../auth/auth_provider.dart';
+import '../models/user.dart';
 import 'bottom_navigation.dart';
 
 class MainNavigationScaffold extends StatefulWidget {
@@ -40,7 +41,7 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
     final user = authProvider.currentUser;
     
     if (user != null) {
-      final routeNames = WMSBottomNavigation.getRouteNamesForRole(user.role);
+      final routeNames = WMSBottomNavigation.getRouteNamesForRole(user.roleString);
       final index = routeNames.indexOf(widget.currentRoute);
       if (index != -1) {
         setState(() {
@@ -55,7 +56,7 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
     final user = authProvider.currentUser;
     
     if (user != null) {
-      final routeNames = WMSBottomNavigation.getRouteNamesForRole(user.role);
+      final routeNames = WMSBottomNavigation.getRouteNamesForRole(user.roleString);
       if (index < routeNames.length) {
         final routeName = routeNames[index];
         
