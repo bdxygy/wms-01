@@ -27,7 +27,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final user = authProvider.currentUser;
 
     return NavigationAwareScaffold(
-      title: _getDashboardTitle(user?.role.toString() ?? 'UNKNOWN'),
+      title: _getDashboardTitle(user?.roleString ?? 'UNKNOWN'),
       currentRoute: 'dashboard',
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
@@ -38,7 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome Section
-              _buildWelcomeSection(user?.name ?? 'User', user?.role.toString() ?? 'UNKNOWN'),
+              _buildWelcomeSection(user?.name ?? 'User', user?.roleString ?? 'UNKNOWN'),
               
               const SizedBox(height: 24),
               
@@ -50,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
               
               // Role-specific Dashboard Content
-              _buildRoleSpecificDashboard(user?.role.toString() ?? 'UNKNOWN'),
+              _buildRoleSpecificDashboard(user?.roleString ?? 'UNKNOWN'),
             ],
           ),
         ),
@@ -152,7 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildRoleSpecificDashboard(String role) {
-    switch (role.toUpperCase()) {
+    switch (role) {
       case 'OWNER':
         return const OwnerDashboard();
       case 'ADMIN':

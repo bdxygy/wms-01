@@ -6,6 +6,7 @@ import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/main_navigation_scaffold.dart';
+import '../../../core/widgets/theme_switcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -248,12 +249,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildSettingsItem(
-              icon: Icons.palette,
-              title: l10n.theme,
-              subtitle: l10n.themeDescription,
-              onTap: () => _themeSettings(l10n),
-            ),
+            _buildThemeSettingsItem(l10n),
             const Divider(),
             _buildSettingsItem(
               icon: Icons.language,
@@ -345,6 +341,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildThemeSettingsItem(AppLocalizations l10n) {
+    return const WMSThemeSettingsTile();
+  }
+
   Color _getRoleColor(String role) {
     switch (role.toUpperCase()) {
       case 'OWNER':
@@ -385,12 +385,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _notificationSettings(AppLocalizations l10n) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.notificationSettingsComingSoon)),
-    );
-  }
-
-  void _themeSettings(AppLocalizations l10n) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.themeSettingsComingSoon)),
     );
   }
 

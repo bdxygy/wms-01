@@ -3,6 +3,7 @@ import '../api/api_client.dart';
 import '../api/api_endpoints.dart';
 import '../api/api_exceptions.dart';
 import '../models/auth_response.dart';
+import '../models/api_response.dart';
 import '../models/store.dart';
 import '../models/user.dart';
 import '../utils/app_config.dart';
@@ -20,19 +21,24 @@ class AuthService {
         password: password,
       );
 
-      final response = await _apiClient.post<Map<String, dynamic>>(
+      final response = await _apiClient.post(
         ApiEndpoints.authLogin,
         data: loginRequest.toJson(),
       );
 
-      if (response.data != null && response.data!['success'] == true) {
-        final authData = response.data!['data'] as Map<String, dynamic>;
+      final apiResponse = ApiResponse<LoginResponseData>.fromJson(
+        response.data,
+        (json) => LoginResponseData.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final loginData = apiResponse.data!;
         
         // Parse the authentication response
         final authResponse = AuthResponse(
-          accessToken: authData['accessToken'] as String,
-          refreshToken: authData['refreshToken'] as String,
-          user: User.fromJson(authData['user'] as Map<String, dynamic>),
+          accessToken: loginData.tokens.accessToken,
+          refreshToken: loginData.tokens.refreshToken ?? '', // Handle missing refreshToken
+          user: loginData.user,
           expiresAt: DateTime.now().add(const Duration(hours: 1)), // Default 1 hour
         );
 
@@ -47,8 +53,8 @@ class AuthService {
         return authResponse;
       } else {
         throw AuthException(
-          message: response.data?['message'] ?? 'Login failed',
-          code: 'LOGIN_FAILED',
+          message: apiResponse.error?.message ?? 'Login failed',
+          code: apiResponse.error?.code ?? 'LOGIN_FAILED',
         );
       }
     } on DioException catch (e) {
@@ -77,18 +83,23 @@ class AuthService {
         refreshToken: refreshToken,
       );
 
-      final response = await _apiClient.post<Map<String, dynamic>>(
+      final response = await _apiClient.post(
         ApiEndpoints.authRefresh,
         data: refreshRequest.toJson(),
       );
 
-      if (response.data != null && response.data!['success'] == true) {
-        final authData = response.data!['data'] as Map<String, dynamic>;
+      final apiResponse = ApiResponse<LoginResponseData>.fromJson(
+        response.data,
+        (json) => LoginResponseData.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (apiResponse.success && apiResponse.data != null) {
+        final loginData = apiResponse.data!;
         
         final authResponse = AuthResponse(
-          accessToken: authData['accessToken'] as String,
-          refreshToken: authData['refreshToken'] as String,
-          user: User.fromJson(authData['user'] as Map<String, dynamic>),
+          accessToken: loginData.tokens.accessToken,
+          refreshToken: loginData.tokens.refreshToken ?? '', // Handle missing refreshToken
+          user: loginData.user,
           expiresAt: DateTime.now().add(const Duration(hours: 1)),
         );
 
@@ -105,8 +116,8 @@ class AuthService {
         // Refresh failed, clear all tokens
         await logout();
         throw AuthException(
-          message: 'Token refresh failed',
-          code: 'REFRESH_FAILED',
+          message: apiResponse.error?.message ?? 'Token refresh failed',
+          code: apiResponse.error?.code ?? 'REFRESH_FAILED',
         );
       }
     } on DioException catch (e) {
@@ -183,15 +194,41 @@ class AuthService {
   // Auto-refresh token if needed
   Future<bool> ensureValidToken() async {
     try {
+      // First check if we have tokens locally
+      if (!await isAuthenticated()) {
+        return false;
+      }
+
+      // If token is near expiry, try to refresh it
       if (await needsTokenRefresh()) {
         final refreshResult = await refreshToken();
         return refreshResult != null;
       }
-      return await isAuthenticated();
+
+      // Validate token with server by making a test API call
+      return await _validateTokenWithServer();
     } catch (e) {
       if (AppConfig.isDebugMode) {
-        print('❌ Token refresh failed: $e');
+        print('❌ Token validation failed: $e');
       }
+      return false;
+    }
+  }
+
+  // Validate token with server by making a test API call
+  Future<bool> _validateTokenWithServer() async {
+    try {
+      // Make a simple authenticated API call to verify token is valid
+      // Using the users endpoint which requires authentication
+      final response = await _apiClient.get(ApiEndpoints.usersList + '?limit=1');
+      
+      // If we get a successful response, token is valid
+      return response.statusCode == 200;
+    } catch (e) {
+      if (AppConfig.isDebugMode) {
+        print('🔍 Server token validation failed: $e');
+      }
+      // If API call fails (401, 403, etc.), token is invalid
       return false;
     }
   }

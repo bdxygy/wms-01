@@ -4,7 +4,7 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // API Base URLs
-  static const String baseUrlDev = 'http://localhost:3000';
+  static const String baseUrlDev = 'http://192.168.0.102:3000';
   static const String baseUrlStaging = 'https://staging-api.wms.example.com';
   static const String baseUrlProd = 'https://api.wms.example.com';
   

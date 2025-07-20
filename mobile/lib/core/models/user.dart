@@ -47,6 +47,19 @@ class User {
   bool get isStaff => role == UserRole.staff;
   bool get isCashier => role == UserRole.cashier;
 
+  String get roleString {
+    switch (role) {
+      case UserRole.owner:
+        return 'OWNER';
+      case UserRole.admin:
+        return 'ADMIN';
+      case UserRole.staff:
+        return 'STAFF';
+      case UserRole.cashier:
+        return 'CASHIER';
+    }
+  }
+
   bool get canCreateProducts => isOwner || isAdmin;
   bool get canCreateTransactions => isOwner || isAdmin || isCashier;
   bool get canManageUsers => isOwner || isAdmin;

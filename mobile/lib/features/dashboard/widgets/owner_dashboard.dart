@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/models/store.dart';
@@ -23,17 +24,35 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   @override
   void initState() {
     super.initState();
-    _loadStores();
+    // Defer the store loading to after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadStores();
+      }
+    });
   }
 
   Future<void> _loadStores() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
     });
 
     try {
+      print('🏪 OwnerDashboard: Starting store loading...');
       final storeProvider = context.read<StoreContextProvider>();
-      await storeProvider.loadAvailableStores();
+
+      print('🏪 OwnerDashboard: Calling loadAvailableStores...');
+      await storeProvider.loadAvailableStores().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Store loading timeout');
+        },
+      );
+
+      print(
+          '🏪 OwnerDashboard: Store loading completed, found ${storeProvider.availableStores.length} stores');
 
       if (mounted) {
         setState(() {
@@ -41,12 +60,22 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           _selectedStore = _stores.isNotEmpty ? _stores.first : null;
           _isLoading = false;
         });
+        print('🏪 OwnerDashboard: State updated successfully');
       }
     } catch (e) {
+      print('❌ OwnerDashboard: Store loading failed: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
+
+        // Show error to user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load stores: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     }
   }
@@ -58,14 +87,14 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
       children: [
         // Store Switcher Panel
         _buildStoreSwitcherPanel(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Overview Metrics
         _buildOverviewMetrics(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Comprehensive Quick Actions (List Page Navigation)
         DashboardQuickActions(
           role: 'OWNER',
@@ -107,7 +136,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
               color: Colors.green,
               onTap: () => _navigateToTransactionsList(),
             ),
-            
+
             // Quick Actions (Creation & Tools)
             QuickAction(
               icon: Icons.add_shopping_cart,
@@ -130,7 +159,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
               color: Colors.orange,
               onTap: () => _navigateToProductCheck(),
             ),
-            
+
             // Analytics & Management
             QuickAction(
               icon: Icons.analytics,
@@ -148,9 +177,9 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Multiple Activity Feeds (All Role Features)
         _buildComprehensiveActivitySections(),
       ],
@@ -165,7 +194,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Wrap(
               children: [
                 Icon(
                   Icons.dashboard,
@@ -175,9 +204,9 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
                 Text(
                   'Multi-Store Overview',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
                 ),
                 const Spacer(),
                 TextButton.icon(
@@ -187,9 +216,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
                 ),
               ],
             ),
-            
             const SizedBox(height: 16),
-            
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else if (_stores.isEmpty)
@@ -210,21 +237,27 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           Icon(
             Icons.store_outlined,
             size: 48,
-            color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
+            color: Theme.of(context)
+                .colorScheme
+                .onPrimaryContainer
+                .withValues(alpha: 0.6),
           ),
           const SizedBox(height: 16),
           Text(
             'No stores created yet',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Create your first store to start managing inventory',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
-            ),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimaryContainer
+                      .withValues(alpha: 0.8),
+                ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -245,8 +278,11 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         Text(
           'Select store to view details (${_stores.length} total)',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
-          ),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onPrimaryContainer
+                    .withValues(alpha: 0.8),
+              ),
         ),
         const SizedBox(height: 12),
         Container(
@@ -255,7 +291,8 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              color:
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
             ),
           ),
           child: DropdownButton<Store>(
@@ -281,16 +318,25 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
                         children: [
                           Text(
                             store.name,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                           if (store.address.isNotEmpty)
                             Text(
                               store.address,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.7),
+                                  ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -298,19 +344,22 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: store.isActive 
-                            ? Colors.green.withValues(alpha: 0.2) 
+                        color: store.isActive
+                            ? Colors.green.withValues(alpha: 0.2)
                             : Colors.orange.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         store.isActive ? 'Active' : 'Inactive',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: store.isActive ? Colors.green[700] : Colors.orange[700],
-                          fontWeight: FontWeight.w500,
-                        ),
+                              color: store.isActive
+                                  ? Colors.green[700]
+                                  : Colors.orange[700],
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                     ),
                   ],
@@ -333,22 +382,22 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _selectedStore != null 
+          _selectedStore != null
               ? 'Comprehensive Analytics for ${_selectedStore!.name}'
               : 'Business Intelligence Dashboard',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
+
         // Store Management Metrics
         Text(
           'Store Management',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.purple,
-          ),
+                fontWeight: FontWeight.w600,
+                color: Colors.purple,
+              ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -376,16 +425,16 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Sales & Transaction Metrics (Cashier Features)
         Text(
           'Sales Performance',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.green,
-          ),
+                fontWeight: FontWeight.w600,
+                color: Colors.green,
+              ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -441,16 +490,16 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Inventory & Product Metrics (Admin Features)
         Text(
           'Inventory Management',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.blue,
-          ),
+                fontWeight: FontWeight.w600,
+                color: Colors.blue,
+              ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -503,16 +552,16 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Staff Operations Metrics (Staff Features)
         Text(
           'Operations & Quality Control',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.orange,
-          ),
+                fontWeight: FontWeight.w600,
+                color: Colors.orange,
+              ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -557,9 +606,9 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           onViewAll: () => _navigateToTransactions(),
           onRefresh: () => _refreshAllData(),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Recent Product Checks (Staff Feature)
         RecentActivityCard(
           title: 'Recent Product Checks',
@@ -567,9 +616,9 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           onViewAll: () => _navigateToAllChecks(),
           onRefresh: () => _refreshAllData(),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Store Activity Overview (Admin Feature)
         RecentActivityCard(
           title: 'Store Operations Activity',
@@ -577,9 +626,9 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           onViewAll: () => _navigateToStoreActivity(),
           onRefresh: () => _refreshAllData(),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Multi-Store Overview (Owner Feature)
         RecentActivityCard(
           title: 'Multi-Store Summary',
@@ -612,10 +661,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   void _navigateToProductsList() {
-    // TODO: Navigate to products list with search & create button
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Products List page coming soon!')),
-    );
+    context.goNamed('products');
   }
 
   void _navigateToCategoriesList() {

@@ -15,6 +15,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  bool _isInitializing = false;
+  
   @override
   void initState() {
     super.initState();
@@ -22,35 +24,70 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
+    // Prevent multiple concurrent initialization
+    if (_isInitializing) {
+      print('⚠️ Splash: Already initializing, skipping...');
+      return;
+    }
+    
+    _isInitializing = true;
+    
     // Initialize app providers
     final appProvider = context.read<AppProvider>();
     final authProvider = context.read<AuthProvider>();
     final storeProvider = context.read<StoreContextProvider>();
 
     try {
+      print('🚀 Splash: Starting app initialization');
+      
       // Initialize app settings
+      print('📱 Splash: Initializing app provider');
       await appProvider.initialize();
+      print('✅ Splash: App provider initialized');
       
       // Initialize authentication
-      await authProvider.initialize();
+      print('🔐 Splash: Initializing auth provider');
+      try {
+        await authProvider.initialize().timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw Exception('Auth initialization timeout');
+          },
+        );
+        print('✅ Splash: Auth provider initialized, state: ${authProvider.state}');
+      } catch (authError) {
+        print('⚠️ Splash: Auth provider initialization failed: $authError');
+        // Clear potentially corrupted auth data and continue
+        await authProvider.logout();
+        print('🧹 Splash: Cleared auth data, continuing...');
+      }
+      
+      // Authentication initialization completed successfully
       
       // Initialize store context if authenticated
       if (authProvider.isAuthenticated) {
+        print('🏪 Splash: Initializing store provider');
         await storeProvider.initialize();
+        print('✅ Splash: Store provider initialized');
       }
 
       // Wait a minimum time for splash experience
+      print('⏱️ Splash: Waiting 2 seconds');
       await Future.delayed(const Duration(seconds: 2));
 
       // Navigate based on authentication state
+      print('🧭 Splash: Ready to navigate');
       if (mounted) {
         _navigateBasedOnState();
       }
     } catch (e) {
       // Handle initialization error
+      print('❌ Splash: Initialization error: $e');
       if (mounted) {
         _showErrorAndRetry(e.toString());
       }
+    } finally {
+      _isInitializing = false;
     }
   }
 
@@ -58,15 +95,22 @@ class _SplashScreenState extends State<SplashScreen> {
     final authProvider = context.read<AuthProvider>();
     final storeProvider = context.read<StoreContextProvider>();
 
+    print('🧭 Splash: Navigation check - authenticated: ${authProvider.isAuthenticated}');
+    print('🧭 Splash: Navigation check - needsStoreSelection: ${authProvider.needsStoreSelection}');
+    print('🧭 Splash: Navigation check - hasStoreSelected: ${storeProvider.hasStoreSelected}');
+
     if (!authProvider.isAuthenticated) {
       // Navigate to login
-      context.goNamed('login');
+      print('➡️ Splash: Navigating to login');
+      context.go('/login');
     } else if (authProvider.needsStoreSelection && !storeProvider.hasStoreSelected) {
       // Navigate to store selection
-      context.goNamed('store-selection');
+      print('➡️ Splash: Navigating to store selection');
+      context.go('/store-selection');
     } else {
       // Navigate to main dashboard
-      context.goNamed('dashboard');
+      print('➡️ Splash: Navigating to dashboard');
+      context.go('/dashboard');
     }
   }
 
@@ -81,6 +125,7 @@ class _SplashScreenState extends State<SplashScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              _isInitializing = false;  // Reset flag before retry
               _initializeApp();
             },
             child: Text(AppLocalizations.of(context)!.retry),

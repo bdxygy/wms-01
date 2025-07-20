@@ -57,7 +57,7 @@ class DashboardQuickActions extends StatelessWidget {
       crossAxisCount: 2,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.4,
+      childAspectRatio: 1.2, // Increased from 1.4 to give more height
       children: actions.map((action) => _buildActionCard(action)).toList(),
     );
   }
@@ -72,7 +72,7 @@ class DashboardQuickActions extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          childAspectRatio: 1.4,
+          childAspectRatio: 1.2, // Increased from 1.4 to give more height
           children: actions.take(4).map((action) => _buildActionCard(action)).toList(),
         ),
         
@@ -80,7 +80,7 @@ class DashboardQuickActions extends StatelessWidget {
           const SizedBox(height: 12),
           // Remaining actions in horizontal list
           SizedBox(
-            height: 120,
+            height: 140, // Increased height to match new aspect ratio
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: actions.length - 4,
@@ -108,34 +108,41 @@ class DashboardQuickActions extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           onTap: action.onTap,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0), // Reduced padding to fit content
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min, // Use minimum space needed
               children: [
                 Icon(
                   action.icon,
-                  size: 32,
+                  size: 28, // Slightly smaller icon
                   color: action.color ?? Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  action.title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 6), // Reduced spacing
+                Flexible( // Allow text to take available space
+                  child: Text(
+                    action.title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13, // Slightly smaller font
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2, // Allow 2 lines for title
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  action.subtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                const SizedBox(height: 2), // Reduced spacing
+                Flexible( // Allow text to take available space
+                  child: Text(
+                    action.subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontSize: 11, // Smaller subtitle font
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

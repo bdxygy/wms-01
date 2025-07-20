@@ -43,24 +43,40 @@ class RecentActivityCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+            Expanded( // Make title flexible to prevent overflow
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 2, // Allow title to wrap to 2 lines if needed
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const Spacer(),
-            if (onRefresh != null)
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: onRefresh,
-                tooltip: 'Refresh',
-              ),
-            if (onViewAll != null && hasActivities)
-              TextButton(
-                onPressed: onViewAll,
-                child: const Text('View All'),
-              ),
+            const SizedBox(width: 8), // Small spacing instead of Spacer
+            Row( // Group buttons to manage their space
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onRefresh != null)
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: onRefresh,
+                    tooltip: 'Refresh',
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ), // Smaller button constraints
+                  ),
+                if (onViewAll != null && hasActivities)
+                  TextButton(
+                    onPressed: onViewAll,
+                    child: const Text(
+                      'View All',
+                      style: TextStyle(fontSize: 13), // Slightly smaller text
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
         const SizedBox(height: 16),

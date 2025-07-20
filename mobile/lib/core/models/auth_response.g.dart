@@ -60,3 +60,26 @@ Map<String, dynamic> _$RegisterRequestToJson(RegisterRequest instance) =>
       'role': instance.role,
       'storeId': instance.storeId,
     };
+
+LoginResponseData _$LoginResponseDataFromJson(Map<String, dynamic> json) =>
+    LoginResponseData(
+      user: User.fromJson(json['user'] as Map<String, dynamic>),
+      tokens: AuthTokens.fromJson(json['tokens'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$LoginResponseDataToJson(LoginResponseData instance) =>
+    <String, dynamic>{
+      'user': instance.user,
+      'tokens': instance.tokens,
+    };
+
+AuthTokens _$AuthTokensFromJson(Map<String, dynamic> json) => AuthTokens(
+      accessToken: json['accessToken'] as String,
+      refreshToken: json['refreshToken'] as String?,
+    );
+
+Map<String, dynamic> _$AuthTokensToJson(AuthTokens instance) =>
+    <String, dynamic>{
+      'accessToken': instance.accessToken,
+      'refreshToken': instance.refreshToken,
+    };

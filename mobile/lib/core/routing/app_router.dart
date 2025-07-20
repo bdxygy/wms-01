@@ -16,6 +16,9 @@ import '../../features/stores/screens/stores_screen.dart';
 import '../../features/users/screens/users_screen.dart';
 import '../../features/categories/screens/categories_screen.dart';
 import '../../features/checks/screens/checks_screen.dart';
+import '../../features/products/screens/product_detail_screen.dart';
+import '../../features/products/screens/create_product_screen.dart';
+import '../../features/products/screens/edit_product_screen.dart';
 
 class AppRouter {
 
@@ -68,6 +71,35 @@ class AppRouter {
           name: 'products',
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const ProductsScreen(),
+          routes: [
+            // Product Detail Route
+            GoRoute(
+              path: '/:id',
+              name: 'product-detail',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final productId = state.pathParameters['id']!;
+                return ProductDetailScreen(productId: productId);
+              },
+            ),
+            // Create Product Route
+            GoRoute(
+              path: '/create',
+              name: 'create-product',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) => const CreateProductScreen(),
+            ),
+            // Edit Product Route
+            GoRoute(
+              path: '/:id/edit',
+              name: 'edit-product',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final productId = state.pathParameters['id']!;
+                return EditProductScreen(productId: productId);
+              },
+            ),
+          ],
         ),
 
         // Transactions Route
@@ -240,6 +272,19 @@ class AppRouter {
 
   static void handleAuthError(BuildContext context, String error) {
     context.goNamed('error', extra: error);
+  }
+
+  // Product navigation helpers
+  static void goToProductDetail(BuildContext context, String productId) {
+    context.goNamed('product-detail', pathParameters: {'id': productId});
+  }
+
+  static void goToCreateProduct(BuildContext context) {
+    context.goNamed('create-product');
+  }
+
+  static void goToEditProduct(BuildContext context, String productId) {
+    context.goNamed('edit-product', pathParameters: {'id': productId});
   }
 
   // Check if current route requires authentication
