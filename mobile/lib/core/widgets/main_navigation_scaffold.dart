@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../auth/auth_provider.dart';
-import '../models/user.dart';
 import 'bottom_navigation.dart';
 
 class MainNavigationScaffold extends StatefulWidget {
@@ -57,6 +56,7 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
     
     if (user != null) {
       final routeNames = WMSBottomNavigation.getRouteNamesForRole(user.roleString);
+      
       if (index < routeNames.length) {
         final routeName = routeNames[index];
         
@@ -90,6 +90,7 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
       bottomNavigationBar: WMSBottomNavigation(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
+        userRole: user.roleString,
       ),
     );
   }

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../../generated/app_localizations.dart';
 
 class WMSBottomNavigation extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final String userRole;
 
   const WMSBottomNavigation({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.userRole,
   });
 
   @override
@@ -18,68 +19,164 @@ class WMSBottomNavigation extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
-      items: _getNavigationItems(context),
+      selectedItemColor: Theme.of(context).colorScheme.primary,
+      unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      elevation: 8,
+      items: getNavigationItemsForRole(context, userRole),
     );
   }
 
-  static List<BottomNavigationBarItem> _getNavigationItems(BuildContext context) {
+  static List<BottomNavigationBarItem> getNavigationItemsForRole(BuildContext context, String role) {
     final l10n = AppLocalizations.of(context)!;
     
-    return [
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.dashboard),
-        label: l10n.dashboard,
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.inventory_2),
-        label: l10n.products,
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.receipt),
-        label: l10n.transactions,
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.store),
-        label: l10n.stores,
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.settings),
-        label: l10n.settings,
-      ),
-    ];
-  }
-
-  static List<String> getRouteNamesForRole(String role) {
-    switch (role) {
+    switch (role.toUpperCase()) {
       case 'OWNER':
         return [
-          'owner_dashboard',
-          'owner_products',
-          'owner_transactions',
-          'owner_stores',
-          'owner_settings',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard),
+            label: l10n.dashboard,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.inventory_2),
+            label: l10n.products,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.receipt),
+            label: l10n.transactions,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.store),
+            label: l10n.stores,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.people),
+            label: l10n.users,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: l10n.settings,
+          ),
         ];
       case 'ADMIN':
         return [
-          'admin_dashboard',
-          'admin_products',
-          'admin_transactions',
-          'admin_stores',
-          'admin_settings',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard),
+            label: l10n.dashboard,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.inventory_2),
+            label: l10n.products,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.receipt),
+            label: l10n.transactions,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.store),
+            label: l10n.stores,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: l10n.settings,
+          ),
         ];
       case 'STAFF':
         return [
-          'staff_dashboard',
-          'staff_products',
-          'staff_checks',
-          'staff_settings',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard),
+            label: l10n.dashboard,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.inventory_2),
+            label: l10n.products,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.checklist),
+            label: l10n.checks,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: l10n.settings,
+          ),
         ];
       case 'CASHIER':
         return [
-          'cashier_dashboard',
-          'cashier_products',
-          'cashier_transactions',
-          'cashier_settings',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard),
+            label: l10n.dashboard,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.inventory_2),
+            label: l10n.products,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.receipt),
+            label: l10n.transactions,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: l10n.settings,
+          ),
+        ];
+      default:
+        return [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard),
+            label: l10n.dashboard,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.inventory_2),
+            label: l10n.products,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.receipt),
+            label: l10n.transactions,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.store),
+            label: l10n.stores,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: l10n.settings,
+          ),
+        ];
+    }
+  }
+
+  static List<String> getRouteNamesForRole(String role) {
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return [
+          'dashboard',
+          'products',
+          'transactions',
+          'stores',
+          'users',
+          'settings',
+        ];
+      case 'ADMIN':
+        return [
+          'dashboard',
+          'products',
+          'transactions',
+          'stores',
+          'settings',
+        ];
+      case 'STAFF':
+        return [
+          'dashboard',
+          'products',
+          'checks',
+          'settings',
+        ];
+      case 'CASHIER':
+        return [
+          'dashboard',
+          'products',
+          'transactions',
+          'settings',
         ];
       default:
         return [
@@ -91,11 +188,4 @@ class WMSBottomNavigation extends StatelessWidget {
         ];
     }
   }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(IntProperty('currentIndex', currentIndex));
-  }
 }
-
