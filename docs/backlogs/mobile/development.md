@@ -789,8 +789,6 @@ Implement comprehensive barcode scanning for product search and transaction item
 
 - [ ] **Scanner Utilities**
   - [ ] Barcode validation and formatting
-  - [ ] QR code generation for sharing
-  - [ ] Deep link handling from QR codes
   - [ ] Scanner result processing
 
 ### **Technical Implementation**
