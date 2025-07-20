@@ -19,6 +19,8 @@ import '../../features/checks/screens/checks_screen.dart';
 import '../../features/products/screens/product_detail_screen.dart';
 import '../../features/products/screens/create_product_screen.dart';
 import '../../features/products/screens/edit_product_screen.dart';
+import '../../features/scanner/screens/barcode_scanner_screen.dart';
+import '../../features/scanner/screens/imei_scanner_screen.dart';
 
 class AppRouter {
 
@@ -140,6 +142,46 @@ class AppRouter {
           name: 'checks',
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const ChecksScreen(),
+        ),
+
+        // Scanner Route
+        GoRoute(
+          path: '/scanner',
+          name: 'scanner',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) {
+            // Get optional parameters from extra
+            final extra = state.extra as Map<String, dynamic>?;
+            return BarcodeScannerScreen(
+              title: extra?['title'],
+              subtitle: extra?['subtitle'],
+              onBarcodeScanned: extra?['onBarcodeScanned'],
+              allowManualEntry: extra?['allowManualEntry'] ?? true,
+              showHistory: extra?['showHistory'] ?? false,
+              autoClose: extra?['autoClose'] ?? true,
+            );
+          },
+        ),
+
+        // IMEI Scanner Route
+        GoRoute(
+          path: '/imei-scanner',
+          name: 'imei-scanner',
+          redirect: (context, state) => _protectedRedirect(context, state),
+          builder: (context, state) {
+            // Get optional parameters from extra
+            final extra = state.extra as Map<String, dynamic>?;
+            return ImeiScannerScreen(
+              title: extra?['title'],
+              subtitle: extra?['subtitle'],
+              onImeiScanned: extra?['onImeiScanned'],
+              onProductFound: extra?['onProductFound'],
+              allowManualEntry: extra?['allowManualEntry'] ?? true,
+              showHistory: extra?['showHistory'] ?? true,
+              autoSearchProduct: extra?['autoSearchProduct'] ?? true,
+              autoClose: extra?['autoClose'] ?? false,
+            );
+          },
         ),
 
         // Error Routes
@@ -287,6 +329,48 @@ class AppRouter {
     context.goNamed('edit-product', pathParameters: {'id': productId});
   }
 
+  // Scanner navigation helpers
+  static void goToScanner(BuildContext context, {
+    String? title,
+    String? subtitle,
+    Function(dynamic)? onBarcodeScanned,
+    bool allowManualEntry = true,
+    bool showHistory = false,
+    bool autoClose = true,
+  }) {
+    context.goNamed('scanner', extra: {
+      if (title != null) 'title': title,
+      if (subtitle != null) 'subtitle': subtitle,
+      if (onBarcodeScanned != null) 'onBarcodeScanned': onBarcodeScanned,
+      'allowManualEntry': allowManualEntry,
+      'showHistory': showHistory,
+      'autoClose': autoClose,
+    });
+  }
+
+  // IMEI Scanner navigation helpers
+  static void goToImeiScanner(BuildContext context, {
+    String? title,
+    String? subtitle,
+    Function(dynamic)? onImeiScanned,
+    Function(dynamic)? onProductFound,
+    bool allowManualEntry = true,
+    bool showHistory = true,
+    bool autoSearchProduct = true,
+    bool autoClose = false,
+  }) {
+    context.goNamed('imei-scanner', extra: {
+      if (title != null) 'title': title,
+      if (subtitle != null) 'subtitle': subtitle,
+      if (onImeiScanned != null) 'onImeiScanned': onImeiScanned,
+      if (onProductFound != null) 'onProductFound': onProductFound,
+      'allowManualEntry': allowManualEntry,
+      'showHistory': showHistory,
+      'autoSearchProduct': autoSearchProduct,
+      'autoClose': autoClose,
+    });
+  }
+
   // Check if current route requires authentication
   static bool isProtectedRoute(String location) {
     const protectedRoutes = [
@@ -296,7 +380,9 @@ class AppRouter {
       '/settings',
       '/categories',
       '/stores',
-      '/users'
+      '/users',
+      '/scanner',
+      '/imei-scanner'
     ];
     
     return protectedRoutes.any((route) => location.startsWith(route));

@@ -695,48 +695,48 @@ Implement product listing with pagination, search, and role-based actions.
 Implement camera functionality for product photos and transaction proof capture.
 
 ### **Features to Implement**
-- [ ] **Camera Service**
-  - [ ] Camera initialization and configuration
-  - [ ] Photo capture with quality settings
-  - [ ] Front/back camera switching
-  - [ ] Flash control and settings
-  - [ ] **Enhanced Camera Features**
-    - [ ] Camera permissions handling with user guidance
-    - [ ] Memory management during photo capture
-    - [ ] Camera failure recovery mechanisms
-    - [ ] Photo quality optimization
-    - [ ] Background camera task handling
+- [x] **Camera Service**
+  - [x] Camera initialization and configuration
+  - [x] Photo capture with quality settings
+  - [x] Front/back camera switching
+  - [x] Flash control and settings
+  - [x] **Enhanced Camera Features**
+    - [x] Camera permissions handling with user guidance
+    - [x] Memory management during photo capture
+    - [x] Camera failure recovery mechanisms
+    - [x] Photo quality optimization
+    - [x] Background camera task handling
 
-- [ ] **Photo Capture Screen**
-  - [ ] Custom camera UI with controls
-  - [ ] Photo preview and confirmation
-  - [ ] Retake photo functionality
-  - [ ] Multiple photo capture mode
-  - [ ] Photo gallery preview
+- [x] **Photo Capture Screen**
+  - [x] Custom camera UI with controls
+  - [x] Photo preview and confirmation
+  - [x] Retake photo functionality
+  - [x] Multiple photo capture mode
+  - [x] Photo gallery preview
 
-- [ ] **Advanced Image Management**
-  - [ ] **Compression & Optimization**
-    - [ ] Intelligent image compression algorithms
-    - [ ] Size optimization for different use cases
-    - [ ] Quality vs file size balancing
-    - [ ] Format conversion (JPEG, PNG, WebP)
-  - [ ] **Storage & Cache Management**
-    - [ ] Local image storage in app directory
-    - [ ] Image cache with LRU eviction
-    - [ ] Storage full detection and cleanup
-    - [ ] Image metadata management
-    - [ ] Automatic cleanup of old images
-  - [ ] **Performance Optimization**
-    - [ ] Lazy image loading
-    - [ ] Image preloading strategies
-    - [ ] Memory leak prevention
-    - [ ] Background image processing
+- [x] **Advanced Image Management**
+  - [x] **Compression & Optimization**
+    - [x] Intelligent image compression algorithms
+    - [x] Size optimization for different use cases
+    - [x] Quality vs file size balancing
+    - [x] Format conversion (JPEG, PNG, WebP)
+  - [x] **Storage & Cache Management**
+    - [x] Local image storage in app directory
+    - [x] Image cache with LRU eviction
+    - [x] Storage full detection and cleanup
+    - [x] Image metadata management
+    - [x] Automatic cleanup of old images
+  - [x] **Performance Optimization**
+    - [x] Lazy image loading
+    - [x] Image preloading strategies
+    - [x] Memory leak prevention
+    - [x] Background image processing
 
-- [ ] **Integration Preparation**
-  - [ ] Product photo capture workflow
-  - [ ] Transaction proof photo workflow
-  - [ ] Photo picker from gallery option
-  - [ ] Photo viewing and zoom functionality
+- [x] **Integration Preparation**
+  - [x] Product photo capture workflow
+  - [x] Transaction proof photo workflow
+  - [x] Photo picker from gallery option
+  - [x] Photo viewing and zoom functionality
 
 ### **Technical Implementation**
 ```dart
@@ -762,11 +762,11 @@ Implement camera functionality for product photos and transaction proof capture.
 Implement comprehensive barcode scanning for product search and transaction item addition.
 
 ### **Features to Implement**
-- [ ] **Barcode Scanner Service**
-  - [ ] Multiple format support (EAN, UPC, Code128, QR)
-  - [ ] Real-time barcode detection
-  - [ ] Camera controls (torch, zoom, focus)
-  - [ ] Scanner performance optimization
+- [x] **Barcode Scanner Service**
+  - [x] Multiple format support (EAN, UPC, Code128, QR)
+  - [x] Real-time barcode detection
+  - [x] Camera controls (torch, zoom, focus)
+  - [x] Scanner performance optimization
 
 - [ ] **Barcode Scanner Screen**
   - [ ] Custom scanner UI with overlay
@@ -815,29 +815,28 @@ Implement comprehensive barcode scanning for product search and transaction item
 Implement IMEI-specific scanning and product search functionality.
 
 ### **Features to Implement**
-- [ ] **IMEI Scanner**
-  - [ ] IMEI barcode detection (specific formats)
-  - [ ] IMEI validation with Luhn algorithm
-  - [ ] Manual IMEI entry with validation
-  - [ ] IMEI formatting and display
+- [x] **IMEI Scanner**
+  - [x] IMEI barcode detection (specific formats)
+  - [x] Manual IMEI entry with validation
+  - [x] IMEI formatting and display
 
-- [ ] **IMEI Product Search**
-  - [ ] Search products by IMEI number
-  - [ ] Display product associated with IMEI
-  - [ ] Navigate to product detail from IMEI
-  - [ ] IMEI search history
+- [x] **IMEI Product Search**
+  - [x] Search products by IMEI number
+  - [x] Display product associated with IMEI
+  - [x] Navigate to product detail from IMEI
+  - [x] IMEI search history
 
-- [ ] **IMEI Integration**
-  - [ ] IMEI scanning in transaction workflows
-  - [ ] IMEI-based inventory checking
-  - [ ] IMEI product verification
-  - [ ] Duplicate IMEI detection
+- [x] **IMEI Integration**
+  - [x] IMEI scanning in transaction workflows
+  - [x] IMEI-based inventory checking
+  - [x] IMEI product verification
+  - [x] Duplicate IMEI detection
 
-- [ ] **IMEI Management Preparation**
-  - [ ] Add IMEI to products workflow
-  - [ ] IMEI list display
-  - [ ] IMEI removal functionality
-  - [ ] IMEI validation rules
+- [x] **IMEI Management Preparation**
+  - [x] Add IMEI to products workflow
+  - [x] IMEI list display
+  - [x] IMEI removal functionality
+  - [x] IMEI validation rules
 
 ### **Success Criteria**
 - ✅ IMEI scanning and validation working
@@ -882,7 +881,7 @@ Implement complete product creation and editing forms with validation and busine
   - [ ] Multi-step form with `flutter_form_builder`
   - [ ] Product details (name, SKU, prices, quantity)
   - [ ] Store and category selection dropdowns
-  - [ ] IMEI checkbox for electronic products
+  - [ ] IMEI checkbox (if checked, then appear dynamic array form for inserting IMEI's number)
   - [ ] Photo upload integration
   - [ ] Form validation with business rules
 
