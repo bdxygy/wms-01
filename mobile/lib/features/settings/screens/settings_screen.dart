@@ -4,6 +4,8 @@ import '../../../generated/app_localizations.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
+import '../../../core/providers/app_provider.dart';
+import '../../../core/models/currency.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/main_navigation_scaffold.dart';
 import '../../../core/widgets/theme_switcher.dart';
@@ -251,6 +253,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 16),
             _buildThemeSettingsItem(l10n),
             const Divider(),
+            _buildCurrencySettingsItem(l10n),
+            const Divider(),
             _buildSettingsItem(
               icon: Icons.language,
               title: l10n.language,
@@ -345,6 +349,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return const WMSThemeSettingsTile();
   }
 
+  Widget _buildCurrencySettingsItem(AppLocalizations l10n) {
+    final appProvider = context.watch<AppProvider>();
+    return ListTile(
+      leading: const Icon(Icons.attach_money),
+      title: const Text('Currency'),
+      subtitle: Text('Current: ${appProvider.currency.displayName}'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => _showCurrencySelector(context, appProvider),
+    );
+  }
+
   Color _getRoleColor(String role) {
     switch (role.toUpperCase()) {
       case 'OWNER':
@@ -435,6 +450,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _privacyPolicy(AppLocalizations l10n) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.privacyPolicyComingSoon)),
+    );
+  }
+
+  void _showCurrencySelector(BuildContext context, AppProvider appProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Currency'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: SupportedCurrencies.all.length,
+            itemBuilder: (context, index) {
+              final currency = SupportedCurrencies.all[index];
+              final isSelected = currency == appProvider.currency;
+              
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: isSelected 
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Text(
+                    currency.symbol,
+                    style: TextStyle(
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                title: Text(currency.name),
+                subtitle: Text(currency.code),
+                trailing: isSelected 
+                    ? Icon(
+                        Icons.check_circle,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () {
+                  appProvider.setCurrency(currency);
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Currency changed to ${currency.name}'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
     );
   }
 

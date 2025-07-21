@@ -4,7 +4,11 @@ import 'package:provider/provider.dart';
 
 import '../../../core/models/product.dart';
 import '../../../core/models/user.dart';
+import '../../../core/models/store.dart';
+import '../../../core/models/category.dart';
 import '../../../core/services/product_service.dart';
+import '../../../core/services/store_service.dart';
+import '../../../core/services/category_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/app_bars.dart';
@@ -27,8 +31,12 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final ProductService _productService = ProductService();
+  final StoreService _storeService = StoreService();
+  final CategoryService _categoryService = CategoryService();
   
   Product? _product;
+  Store? _store;
+  Category? _category;
   bool _isLoading = true;
   String? _error;
 
@@ -46,8 +54,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       final product = await _productService.getProductById(widget.productId);
+      
+      // Load store details
+      Store? store;
+      try {
+        store = await _storeService.getStoreById(product.storeId);
+      } catch (e) {
+        debugPrint('Failed to load store: $e');
+      }
+      
+      // Load category details if category exists
+      Category? category;
+      if (product.categoryId != null) {
+        try {
+          category = await _categoryService.getCategoryById(product.categoryId!);
+        } catch (e) {
+          debugPrint('Failed to load category: $e');
+        }
+      }
+      
       setState(() {
         _product = product;
+        _store = store;
+        _category = category;
       });
     } catch (e) {
       setState(() {
@@ -378,9 +407,9 @@ Quantity: ${_product!.quantity}''';
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Store ID', _product!.storeId),
+            _buildInfoRow('Store', _store?.name ?? 'Loading...'),
             if (_product!.categoryId != null)
-              _buildInfoRow('Category ID', _product!.categoryId!),
+              _buildInfoRow('Category', _category?.name ?? 'Loading...'),
           ],
         ),
       ),
@@ -442,53 +471,73 @@ Quantity: ${_product!.quantity}''';
     final canEdit = user?.canCreateProducts == true;
     final isOwner = user?.role == UserRole.owner;
 
-    return Row(
-      children: [
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Row(
+        children: [
         if (canEdit) ...[ 
           Expanded(
             child: OutlinedButton(
               onPressed: _editProduct,
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.edit, size: 18),
-                  SizedBox(width: 8),
-                  Text('Edit Product'),
+                  SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Edit',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
         ],
         Expanded(
           child: OutlinedButton(
             onPressed: _printBarcode,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.print, size: 18),
-                SizedBox(width: 8),
-                Text('Print Barcode'),
+                SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    'Print',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: OutlinedButton(
             onPressed: _shareProduct,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.share, size: 18),
-                SizedBox(width: 8),
-                Text('Share'),
+                SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    'Share',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
           ),
         ),
         if (isOwner) ...[ 
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           OutlinedButton(
             onPressed: _deleteProduct,
             style: OutlinedButton.styleFrom(
@@ -497,7 +546,8 @@ Quantity: ${_product!.quantity}''';
             child: const Icon(Icons.delete, color: Colors.red, size: 18),
           ),
         ],
-      ],
+        ],
+      ),
     );
   }
 

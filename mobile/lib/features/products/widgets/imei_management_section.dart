@@ -343,9 +343,10 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
 
     if (_imeis.isEmpty) {
       return Container(
-        height: 100,
+        width: double.infinity,
         padding: const EdgeInsets.all(16),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.device_hub_outlined, color: Colors.grey[400], size: 32),

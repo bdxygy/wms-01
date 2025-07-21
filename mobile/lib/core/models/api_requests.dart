@@ -10,7 +10,6 @@ class CreateProductRequest {
   final String? categoryId;
   final String sku;
   final bool isImei;
-  final String barcode;
   final int quantity;
   final double purchasePrice;
   final double? salePrice;
@@ -21,7 +20,6 @@ class CreateProductRequest {
     this.categoryId,
     required this.sku,
     required this.isImei,
-    required this.barcode,
     required this.quantity,
     required this.purchasePrice,
     this.salePrice,
@@ -39,7 +37,6 @@ class UpdateProductRequest {
   final String? categoryId;
   final String? sku;
   final bool? isImei;
-  final String? barcode;
   final int? quantity;
   final double? purchasePrice;
   final double? salePrice;
@@ -49,7 +46,6 @@ class UpdateProductRequest {
     this.categoryId,
     this.sku,
     this.isImei,
-    this.barcode,
     this.quantity,
     this.purchasePrice,
     this.salePrice,

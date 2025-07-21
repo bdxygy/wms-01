@@ -33,7 +33,7 @@ const envSchema = z.object({
   BASIC_AUTH_PASSWORD: z.string().min(1, 'BASIC_AUTH_PASSWORD is required'),
   
   // Barcode
-  BARCODE_PREFIX: z.string().min(1, 'BARCODE_PREFIX is required').default('RADJA-'),
+  BARCODE_PREFIX: z.string().min(1, 'BARCODE_PREFIX is required').default('A'),
 });
 
 export const env = envSchema.parse(process.env);

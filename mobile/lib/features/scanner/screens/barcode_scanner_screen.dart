@@ -38,12 +38,12 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     with WidgetsBindingObserver {
   final ScannerService _scannerService = ScannerService();
   StreamSubscription<String>? _scanSubscription;
-  
+
   bool _isFlashOn = false;
   final bool _canSwitchCamera = true;
   bool _isTorchAvailable = false;
   bool _isProcessing = false;
-  
+
   final List<BarcodeScanResult> _scanHistory = [];
   String? _lastScannedCode;
   DateTime? _lastScanTime;
@@ -76,19 +76,21 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     try {
       final success = await _scannerService.initialize();
       if (!success) {
-        _showErrorDialog('Failed to initialize scanner. Please check camera permissions.');
+        _showErrorDialog(
+            'Failed to initialize scanner. Please check camera permissions.');
         return;
       }
 
       // Check torch availability
       _isTorchAvailable = await _scannerService.isTorchAvailable();
-      
+
       // Start scanning
       await _scannerService.startScanning();
-      
+
       // Listen to scan results
-      _scanSubscription = _scannerService.scanResultStream?.listen(_handleScanResult);
-      
+      _scanSubscription =
+          _scannerService.scanResultStream?.listen(_handleScanResult);
+
       if (mounted) {
         setState(() {});
       }
@@ -99,31 +101,32 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   void _handleScanResult(String code) {
     if (_isProcessing) return;
-    
+
     // Prevent duplicate scans
     final now = DateTime.now();
-    if (_lastScannedCode == code && 
-        _lastScanTime != null && 
+    if (_lastScannedCode == code &&
+        _lastScanTime != null &&
         now.difference(_lastScanTime!).inMilliseconds < 2000) {
       return;
     }
-    
+
     _lastScannedCode = code;
     _lastScanTime = now;
     _isProcessing = true;
 
     // Validate and process barcode
     final result = _processBarcode(code);
-    
+
     // Add to history
     _scanHistory.insert(0, result);
-    if (_scanHistory.length > 50) { // Keep only last 50 scans
+    if (_scanHistory.length > 50) {
+      // Keep only last 50 scans
       _scanHistory.removeLast();
     }
 
     // Show result
     _showScanResult(result);
-    
+
     _isProcessing = false;
   }
 
@@ -132,20 +135,19 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       // Clean and detect barcode type
       final cleanCode = BarcodeUtils.cleanBarcode(code);
       final detectedType = BarcodeUtils.detectBarcodeType(cleanCode);
-      
+
       // Check if type is allowed
-      if (widget.allowedTypes != null && 
-          widget.allowedTypes!.isNotEmpty && 
+      if (widget.allowedTypes != null &&
+          widget.allowedTypes!.isNotEmpty &&
           !widget.allowedTypes!.contains(detectedType)) {
         return BarcodeScanResult.error(
-          code, 
-          'Barcode type $detectedType not allowed'
-        );
+            code, 'Barcode type $detectedType not allowed');
       }
-      
+
       // Validate barcode
-      final isValid = BarcodeUtils.isValidBarcode(cleanCode, expectedType: detectedType);
-      
+      final isValid =
+          BarcodeUtils.isValidBarcode(cleanCode, expectedType: detectedType);
+
       if (isValid) {
         return BarcodeScanResult.success(cleanCode, type: detectedType);
       } else {
@@ -174,7 +176,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   Widget _buildResultDialog(BarcodeScanResult result) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return AlertDialog(
       title: Row(
         children: [
@@ -240,7 +242,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   void _handleConfirmedScan(BarcodeScanResult result) {
     widget.onBarcodeScanned?.call(result);
-    
+
     if (widget.autoClose) {
       Navigator.of(context).pop(result);
     }
@@ -253,7 +255,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   Future<void> _toggleFlash() async {
     if (!_isTorchAvailable) return;
-    
+
     try {
       await _scannerService.toggleTorch();
       setState(() {
@@ -281,7 +283,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   Widget _buildManualEntryDialog() {
     final controller = TextEditingController();
-    
+
     return AlertDialog(
       title: const Text('Enter Barcode Manually'),
       content: Column(
@@ -299,7 +301,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
             onChanged: (value) {
               // Auto-format as user types
               final cleaned = BarcodeUtils.cleanBarcode(value);
-              if (cleaned != value.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '')) {
+              if (cleaned !=
+                  value.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '')) {
                 controller.text = cleaned;
                 controller.selection = TextSelection.fromPosition(
                   TextPosition(offset: cleaned.length),

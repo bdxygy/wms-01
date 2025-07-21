@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/models/product.dart';
 import '../../../core/models/store.dart';
 import '../../../core/models/category.dart';
+import '../../../core/models/user.dart';
 import '../../../core/services/store_service.dart';
 import '../../../core/services/category_service.dart';
 import '../../../core/validators/product_validators.dart';
@@ -16,7 +17,6 @@ import '../../../core/auth/auth_provider.dart';
 class ProductFormData {
   final String productName;
   final String sku;
-  final String barcode;
   final double purchasePrice;
   final double? salePrice;
   final int quantity;
@@ -30,7 +30,6 @@ class ProductFormData {
   ProductFormData({
     required this.productName,
     required this.sku,
-    required this.barcode,
     required this.purchasePrice,
     this.salePrice,
     required this.quantity,
@@ -73,7 +72,6 @@ class _ProductFormState extends State<ProductForm> {
   // Form controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _skuController = TextEditingController();
-  final TextEditingController _barcodeController = TextEditingController();
   final TextEditingController _purchasePriceController = TextEditingController();
   final TextEditingController _salePriceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
@@ -100,14 +98,34 @@ class _ProductFormState extends State<ProductForm> {
   void initState() {
     super.initState();
     _initializeForm();
-    _loadFormData();
+    
+    // Add listeners to text controllers to update button state
+    _nameController.addListener(_updateButtonState);
+    _skuController.addListener(_updateButtonState);
+    _purchasePriceController.addListener(_updateButtonState);
+    _salePriceController.addListener(_updateButtonState);
+    _quantityController.addListener(_updateButtonState);
+    
+    // Only load data for edit mode or when specifically needed
+    if (widget.isEditing) {
+      _loadFormData();
+    } else {
+      // For create mode, set defaults and load data lazily
+      _setCreateModeDefaults();
+    }
   }
   
   @override
   void dispose() {
+    // Remove listeners before disposing
+    _nameController.removeListener(_updateButtonState);
+    _skuController.removeListener(_updateButtonState);
+    _purchasePriceController.removeListener(_updateButtonState);
+    _salePriceController.removeListener(_updateButtonState);
+    _quantityController.removeListener(_updateButtonState);
+    
     _nameController.dispose();
     _skuController.dispose();
-    _barcodeController.dispose();
     _purchasePriceController.dispose();
     _salePriceController.dispose();
     _quantityController.dispose();
@@ -121,7 +139,7 @@ class _ProductFormState extends State<ProductForm> {
       final product = widget.initialProduct!;
       _nameController.text = product.name;
       _skuController.text = product.sku;
-      _barcodeController.text = product.barcode;
+      // Barcode is handled by backend
       _purchasePriceController.text = product.purchasePrice.toStringAsFixed(2);
       _salePriceController.text = product.salePrice?.toStringAsFixed(2) ?? '';
       _quantityController.text = product.quantity.toString();
@@ -132,6 +150,24 @@ class _ProductFormState extends State<ProductForm> {
       _photoUrl = null; // Product model doesn't have photoUrl
       // Note: IMEI list would need to be loaded separately if editing
     }
+  }
+  
+  void _setCreateModeDefaults() {
+    // Set default values for create mode without API calls
+    final storeContext = context.read<StoreContextProvider>().selectedStore;
+    final user = context.read<AuthProvider>().user;
+    
+    if (user?.role != UserRole.owner && storeContext != null) {
+      _selectedStoreId = storeContext.id;
+    }
+    
+    // Generate default SKU (barcode handled by backend)
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    _skuController.text = 'SKUtimestamp';
+    
+    setState(() {
+      _isLoading = false;
+    });
   }
   
   Future<void> _loadFormData() async {
@@ -148,7 +184,7 @@ class _ProductFormState extends State<ProductForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load form data: $e'),
+            content: Text('Failed to load form data: e'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -177,7 +213,7 @@ class _ProductFormState extends State<ProductForm> {
         }
       });
     } catch (e) {
-      debugPrint('Failed to load stores: $e');
+      debugPrint('Failed to load stores: e');
     }
   }
   
@@ -191,8 +227,21 @@ class _ProductFormState extends State<ProductForm> {
         _categories = response.data;
       });
     } catch (e) {
-      debugPrint('Failed to load categories: $e');
+      debugPrint('Failed to load categories: e');
     }
+  }
+  
+  Future<void> _loadStoreAndCategoryData() async {
+    if (_stores.isEmpty) {
+      await _loadStores();
+    }
+    // Categories will be loaded when a store is selected
+  }
+  
+  void _updateButtonState() {
+    // Trigger a rebuild to update button state
+    print('🧭 ProductForm: _updateButtonState called for step _currentStep');
+    setState(() {});
   }
   
   void _onStoreChanged(String? storeId) {
@@ -205,6 +254,7 @@ class _ProductFormState extends State<ProductForm> {
     if (storeId != null) {
       _loadCategories(); // Reload categories for new store
     }
+    // Button state will update automatically due to setState
   }
   
   void _onImeiToggleChanged(bool value) {
@@ -214,6 +264,7 @@ class _ProductFormState extends State<ProductForm> {
         _imeis.clear(); // Clear IMEIs if toggled off
       }
     });
+    // Button state will update automatically due to setState
   }
   
   void _onQuantityChanged(String? value) {
@@ -232,6 +283,7 @@ class _ProductFormState extends State<ProductForm> {
         });
       }
     }
+    // Button state will update automatically due to setState or controller listener
   }
   
   void _nextStep() {
@@ -243,6 +295,11 @@ class _ProductFormState extends State<ProductForm> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+      
+      // Load data lazily when reaching store selection step (step 2)
+      if (_currentStep == 2 && !widget.isEditing) {
+        _loadStoreAndCategoryData();
+      }
     }
   }
   
@@ -262,8 +319,7 @@ class _ProductFormState extends State<ProductForm> {
     switch (_currentStep) {
       case 0: // Basic Information
         return ProductValidators.validateProductName(_nameController.text) == null &&
-               ProductValidators.validateSku(_skuController.text) == null &&
-               ProductValidators.validateBarcode(_barcodeController.text) == null;
+               ProductValidators.validateSku(_skuController.text) == null;
       case 1: // Pricing & Inventory
         final purchasePriceError = ProductValidators.validatePurchasePrice(_purchasePriceController.text);
         final salePriceError = ProductValidators.validateSalePrice(
@@ -271,7 +327,37 @@ class _ProductFormState extends State<ProductForm> {
           double.tryParse(_purchasePriceController.text),
         );
         final quantityError = ProductValidators.validateQuantity(_quantityController.text);
-        return purchasePriceError == null && salePriceError == null && quantityError == null;
+ 
+        
+        // For step validation, we don't need to validate IMEIs strictly
+        // IMEIs will be validated at the final save step
+        // This allows users to enable IMEI toggle and proceed to next step
+        String? imeiError;
+        if (_isImeiProduct) {
+          final filledImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+          // Only validate if user has started filling IMEIs
+          if (filledImeis.isNotEmpty) {
+            // Validate individual IMEI formats
+            for (int i = 0; i < filledImeis.length; i++) {
+              final validation = ProductValidators.validateImei(filledImeis[i]);
+              if (validation != null) {
+                imeiError = 'IMEI {i + 1}: validation';
+                break;
+              }
+            }
+          }
+          print('🧭 IMEI Error: imeiError');
+          print('🧭 IMEI List: _imeis');
+          print('🧭 Filled IMEIs: filledImeis');
+        }
+        
+        final isValid = purchasePriceError == null && 
+                       salePriceError == null && 
+                       quantityError == null && 
+                       imeiError == null;
+        
+        print('🧭 Step 1 Valid: isValid');
+        return isValid;
       case 2: // Store & Additional Info
         return ProductValidators.validateStore(_selectedStoreId) == null;
       default:
@@ -284,6 +370,23 @@ class _ProductFormState extends State<ProductForm> {
       return;
     }
     
+    // Additional validation for IMEI products at save time
+    if (_isImeiProduct) {
+      final filledImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+      final quantity = int.tryParse(_quantityController.text) ?? 0;
+      final imeiError = ProductValidators.validateImeiList(filledImeis, quantity);
+      
+      if (imeiError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('IMEI Validation Error: imeiError'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+        return;
+      }
+    }
+    
     setState(() {
       _isSaving = true;
     });
@@ -293,7 +396,6 @@ class _ProductFormState extends State<ProductForm> {
       final formData = ProductFormData(
         productName: productName,
         sku: sku,
-        barcode: barcode,
         purchasePrice: purchasePrice,
         salePrice: salePrice,
         quantity: quantity,
@@ -311,7 +413,7 @@ class _ProductFormState extends State<ProductForm> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save product: $e'),
+            content: Text('Failed to save product: e'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -423,28 +525,6 @@ class _ProductFormState extends State<ProductForm> {
             ],
           ),
           
-          const SizedBox(height: 16),
-          
-          WMSTextFormField(
-            label: 'Barcode *',
-            controller: _barcodeController,
-            hint: 'Enter or scan barcode',
-            validator: ProductValidators.validateBarcode,
-            prefixIcon: const Icon(Icons.barcode_reader),
-            suffixIcon: IconButton(
-              onPressed: () {
-                // TODO: Implement barcode scanner
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Barcode scanner coming soon!')),
-                );
-              },
-              icon: const Icon(Icons.qr_code_scanner),
-            ),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
-              LengthLimitingTextInputFormatter(50),
-            ],
-          ),
           
           const SizedBox(height: 16),
           
@@ -557,15 +637,15 @@ class _ProductFormState extends State<ProductForm> {
           
           WMSDropdownFormField<String>(
             label: 'Store *',
-            hint: 'Select store',
-            value: _selectedStoreId,
+            hint: _stores.isEmpty ? 'Loading stores...' : 'Select store',
+            value: _stores.isNotEmpty && _stores.any((store) => store.id == _selectedStoreId) ? _selectedStoreId : null,
             items: _stores.map((store) {
               return DropdownMenuItem<String>(
                 value: store.id,
-                child: Text('${store.name} - ${store.address}'),
+                child: Text('{store.name} - {store.address}'),
               );
             }).toList(),
-            onChanged: _onStoreChanged,
+            onChanged: _stores.isEmpty ? null : _onStoreChanged,
             validator: ProductValidators.validateStore,
             prefixIcon: const Icon(Icons.store),
           ),
@@ -574,19 +654,23 @@ class _ProductFormState extends State<ProductForm> {
           
           WMSDropdownFormField<String>(
             label: 'Category',
-            hint: 'Select category (optional)',
-            value: _selectedCategoryId,
+            hint: _selectedStoreId == null 
+                ? 'Select store first' 
+                : _categories.isEmpty 
+                    ? 'Loading categories...' 
+                    : 'Select category (optional)',
+            value: _categories.isNotEmpty && _categories.any((category) => category.id == _selectedCategoryId) ? _selectedCategoryId : null,
             items: _categories.map((category) {
               return DropdownMenuItem<String>(
                 value: category.id,
                 child: Text(category.name),
               );
             }).toList(),
-            onChanged: (value) {
+            onChanged: _selectedStoreId != null && _categories.isNotEmpty ? (value) {
               setState(() {
                 _selectedCategoryId = value;
               });
-            },
+            } : null,
             validator: ProductValidators.validateCategory,
             prefixIcon: const Icon(Icons.category),
             enabled: _selectedStoreId != null,
@@ -648,7 +732,7 @@ class _ProductFormState extends State<ProductForm> {
           if (_currentStep < _totalSteps - 1)
             ElevatedButton(
               onPressed: _validateCurrentStep() ? _nextStep : null,
-              child: const Text('Next'),
+              child: const Text('Next!')
             )
           else
             ElevatedButton(
@@ -669,7 +753,6 @@ class _ProductFormState extends State<ProductForm> {
   // Getters for form data
   String get productName => _nameController.text.trim();
   String get sku => _skuController.text.trim();
-  String get barcode => _barcodeController.text.trim();
   double get purchasePrice => double.tryParse(_purchasePriceController.text) ?? 0.0;
   double? get salePrice {
     final text = _salePriceController.text.trim();

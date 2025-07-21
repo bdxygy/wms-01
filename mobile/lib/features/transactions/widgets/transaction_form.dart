@@ -6,7 +6,6 @@ import '../../../core/models/api_requests.dart';
 import '../../../core/models/store.dart';
 import '../../../core/models/user.dart';
 import '../../../core/services/store_service.dart';
-import '../../../core/services/product_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/widgets/cards.dart';

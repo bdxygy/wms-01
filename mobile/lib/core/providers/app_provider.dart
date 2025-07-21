@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/currency.dart';
 
 class AppProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   Locale _locale = const Locale('en', 'US');
+  Currency _currency = SupportedCurrencies.usd;
   bool _isInitialized = false;
 
   // Getters
   ThemeMode get themeMode => _themeMode;
   Locale get locale => _locale;
+  Currency get currency => _currency;
   bool get isInitialized => _isInitialized;
 
   // Theme management
@@ -47,6 +50,21 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  // Currency management
+  void setCurrency(Currency currency) {
+    _currency = currency;
+    _saveCurrency(currency);
+    notifyListeners();
+  }
+
+  String formatCurrency(double amount) {
+    return '${_currency.symbol}${amount.toStringAsFixed(2)}';
+  }
+
+  String formatCurrencyWithCode(double amount) {
+    return '${_currency.symbol}${amount.toStringAsFixed(2)} ${_currency.code}';
+  }
+
   // Initialize app settings
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -62,6 +80,10 @@ class AppProvider extends ChangeNotifier {
       final languageCode = prefs.getString('language_code') ?? 'en';
       final countryCode = prefs.getString('country_code') ?? 'US';
       _locale = Locale(languageCode, countryCode);
+      
+      // Load currency
+      final currencyCode = prefs.getString('currency_code') ?? 'USD';
+      _currency = SupportedCurrencies.fromCode(currencyCode);
       
       _isInitialized = true;
       notifyListeners();
@@ -92,6 +114,15 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> _saveCurrency(Currency currency) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('currency_code', currency.code);
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
   // Reset app settings
   Future<void> resetSettings() async {
     try {
@@ -99,9 +130,11 @@ class AppProvider extends ChangeNotifier {
       await prefs.remove('theme_mode');
       await prefs.remove('language_code');
       await prefs.remove('country_code');
+      await prefs.remove('currency_code');
       
       _themeMode = ThemeMode.system;
       _locale = const Locale('en', 'US');
+      _currency = SupportedCurrencies.usd;
       notifyListeners();
     } catch (e) {
       // Handle error silently

@@ -34,14 +34,13 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
     }
 
     try {
-      // Create product request
+      // Create product request (barcode handled by backend)
       final request = CreateProductRequest(
         name: formData.productName,
         storeId: formData.storeId,
         categoryId: formData.categoryId,
         sku: formData.sku,
         isImei: formData.isImei,
-        barcode: formData.barcode,
         quantity: formData.quantity,
         purchasePrice: formData.purchasePrice,
         salePrice: formData.salePrice,

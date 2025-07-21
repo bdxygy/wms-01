@@ -68,13 +68,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
 
     try {
-      // Create update request with only changed fields
+      // Create update request with only changed fields (barcode handled by backend)
       final request = UpdateProductRequest(
         name: formData.productName != _product!.name ? formData.productName : null,
         categoryId: formData.categoryId != _product!.categoryId ? formData.categoryId : null,
         sku: formData.sku != _product!.sku ? formData.sku : null,
         isImei: formData.isImei != _product!.isImei ? formData.isImei : null,
-        barcode: formData.barcode != _product!.barcode ? formData.barcode : null,
         quantity: formData.quantity != _product!.quantity ? formData.quantity : null,
         purchasePrice: formData.purchasePrice != _product!.purchasePrice ? formData.purchasePrice : null,
         salePrice: formData.salePrice != _product!.salePrice ? formData.salePrice : null,

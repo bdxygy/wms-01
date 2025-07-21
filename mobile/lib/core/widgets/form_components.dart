@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../theme/theme_colors.dart';
 import '../theme/typography.dart';
 import '../utils/imei_utils.dart';
+import '../providers/app_provider.dart';
 
 /// Form components for the WMS application
 /// Provides consistent form field styles and validation
@@ -114,7 +116,7 @@ class WMSTextFormField extends StatelessWidget {
             filled: true,
             fillColor: enabled 
                 ? Theme.of(context).colorScheme.surface
-                : WMSColors.surfaceVariant,
+                : Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             errorStyle: WMSTypography.formError,
           ),
@@ -164,10 +166,19 @@ class WMSDropdownFormField<T> extends StatelessWidget {
           items: items,
           onChanged: enabled ? onChanged : null,
           validator: validator,
-          style: WMSTypography.bodyMedium,
+          style: WMSTypography.bodyMedium.copyWith(
+            color: enabled 
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+          dropdownColor: Theme.of(context).colorScheme.surface,
+          iconEnabledColor: Theme.of(context).colorScheme.onSurface,
+          iconDisabledColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: WMSTypography.formHint,
+            hintStyle: WMSTypography.formHint.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
             prefixIcon: prefixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -196,7 +207,7 @@ class WMSDropdownFormField<T> extends StatelessWidget {
             filled: true,
             fillColor: enabled 
                 ? Theme.of(context).colorScheme.surface
-                : WMSColors.surfaceVariant,
+                : Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             errorStyle: WMSTypography.formError,
           ),
@@ -837,7 +848,6 @@ class WMSCurrencyFormField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final ValueChanged<double?>? onChanged;
   final bool enabled;
-  final String currencySymbol;
 
   const WMSCurrencyFormField({
     super.key,
@@ -848,7 +858,6 @@ class WMSCurrencyFormField extends StatefulWidget {
     this.validator,
     this.onChanged,
     this.enabled = true,
-    this.currencySymbol = '\$',
   });
 
   @override
@@ -882,13 +891,15 @@ class _WMSCurrencyFormFieldState extends State<WMSCurrencyFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = context.watch<AppProvider>();
+    
     return WMSTextFormField(
       label: widget.label,
       hint: widget.hint,
       controller: _controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       enabled: widget.enabled,
-      prefixText: widget.currencySymbol,
+      prefixText: appProvider.currency.symbol,
       validator: widget.validator,
       onChanged: (value) {
         final parsedValue = double.tryParse(value);

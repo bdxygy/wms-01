@@ -24,7 +24,6 @@ import '../../features/scanner/screens/barcode_scanner_screen.dart';
 import '../../features/scanner/screens/imei_scanner_screen.dart';
 
 class AppRouter {
-
   static GoRouter createRouter() {
     return GoRouter(
       initialLocation: '/splash',
@@ -75,6 +74,13 @@ class AppRouter {
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const ProductsScreen(),
           routes: [
+            // Create Product Route
+            GoRoute(
+                path: '/create',
+                name: 'create-product',
+                redirect: (context, state) =>
+                    _protectedRedirect(context, state),
+                builder: (context, state) => const CreateProductScreen()),
             // Product Detail Route
             GoRoute(
               path: '/:id',
@@ -84,13 +90,6 @@ class AppRouter {
                 final productId = state.pathParameters['id']!;
                 return ProductDetailScreen(productId: productId);
               },
-            ),
-            // Create Product Route
-            GoRoute(
-              path: '/create',
-              name: 'create-product',
-              redirect: (context, state) => _protectedRedirect(context, state),
-              builder: (context, state) => const CreateProductScreen(),
             ),
             // Edit Product Route
             GoRoute(
@@ -212,7 +211,8 @@ class AppRouter {
 
       // Global error handling
       errorBuilder: (context, state) => ErrorScreen(
-        error: AppLocalizations.of(context)!.pageNotFound(state.matchedLocation),
+        error:
+            AppLocalizations.of(context)!.pageNotFound(state.matchedLocation),
       ),
 
       // Debug logging
@@ -248,10 +248,10 @@ class AppRouter {
     }
 
     // If authenticated and has store context, redirect away from auth screens
-    if (authProvider.isAuthenticated && 
+    if (authProvider.isAuthenticated &&
         (authProvider.isOwner || storeProvider.hasStoreSelected)) {
-      if (currentLocation == '/login' || 
-          currentLocation == '/store-selection' || 
+      if (currentLocation == '/login' ||
+          currentLocation == '/store-selection' ||
           currentLocation == '/splash') {
         return '/dashboard';
       }
@@ -261,7 +261,8 @@ class AppRouter {
   }
 
   // Store selection redirect logic
-  static String? _storeSelectionRedirect(BuildContext context, GoRouterState state) {
+  static String? _storeSelectionRedirect(
+      BuildContext context, GoRouterState state) {
     final authProvider = context.read<AuthProvider>();
     final storeProvider = context.read<StoreContextProvider>();
 
@@ -344,7 +345,8 @@ class AppRouter {
     context.goNamed('edit-product', pathParameters: {'id': productId});
   }
 
-  static void goToProductSearch(BuildContext context, {
+  static void goToProductSearch(
+    BuildContext context, {
     String? initialQuery,
     String? searchType,
   }) {
@@ -355,7 +357,8 @@ class AppRouter {
   }
 
   // Scanner navigation helpers
-  static void goToScanner(BuildContext context, {
+  static void goToScanner(
+    BuildContext context, {
     String? title,
     String? subtitle,
     Function(dynamic)? onBarcodeScanned,
@@ -374,7 +377,8 @@ class AppRouter {
   }
 
   // IMEI Scanner navigation helpers
-  static void goToImeiScanner(BuildContext context, {
+  static void goToImeiScanner(
+    BuildContext context, {
     String? title,
     String? subtitle,
     Function(dynamic)? onImeiScanned,
@@ -401,8 +405,10 @@ class AppRouter {
     context.goNamed('create-transaction');
   }
 
-  static void goToTransactionDetail(BuildContext context, String transactionId) {
-    context.goNamed('transaction-detail', pathParameters: {'id': transactionId});
+  static void goToTransactionDetail(
+      BuildContext context, String transactionId) {
+    context
+        .goNamed('transaction-detail', pathParameters: {'id': transactionId});
   }
 
   static void goToEditTransaction(BuildContext context, String transactionId) {
@@ -423,7 +429,7 @@ class AppRouter {
       '/scanner',
       '/imei-scanner'
     ];
-    
+
     return protectedRoutes.any((route) => location.startsWith(route));
   }
 
@@ -435,7 +441,7 @@ class AppRouter {
       '/transactions',
       '/categories'
     ];
-    
+
     return storeRequiredRoutes.any((route) => location.startsWith(route));
   }
 }
@@ -468,34 +474,26 @@ class ErrorScreen extends StatelessWidget {
                 size: 64,
                 color: Theme.of(context).colorScheme.error,
               ),
-              
               const SizedBox(height: 24),
-              
               Text(
                 AppLocalizations.of(context)!.oopsWentWrong,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
                 textAlign: TextAlign.center,
               ),
-              
               const SizedBox(height: 16),
-              
               Text(
                 error,
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
-              
               const SizedBox(height: 32),
-              
               ElevatedButton(
                 onPressed: () => _handleRetry(context),
                 child: Text(AppLocalizations.of(context)!.goToDashboard),
               ),
-              
               const SizedBox(height: 16),
-              
               TextButton(
                 onPressed: () => _handleLogout(context),
                 child: Text(AppLocalizations.of(context)!.logout),

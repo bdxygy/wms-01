@@ -257,6 +257,38 @@ class _ProductListScreenState extends State<ProductListScreen> {
     });
     _refreshProducts();
   }
+
+  void _scanBarcode() {
+    AppRouter.goToScanner(
+      context,
+      title: 'Scan Product Barcode',
+      subtitle: 'Scan a barcode to search for products',
+      onBarcodeScanned: (result) {
+        if (result.isValid) {
+          _searchProductByBarcode(result.code);
+        }
+      },
+    );
+  }
+
+  Future<void> _searchProductByBarcode(String barcode) async {
+    try {
+      // Search for product by barcode using the dedicated method
+      final product = await _productService.getProductByBarcode(barcode);
+      
+      // Navigate directly to product detail
+      AppRouter.goToProductDetail(context, product.id);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No product found with barcode: $barcode'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
   
   bool get _hasActiveFilters {
     return _selectedCategoryId != null ||
@@ -275,6 +307,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: WMSAppBar(
         title: 'Products',
         actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: _scanBarcode,
+            tooltip: 'Scan Barcode',
+          ),
           IconButton(
             icon: Icon(
               Icons.filter_list,
