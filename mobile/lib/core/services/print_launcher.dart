@@ -333,7 +333,8 @@ class PrintLauncher {
       try {
         debugPrint('Generating barcode: ${product.barcode}');
         // Generate barcode using Code128 format
-        bytes += generator.barcode(Barcode.code128(product.barcode.codeUnits));
+        bytes +=
+            generator.barcode(Barcode.code128(product.barcode.split('').toList()));
       } catch (e) {
         debugPrint('Error generating barcode: $e');
         // Fallback to text representation

@@ -49,7 +49,7 @@ class AppConfig {
   static List<String> get allowedHosts {
     switch (_environment) {
       case Environment.dev:
-        return ['192.168.0.102', '10.0.2.2:3000'];
+        return ['192.168.0.102', '10.0.2.2:3000', '192.168.1.121'];
       case Environment.staging:
         return ['staging-api.wms.example.com'];
       case Environment.prod:
