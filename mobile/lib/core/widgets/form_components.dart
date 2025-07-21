@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../theme/theme_colors.dart';
 import '../theme/typography.dart';
 import '../utils/imei_utils.dart';
 import '../providers/app_provider.dart';
+import '../routing/app_router.dart';
+import '../utils/scanner_launcher.dart';
 
 /// Form components for the WMS application
 /// Provides consistent form field styles and validation
@@ -166,6 +169,7 @@ class WMSDropdownFormField<T> extends StatelessWidget {
           items: items,
           onChanged: enabled ? onChanged : null,
           validator: validator,
+          isExpanded: true, // This helps prevent overflow
           style: WMSTypography.bodyMedium.copyWith(
             color: enabled 
                 ? Theme.of(context).colorScheme.onSurface
@@ -656,7 +660,7 @@ class WMSImeiArrayFormField extends StatefulWidget {
   final ValueChanged<List<String>>? onChanged;
   final FormFieldValidator<List<String>>? validator;
   final bool enabled;
-  final int? expectedQuantity;
+  final bool allowScanning;
 
   const WMSImeiArrayFormField({
     super.key,
@@ -665,7 +669,7 @@ class WMSImeiArrayFormField extends StatefulWidget {
     this.onChanged,
     this.validator,
     this.enabled = true,
-    this.expectedQuantity,
+    this.allowScanning = true,
   });
 
   @override
@@ -680,22 +684,10 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
   void initState() {
     super.initState();
     _imeis = List.from(widget.initialImeis);
-    if (_imeis.isEmpty && widget.expectedQuantity != null) {
-      _imeis = List.filled(widget.expectedQuantity!, '');
-    }
     if (_imeis.isEmpty) {
       _imeis = [''];
     }
     _controllers = _imeis.map((imei) => TextEditingController(text: imei)).toList();
-  }
-
-  @override
-  void didUpdateWidget(WMSImeiArrayFormField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.expectedQuantity != oldWidget.expectedQuantity && 
-        widget.expectedQuantity != null) {
-      _updateImeiCount(widget.expectedQuantity!);
-    }
   }
 
   @override
@@ -706,27 +698,6 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
     super.dispose();
   }
 
-  void _updateImeiCount(int count) {
-    setState(() {
-      final currentCount = _controllers.length;
-      
-      if (count > currentCount) {
-        // Add more IMEI fields
-        for (int i = currentCount; i < count; i++) {
-          _controllers.add(TextEditingController());
-          _imeis.add('');
-        }
-      } else if (count < currentCount) {
-        // Remove excess IMEI fields
-        for (int i = currentCount - 1; i >= count; i--) {
-          _controllers[i].dispose();
-          _controllers.removeAt(i);
-          _imeis.removeAt(i);
-        }
-      }
-      _notifyChange();
-    });
-  }
 
   void _addImeiField() {
     setState(() {
@@ -752,6 +723,23 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
     widget.onChanged?.call(validImeis);
   }
 
+  void _scanImei(int index) {
+    if (!widget.allowScanning) return;
+    
+    ScannerLauncher.forImeiEntry(
+      context,
+      title: 'Scan IMEI Barcode',
+      subtitle: 'Scan the IMEI barcode on the device',
+      onImeiScanned: (imei) {
+        setState(() {
+          _controllers[index].text = imei;
+          _imeis[index] = imei;
+          _notifyChange();
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FormField<List<String>>(
@@ -769,13 +757,12 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
                     style: WMSTypography.formLabel,
                   ),
                   const Spacer(),
-                  if (widget.expectedQuantity != null)
-                    Text(
-                      '${_imeis.where((imei) => imei.trim().isNotEmpty).length}/${widget.expectedQuantity}',
-                      style: WMSTypography.bodySmall.copyWith(
-                        color: WMSColors.textSecondary,
-                      ),
+                  Text(
+                    '${_imeis.where((imei) => imei.trim().isNotEmpty).length} IMEI(s)',
+                    style: WMSTypography.bodySmall.copyWith(
+                      color: WMSColors.textSecondary,
                     ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -808,17 +795,25 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    if (widget.allowScanning && widget.enabled)
+                      IconButton(
+                        onPressed: () => _scanImei(index),
+                        icon: const Icon(Icons.qr_code_scanner),
+                        color: WMSColors.primaryBlue,
+                        tooltip: 'Scan IMEI',
+                      ),
                     if (_controllers.length > 1)
                       IconButton(
                         onPressed: widget.enabled ? () => _removeImeiField(index) : null,
                         icon: const Icon(Icons.remove_circle_outline),
                         color: WMSColors.errorRed,
+                        tooltip: 'Remove IMEI',
                       ),
                   ],
                 ),
               );
             }),
-            if (widget.enabled && (widget.expectedQuantity == null || _controllers.length < widget.expectedQuantity!))
+            if (widget.enabled)
               TextButton.icon(
                 onPressed: _addImeiField,
                 icon: const Icon(Icons.add),

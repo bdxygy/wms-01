@@ -76,7 +76,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void _onSearchChanged() {
     // Debounce search to avoid too many API calls
     Future.delayed(const Duration(milliseconds: 500), () {
-      if (_searchController.text != _searchQuery) {
+      if (mounted && _searchController.text != _searchQuery) {
         setState(() {
           _searchQuery = _searchController.text;
         });
@@ -86,6 +86,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
   
   Future<void> _loadInitialData() async {
+    if (!mounted) return;
+    
     setState(() {
       _isLoading = true;
       _error = null;
@@ -99,22 +101,29 @@ class _ProductListScreenState extends State<ProductListScreen> {
         _loadProducts(reset: true),
       ]);
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+        });
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
   
   Future<void> _loadCategories() async {
     try {
+      if (!mounted) return;
       final response = await _categoryService.getCategories(limit: 100);
-      setState(() {
-        _categories = response.data;
-      });
+      if (mounted) {
+        setState(() {
+          _categories = response.data;
+        });
+      }
     } catch (e) {
       // Categories are optional for filtering, so don't throw error
       debugPrint('Failed to load categories: $e');
@@ -123,12 +132,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
   
   Future<void> _loadStores() async {
     try {
+      if (!mounted) return;
       final user = context.read<AuthProvider>().user;
       if (user?.role == UserRole.owner) {
         final response = await _storeService.getStores(limit: 100);
-        setState(() {
-          _stores = response.data;
-        });
+        if (mounted) {
+          setState(() {
+            _stores = response.data;
+          });
+        }
       }
     } catch (e) {
       // Stores are optional for filtering, so don't throw error
@@ -137,6 +149,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
   
   Future<void> _loadProducts({bool reset = false}) async {
+    if (!mounted) return;
+    
     if (reset) {
       setState(() {
         _currentPage = 1;
@@ -145,6 +159,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     }
     
     try {
+      if (!mounted) return;
       final storeContext = context.read<StoreContextProvider>().selectedStore;
       final user = context.read<AuthProvider>().user;
       
@@ -164,15 +179,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
         maxPrice: _maxPrice,
       );
       
-      setState(() {
-        if (reset) {
-          _products = response.data;
-        } else {
-          _products.addAll(response.data);
-        }
-        _hasMoreProducts = response.pagination.hasNext;
-      });
+      if (mounted) {
+        setState(() {
+          if (reset) {
+            _products = response.data;
+          } else {
+            _products.addAll(response.data);
+          }
+          _hasMoreProducts = response.pagination.hasNext;
+        });
+      }
     } catch (e) {
+      if (!mounted) return;
       if (reset) {
         setState(() {
           _error = e.toString();
@@ -200,9 +218,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
         );
       }
     } finally {
-      setState(() {
-        _isLoadingMore = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
     }
   }
   
@@ -277,7 +297,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
       final product = await _productService.getProductByBarcode(barcode);
       
       // Navigate directly to product detail
-      AppRouter.goToProductDetail(context, product.id);
+      if (mounted) {
+        AppRouter.goToProductDetail(context, product.id);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -582,7 +604,7 @@ class _ProductCard extends StatelessWidget {
                 Expanded(
                   child: _InfoChip(
                     label: 'Price',
-                    value: '\$${(product.salePrice ?? product.purchasePrice).toStringAsFixed(2)}',
+                    value: '${(product.salePrice ?? product.purchasePrice).toStringAsFixed(2)}',
                     icon: Icons.attach_money,
                   ),
                 ),
@@ -815,7 +837,7 @@ class _FilterDialogState extends State<_FilterDialog> {
                   decoration: const InputDecoration(
                     hintText: 'Min price',
                     border: OutlineInputBorder(),
-                    prefixText: '\$',
+                    prefixText: '',
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -827,7 +849,7 @@ class _FilterDialogState extends State<_FilterDialog> {
                   decoration: const InputDecoration(
                     hintText: 'Max price',
                     border: OutlineInputBorder(),
-                    prefixText: '\$',
+                    prefixText: '',
                   ),
                   keyboardType: TextInputType.number,
                 ),

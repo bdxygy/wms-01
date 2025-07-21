@@ -4,50 +4,131 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import 'package:go_router/go_router.dart';
+import '../services/scanner_service.dart';
+import '../utils/barcode_utils.dart';
+import 'scanner_overlay.dart';
 
-import '../../../core/services/scanner_service.dart';
-import '../../../core/services/product_service.dart';
-import '../../../core/utils/barcode_utils.dart';
-import '../../../core/widgets/scanner_overlay.dart';
-import '../../../generated/app_localizations.dart';
+/// Result model for barcode scanning
+class BarcodeScanResult {
+  final String code;
+  final String formattedCode;
+  final String type;
+  final bool isValid;
+  final String? errorMessage;
+  final DateTime timestamp;
 
-/// Professional barcode scanner screen with custom overlay and controls
-class BarcodeScannerScreen extends StatefulWidget {
+  BarcodeScanResult._({
+    required this.code,
+    required this.formattedCode,
+    required this.type,
+    required this.isValid,
+    this.errorMessage,
+    required this.timestamp,
+  });
+
+  factory BarcodeScanResult.success(String code, {required String type}) {
+    return BarcodeScanResult._(
+      code: code,
+      formattedCode: code,
+      type: type,
+      isValid: true,
+      timestamp: DateTime.now(),
+    );
+  }
+
+  factory BarcodeScanResult.error(String code, String errorMessage) {
+    return BarcodeScanResult._(
+      code: code,
+      formattedCode: code,
+      type: 'UNKNOWN',
+      isValid: false,
+      errorMessage: errorMessage,
+      timestamp: DateTime.now(),
+    );
+  }
+
+  String get typeDescription {
+    switch (type) {
+      case 'EAN13':
+        return 'EAN-13';
+      case 'EAN8':
+        return 'EAN-8';
+      case 'UPCA':
+        return 'UPC-A';
+      case 'CODE128':
+        return 'Code 128';
+      case 'CODE39':
+        return 'Code 39';
+      case 'QR_CODE':
+        return 'QR Code';
+      case 'UNKNOWN':
+        return 'Unknown';
+      default:
+        return type;
+    }
+  }
+}
+
+/// Configuration for the global barcode scanner
+class BarcodeScannerConfig {
   final String? title;
   final String? subtitle;
-  final Function(BarcodeScanResult)? onBarcodeScanned;
   final bool allowManualEntry;
   final bool showHistory;
   final List<String>? allowedTypes;
   final bool autoClose;
+  final Duration? scanDebounce;
+  final bool enableHapticFeedback;
 
-  const BarcodeScannerScreen({
-    super.key,
+  const BarcodeScannerConfig({
     this.title,
     this.subtitle,
-    this.onBarcodeScanned,
     this.allowManualEntry = true,
     this.showHistory = false,
     this.allowedTypes,
     this.autoClose = true,
+    this.scanDebounce = const Duration(milliseconds: 2000),
+    this.enableHapticFeedback = true,
+  });
+}
+
+/// Global flexible barcode scanner widget
+/// 
+/// Can be used for different purposes:
+/// - IMEI scanning with auto-fill callback
+/// - Product search with service callback
+/// - Generic barcode scanning with custom callback
+class GlobalBarcodeScanner extends StatefulWidget {
+  /// Configuration for the scanner
+  final BarcodeScannerConfig config;
+
+  /// Callback function that handles the scan result
+  /// This function determines what happens with the scanned barcode
+  final Future<void> Function(BarcodeScanResult result) onScanResult;
+
+  /// Optional callback for scanner dismissal
+  final VoidCallback? onDismiss;
+
+  const GlobalBarcodeScanner({
+    super.key,
+    required this.config,
+    required this.onScanResult,
+    this.onDismiss,
   });
 
   @override
-  State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
+  State<GlobalBarcodeScanner> createState() => _GlobalBarcodeScannerState();
 }
 
-class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
+class _GlobalBarcodeScannerState extends State<GlobalBarcodeScanner>
     with WidgetsBindingObserver {
   final ScannerService _scannerService = ScannerService();
-  final ProductService _productService = ProductService();
   StreamSubscription<String>? _scanSubscription;
 
   bool _isFlashOn = false;
   final bool _canSwitchCamera = true;
   bool _isTorchAvailable = false;
   bool _isProcessing = false;
-  bool _isSearchingProduct = false;
 
   final List<BarcodeScanResult> _scanHistory = [];
   String? _lastScannedCode;
@@ -105,13 +186,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   }
 
   void _handleScanResult(String code) {
-    if (_isProcessing || _isSearchingProduct) return;
+    if (_isProcessing) return;
 
-    // Prevent duplicate scans
+    // Prevent duplicate scans with debounce
     final now = DateTime.now();
     if (_lastScannedCode == code &&
         _lastScanTime != null &&
-        now.difference(_lastScanTime!).inMilliseconds < 2000) {
+        now.difference(_lastScanTime!) < (widget.config.scanDebounce ?? const Duration(milliseconds: 2000))) {
       return;
     }
 
@@ -122,16 +203,34 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     // Stop scanning while processing
     _scannerService.stopScanning();
 
-    // Validate barcode
+    // Process barcode and create result
     final result = _processBarcode(code);
 
+    // Add to history if enabled
+    if (widget.config.showHistory) {
+      setState(() {
+        _scanHistory.insert(0, result);
+        // Keep only last 50 scans
+        if (_scanHistory.length > 50) {
+          _scanHistory.removeRange(50, _scanHistory.length);
+        }
+      });
+    }
+
+    // Provide haptic feedback
+    if (widget.config.enableHapticFeedback) {
+      if (result.isValid) {
+        HapticFeedback.mediumImpact();
+      } else {
+        HapticFeedback.lightImpact();
+      }
+    }
+
+    // Handle the result based on validity
     if (result.isValid) {
-      // Show loading immediately and search for product
-      _searchProductByBarcode(result.formattedCode);
+      _handleValidScan(result);
     } else {
-      // Show error for invalid barcode
-      _showScanResult(result);
-      _isProcessing = false;
+      _handleInvalidScan(result);
     }
   }
 
@@ -142,9 +241,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       final detectedType = BarcodeUtils.detectBarcodeType(cleanCode);
 
       // Check if type is allowed
-      if (widget.allowedTypes != null &&
-          widget.allowedTypes!.isNotEmpty &&
-          !widget.allowedTypes!.contains(detectedType)) {
+      if (widget.config.allowedTypes != null &&
+          widget.config.allowedTypes!.isNotEmpty &&
+          !widget.config.allowedTypes!.contains(detectedType)) {
         return BarcodeScanResult.error(
             code, 'Barcode type $detectedType not allowed');
       }
@@ -163,121 +262,113 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     }
   }
 
-  void _showScanResult(BarcodeScanResult result) {
-    // Provide haptic feedback
-    if (result.isValid) {
-      HapticFeedback.mediumImpact();
-    } else {
-      HapticFeedback.lightImpact();
-    }
-
-    // Show result dialog for invalid barcodes only
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => _buildResultDialog(dialogContext, result),
-    );
-  }
-
-  Widget _buildResultDialog(
-      BuildContext dialogContext, BarcodeScanResult result) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(
-            Icons.error,
-            color: Colors.red,
-          ),
-          const SizedBox(width: 8),
-          Text('Invalid Barcode'),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Code: ${result.code}'),
-          const SizedBox(height: 8),
-          Text(
-            'Error: ${result.errorMessage}',
-            style: TextStyle(color: Colors.red[700]),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: _scanAnother,
-          child: const Text('Try Again'),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
-          child: Text(l10n.ok),
-        ),
-      ],
-    );
-  }
-
-  void _handleConfirmedScan(BarcodeScanResult result) {
-    widget.onBarcodeScanned?.call(result);
-
-    if (widget.autoClose) {
-      context.go('/dashboard');
-    }
-  }
-
-  Future<void> _searchProductByBarcode(String barcode) async {
-    setState(() {
-      _isSearchingProduct = true;
-      _isProcessing = true; // Ensure processing flag is also set
-    });
-
+  Future<void> _handleValidScan(BarcodeScanResult result) async {
     try {
-      final product = await _productService.getProductByBarcode(barcode);
-
-      if (mounted) {
-        // Navigate directly to product detail
-        context.go('/products/detail/${product.id}');
+      // Call the external callback function to handle the result
+      await widget.onScanResult(result);
+      
+      // If auto-close is enabled and we get here, close the scanner
+      if (widget.config.autoClose && mounted) {
+        _dismissScanner();
+      } else {
+        // Continue scanning if auto-close is disabled
+        _continueScanning();
       }
     } catch (e) {
+      // If the callback throws an error, show error and continue scanning
       if (mounted) {
-        // Show error if product not found
-        _showProductNotFoundDialog(barcode, e.toString());
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSearchingProduct = false;
-          _isProcessing = false;
-        });
-        _scannerService.startScanning();
+        _showCallbackErrorDialog(result, e.toString());
       }
     }
   }
 
-  void _showProductNotFoundDialog(String barcode, String error) {
+  void _handleInvalidScan(BarcodeScanResult result) {
+    // Show error dialog for invalid barcodes
+    _showInvalidBarcodeDialog(result);
+  }
+
+  void _showInvalidBarcodeDialog(BarcodeScanResult result) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Product Not Found'),
+        title: const Row(
+          children: [
+            Icon(Icons.error, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Invalid Barcode'),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Barcode: $barcode'),
+            Text('Code: ${result.code}'),
             const SizedBox(height: 8),
             Text(
-              'Error: ${error.contains('not found') ? 'No product found with this barcode' : error}',
+              'Error: ${result.errorMessage}',
               style: TextStyle(color: Colors.red[700]),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: _scanAnother,
-            child: const Text('Scan Another'),
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _continueScanning();
+            },
+            child: const Text('Try Again'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _dismissScanner();
+            },
+            child: const Text('Close Scanner'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCallbackErrorDialog(BarcodeScanResult result, String error) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Processing Error'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Scanned: ${result.formattedCode}'),
+            const SizedBox(height: 8),
+            Text(
+              'Error: $error',
+              style: TextStyle(color: Colors.red[700]),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _continueScanning();
+            },
+            child: const Text('Scan Again'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _dismissScanner();
+            },
+            child: const Text('Close Scanner'),
           ),
         ],
       ),
@@ -285,17 +376,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   }
 
   void _continueScanning() {
-    _isProcessing = false;
-    _isSearchingProduct = false;
+    setState(() {
+      _isProcessing = false;
+    });
     _scannerService.startScanning();
   }
 
-  void _scanAnother() {
-    // Close any open dialogs and restart scanning
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    }
-    _continueScanning();
+  void _dismissScanner() {
+    widget.onDismiss?.call();
+    Navigator.of(context).pop();
   }
 
   Future<void> _toggleFlash() async {
@@ -374,13 +463,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               Navigator.of(context).pop();
               final result = _processBarcode(code);
               if (result.isValid) {
-                _searchProductByBarcode(result.formattedCode);
+                _handleValidScan(result);
               } else {
-                _showScanResult(result);
+                _handleInvalidScan(result);
               }
             }
           },
-          child: const Text('Validate'),
+          child: const Text('Process'),
         ),
       ],
     );
@@ -418,9 +507,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
                     onTap: () {
                       if (result.isValid) {
                         Navigator.of(context).pop(); // Close history dialog
-                        context.go(
-                            '/dashboard'); // Close scanner and go to dashboard
-                        _handleConfirmedScan(result);
+                        _handleValidScan(result);
                       }
                     },
                   );
@@ -454,8 +541,11 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _dismissScanner();
+            },
+            child: const Text('Close Scanner'),
           ),
         ],
       ),
@@ -499,21 +589,19 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
           // Scanner overlay
           Positioned.fill(
             child: ScannerOverlay(
-              title: widget.title ?? 'Scan Barcode',
-              subtitle: widget.subtitle ?? 'Position barcode within the frame',
+              title: widget.config.title ?? 'Scan Barcode',
+              subtitle: widget.config.subtitle ?? 'Position barcode within the frame',
               onFlashToggle: _isTorchAvailable ? _toggleFlash : null,
               onCameraSwitch: _canSwitchCamera ? _switchCamera : null,
-              onManualEntry: widget.allowManualEntry ? _showManualEntry : null,
-              onClose: () {
-                context.go('/dashboard');
-              },
+              onManualEntry: widget.config.allowManualEntry ? _showManualEntry : null,
+              onClose: _dismissScanner,
               isFlashOn: _isFlashOn,
               canSwitchCamera: _canSwitchCamera,
             ),
           ),
 
           // History button (if enabled)
-          if (widget.showHistory && _scanHistory.isNotEmpty)
+          if (widget.config.showHistory && _scanHistory.isNotEmpty)
             Positioned(
               top: 100,
               right: 16,
@@ -555,27 +643,20 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
               ),
             ),
 
-          // Loading overlay for product search
-          if (_isSearchingProduct)
+          // Processing overlay
+          if (_isProcessing)
             Positioned.fill(
               child: Container(
                 color: Colors.black.withValues(alpha: 0.8),
-                child: Center(
+                child: const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const CircularProgressIndicator(color: Colors.white),
-                      const SizedBox(height: 16),
+                      CircularProgressIndicator(color: Colors.white),
+                      SizedBox(height: 16),
                       Text(
-                        'Searching for product...',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Please wait a moment',
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 14),
+                        'Processing barcode...',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ],
                   ),

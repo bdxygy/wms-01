@@ -331,10 +331,13 @@ export class ProductService {
         storeId: products.storeId,
         categoryId: products.categoryId,
         sku: products.sku,
+        isImei: products.isImei,
+        quantity: products.quantity,
         createdBy: products.createdBy,
         storeOwnerId: stores.ownerId,
       })
       .from(products)
+      .innerJoin(stores, eq(products.storeId, stores.id))
       .where(and(eq(products.id, id), isNull(products.deletedAt)));
 
     if (!existingProduct[0]) {
@@ -379,6 +382,23 @@ export class ProductService {
           message: "SKU already exists in this store",
         });
       }
+    }
+
+    // Business rule validation for IMEI products
+    const finalIsImei = data.isImei !== undefined ? data.isImei : existingProduct[0].isImei;
+    const finalQuantity = data.quantity !== undefined ? data.quantity : existingProduct[0].quantity;
+    
+    // If product is being set to IMEI tracking, validate quantity rules
+    if (finalIsImei && finalQuantity !== 1) {
+      throw new HTTPException(400, {
+        message: "IMEI products must have quantity of 1",
+      });
+    }
+    
+    // If enabling IMEI tracking on existing product, force quantity to 1
+    if (data.isImei === true && !existingProduct[0].isImei) {
+      // Force quantity to 1 when enabling IMEI tracking
+      data.quantity = 1;
     }
 
     // Prepare update data

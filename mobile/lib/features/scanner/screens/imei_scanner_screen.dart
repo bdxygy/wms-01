@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/services/imei_scanner_service.dart';
 import '../../../core/utils/imei_utils.dart';
@@ -48,8 +49,8 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
   bool _isProcessing = false;
   bool _isSearchingProduct = false;
   
-  Product? _foundProduct;
-  String? _searchError;
+  String? _lastScannedImei;
+  DateTime? _lastScanTime;
 
   @override
   void initState() {
@@ -101,13 +102,22 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
   }
 
   void _handleImeiScanResult(ImeiScanResult result) async {
-    if (_isProcessing) return;
-    
-    setState(() {
-      _isProcessing = true;
-      _foundProduct = null;
-      _searchError = null;
-    });
+    if (_isProcessing || _isSearchingProduct) return;
+
+    // Prevent duplicate scans
+    final now = DateTime.now();
+    if (_lastScannedImei == result.imeiInfo.cleanedImei &&
+        _lastScanTime != null &&
+        now.difference(_lastScanTime!).inMilliseconds < 2000) {
+      return;
+    }
+
+    _lastScannedImei = result.imeiInfo.cleanedImei;
+    _lastScanTime = now;
+    _isProcessing = true;
+
+    // Stop scanning while processing
+    _imeiScannerService.stopScanning();
 
     // Provide haptic feedback
     if (result.isValid) {
@@ -116,43 +126,45 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
       HapticFeedback.lightImpact();
     }
 
-    // Auto-search for product if enabled and IMEI is valid
-    if (widget.autoSearchProduct && result.isValid) {
-      await _searchProductByImei(result.imeiInfo.cleanedImei);
-    }
-
-    // Show result dialog
-    _showImeiResult(result);
-    
-    setState(() {
+    if (result.isValid && widget.autoSearchProduct) {
+      // Search for product directly and navigate
+      _searchProductByImei(result.imeiInfo.cleanedImei);
+    } else {
+      // Show error for invalid IMEI
+      _showImeiResult(result);
       _isProcessing = false;
-    });
+    }
   }
 
   Future<void> _searchProductByImei(String imei) async {
     setState(() {
       _isSearchingProduct = true;
-      _searchError = null;
     });
 
     try {
       final searchResult = await _imeiScannerService.searchProductByImei(imei);
       
-      setState(() {
+      if (mounted) {
         if (searchResult.hasProduct) {
-          _foundProduct = searchResult.product;
-        } else if (searchResult.hasError) {
-          _searchError = searchResult.errorMessage;
+          // Navigate directly to product detail
+          context.go('/products/detail/${searchResult.product!.id}');
         } else {
-          _searchError = 'No product found with this IMEI';
+          // Show product not found dialog
+          _showProductNotFoundDialog(imei, searchResult.errorMessage ?? 'No product found');
         }
-        _isSearchingProduct = false;
-      });
+      }
     } catch (e) {
-      setState(() {
-        _searchError = 'Product search failed: $e';
-        _isSearchingProduct = false;
-      });
+      if (mounted) {
+        _showProductNotFoundDialog(imei, e.toString());
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSearchingProduct = false;
+          _isProcessing = false;
+        });
+        _imeiScannerService.startScanning();
+      }
     }
   }
 
@@ -161,6 +173,34 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
       context: context,
       barrierDismissible: false,
       builder: (context) => _buildImeiResultDialog(result),
+    );
+  }
+
+  void _showProductNotFoundDialog(String imei, String error) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Product Not Found'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('IMEI: $imei'),
+            const SizedBox(height: 8),
+            Text(
+              'Error: ${error.contains('not found') ? 'No product found with this IMEI' : error}',
+              style: TextStyle(color: Colors.red[700]),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: _scanAnother,
+            child: const Text('Scan Another'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -183,17 +223,8 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // IMEI Information
-            if (result.isValid) ...[ 
+            if (result.isValid) ...[
               _buildImeiInfoSection(result.imeiInfo),
-              const SizedBox(height: 16),
-              
-              // Product Search Results
-              if (widget.autoSearchProduct) ...[
-                const Divider(),
-                const SizedBox(height: 8),
-                _buildProductSearchSection(),
-              ],
             ] else ...[
               Text('IMEI: ${result.scannedValue}'),
               const SizedBox(height: 8),
@@ -208,26 +239,12 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
       actions: [
         if (!result.isValid)
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _continueScanning();
-            },
+            onPressed: _scanAnother,
             child: const Text('Try Again'),
           ),
-        if (result.isValid) ...[ 
-          if (_foundProduct != null)
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _handleProductSelected(_foundProduct!);
-              },
-              child: const Text('View Product'),
-            ),
+        if (result.isValid) ...[
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _continueScanning();
-            },
+            onPressed: _scanAnother,
             child: const Text('Scan Another'),
           ),
           ElevatedButton(
@@ -237,7 +254,7 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
             },
             child: const Text('Use This IMEI'),
           ),
-        ] else ...[ 
+        ] else ...[
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.ok),
@@ -273,85 +290,28 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
     );
   }
 
-  Widget _buildProductSearchSection() {
-    if (_isSearchingProduct) {
-      return const Row(
-        children: [
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          SizedBox(width: 8),
-          Text('Searching for product...'),
-        ],
-      );
-    }
-
-    if (_foundProduct != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Product Found:',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-          ),
-          const SizedBox(height: 4),
-          Text(_foundProduct!.name),
-          const SizedBox(height: 2),
-          Text(
-            'SKU: ${_foundProduct!.sku}',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-          if (_foundProduct!.salePrice != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              'Price: \$${_foundProduct!.salePrice!.toStringAsFixed(2)}',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ],
-        ],
-      );
-    }
-
-    if (_searchError != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Product Search:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _searchError!,
-            style: TextStyle(color: Colors.orange[700]),
-          ),
-        ],
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
 
   void _handleConfirmedScan(ImeiScanResult result) {
     widget.onImeiScanned?.call(result);
     
     if (widget.autoClose) {
-      Navigator.of(context).pop(result);
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop(result);
+      } else {
+        // If there's nothing to pop, just close the screen gracefully
+        Navigator.of(context).pushReplacementNamed('/dashboard');
+      }
     }
   }
 
-  void _handleProductSelected(Product product) {
-    widget.onProductFound?.call(product);
-    
-    if (widget.autoClose) {
-      Navigator.of(context).pop(product);
-    }
-  }
 
-  void _continueScanning() {
+  void _scanAnother() {
+    // Close any open dialogs and restart scanning
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
     _isProcessing = false;
+    _isSearchingProduct = false;
     _imeiScannerService.startScanning();
   }
 
@@ -494,8 +454,10 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
                       ),
                       onTap: () {
                         if (scan.isValid) {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(); // Close history dialog
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop(); // Close scanner if possible
+                          }
                           _handleConfirmedScan(scan);
                         }
                       },
@@ -578,7 +540,13 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
               onFlashToggle: _isTorchAvailable ? _toggleFlash : null,
               onCameraSwitch: _canSwitchCamera ? _switchCamera : null,
               onManualEntry: widget.allowManualEntry ? _showManualEntry : null,
-              onClose: () => Navigator.of(context).pop(),
+              onClose: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                } else {
+                  Navigator.of(context).pushReplacementNamed('/dashboard');
+                }
+              },
               isFlashOn: _isFlashOn,
               canSwitchCamera: _canSwitchCamera,
             ),
@@ -627,8 +595,34 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
               ),
             ),
 
+          // Enhanced loading overlay for product search
+          if (_isSearchingProduct)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.8),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(color: Colors.white),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Searching for product...',
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Please wait a moment',
+                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
           // Processing indicator
-          if (_isProcessing || _isSearchingProduct)
+          if (_isProcessing && !_isSearchingProduct)
             Positioned.fill(
               child: Container(
                 color: Colors.black.withValues(alpha: 0.3),

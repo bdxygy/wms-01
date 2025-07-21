@@ -5,9 +5,9 @@ import 'package:provider/provider.dart';
 import '../../../core/models/product.dart';
 import '../../../core/models/store.dart';
 import '../../../core/models/category.dart';
-import '../../../core/models/user.dart';
 import '../../../core/services/store_service.dart';
 import '../../../core/services/category_service.dart';
+import '../../../core/services/product_service.dart';
 import '../../../core/validators/product_validators.dart';
 import '../../../core/widgets/form_components.dart';
 import '../../../core/providers/store_context_provider.dart';
@@ -42,10 +42,10 @@ class ProductFormData {
   });
 }
 
-/// Comprehensive product form for create and edit operations
+/// Single-step product form for create and edit operations
 class ProductForm extends StatefulWidget {
   final Product? initialProduct;
-  final Function(ProductFormData)? onSave;
+  final Future<void> Function(ProductFormData)? onSave;
   final VoidCallback? onCancel;
   final bool isEditing;
 
@@ -63,11 +63,11 @@ class ProductForm extends StatefulWidget {
 
 class _ProductFormState extends State<ProductForm> {
   final _formKey = GlobalKey<FormState>();
-  final _pageController = PageController();
   
   // Service instances
   final StoreService _storeService = StoreService();
   final CategoryService _categoryService = CategoryService();
+  final ProductService _productService = ProductService();
   
   // Form controllers
   final TextEditingController _nameController = TextEditingController();
@@ -91,86 +91,50 @@ class _ProductFormState extends State<ProductForm> {
   // UI state
   bool _isLoading = true;
   bool _isSaving = false;
-  int _currentStep = 0;
-  final int _totalSteps = 3;
   
   @override
   void initState() {
     super.initState();
     _initializeForm();
-    
-    // Add listeners to text controllers to update button state
-    _nameController.addListener(_updateButtonState);
-    _skuController.addListener(_updateButtonState);
-    _purchasePriceController.addListener(_updateButtonState);
-    _salePriceController.addListener(_updateButtonState);
-    _quantityController.addListener(_updateButtonState);
-    
-    // Only load data for edit mode or when specifically needed
-    if (widget.isEditing) {
-      _loadFormData();
-    } else {
-      // For create mode, set defaults and load data lazily
-      _setCreateModeDefaults();
-    }
+    _loadFormData();
   }
   
   @override
   void dispose() {
-    // Remove listeners before disposing
-    _nameController.removeListener(_updateButtonState);
-    _skuController.removeListener(_updateButtonState);
-    _purchasePriceController.removeListener(_updateButtonState);
-    _salePriceController.removeListener(_updateButtonState);
-    _quantityController.removeListener(_updateButtonState);
-    
     _nameController.dispose();
     _skuController.dispose();
     _purchasePriceController.dispose();
     _salePriceController.dispose();
     _quantityController.dispose();
     _descriptionController.dispose();
-    _pageController.dispose();
     super.dispose();
   }
   
   void _initializeForm() {
-    if (widget.initialProduct != null) {
-      final product = widget.initialProduct!;
-      _nameController.text = product.name;
-      _skuController.text = product.sku;
-      // Barcode is handled by backend
-      _purchasePriceController.text = product.purchasePrice.toStringAsFixed(2);
-      _salePriceController.text = product.salePrice?.toStringAsFixed(2) ?? '';
-      _quantityController.text = product.quantity.toString();
-      _descriptionController.text = ''; // Product model doesn't have description
-      _selectedStoreId = product.storeId;
-      _selectedCategoryId = product.categoryId;
-      _isImeiProduct = product.isImei;
-      _photoUrl = null; // Product model doesn't have photoUrl
-      // Note: IMEI list would need to be loaded separately if editing
+    // Guard clause: skip if no initial product
+    if (widget.initialProduct == null) return;
+    
+    final product = widget.initialProduct!;
+    _nameController.text = product.name;
+    _skuController.text = product.sku;
+    _purchasePriceController.text = product.purchasePrice.toStringAsFixed(2);
+    _salePriceController.text = product.salePrice?.toStringAsFixed(2) ?? '';
+    _quantityController.text = product.quantity.toString();
+    _descriptionController.text = ''; // Product model doesn't have description
+    _selectedStoreId = product.storeId;
+    _selectedCategoryId = product.categoryId;
+    _isImeiProduct = product.isImei;
+    _photoUrl = null; // Product model doesn't have photoUrl
+    
+    // Load IMEIs if this is an IMEI product
+    if (product.isImei) {
+      _loadProductImeis(product.id);
     }
-  }
-  
-  void _setCreateModeDefaults() {
-    // Set default values for create mode without API calls
-    final storeContext = context.read<StoreContextProvider>().selectedStore;
-    final user = context.read<AuthProvider>().user;
-    
-    if (user?.role != UserRole.owner && storeContext != null) {
-      _selectedStoreId = storeContext.id;
-    }
-    
-    // Generate default SKU (barcode handled by backend)
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
-    _skuController.text = 'SKUtimestamp';
-    
-    setState(() {
-      _isLoading = false;
-    });
   }
   
   Future<void> _loadFormData() async {
+    if (!mounted) return;
+    
     setState(() {
       _isLoading = true;
     });
@@ -180,40 +144,56 @@ class _ProductFormState extends State<ProductForm> {
         _loadStores(),
         _loadCategories(),
       ]);
+      
+      // Set defaults after loading
+      _setDefaults();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load form data: e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load form data: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+  
+  void _setDefaults() {
+    // Guard clause: skip if editing mode
+    if (widget.isEditing) return;
+    
+    final authProvider = context.read<AuthProvider>();
+    final storeProvider = context.read<StoreContextProvider>();
+    
+    // Auto-select store for non-owners with guard clause
+    if (!authProvider.isOwner && storeProvider.hasStoreSelected) {
+      _selectedStoreId = storeProvider.selectedStore!.id;
+    }
+    
+    // Generate default SKU only if empty
+    if (_skuController.text.isEmpty) {
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+      _skuController.text = 'SKU$timestamp';
     }
   }
   
   Future<void> _loadStores() async {
     try {
       final response = await _storeService.getStores(limit: 100);
+      if (!mounted) return;
+      
       setState(() {
         _stores = response.data;
-        
-        // Auto-select store for non-owner users
-        final authProvider = context.read<AuthProvider>();
-        final storeProvider = context.read<StoreContextProvider>();
-        
-        if (!authProvider.isOwner && storeProvider.hasStoreSelected) {
-          _selectedStoreId = storeProvider.selectedStore!.id;
-        }
       });
     } catch (e) {
-      debugPrint('Failed to load stores: e');
+      debugPrint('Failed to load stores: $e');
     }
   }
   
@@ -223,25 +203,31 @@ class _ProductFormState extends State<ProductForm> {
         storeId: _selectedStoreId,
         limit: 100,
       );
+      if (!mounted) return;
+      
       setState(() {
         _categories = response.data;
       });
     } catch (e) {
-      debugPrint('Failed to load categories: e');
+      debugPrint('Failed to load categories: $e');
     }
   }
   
-  Future<void> _loadStoreAndCategoryData() async {
-    if (_stores.isEmpty) {
-      await _loadStores();
+  Future<void> _loadProductImeis(String productId) async {
+    try {
+      final response = await _productService.getProductImeis(productId, limit: 100);
+      if (!mounted) return;
+      
+      // Extract IMEI codes from the response
+      final imeiList = response.data.map((imeiData) => imeiData['imei'] as String).toList();
+      
+      setState(() {
+        _imeis = imeiList;
+      });
+    } catch (e) {
+      debugPrint('Failed to load product IMEIs: $e');
+      // Don't show error to user for IMEIs loading failure
     }
-    // Categories will be loaded when a store is selected
-  }
-  
-  void _updateButtonState() {
-    // Trigger a rebuild to update button state
-    print('🧭 ProductForm: _updateButtonState called for step _currentStep');
-    setState(() {});
   }
   
   void _onStoreChanged(String? storeId) {
@@ -251,135 +237,48 @@ class _ProductFormState extends State<ProductForm> {
       _categories = []; // Clear categories
     });
     
-    if (storeId != null) {
-      _loadCategories(); // Reload categories for new store
-    }
-    // Button state will update automatically due to setState
+    // Guard clause: only load categories if store is selected
+    if (storeId == null) return;
+    
+    _loadCategories(); // Reload categories for new store
   }
   
   void _onImeiToggleChanged(bool value) {
     setState(() {
       _isImeiProduct = value;
+      // Guard clause: clear IMEIs if toggled off
       if (!value) {
-        _imeis.clear(); // Clear IMEIs if toggled off
+        _imeis.clear();
+      } else {
+        // For IMEI products, set quantity to 1 and make it read-only
+        _quantityController.text = '1';
       }
     });
-    // Button state will update automatically due to setState
   }
   
   void _onQuantityChanged(String? value) {
-    // Update IMEI count based on quantity when IMEI product
-    if (_isImeiProduct && value != null && value.isNotEmpty) {
-      final quantity = int.tryParse(value);
-      if (quantity != null && quantity != _imeis.length) {
-        setState(() {
-          if (quantity > _imeis.length) {
-            // Add empty IMEIs
-            _imeis.addAll(List.filled(quantity - _imeis.length, ''));
-          } else if (quantity < _imeis.length) {
-            // Remove excess IMEIs
-            _imeis = _imeis.take(quantity).toList();
-          }
-        });
-      }
-    }
-    // Button state will update automatically due to setState or controller listener
-  }
-  
-  void _nextStep() {
-    if (_currentStep < _totalSteps - 1) {
-      setState(() {
-        _currentStep++;
-      });
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      
-      // Load data lazily when reaching store selection step (step 2)
-      if (_currentStep == 2 && !widget.isEditing) {
-        _loadStoreAndCategoryData();
-      }
-    }
-  }
-  
-  void _previousStep() {
-    if (_currentStep > 0) {
-      setState(() {
-        _currentStep--;
-      });
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-  
-  bool _validateCurrentStep() {
-    switch (_currentStep) {
-      case 0: // Basic Information
-        return ProductValidators.validateProductName(_nameController.text) == null &&
-               ProductValidators.validateSku(_skuController.text) == null;
-      case 1: // Pricing & Inventory
-        final purchasePriceError = ProductValidators.validatePurchasePrice(_purchasePriceController.text);
-        final salePriceError = ProductValidators.validateSalePrice(
-          _salePriceController.text,
-          double.tryParse(_purchasePriceController.text),
-        );
-        final quantityError = ProductValidators.validateQuantity(_quantityController.text);
- 
-        
-        // For step validation, we don't need to validate IMEIs strictly
-        // IMEIs will be validated at the final save step
-        // This allows users to enable IMEI toggle and proceed to next step
-        String? imeiError;
-        if (_isImeiProduct) {
-          final filledImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
-          // Only validate if user has started filling IMEIs
-          if (filledImeis.isNotEmpty) {
-            // Validate individual IMEI formats
-            for (int i = 0; i < filledImeis.length; i++) {
-              final validation = ProductValidators.validateImei(filledImeis[i]);
-              if (validation != null) {
-                imeiError = 'IMEI {i + 1}: validation';
-                break;
-              }
-            }
-          }
-          print('🧭 IMEI Error: imeiError');
-          print('🧭 IMEI List: _imeis');
-          print('🧭 Filled IMEIs: filledImeis');
-        }
-        
-        final isValid = purchasePriceError == null && 
-                       salePriceError == null && 
-                       quantityError == null && 
-                       imeiError == null;
-        
-        print('🧭 Step 1 Valid: isValid');
-        return isValid;
-      case 2: // Store & Additional Info
-        return ProductValidators.validateStore(_selectedStoreId) == null;
-      default:
-        return true;
+    // Guard clause: prevent quantity changes for IMEI products
+    if (_isImeiProduct && value != '1') {
+      // Reset to 1 for IMEI products
+      _quantityController.text = '1';
     }
   }
   
   Future<void> _saveProduct() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    // Guard clause: validate form first
+    if (!_formKey.currentState!.validate()) return;
     
-    // Additional validation for IMEI products at save time
+    // Guard clause: validate IMEI for IMEI products
     if (_isImeiProduct) {
       final filledImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
-      final quantity = int.tryParse(_quantityController.text) ?? 0;
-      final imeiError = ProductValidators.validateImeiList(filledImeis, quantity);
+      final imeiError = ProductValidators.validateImeiList(filledImeis);
       
       if (imeiError != null) {
+        if (!mounted) return;
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('IMEI Validation Error: imeiError'),
+            content: Text('IMEI Validation Error: $imeiError'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -394,41 +293,42 @@ class _ProductFormState extends State<ProductForm> {
     try {
       // Create form data object
       final formData = ProductFormData(
-        productName: productName,
-        sku: sku,
-        purchasePrice: purchasePrice,
-        salePrice: salePrice,
-        quantity: quantity,
-        description: description,
-        storeId: storeId!,
-        categoryId: categoryId,
-        isImei: isImei,
-        imeis: imeis,
-        photoUrl: photoUrl,
+        productName: this.productName,
+        sku: this.sku,
+        purchasePrice: this.purchasePrice,
+        salePrice: this.salePrice,
+        quantity: this.quantity,
+        description: this.description,
+        storeId: this.storeId!,
+        categoryId: this.categoryId,
+        isImei: this.isImei,
+        imeis: this.imeis,
+        photoUrl: this.photoUrl,
       );
       
-      // Call parent save handler
-      widget.onSave?.call(formData);
+      // Call parent save handler and wait for completion
+      await widget.onSave?.call(formData);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save product: e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save product: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+      if (!mounted) return;
+      
+      setState(() {
+        _isSaving = false;
+      });
     }
   }
   
   @override
   Widget build(BuildContext context) {
+    // Guard clause: show loading state
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -439,266 +339,248 @@ class _ProductFormState extends State<ProductForm> {
       key: _formKey,
       child: Column(
         children: [
-          // Progress indicator
-          _buildProgressIndicator(),
-          
-          const SizedBox(height: 16),
-          
-          // Form content
+          // Single scrollable form
           Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildBasicInfoStep(),
-                _buildPricingStep(),
-                _buildStoreAndAdditionalInfoStep(),
-              ],
-            ),
+            child: _buildSingleStepForm(),
           ),
           
-          // Navigation buttons
-          _buildNavigationButtons(),
+          // Action buttons
+          _buildActionButtons(),
         ],
       ),
     );
   }
   
-  Widget _buildProgressIndicator() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: List.generate(_totalSteps, (index) {
-          final isActive = index == _currentStep;
-          final isCompleted = index < _currentStep;
-          
-          return Expanded(
-            child: Container(
-              margin: EdgeInsets.only(right: index < _totalSteps - 1 ? 8 : 0),
-              height: 4,
-              decoration: BoxDecoration(
-                color: isCompleted || isActive 
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.outline,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-  
-  Widget _buildBasicInfoStep() {
+  Widget _buildSingleStepForm() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Basic Information',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          WMSTextFormField(
-            label: 'Product Name *',
-            controller: _nameController,
-            hint: 'Enter product name',
-            validator: ProductValidators.validateProductName,
-            prefixIcon: const Icon(Icons.inventory_2),
-          ),
-          
+          // Basic Information Section
+          _buildSectionHeader('Basic Information'),
           const SizedBox(height: 16),
+          _buildBasicInfoFields(),
           
-          WMSTextFormField(
-            label: 'SKU *',
-            controller: _skuController,
-            hint: 'Enter SKU (e.g., PROD001)',
-            validator: ProductValidators.validateSku,
-            prefixIcon: const Icon(Icons.qr_code),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9_-]')),
-              LengthLimitingTextInputFormatter(50),
-            ],
-          ),
+          const SizedBox(height: 32),
           
-          
+          // Pricing & Inventory Section
+          _buildSectionHeader('Pricing & Inventory'),
           const SizedBox(height: 16),
+          _buildPricingFields(),
           
-          WMSTextFormField(
-            label: 'Description',
-            controller: _descriptionController,
-            hint: 'Enter product description (optional)',
-            validator: ProductValidators.validateDescription,
-            maxLines: 3,
-            prefixIcon: const Icon(Icons.description),
-          ),
+          const SizedBox(height: 32),
+          
+          // Store & Category Section
+          _buildSectionHeader('Store & Category'),
+          const SizedBox(height: 16),
+          _buildStoreFields(),
+          
+          const SizedBox(height: 32),
+          
+          // Additional Information Section
+          _buildSectionHeader('Additional Information'),
+          const SizedBox(height: 16),
+          _buildAdditionalFields(),
         ],
       ),
     );
   }
   
-  Widget _buildPricingStep() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Pricing & Inventory',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          WMSCurrencyFormField(
-            label: 'Purchase Price *',
-            controller: _purchasePriceController,
-            hint: 'Enter purchase price',
-            validator: ProductValidators.validatePurchasePrice,
-          ),
-          
-          const SizedBox(height: 16),
-          
-          WMSCurrencyFormField(
-            label: 'Sale Price',
-            controller: _salePriceController,
-            hint: 'Enter sale price (optional)',
-            validator: (value) => ProductValidators.validateSalePrice(
-              value,
-              double.tryParse(_purchasePriceController.text),
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          WMSTextFormField(
-            label: 'Quantity *',
-            controller: _quantityController,
-            hint: 'Enter quantity',
-            keyboardType: TextInputType.number,
-            validator: ProductValidators.validateQuantity,
-            onChanged: _onQuantityChanged,
-            prefixIcon: const Icon(Icons.inventory),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(6),
-            ],
-          ),
-          
-          const SizedBox(height: 24),
-          
-          WMSSwitchFormField(
-            label: 'IMEI Product',
-            subtitle: 'Enable if this product requires IMEI tracking',
-            value: _isImeiProduct,
-            onChanged: _onImeiToggleChanged,
-          ),
-          
-          if (_isImeiProduct) ...[
-            const SizedBox(height: 16),
-            WMSImeiArrayFormField(
-              label: 'IMEI Numbers',
-              initialImeis: _imeis,
-              expectedQuantity: int.tryParse(_quantityController.text),
-              onChanged: (imeis) {
-                setState(() {
-                  _imeis = imeis;
-                });
-              },
-              validator: (imeis) {
-                final quantity = int.tryParse(_quantityController.text) ?? 0;
-                return ProductValidators.validateImeiList(imeis ?? [], quantity);
-              },
-            ),
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+  
+  Widget _buildBasicInfoFields() {
+    return Column(
+      children: [
+        WMSTextFormField(
+          label: 'Product Name *',
+          controller: _nameController,
+          hint: 'Enter product name',
+          validator: ProductValidators.validateProductName,
+          prefixIcon: const Icon(Icons.inventory_2),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        WMSTextFormField(
+          label: 'SKU *',
+          controller: _skuController,
+          hint: 'Enter SKU (e.g., PROD001)',
+          validator: ProductValidators.validateSku,
+          prefixIcon: const Icon(Icons.qr_code),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9_-]')),
+            LengthLimitingTextInputFormatter(50),
           ],
-        ],
-      ),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        WMSTextFormField(
+          label: 'Description',
+          controller: _descriptionController,
+          hint: 'Enter product description (optional)',
+          validator: ProductValidators.validateDescription,
+          maxLines: 3,
+          prefixIcon: const Icon(Icons.description),
+        ),
+      ],
     );
   }
   
-  Widget _buildStoreAndAdditionalInfoStep() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Store & Additional Information',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+  Widget _buildPricingFields() {
+    return Column(
+      children: [
+        WMSCurrencyFormField(
+          label: 'Purchase Price *',
+          controller: _purchasePriceController,
+          hint: 'Enter purchase price',
+          validator: ProductValidators.validatePurchasePrice,
+        ),
+        
+        const SizedBox(height: 16),
+        
+        WMSCurrencyFormField(
+          label: 'Sale Price',
+          controller: _salePriceController,
+          hint: 'Enter sale price (optional)',
+          validator: (value) => ProductValidators.validateSalePrice(
+            value,
+            double.tryParse(_purchasePriceController.text),
           ),
-          const SizedBox(height: 24),
-          
-          WMSDropdownFormField<String>(
-            label: 'Store *',
-            hint: _stores.isEmpty ? 'Loading stores...' : 'Select store',
-            value: _stores.isNotEmpty && _stores.any((store) => store.id == _selectedStoreId) ? _selectedStoreId : null,
-            items: _stores.map((store) {
-              return DropdownMenuItem<String>(
-                value: store.id,
-                child: Text('{store.name} - {store.address}'),
-              );
-            }).toList(),
-            onChanged: _stores.isEmpty ? null : _onStoreChanged,
-            validator: ProductValidators.validateStore,
-            prefixIcon: const Icon(Icons.store),
-          ),
-          
+        ),
+        
+        const SizedBox(height: 16),
+        
+        WMSTextFormField(
+          label: 'Quantity *',
+          controller: _quantityController,
+          hint: _isImeiProduct ? 'Fixed at 1 for IMEI products' : 'Enter quantity',
+          keyboardType: TextInputType.number,
+          validator: (value) => ProductValidators.validateQuantityForImei(value, _isImeiProduct),
+          onChanged: _onQuantityChanged,
+          readOnly: _isImeiProduct,
+          enabled: !_isImeiProduct,
+          prefixIcon: const Icon(Icons.inventory),
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(6),
+          ],
+        ),
+        
+        const SizedBox(height: 24),
+        
+        WMSSwitchFormField(
+          label: 'IMEI Product',
+          subtitle: 'Enable if this product requires IMEI tracking',
+          value: _isImeiProduct,
+          onChanged: _onImeiToggleChanged,
+        ),
+        
+        if (_isImeiProduct) ...[
           const SizedBox(height: 16),
-          
-          WMSDropdownFormField<String>(
-            label: 'Category',
-            hint: _selectedStoreId == null 
-                ? 'Select store first' 
-                : _categories.isEmpty 
-                    ? 'Loading categories...' 
-                    : 'Select category (optional)',
-            value: _categories.isNotEmpty && _categories.any((category) => category.id == _selectedCategoryId) ? _selectedCategoryId : null,
-            items: _categories.map((category) {
-              return DropdownMenuItem<String>(
-                value: category.id,
-                child: Text(category.name),
-              );
-            }).toList(),
-            onChanged: _selectedStoreId != null && _categories.isNotEmpty ? (value) {
+          WMSImeiArrayFormField(
+            label: 'IMEI Numbers',
+            initialImeis: _imeis,
+            onChanged: (imeis) {
               setState(() {
-                _selectedCategoryId = value;
-              });
-            } : null,
-            validator: ProductValidators.validateCategory,
-            prefixIcon: const Icon(Icons.category),
-            enabled: _selectedStoreId != null,
-          ),
-          
-          const SizedBox(height: 16),
-          
-          WMSPhotoFormField(
-            label: 'Product Photo',
-            imageUrl: _photoUrl,
-            onChanged: (url) {
-              setState(() {
-                _photoUrl = url;
+                _imeis = imeis;
               });
             },
-            onImagePicked: () {
-              // TODO: Implement image picker
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Image picker coming soon!')),
-              );
+            validator: (imeis) {
+              return ProductValidators.validateImeiList(imeis ?? []);
             },
           ),
         ],
-      ),
+      ],
     );
   }
   
-  Widget _buildNavigationButtons() {
+  Widget _buildStoreFields() {
+    return Column(
+      children: [
+        WMSDropdownFormField<String>(
+          label: 'Store *',
+          hint: _stores.isEmpty ? 'Loading stores...' : 'Select store',
+          value: _stores.isNotEmpty && _stores.any((store) => store.id == _selectedStoreId) ? _selectedStoreId : null,
+          items: _stores.map((store) {
+            return DropdownMenuItem<String>(
+              value: store.id,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 280),
+                child: Text(
+                  '${store.name} - ${store.address}',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: _stores.isEmpty ? null : _onStoreChanged,
+          validator: ProductValidators.validateStore,
+          prefixIcon: const Icon(Icons.store),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        WMSDropdownFormField<String>(
+          label: 'Category',
+          hint: _selectedStoreId == null 
+              ? 'Select store first' 
+              : _categories.isEmpty 
+                  ? 'Loading categories...' 
+                  : 'Select category (optional)',
+          value: _categories.isNotEmpty && _categories.any((category) => category.id == _selectedCategoryId) ? _selectedCategoryId : null,
+          items: _categories.map((category) {
+            return DropdownMenuItem<String>(
+              value: category.id,
+              child: Text(category.name),
+            );
+          }).toList(),
+          onChanged: _selectedStoreId != null && _categories.isNotEmpty ? (value) {
+            setState(() {
+              _selectedCategoryId = value;
+            });
+          } : null,
+          validator: ProductValidators.validateCategory,
+          prefixIcon: const Icon(Icons.category),
+          enabled: _selectedStoreId != null,
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildAdditionalFields() {
+    return Column(
+      children: [
+        WMSPhotoFormField(
+          label: 'Product Photo',
+          imageUrl: _photoUrl,
+          onChanged: (url) {
+            setState(() {
+              _photoUrl = url;
+            });
+          },
+          onImagePicked: () {
+            // TODO: Implement image picker
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Image picker coming soon!')),
+            );
+          },
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildActionButtons() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -711,46 +593,34 @@ class _ProductFormState extends State<ProductForm> {
       ),
       child: Row(
         children: [
-          if (_currentStep > 0) ...[
-            TextButton(
-              onPressed: _previousStep,
-              child: const Text('Previous'),
-            ),
-            const SizedBox(width: 16),
-          ],
-          
+          // Cancel button with guard clause
           if (widget.onCancel != null) ...[
             TextButton(
               onPressed: widget.onCancel,
               child: const Text('Cancel'),
             ),
             const Spacer(),
-          ] else if (_currentStep > 0) ...[
+          ] else ...[
             const Spacer(),
           ],
           
-          if (_currentStep < _totalSteps - 1)
-            ElevatedButton(
-              onPressed: _validateCurrentStep() ? _nextStep : null,
-              child: const Text('Next!')
-            )
-          else
-            ElevatedButton(
-              onPressed: _isSaving ? null : _saveProduct,
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(widget.isEditing ? 'Update Product' : 'Create Product'),
-            ),
+          // Save button
+          ElevatedButton(
+            onPressed: _isSaving ? null : _saveProduct,
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(widget.isEditing ? 'Update Product' : 'Create Product'),
+          ),
         ],
       ),
     );
   }
   
-  // Getters for form data
+  // Getters for form data using guard clauses
   String get productName => _nameController.text.trim();
   String get sku => _skuController.text.trim();
   double get purchasePrice => double.tryParse(_purchasePriceController.text) ?? 0.0;

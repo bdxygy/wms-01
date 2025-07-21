@@ -186,7 +186,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
             Expanded(
               child: DashboardMetricCard(
                 title: 'Sales Today',
-                value: '\$0', // TODO: Get actual data
+                value: '0', // TODO: Get actual data
                 icon: Icons.attach_money,
                 color: Colors.green,
                 trend: '+0',
@@ -212,7 +212,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
             Expanded(
               child: DashboardMetricCard(
                 title: 'Avg. Sale',
-                value: '\$0', // TODO: Get actual data
+                value: '0', // TODO: Get actual data
                 icon: Icons.trending_up,
                 color: Colors.orange,
                 trend: '+0',

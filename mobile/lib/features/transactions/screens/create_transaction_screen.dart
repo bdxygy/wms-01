@@ -54,7 +54,7 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Transaction created successfully! Total: \$${transaction.calculatedAmount.toStringAsFixed(2)}'),
+            content: Text('Transaction created successfully! Total: ${transaction.calculatedAmount.toStringAsFixed(2)}'),
             backgroundColor: Colors.green,
             action: SnackBarAction(
               label: 'View',

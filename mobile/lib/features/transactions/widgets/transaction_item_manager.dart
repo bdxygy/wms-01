@@ -366,7 +366,7 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
             ),
           ),
           Text(
-            '\$${total.toStringAsFixed(2)}',
+            '${total.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).primaryColor,
@@ -419,7 +419,7 @@ class _SearchResultCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 4),
                   Text(
-                    '\$${(product.salePrice ?? product.purchasePrice).toStringAsFixed(2)}',
+                    '${(product.salePrice ?? product.purchasePrice).toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
@@ -512,7 +512,7 @@ class _TransactionItemCardState extends State<_TransactionItemCard> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Subtotal: \$${(widget.item.price * widget.item.quantity).toStringAsFixed(2)}',
+                        'Subtotal: ${(widget.item.price * widget.item.quantity).toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w600,
@@ -559,7 +559,7 @@ class _TransactionItemCardState extends State<_TransactionItemCard> {
                     decoration: const InputDecoration(
                       labelText: 'Price',
                       border: OutlineInputBorder(),
-                      prefixText: '\$',
+                      prefixText: '',
                       isDense: true,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),

@@ -494,7 +494,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   const Divider(),
                   _buildSummaryRow(
                     'Total Amount', 
-                    '\$${TransactionFormData(type: _selectedType, storeId: _selectedStoreId!, items: _items).totalAmount.toStringAsFixed(2)}',
+                    '${TransactionFormData(type: _selectedType, storeId: _selectedStoreId!, items: _items).totalAmount.toStringAsFixed(2)}',
                     isTotal: true,
                   ),
                 ],

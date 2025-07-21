@@ -15,12 +15,21 @@ export const createProductSchema = z.object({
 // Update product schema (without barcode - it's auto-generated)
 export const updateProductSchema = z.object({
   name: z.string().min(1, "Product name is required").max(200, "Product name must be less than 200 characters").optional(),
-  categoryId: z.string().uuid("Invalid category ID format").optional(),
+  categoryId: z.string().uuid("Invalid category ID format").optional().nullable(),
   sku: z.string().min(1, "SKU is required").max(100, "SKU must be less than 100 characters").optional(),
   isImei: z.boolean().optional(),
   quantity: z.number().int().min(0, "Quantity must be non-negative").optional(),
   purchasePrice: z.number().positive("Purchase price must be positive").optional(),
-  salePrice: z.number().positive("Sale price must be positive").optional(),
+  salePrice: z.number().positive("Sale price must be positive").optional().nullable(),
+}).refine((data) => {
+  // If quantity is provided and isImei is true, quantity must be 1
+  if (data.isImei === true && data.quantity !== undefined && data.quantity !== 1) {
+    return false;
+  }
+  return true;
+}, {
+  message: "IMEI products must have quantity of 1",
+  path: ["quantity"],
 });
 
 // Query parameters for list products

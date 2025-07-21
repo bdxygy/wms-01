@@ -116,11 +116,10 @@ class ProductValidators {
     if (value == null || value.trim().isEmpty) {
       return 'IMEI is required';
     }
-    final imeiInfo = ImeiUtils.getImeiInfo(value.trim());
-    if (!imeiInfo.isValid) {
-      return 'Invalid IMEI format (must be 15-16 digits)';
-    }
-    return null;
+
+    return value.length == 15 || value.length == 16
+        ? null
+        : 'IMEI must be 15 or 16 digits';
   }
 
   /// Store selection validation
@@ -146,17 +145,17 @@ class ProductValidators {
   }
 
   /// Validate IMEI list for dynamic form
-  static String? validateImeiList(List<String> imeis, int expectedQuantity) {
+  static String? validateImeiList(List<String> imeis) {
     if (imeis.isEmpty) {
       return 'At least one IMEI is required';
     }
-    
+
     // Check for duplicates
     final uniqueImeis = imeis.toSet();
     if (uniqueImeis.length != imeis.length) {
       return 'Duplicate IMEIs are not allowed';
     }
-    
+
     // Validate each IMEI
     for (int i = 0; i < imeis.length; i++) {
       final validation = validateImei(imeis[i]);
@@ -164,12 +163,22 @@ class ProductValidators {
         return 'IMEI ${i + 1}: $validation';
       }
     }
-    
-    // Check if IMEI count matches quantity (optional business rule)
-    if (imeis.length != expectedQuantity) {
-      return 'Number of IMEIs (${imeis.length}) must match quantity ($expectedQuantity)';
+
+    return null;
+  }
+
+  /// Validate quantity for IMEI products (must be 1)
+  static String? validateQuantityForImei(String? value, bool isImeiProduct) {
+    if (!isImeiProduct) {
+      return validateQuantity(value);
     }
-    
+
+    // For IMEI products, quantity must be exactly 1
+    final quantity = int.tryParse(value?.trim() ?? '');
+    if (quantity != 1) {
+      return 'Quantity for IMEI products must be 1';
+    }
+
     return null;
   }
 
@@ -199,7 +208,8 @@ class ProductValidators {
     if (barcodeError != null) errors['barcode'] = barcodeError;
 
     final purchasePriceError = validatePurchasePrice(purchasePrice);
-    if (purchasePriceError != null) errors['purchasePrice'] = purchasePriceError;
+    if (purchasePriceError != null)
+      errors['purchasePrice'] = purchasePriceError;
 
     final parsedPurchasePrice = double.tryParse(purchasePrice ?? '');
     final salePriceError = validateSalePrice(salePrice, parsedPurchasePrice);
@@ -219,8 +229,7 @@ class ProductValidators {
 
     // Validate IMEIs if product supports IMEI
     if (isImei && imeis != null) {
-      final parsedQuantity = int.tryParse(quantity ?? '0') ?? 0;
-      final imeiError = validateImeiList(imeis, parsedQuantity);
+      final imeiError = validateImeiList(imeis);
       if (imeiError != null) errors['imeis'] = imeiError;
     }
 

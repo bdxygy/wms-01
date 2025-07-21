@@ -542,7 +542,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen>
               children: [
                 Text('SKU: ${product.sku}'),
                 if (product.salePrice != null)
-                  Text('Price: \$${product.salePrice!.toStringAsFixed(2)}'),
+                  Text('Price: ${product.salePrice!.toStringAsFixed(2)}'),
               ],
             ),
             trailing: const Icon(Icons.arrow_forward_ios),
@@ -567,8 +567,8 @@ class _ProductSearchScreenState extends State<ProductSearchScreen>
         _buildDetailRow('SKU', product.sku),
         _buildDetailRow('Barcode', product.barcode),
         if (product.salePrice != null)
-          _buildDetailRow('Sale Price', '\$${product.salePrice!.toStringAsFixed(2)}'),
-        _buildDetailRow('Purchase Price', '\$${product.purchasePrice.toStringAsFixed(2)}'),
+          _buildDetailRow('Sale Price', '${product.salePrice!.toStringAsFixed(2)}'),
+        _buildDetailRow('Purchase Price', '${product.purchasePrice.toStringAsFixed(2)}'),
         _buildDetailRow('Quantity', '${product.quantity}'),
         if (product.categoryName != null)
           _buildDetailRow('Category', product.categoryName!),

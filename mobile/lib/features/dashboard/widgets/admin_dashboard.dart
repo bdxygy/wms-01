@@ -191,7 +191,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             Expanded(
               child: DashboardMetricCard(
                 title: 'Today Sales',
-                value: '\$0', // TODO: Get actual data
+                value: '0', // TODO: Get actual data
                 icon: Icons.trending_up,
                 color: Colors.green,
                 trend: '+0',

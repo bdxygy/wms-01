@@ -1,36 +1,30 @@
 /// Utility class for IMEI validation, formatting, and management
 class ImeiUtils {
-  
   /// Validate IMEI using industry standards (15-16 digits with Luhn algorithm)
   static bool isValidImei(String imei) {
     if (imei.isEmpty) return false;
-    
+
     final cleaned = cleanImei(imei);
-    
+
     // IMEI should be 15 or 16 digits
     if (cleaned.length != 15 && cleaned.length != 16) return false;
-    
+
     // Must be numeric only
     if (!_isNumeric(cleaned)) return false;
-    
-    // Validate using Luhn algorithm for 15-digit IMEI
-    if (cleaned.length == 15) {
-      return _validateLuhnChecksum(cleaned);
-    }
-    
+
     // For 16-digit IMEI (IMEISV), skip checksum validation
-    if (cleaned.length == 16) {
+    if (cleaned.length == 16 || cleaned.length == 15) {
       return true;
     }
-    
+
     return false;
   }
-  
+
   /// Clean and format IMEI (remove spaces, dashes, etc.)
   static String cleanImei(String imei) {
     return imei.replaceAll(RegExp(r'[^0-9]'), '');
   }
-  
+
   /// Format IMEI for display (XX-XXXXXX-XXXXXX-X format)
   static String formatImeiForDisplay(String imei) {
     final cleaned = cleanImei(imei);
@@ -41,7 +35,7 @@ class ImeiUtils {
     }
     return cleaned;
   }
-  
+
   /// Extract Type Allocation Code (TAC) from IMEI (first 8 digits)
   static String? extractTac(String imei) {
     final cleaned = cleanImei(imei);
@@ -50,7 +44,7 @@ class ImeiUtils {
     }
     return null;
   }
-  
+
   /// Extract Serial Number from IMEI (digits 9-14)
   static String? extractSerialNumber(String imei) {
     final cleaned = cleanImei(imei);
@@ -59,7 +53,7 @@ class ImeiUtils {
     }
     return null;
   }
-  
+
   /// Extract Check Digit from IMEI (last digit for 15-digit IMEI)
   static String? extractCheckDigit(String imei) {
     final cleaned = cleanImei(imei);
@@ -68,17 +62,17 @@ class ImeiUtils {
     }
     return null;
   }
-  
+
   /// Generate check digit for IMEI using Luhn algorithm
   static int calculateImeiCheckDigit(String imeiWithoutCheck) {
     if (imeiWithoutCheck.length != 14) {
       throw ArgumentError('IMEI without check digit must be 14 digits');
     }
-    
+
     int sum = 0;
     for (int i = 0; i < 14; i++) {
       int digit = int.parse(imeiWithoutCheck[i]);
-      
+
       // Double every second digit from right to left
       if ((14 - i) % 2 == 0) {
         digit *= 2;
@@ -88,27 +82,27 @@ class ImeiUtils {
       }
       sum += digit;
     }
-    
+
     int checkDigit = (10 - (sum % 10)) % 10;
     return checkDigit;
   }
-  
+
   /// Validate IMEI using Luhn algorithm
   static bool _validateLuhnChecksum(String imei) {
     if (imei.length != 15) return false;
-    
+
     final withoutCheck = imei.substring(0, 14);
     final providedCheck = int.parse(imei[14]);
     final calculatedCheck = calculateImeiCheckDigit(withoutCheck);
-    
+
     return providedCheck == calculatedCheck;
   }
-  
+
   /// Check if string contains only digits
   static bool _isNumeric(String str) {
     return RegExp(r'^\d+$').hasMatch(str);
   }
-  
+
   /// Generate random valid IMEI for testing (15 digits with valid checksum)
   static String generateRandomImei() {
     // Start with a valid TAC (Type Allocation Code)
@@ -118,40 +112,40 @@ class ImeiUtils {
       '35847709', // Samsung Galaxy
       '35916505', // Huawei
     ];
-    
+
     final random = DateTime.now().millisecondsSinceEpoch;
     final tac = validTacs[random % validTacs.length];
-    
+
     // Generate 6-digit serial number
     String serial = '';
     for (int i = 0; i < 6; i++) {
       serial += ((random + i) % 10).toString();
     }
-    
+
     final withoutCheck = tac + serial;
     final checkDigit = calculateImeiCheckDigit(withoutCheck);
-    
+
     return withoutCheck + checkDigit.toString();
   }
-  
+
   /// Detect if a scanned code is likely an IMEI
   static bool isLikelyImei(String code) {
     final cleaned = cleanImei(code);
-    
+
     // IMEI characteristics
-    return cleaned.length == 15 || 
-           cleaned.length == 16 ||
-           (cleaned.length >= 14 && cleaned.length <= 17 && _isNumeric(cleaned));
+    return cleaned.length == 15 ||
+        cleaned.length == 16 ||
+        (cleaned.length >= 14 && cleaned.length <= 17 && _isNumeric(cleaned));
   }
-  
+
   /// Get IMEI information breakdown
   static ImeiInfo getImeiInfo(String imei) {
     final cleaned = cleanImei(imei);
-    
+
     if (!isValidImei(cleaned)) {
       return ImeiInfo.invalid(cleaned);
     }
-    
+
     return ImeiInfo(
       originalImei: imei,
       cleanedImei: cleaned,
@@ -163,11 +157,11 @@ class ImeiUtils {
       type: cleaned.length == 15 ? 'IMEI' : 'IMEISV',
     );
   }
-  
+
   /// Validate IMEI input as user types
   static ImeiValidationResult validateInput(String input) {
     final cleaned = cleanImei(input);
-    
+
     if (cleaned.isEmpty) {
       return ImeiValidationResult(
         isValid: false,
@@ -175,7 +169,7 @@ class ImeiUtils {
         canProceed: false,
       );
     }
-    
+
     if (!_isNumeric(cleaned)) {
       return ImeiValidationResult(
         isValid: false,
@@ -183,7 +177,7 @@ class ImeiUtils {
         canProceed: false,
       );
     }
-    
+
     if (cleaned.length < 14) {
       return ImeiValidationResult(
         isValid: false,
@@ -191,7 +185,7 @@ class ImeiUtils {
         canProceed: false,
       );
     }
-    
+
     if (cleaned.length > 16) {
       return ImeiValidationResult(
         isValid: false,
@@ -199,7 +193,7 @@ class ImeiUtils {
         canProceed: false,
       );
     }
-    
+
     if (cleaned.length == 14) {
       return ImeiValidationResult(
         isValid: false,
@@ -207,7 +201,7 @@ class ImeiUtils {
         canProceed: false,
       );
     }
-    
+
     if (cleaned.length == 15) {
       final isValid = _validateLuhnChecksum(cleaned);
       return ImeiValidationResult(
@@ -216,7 +210,7 @@ class ImeiUtils {
         canProceed: isValid,
       );
     }
-    
+
     if (cleaned.length == 16) {
       return ImeiValidationResult(
         isValid: true,
@@ -224,7 +218,7 @@ class ImeiUtils {
         canProceed: true,
       );
     }
-    
+
     return ImeiValidationResult(
       isValid: false,
       message: 'Invalid IMEI length',
@@ -328,7 +322,7 @@ class ImeiScanResult {
 
   factory ImeiScanResult.fromScan(String scannedValue, String method) {
     final imeiInfo = ImeiUtils.getImeiInfo(scannedValue);
-    
+
     return ImeiScanResult(
       scannedValue: scannedValue,
       imeiInfo: imeiInfo,
@@ -352,7 +346,8 @@ class ImeiScanResult {
     return ImeiScanResult(
       scannedValue: json['scannedValue'] ?? '',
       imeiInfo: ImeiInfo.fromJson(json['imeiInfo'] ?? {}),
-      timestamp: DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()),
+      timestamp:
+          DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()),
       scanMethod: json['scanMethod'] ?? 'unknown',
       isValid: json['isValid'] ?? false,
     );

@@ -112,7 +112,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 Name: ${_product!.name}
 SKU: ${_product!.sku}
 Barcode: ${_product!.barcode}
-Price: \$${(_product!.salePrice ?? _product!.purchasePrice).toStringAsFixed(2)}
+Price: ${(_product!.salePrice ?? _product!.purchasePrice).toStringAsFixed(2)}
 Quantity: ${_product!.quantity}''';
     
     Clipboard.setData(ClipboardData(text: productInfo));
@@ -362,9 +362,9 @@ Quantity: ${_product!.quantity}''';
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Purchase Price', '\$${_product!.purchasePrice.toStringAsFixed(2)}'),
+            _buildInfoRow('Purchase Price', '${_product!.purchasePrice.toStringAsFixed(2)}'),
             if (_product!.salePrice != null)
-              _buildInfoRow('Sale Price', '\$${_product!.salePrice!.toStringAsFixed(2)}'),
+              _buildInfoRow('Sale Price', '${_product!.salePrice!.toStringAsFixed(2)}'),
           ],
         ),
       ),

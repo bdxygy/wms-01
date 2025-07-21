@@ -62,6 +62,9 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
 
   Future<void> _loadImeis({bool reset = false}) async {
     if (reset) {
+      // Guard clause: only update state if widget is still mounted
+      if (!mounted) return;
+      
       setState(() {
         _currentPage = 1;
         _hasMoreImeis = true;
@@ -77,6 +80,9 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
         limit: _pageSize,
       );
 
+      // Guard clause: only update state if widget is still mounted
+      if (!mounted) return;
+      
       setState(() {
         if (reset) {
           _imeis = response.data;
@@ -87,6 +93,9 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
         _isLoading = false;
       });
     } catch (e) {
+      // Guard clause: only update state if widget is still mounted
+      if (!mounted) return;
+      
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -97,6 +106,9 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
   Future<void> _loadMoreImeis() async {
     if (_isLoadingMore || !_hasMoreImeis) return;
 
+    // Guard clause: only update state if widget is still mounted
+    if (!mounted) return;
+    
     setState(() {
       _isLoadingMore = true;
     });
@@ -112,6 +124,9 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
         );
       }
     } finally {
+      // Guard clause: only update state if widget is still mounted
+      if (!mounted) return;
+      
       setState(() {
         _isLoadingMore = false;
       });
@@ -124,6 +139,9 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
     // Validate IMEI
     final validationError = ProductValidators.validateImei(imei);
     if (validationError != null) {
+      // Guard clause: only show snackbar if widget is still mounted
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(validationError),
@@ -136,6 +154,9 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
     // Check if IMEI already exists
     final existingImei = _imeis.where((i) => i['imei'] == imei).firstOrNull;
     if (existingImei != null) {
+      // Guard clause: only show snackbar if widget is still mounted
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('This IMEI is already added to this product'),
@@ -226,6 +247,10 @@ class _ImeiManagementSectionState extends State<ImeiManagementSection> {
 
   void _copyImei(String imei) {
     Clipboard.setData(ClipboardData(text: imei));
+    
+    // Guard clause: only show snackbar if widget is still mounted
+    if (!mounted) return;
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('IMEI $imei copied to clipboard'),

@@ -271,7 +271,7 @@ class _ImeiProductSearchWidgetState extends State<ImeiProductSearchWidget> {
                 if (product.salePrice != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Price: \$${product.salePrice!.toStringAsFixed(2)}',
+                    'Price: ${product.salePrice!.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],

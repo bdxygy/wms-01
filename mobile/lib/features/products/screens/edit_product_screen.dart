@@ -68,15 +68,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
 
     try {
-      // Create update request with only changed fields (barcode handled by backend)
+      // Create update request with all current values (backend expects all fields)
       final request = UpdateProductRequest(
-        name: formData.productName != _product!.name ? formData.productName : null,
-        categoryId: formData.categoryId != _product!.categoryId ? formData.categoryId : null,
-        sku: formData.sku != _product!.sku ? formData.sku : null,
-        isImei: formData.isImei != _product!.isImei ? formData.isImei : null,
-        quantity: formData.quantity != _product!.quantity ? formData.quantity : null,
-        purchasePrice: formData.purchasePrice != _product!.purchasePrice ? formData.purchasePrice : null,
-        salePrice: formData.salePrice != _product!.salePrice ? formData.salePrice : null,
+        name: formData.productName,
+        categoryId: formData.categoryId, // Can be null for optional category
+        sku: formData.sku,
+        isImei: formData.isImei,
+        quantity: formData.quantity,
+        purchasePrice: formData.purchasePrice,
+        salePrice: formData.salePrice, // Can be null for optional sale price
       );
       
       final updatedProduct = await _productService.updateProduct(widget.productId, request);
@@ -96,8 +96,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
           ),
         );
         
-        // Navigate back to product detail
-        Navigator.of(context).pop();
+        // Navigate to product detail screen to show updated product
+        AppRouter.goToProductDetail(context, updatedProduct.id);
       }
     } catch (e) {
       if (mounted) {

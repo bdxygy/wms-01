@@ -54,7 +54,16 @@ class UpdateProductRequest {
   factory UpdateProductRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateProductRequestFromJson(json);
 
-  Map<String, dynamic> toJson() => _$UpdateProductRequestToJson(this);
+  Map<String, dynamic> toJson() {
+    final json = _$UpdateProductRequestToJson(this);
+    
+    // Validate IMEI business rules before sending
+    if (isImei == true && quantity != null && quantity != 1) {
+      throw ArgumentError('IMEI products must have quantity of 1');
+    }
+    
+    return json;
+  }
 }
 
 // Category requests

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/widgets/app_bars.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/models/api_requests.dart';
+import '../../../core/models/product.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../generated/app_localizations.dart';
@@ -34,19 +35,39 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
     }
 
     try {
-      // Create product request (barcode handled by backend)
-      final request = CreateProductRequest(
-        name: formData.productName,
-        storeId: formData.storeId,
-        categoryId: formData.categoryId,
-        sku: formData.sku,
-        isImei: formData.isImei,
-        quantity: formData.quantity,
-        purchasePrice: formData.purchasePrice,
-        salePrice: formData.salePrice,
-      );
+      // Choose appropriate endpoint based on whether IMEIs are provided
+      final Product product;
       
-      final product = await _productService.createProduct(request);
+      if (formData.isImei && formData.imeis.isNotEmpty) {
+        // Create product with IMEIs using dedicated endpoint
+        final request = CreateProductWithImeisRequest(
+          name: formData.productName,
+          storeId: formData.storeId,
+          categoryId: formData.categoryId,
+          sku: formData.sku,
+          barcode: '', // Backend generates this
+          quantity: formData.quantity,
+          purchasePrice: formData.purchasePrice,
+          salePrice: formData.salePrice,
+          imeis: formData.imeis,
+        );
+        
+        product = await _productService.createProductWithImeis(request);
+      } else {
+        // Create regular product
+        final request = CreateProductRequest(
+          name: formData.productName,
+          storeId: formData.storeId,
+          categoryId: formData.categoryId,
+          sku: formData.sku,
+          isImei: formData.isImei,
+          quantity: formData.quantity,
+          purchasePrice: formData.purchasePrice,
+          salePrice: formData.salePrice,
+        );
+        
+        product = await _productService.createProduct(request);
+      }
       
       // Success feedback
       if (mounted) {

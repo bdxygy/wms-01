@@ -429,7 +429,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             Expanded(
               child: DashboardMetricCard(
                 title: 'Today Sales',
-                value: '\$0', // TODO: Get actual data
+                value: '0', // TODO: Get actual data
                 icon: Icons.attach_money,
                 color: Colors.green,
                 trend: '+0',
@@ -457,7 +457,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             Expanded(
               child: DashboardMetricCard(
                 title: 'Avg. Sale',
-                value: '\$0', // TODO: Get actual data
+                value: '0', // TODO: Get actual data
                 icon: Icons.trending_up,
                 color: Colors.green,
                 trend: '+0',

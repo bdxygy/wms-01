@@ -102,7 +102,7 @@ class TransactionValidators {
     }
     
     if (price > 1000000) {
-      return 'Price cannot exceed \$1,000,000';
+      return 'Price cannot exceed 1,000,000';
     }
     
     // Check for reasonable decimal places (max 2)
