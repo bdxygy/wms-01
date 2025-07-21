@@ -127,12 +127,14 @@ Quantity: ${_product!.quantity}''';
   void _deleteProduct() async {
     final user = context.read<AuthProvider>().user;
     if (user?.role != UserRole.owner) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Only owners can delete products'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Only owners can delete products'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -160,20 +162,28 @@ Quantity: ${_product!.quantity}''';
 
     if (shouldDelete == true) {
       try {
-        // TODO: Implement delete product API call when available
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Product deletion will be implemented when API is available'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        await _productService.deleteProduct(widget.productId);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Product "${_product!.name}" deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          // Navigate back to products list
+          Navigator.of(context).pop();
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete product: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete product: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
@@ -362,9 +372,9 @@ Quantity: ${_product!.quantity}''';
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Purchase Price', '${_product!.purchasePrice.toStringAsFixed(2)}'),
+            _buildInfoRow('Purchase Price', _product!.purchasePrice.toStringAsFixed(2)),
             if (_product!.salePrice != null)
-              _buildInfoRow('Sale Price', '${_product!.salePrice!.toStringAsFixed(2)}'),
+              _buildInfoRow('Sale Price', _product!.salePrice!.toStringAsFixed(2)),
           ],
         ),
       ),

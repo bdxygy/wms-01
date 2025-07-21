@@ -52,7 +52,7 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
 
 ProductImei _$ProductImeiFromJson(Map<String, dynamic> json) => ProductImei(
       id: json['id'] as String,
-      productId: json['productId'] as String,
+      productId: json['productId'] as String?,
       imei: json['imei'] as String,
       createdBy: json['createdBy'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),

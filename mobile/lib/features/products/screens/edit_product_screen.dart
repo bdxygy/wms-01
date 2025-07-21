@@ -36,6 +36,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   Future<void> _loadProduct() async {
     try {
       final product = await _productService.getProductById(widget.productId);
+
       setState(() {
         _product = product;
         _isLoading = false;
@@ -55,7 +56,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   Future<void> _updateProduct(ProductFormData formData) async {
     final authProvider = context.read<AuthProvider>();
-    
+
     // Validate permissions
     if (!authProvider.canCreateProducts) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -68,24 +69,44 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
 
     try {
-      // Create update request with all current values (backend expects all fields)
-      final request = UpdateProductRequest(
-        name: formData.productName,
-        categoryId: formData.categoryId, // Can be null for optional category
-        sku: formData.sku,
-        isImei: formData.isImei,
-        quantity: formData.quantity,
-        purchasePrice: formData.purchasePrice,
-        salePrice: formData.salePrice, // Can be null for optional sale price
-      );
-      
-      final updatedProduct = await _productService.updateProduct(widget.productId, request);
-      
+      Product updatedProduct;
+
+      // Use different endpoints based on whether this is an IMEI product with IMEIs
+      if (formData.isImei && formData.imeis.isNotEmpty) {
+        // Use the new updateProductWithImeis endpoint for IMEI products with IMEIs
+        final request = UpdateProductWithImeisRequest(
+          name: formData.productName,
+          categoryId: formData.categoryId,
+          sku: formData.sku,
+          purchasePrice: formData.purchasePrice,
+          salePrice: formData.salePrice,
+          imeis: formData.imeis,
+        );
+
+        updatedProduct = await _productService.updateProductWithImeis(
+            widget.productId, request);
+      } else {
+        // Use regular update for non-IMEI products or IMEI products without IMEIs
+        final request = UpdateProductRequest(
+          name: formData.productName,
+          categoryId: formData.categoryId,
+          sku: formData.sku,
+          isImei: formData.isImei,
+          quantity: formData.quantity,
+          purchasePrice: formData.purchasePrice,
+          salePrice: formData.salePrice,
+        );
+
+        updatedProduct =
+            await _productService.updateProduct(widget.productId, request);
+      }
+
       // Success feedback
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Product "${updatedProduct.name}" updated successfully!'),
+            content:
+                Text('Product "${updatedProduct.name}" updated successfully!'),
             backgroundColor: Colors.green,
             action: SnackBarAction(
               label: 'View',
@@ -95,7 +116,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
             ),
           ),
         );
-        
+
         // Navigate to product detail screen to show updated product
         AppRouter.goToProductDetail(context, updatedProduct.id);
       }

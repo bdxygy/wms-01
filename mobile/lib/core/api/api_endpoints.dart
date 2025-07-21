@@ -39,11 +39,13 @@ class ApiEndpoints {
   static const String productsCreate = products;
   static String productsById(String id) => '$products/$id';
   static String productsUpdate(String id) => '$products/$id';
+  static String productsDelete(String id) => '$products/$id';
   static String productsByBarcode(String barcode) => '$products/barcode/$barcode';
   
   // Product IMEI endpoints
   static String productsAddImei(String productId) => '$products/$productId/imeis';
   static String productsListImeis(String productId) => '$products/$productId/imeis';
+  static String productsUpdateWithImeis(String productId) => '$products/$productId/imeis';
   static String productsCreateWithImeis() => '$products/imeis';
   static String productsByImei(String imei) => '$products/imeis/$imei';
   static String imeisDelete(String imeiId) => '$imeis/$imeiId';

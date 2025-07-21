@@ -255,3 +255,25 @@ Map<String, dynamic> _$CreateProductWithImeisRequestToJson(
       'salePrice': instance.salePrice,
       'imeis': instance.imeis,
     };
+
+UpdateProductWithImeisRequest _$UpdateProductWithImeisRequestFromJson(
+        Map<String, dynamic> json) =>
+    UpdateProductWithImeisRequest(
+      name: json['name'] as String?,
+      categoryId: json['categoryId'] as String?,
+      sku: json['sku'] as String?,
+      purchasePrice: (json['purchasePrice'] as num?)?.toDouble(),
+      salePrice: (json['salePrice'] as num?)?.toDouble(),
+      imeis: (json['imeis'] as List<dynamic>).map((e) => e as String).toList(),
+    );
+
+Map<String, dynamic> _$UpdateProductWithImeisRequestToJson(
+        UpdateProductWithImeisRequest instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'categoryId': instance.categoryId,
+      'sku': instance.sku,
+      'purchasePrice': instance.purchasePrice,
+      'salePrice': instance.salePrice,
+      'imeis': instance.imeis,
+    };

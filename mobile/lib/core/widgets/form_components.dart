@@ -102,7 +102,8 @@ class WMSTextFormField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: WMSColors.primaryBlue, width: 2),
+              borderSide:
+                  const BorderSide(color: WMSColors.primaryBlue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -117,10 +118,11 @@ class WMSTextFormField extends StatelessWidget {
               borderSide: const BorderSide(color: WMSColors.textDisabled),
             ),
             filled: true,
-            fillColor: enabled 
+            fillColor: enabled
                 ? Theme.of(context).colorScheme.surface
                 : Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             errorStyle: WMSTypography.formError,
           ),
         ),
@@ -171,17 +173,24 @@ class WMSDropdownFormField<T> extends StatelessWidget {
           validator: validator,
           isExpanded: true, // This helps prevent overflow
           style: WMSTypography.bodyMedium.copyWith(
-            color: enabled 
+            color: enabled
                 ? Theme.of(context).colorScheme.onSurface
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                : Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
           ),
           dropdownColor: Theme.of(context).colorScheme.surface,
           iconEnabledColor: Theme.of(context).colorScheme.onSurface,
-          iconDisabledColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+          iconDisabledColor:
+              Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: WMSTypography.formHint.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.6),
             ),
             prefixIcon: prefixIcon,
             border: OutlineInputBorder(
@@ -194,7 +203,8 @@ class WMSDropdownFormField<T> extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: WMSColors.primaryBlue, width: 2),
+              borderSide:
+                  const BorderSide(color: WMSColors.primaryBlue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -209,10 +219,11 @@ class WMSDropdownFormField<T> extends StatelessWidget {
               borderSide: const BorderSide(color: WMSColors.textDisabled),
             ),
             filled: true,
-            fillColor: enabled 
+            fillColor: enabled
                 ? Theme.of(context).colorScheme.surface
                 : Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             errorStyle: WMSTypography.formError,
           ),
         ),
@@ -306,7 +317,7 @@ class WMSCheckboxFormField extends StatelessWidget {
                     )
                   : null,
               value: state.value ?? false,
-              onChanged: enabled 
+              onChanged: enabled
                   ? (bool? newValue) {
                       state.didChange(newValue);
                       onChanged?.call(newValue);
@@ -316,7 +327,8 @@ class WMSCheckboxFormField extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(4),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
             if (state.hasError)
               Padding(
@@ -369,29 +381,30 @@ class WMSRadioGroupFormField<T> extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             ...options.map((option) => RadioListTile<T>(
-              title: Text(
-                option.label,
-                style: WMSTypography.bodyMedium,
-              ),
-              subtitle: option.subtitle != null
-                  ? Text(
-                      option.subtitle!,
-                      style: WMSTypography.bodySmall.copyWith(
-                        color: WMSColors.textSecondary,
-                      ),
-                    )
-                  : null,
-              value: option.value,
-              groupValue: state.value,
-              onChanged: enabled 
-                  ? (T? newValue) {
-                      state.didChange(newValue);
-                      onChanged?.call(newValue);
-                    }
-                  : null,
-              activeColor: WMSColors.primaryBlue,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            )),
+                  title: Text(
+                    option.label,
+                    style: WMSTypography.bodyMedium,
+                  ),
+                  subtitle: option.subtitle != null
+                      ? Text(
+                          option.subtitle!,
+                          style: WMSTypography.bodySmall.copyWith(
+                            color: WMSColors.textSecondary,
+                          ),
+                        )
+                      : null,
+                  value: option.value,
+                  groupValue: state.value,
+                  onChanged: enabled
+                      ? (T? newValue) {
+                          state.didChange(newValue);
+                          onChanged?.call(newValue);
+                        }
+                      : null,
+                  activeColor: WMSColors.primaryBlue,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                )),
             if (state.hasError)
               Padding(
                 padding: const EdgeInsets.only(left: 16, top: 4),
@@ -451,27 +464,26 @@ class WMSDateFormField extends StatelessWidget {
       label: label,
       hint: hint,
       controller: TextEditingController(
-        text: value != null 
-            ? '${value!.day}/${value!.month}/${value!.year}'
-            : '',
+        text:
+            value != null ? '${value!.day}/${value!.month}/${value!.year}' : '',
       ),
       readOnly: true,
       enabled: enabled,
       prefixIcon: prefixIcon ?? const Icon(Icons.calendar_today),
-      onTap: enabled ? () async {
-        final pickedDate = await showDatePicker(
-          context: context,
-          initialDate: value ?? DateTime.now(),
-          firstDate: firstDate ?? DateTime(1900),
-          lastDate: lastDate ?? DateTime(2100),
-        );
-        if (pickedDate != null) {
-          onChanged?.call(pickedDate);
-        }
-      } : null,
-      validator: validator != null 
-          ? (String? text) => validator!(value)
+      onTap: enabled
+          ? () async {
+              final pickedDate = await showDatePicker(
+                context: context,
+                initialDate: value ?? DateTime.now(),
+                firstDate: firstDate ?? DateTime(1900),
+                lastDate: lastDate ?? DateTime(2100),
+              );
+              if (pickedDate != null) {
+                onChanged?.call(pickedDate);
+              }
+            }
           : null,
+      validator: validator != null ? (String? text) => validator!(value) : null,
     );
   }
 }
@@ -503,25 +515,23 @@ class WMSTimeFormField extends StatelessWidget {
       label: label,
       hint: hint,
       controller: TextEditingController(
-        text: value != null 
-            ? value!.format(context)
-            : '',
+        text: value != null ? value!.format(context) : '',
       ),
       readOnly: true,
       enabled: enabled,
       prefixIcon: prefixIcon ?? const Icon(Icons.access_time),
-      onTap: enabled ? () async {
-        final pickedTime = await showTimePicker(
-          context: context,
-          initialTime: value ?? TimeOfDay.now(),
-        );
-        if (pickedTime != null) {
-          onChanged?.call(pickedTime);
-        }
-      } : null,
-      validator: validator != null 
-          ? (String? text) => validator!(value)
+      onTap: enabled
+          ? () async {
+              final pickedTime = await showTimePicker(
+                context: context,
+                initialTime: value ?? TimeOfDay.now(),
+              );
+              if (pickedTime != null) {
+                onChanged?.call(pickedTime);
+              }
+            }
           : null,
+      validator: validator != null ? (String? text) => validator!(value) : null,
     );
   }
 }
@@ -566,7 +576,8 @@ class WMSPhotoFormField extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: state.hasError ? WMSColors.errorRed : WMSColors.outline,
+                  color:
+                      state.hasError ? WMSColors.errorRed : WMSColors.outline,
                   width: state.hasError ? 2 : 1,
                 ),
                 borderRadius: BorderRadius.circular(12),
@@ -591,13 +602,16 @@ class WMSPhotoFormField extends StatelessWidget {
                           top: 8,
                           right: 8,
                           child: IconButton(
-                            onPressed: enabled ? () {
-                              state.didChange(null);
-                              onChanged?.call(null);
-                            } : null,
+                            onPressed: enabled
+                                ? () {
+                                    state.didChange(null);
+                                    onChanged?.call(null);
+                                  }
+                                : null,
                             icon: const Icon(Icons.close),
                             style: IconButton.styleFrom(
-                              backgroundColor: Colors.black.withValues(alpha: 0.5),
+                              backgroundColor:
+                                  Colors.black.withValues(alpha: 0.5),
                               foregroundColor: Colors.white,
                             ),
                           ),
@@ -683,11 +697,33 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
   @override
   void initState() {
     super.initState();
-    _imeis = List.from(widget.initialImeis);
-    if (_imeis.isEmpty) {
-      _imeis = [''];
-    }
-    _controllers = _imeis.map((imei) => TextEditingController(text: imei)).toList();
+    setState(() {
+      _imeis = List.from(widget.initialImeis);
+
+      print('📱 IMEIs Form: $_imeis');
+
+      if (_imeis.isEmpty) {
+        _imeis = [''];
+      }
+
+      _controllers =
+          _imeis.map((imei) => TextEditingController(text: imei)).toList();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant WMSImeiArrayFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    setState(() {
+      _imeis = List.from(widget.initialImeis);
+
+      if (_imeis.isEmpty) {
+        _imeis = [''];
+      }
+
+      _controllers =
+          _imeis.map((imei) => TextEditingController(text: imei)).toList();
+    });
   }
 
   @override
@@ -697,7 +733,6 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
     }
     super.dispose();
   }
-
 
   void _addImeiField() {
     setState(() {
@@ -725,7 +760,7 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
 
   void _scanImei(int index) {
     if (!widget.allowScanning) return;
-    
+
     ScannerLauncher.forImeiEntry(
       context,
       title: 'Scan IMEI Barcode',
@@ -804,7 +839,9 @@ class _WMSImeiArrayFormFieldState extends State<WMSImeiArrayFormField> {
                       ),
                     if (_controllers.length > 1)
                       IconButton(
-                        onPressed: widget.enabled ? () => _removeImeiField(index) : null,
+                        onPressed: widget.enabled
+                            ? () => _removeImeiField(index)
+                            : null,
                         icon: const Icon(Icons.remove_circle_outline),
                         color: WMSColors.errorRed,
                         tooltip: 'Remove IMEI',
@@ -887,7 +924,7 @@ class _WMSCurrencyFormFieldState extends State<WMSCurrencyFormField> {
   @override
   Widget build(BuildContext context) {
     final appProvider = context.watch<AppProvider>();
-    
+
     return WMSTextFormField(
       label: widget.label,
       hint: widget.hint,

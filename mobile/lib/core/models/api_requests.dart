@@ -296,3 +296,41 @@ class CreateProductWithImeisRequest {
 
   Map<String, dynamic> toJson() => _$CreateProductWithImeisRequestToJson(this);
 }
+
+@JsonSerializable()
+class UpdateProductWithImeisRequest {
+  final String? name;
+  final String? categoryId;
+  final String? sku;
+  final double? purchasePrice;
+  final double? salePrice;
+  final List<String> imeis;
+
+  UpdateProductWithImeisRequest({
+    this.name,
+    this.categoryId,
+    this.sku,
+    this.purchasePrice,
+    this.salePrice,
+    required this.imeis,
+  });
+
+  factory UpdateProductWithImeisRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdateProductWithImeisRequestFromJson(json);
+
+  Map<String, dynamic> toJson() {
+    final json = _$UpdateProductWithImeisRequestToJson(this);
+    
+    // Validate that IMEIs are provided and unique
+    if (imeis.isEmpty) {
+      throw ArgumentError('At least one IMEI is required');
+    }
+    
+    final uniqueImeis = imeis.toSet();
+    if (uniqueImeis.length != imeis.length) {
+      throw ArgumentError('All IMEIs must be unique');
+    }
+    
+    return json;
+  }
+}

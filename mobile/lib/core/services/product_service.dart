@@ -146,6 +146,23 @@ class ProductService {
     }
   }
 
+  /// Update product with IMEIs (OWNER/ADMIN only)
+  Future<Product> updateProductWithImeis(String productId, UpdateProductWithImeisRequest request) async {
+    try {
+      final response = await _apiClient.put(ApiEndpoints.productsUpdateWithImeis(productId), data: request.toJson());
+      final apiResponse = ApiResponse<Product>.fromJson(
+        response.data,
+        (json) => Product.fromJson(json as Map<String, dynamic>),
+      );
+      if (!apiResponse.success || apiResponse.data == null) {
+        throw Exception(apiResponse.error?.message ?? 'Failed to update product with IMEIs');
+      }
+      return apiResponse.data!;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// Get paginated list of IMEIs for a product
   Future<PaginatedResponse<Map<String, dynamic>>> getProductImeis(
     String productId, {
@@ -201,6 +218,22 @@ class ProductService {
       );
       if (!apiResponse.success) {
         throw Exception(apiResponse.error?.message ?? 'Failed to remove IMEI');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Soft delete product (OWNER only)
+  Future<void> deleteProduct(String productId) async {
+    try {
+      final response = await _apiClient.delete(ApiEndpoints.productsDelete(productId));
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (json) => json as Map<String, dynamic>,
+      );
+      if (!apiResponse.success) {
+        throw Exception(apiResponse.error?.message ?? 'Failed to delete product');
       }
     } catch (e) {
       rethrow;

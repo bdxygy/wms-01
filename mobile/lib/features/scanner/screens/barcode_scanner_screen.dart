@@ -238,7 +238,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
       if (mounted) {
         // Navigate directly to product detail
-        context.go('/products/detail/${product.id}');
+        context.go('/products/${product.id}');
       }
     } catch (e) {
       if (mounted) {

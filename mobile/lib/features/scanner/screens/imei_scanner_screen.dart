@@ -147,7 +147,7 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
       if (mounted) {
         if (searchResult.hasProduct) {
           // Navigate directly to product detail
-          context.go('/products/detail/${searchResult.product!.id}');
+          context.go('/products/${searchResult.product!.id}');
         } else {
           // Show product not found dialog
           _showProductNotFoundDialog(imei, searchResult.errorMessage ?? 'No product found');

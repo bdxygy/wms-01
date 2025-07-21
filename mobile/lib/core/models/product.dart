@@ -113,7 +113,7 @@ class Product {
 @JsonSerializable()
 class ProductImei {
   final String id;
-  final String productId;
+  final String? productId;
   final String imei;
   final String createdBy;
   final DateTime createdAt;
@@ -121,7 +121,7 @@ class ProductImei {
 
   ProductImei({
     required this.id,
-    required this.productId,
+    this.productId,
     required this.imei,
     required this.createdBy,
     required this.createdAt,

@@ -63,42 +63,43 @@ class ProductForm extends StatefulWidget {
 
 class _ProductFormState extends State<ProductForm> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Service instances
   final StoreService _storeService = StoreService();
   final CategoryService _categoryService = CategoryService();
   final ProductService _productService = ProductService();
-  
+
   // Form controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _skuController = TextEditingController();
-  final TextEditingController _purchasePriceController = TextEditingController();
+  final TextEditingController _purchasePriceController =
+      TextEditingController();
   final TextEditingController _salePriceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  
+
   // Form state
   String? _selectedStoreId;
   String? _selectedCategoryId;
   bool _isImeiProduct = false;
   List<String> _imeis = [];
   String? _photoUrl;
-  
+
   // Data lists
   List<Store> _stores = [];
   List<Category> _categories = [];
-  
+
   // UI state
   bool _isLoading = true;
   bool _isSaving = false;
-  
+
   @override
   void initState() {
     super.initState();
-    _initializeForm();
     _loadFormData();
+    _initializeForm();
   }
-  
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -109,11 +110,11 @@ class _ProductFormState extends State<ProductForm> {
     _descriptionController.dispose();
     super.dispose();
   }
-  
+
   void _initializeForm() {
     // Guard clause: skip if no initial product
     if (widget.initialProduct == null) return;
-    
+
     final product = widget.initialProduct!;
     _nameController.text = product.name;
     _skuController.text = product.sku;
@@ -125,31 +126,31 @@ class _ProductFormState extends State<ProductForm> {
     _selectedCategoryId = product.categoryId;
     _isImeiProduct = product.isImei;
     _photoUrl = null; // Product model doesn't have photoUrl
-    
+
     // Load IMEIs if this is an IMEI product
     if (product.isImei) {
       _loadProductImeis(product.id);
     }
   }
-  
+
   Future<void> _loadFormData() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       await Future.wait([
         _loadStores(),
         _loadCategories(),
       ]);
-      
+
       // Set defaults after loading
       _setDefaults();
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to load form data: $e'),
@@ -158,37 +159,38 @@ class _ProductFormState extends State<ProductForm> {
       );
     } finally {
       if (!mounted) return;
-      
+
       setState(() {
         _isLoading = false;
       });
     }
   }
-  
+
   void _setDefaults() {
     // Guard clause: skip if editing mode
     if (widget.isEditing) return;
-    
+
     final authProvider = context.read<AuthProvider>();
     final storeProvider = context.read<StoreContextProvider>();
-    
+
     // Auto-select store for non-owners with guard clause
     if (!authProvider.isOwner && storeProvider.hasStoreSelected) {
       _selectedStoreId = storeProvider.selectedStore!.id;
     }
-    
+
     // Generate default SKU only if empty
     if (_skuController.text.isEmpty) {
-      final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+      final timestamp =
+          DateTime.now().millisecondsSinceEpoch.toString().substring(8);
       _skuController.text = 'SKU$timestamp';
     }
   }
-  
+
   Future<void> _loadStores() async {
     try {
       final response = await _storeService.getStores(limit: 100);
       if (!mounted) return;
-      
+
       setState(() {
         _stores = response.data;
       });
@@ -196,7 +198,7 @@ class _ProductFormState extends State<ProductForm> {
       debugPrint('Failed to load stores: $e');
     }
   }
-  
+
   Future<void> _loadCategories() async {
     try {
       final response = await _categoryService.getCategories(
@@ -204,7 +206,7 @@ class _ProductFormState extends State<ProductForm> {
         limit: 100,
       );
       if (!mounted) return;
-      
+
       setState(() {
         _categories = response.data;
       });
@@ -212,15 +214,22 @@ class _ProductFormState extends State<ProductForm> {
       debugPrint('Failed to load categories: $e');
     }
   }
-  
+
   Future<void> _loadProductImeis(String productId) async {
     try {
-      final response = await _productService.getProductImeis(productId, limit: 100);
+      final response =
+          await _productService.getProductImeis(productId, limit: 100);
+
+      final imeiJson = response.data;
+
+      print('✅ Load Product IMEIs $imeiJson');
+
       if (!mounted) return;
-      
+
       // Extract IMEI codes from the response
-      final imeiList = response.data.map((imeiData) => imeiData['imei'] as String).toList();
-      
+      final imeiList =
+          response.data.map((imeiData) => imeiData['imei'] as String).toList();
+
       setState(() {
         _imeis = imeiList;
       });
@@ -229,20 +238,20 @@ class _ProductFormState extends State<ProductForm> {
       // Don't show error to user for IMEIs loading failure
     }
   }
-  
+
   void _onStoreChanged(String? storeId) {
     setState(() {
       _selectedStoreId = storeId;
       _selectedCategoryId = null; // Reset category when store changes
       _categories = []; // Clear categories
     });
-    
+
     // Guard clause: only load categories if store is selected
     if (storeId == null) return;
-    
+
     _loadCategories(); // Reload categories for new store
   }
-  
+
   void _onImeiToggleChanged(bool value) {
     setState(() {
       _isImeiProduct = value;
@@ -255,7 +264,7 @@ class _ProductFormState extends State<ProductForm> {
       }
     });
   }
-  
+
   void _onQuantityChanged(String? value) {
     // Guard clause: prevent quantity changes for IMEI products
     if (_isImeiProduct && value != '1') {
@@ -263,19 +272,20 @@ class _ProductFormState extends State<ProductForm> {
       _quantityController.text = '1';
     }
   }
-  
+
   Future<void> _saveProduct() async {
     // Guard clause: validate form first
     if (!_formKey.currentState!.validate()) return;
-    
+
     // Guard clause: validate IMEI for IMEI products
     if (_isImeiProduct) {
-      final filledImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+      final filledImeis =
+          _imeis.where((imei) => imei.trim().isNotEmpty).toList();
       final imeiError = ProductValidators.validateImeiList(filledImeis);
-      
+
       if (imeiError != null) {
         if (!mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('IMEI Validation Error: $imeiError'),
@@ -285,11 +295,11 @@ class _ProductFormState extends State<ProductForm> {
         return;
       }
     }
-    
+
     setState(() {
       _isSaving = true;
     });
-    
+
     try {
       // Create form data object
       final formData = ProductFormData(
@@ -305,12 +315,12 @@ class _ProductFormState extends State<ProductForm> {
         imeis: this.imeis,
         photoUrl: this.photoUrl,
       );
-      
+
       // Call parent save handler and wait for completion
       await widget.onSave?.call(formData);
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to save product: $e'),
@@ -319,13 +329,13 @@ class _ProductFormState extends State<ProductForm> {
       );
     } finally {
       if (!mounted) return;
-      
+
       setState(() {
         _isSaving = false;
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // Guard clause: show loading state
@@ -334,7 +344,7 @@ class _ProductFormState extends State<ProductForm> {
         child: CircularProgressIndicator(),
       );
     }
-    
+
     return Form(
       key: _formKey,
       child: Column(
@@ -343,14 +353,14 @@ class _ProductFormState extends State<ProductForm> {
           Expanded(
             child: _buildSingleStepForm(),
           ),
-          
+
           // Action buttons
           _buildActionButtons(),
         ],
       ),
     );
   }
-  
+
   Widget _buildSingleStepForm() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -361,23 +371,23 @@ class _ProductFormState extends State<ProductForm> {
           _buildSectionHeader('Basic Information'),
           const SizedBox(height: 16),
           _buildBasicInfoFields(),
-          
+
           const SizedBox(height: 32),
-          
+
           // Pricing & Inventory Section
           _buildSectionHeader('Pricing & Inventory'),
           const SizedBox(height: 16),
           _buildPricingFields(),
-          
+
           const SizedBox(height: 32),
-          
+
           // Store & Category Section
           _buildSectionHeader('Store & Category'),
           const SizedBox(height: 16),
           _buildStoreFields(),
-          
+
           const SizedBox(height: 32),
-          
+
           // Additional Information Section
           _buildSectionHeader('Additional Information'),
           const SizedBox(height: 16),
@@ -386,17 +396,17 @@ class _ProductFormState extends State<ProductForm> {
       ),
     );
   }
-  
+
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.primary,
-      ),
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
     );
   }
-  
+
   Widget _buildBasicInfoFields() {
     return Column(
       children: [
@@ -407,9 +417,9 @@ class _ProductFormState extends State<ProductForm> {
           validator: ProductValidators.validateProductName,
           prefixIcon: const Icon(Icons.inventory_2),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         WMSTextFormField(
           label: 'SKU *',
           controller: _skuController,
@@ -421,21 +431,21 @@ class _ProductFormState extends State<ProductForm> {
             LengthLimitingTextInputFormatter(50),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
-        WMSTextFormField(
-          label: 'Description',
-          controller: _descriptionController,
-          hint: 'Enter product description (optional)',
-          validator: ProductValidators.validateDescription,
-          maxLines: 3,
-          prefixIcon: const Icon(Icons.description),
-        ),
+
+        // WMSTextFormField(
+        //   label: 'Description',
+        //   controller: _descriptionController,
+        //   hint: 'Enter product description (optional)',
+        //   validator: ProductValidators.validateDescription,
+        //   maxLines: 3,
+        //   prefixIcon: const Icon(Icons.description),
+        // ),
       ],
     );
   }
-  
+
   Widget _buildPricingFields() {
     return Column(
       children: [
@@ -445,9 +455,7 @@ class _ProductFormState extends State<ProductForm> {
           hint: 'Enter purchase price',
           validator: ProductValidators.validatePurchasePrice,
         ),
-        
         const SizedBox(height: 16),
-        
         WMSCurrencyFormField(
           label: 'Sale Price',
           controller: _salePriceController,
@@ -457,15 +465,16 @@ class _ProductFormState extends State<ProductForm> {
             double.tryParse(_purchasePriceController.text),
           ),
         ),
-        
         const SizedBox(height: 16),
-        
         WMSTextFormField(
           label: 'Quantity *',
           controller: _quantityController,
-          hint: _isImeiProduct ? 'Fixed at 1 for IMEI products' : 'Enter quantity',
+          hint: _isImeiProduct
+              ? 'Fixed at 1 for IMEI products'
+              : 'Enter quantity',
           keyboardType: TextInputType.number,
-          validator: (value) => ProductValidators.validateQuantityForImei(value, _isImeiProduct),
+          validator: (value) =>
+              ProductValidators.validateQuantityForImei(value, _isImeiProduct),
           onChanged: _onQuantityChanged,
           readOnly: _isImeiProduct,
           enabled: !_isImeiProduct,
@@ -475,42 +484,42 @@ class _ProductFormState extends State<ProductForm> {
             LengthLimitingTextInputFormatter(6),
           ],
         ),
-        
         const SizedBox(height: 24),
-        
         WMSSwitchFormField(
           label: 'IMEI Product',
           subtitle: 'Enable if this product requires IMEI tracking',
           value: _isImeiProduct,
           onChanged: _onImeiToggleChanged,
         ),
-        
         if (_isImeiProduct) ...[
           const SizedBox(height: 16),
           WMSImeiArrayFormField(
             label: 'IMEI Numbers',
-            initialImeis: _imeis,
-            onChanged: (imeis) {
+            initialImeis: imeis,
+            onChanged: (ims) {
               setState(() {
-                _imeis = imeis;
+                _imeis = ims;
               });
             },
-            validator: (imeis) {
-              return ProductValidators.validateImeiList(imeis ?? []);
+            validator: (ims) {
+              return ProductValidators.validateImeiList(ims ?? []);
             },
           ),
         ],
       ],
     );
   }
-  
+
   Widget _buildStoreFields() {
     return Column(
       children: [
         WMSDropdownFormField<String>(
           label: 'Store *',
           hint: _stores.isEmpty ? 'Loading stores...' : 'Select store',
-          value: _stores.isNotEmpty && _stores.any((store) => store.id == _selectedStoreId) ? _selectedStoreId : null,
+          value: _stores.isNotEmpty &&
+                  _stores.any((store) => store.id == _selectedStoreId)
+              ? _selectedStoreId
+              : null,
           items: _stores.map((store) {
             return DropdownMenuItem<String>(
               value: store.id,
@@ -528,28 +537,32 @@ class _ProductFormState extends State<ProductForm> {
           validator: ProductValidators.validateStore,
           prefixIcon: const Icon(Icons.store),
         ),
-        
         const SizedBox(height: 16),
-        
         WMSDropdownFormField<String>(
           label: 'Category',
-          hint: _selectedStoreId == null 
-              ? 'Select store first' 
-              : _categories.isEmpty 
-                  ? 'Loading categories...' 
+          hint: _selectedStoreId == null
+              ? 'Select store first'
+              : _categories.isEmpty
+                  ? 'Loading categories...'
                   : 'Select category (optional)',
-          value: _categories.isNotEmpty && _categories.any((category) => category.id == _selectedCategoryId) ? _selectedCategoryId : null,
+          value: _categories.isNotEmpty &&
+                  _categories
+                      .any((category) => category.id == _selectedCategoryId)
+              ? _selectedCategoryId
+              : null,
           items: _categories.map((category) {
             return DropdownMenuItem<String>(
               value: category.id,
               child: Text(category.name),
             );
           }).toList(),
-          onChanged: _selectedStoreId != null && _categories.isNotEmpty ? (value) {
-            setState(() {
-              _selectedCategoryId = value;
-            });
-          } : null,
+          onChanged: _selectedStoreId != null && _categories.isNotEmpty
+              ? (value) {
+                  setState(() {
+                    _selectedCategoryId = value;
+                  });
+                }
+              : null,
           validator: ProductValidators.validateCategory,
           prefixIcon: const Icon(Icons.category),
           enabled: _selectedStoreId != null,
@@ -557,7 +570,7 @@ class _ProductFormState extends State<ProductForm> {
       ],
     );
   }
-  
+
   Widget _buildAdditionalFields() {
     return Column(
       children: [
@@ -579,7 +592,7 @@ class _ProductFormState extends State<ProductForm> {
       ],
     );
   }
-  
+
   Widget _buildActionButtons() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -603,7 +616,7 @@ class _ProductFormState extends State<ProductForm> {
           ] else ...[
             const Spacer(),
           ],
-          
+
           // Save button
           ElevatedButton(
             onPressed: _isSaving ? null : _saveProduct,
@@ -619,23 +632,27 @@ class _ProductFormState extends State<ProductForm> {
       ),
     );
   }
-  
+
   // Getters for form data using guard clauses
   String get productName => _nameController.text.trim();
   String get sku => _skuController.text.trim();
-  double get purchasePrice => double.tryParse(_purchasePriceController.text) ?? 0.0;
+  double get purchasePrice =>
+      double.tryParse(_purchasePriceController.text) ?? 0.0;
   double? get salePrice {
     final text = _salePriceController.text.trim();
     return text.isEmpty ? null : double.tryParse(text);
   }
+
   int get quantity => int.tryParse(_quantityController.text) ?? 0;
   String? get description {
     final text = _descriptionController.text.trim();
     return text.isEmpty ? null : text;
   }
+
   String? get storeId => _selectedStoreId;
   String? get categoryId => _selectedCategoryId;
   bool get isImei => _isImeiProduct;
-  List<String> get imeis => _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+  List<String> get imeis =>
+      _imeis.where((imei) => imei.trim().isNotEmpty).toList();
   String? get photoUrl => _photoUrl;
 }
