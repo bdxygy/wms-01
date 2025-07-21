@@ -4,9 +4,9 @@
   "description": "Warehouse Management System Backend API",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "start": "vercel dev",
+    "start": "ts-node src/index.ts",
     "local:dev": "tsx watch src/index.ts",
     "local:start": "node dist/index.js",
     "vercel-build": "echo \"Run Build\"",
@@ -42,6 +42,8 @@
     "hono": "^4.5.0",
     "jose": "^6.0.12",
     "nanoid": "^5.1.5",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
     "uuid": "^11.1.0",
     "vitest": "^3.2.4",
     "zod": "^3.23.8"
