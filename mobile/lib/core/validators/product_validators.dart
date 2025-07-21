@@ -65,9 +65,6 @@ class ProductValidators {
     if (price < 0) {
       return 'Purchase price cannot be negative';
     }
-    if (price > 1000000) {
-      return 'Purchase price must be less than 1,000,000';
-    }
     return null;
   }
 
@@ -82,9 +79,6 @@ class ProductValidators {
     }
     if (price < 0) {
       return 'Sale price cannot be negative';
-    }
-    if (price > 1000000) {
-      return 'Sale price must be less than 1,000,000';
     }
     // Cross-field validation: sale price should be >= purchase price
     if (purchasePrice != null && price < purchasePrice) {

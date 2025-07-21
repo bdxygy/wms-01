@@ -101,10 +101,6 @@ class TransactionValidators {
       return 'Price cannot be negative';
     }
     
-    if (price > 1000000) {
-      return 'Price cannot exceed 1,000,000';
-    }
-    
     // Check for reasonable decimal places (max 2)
     final decimalPlaces = value.contains('.') ? value.split('.')[1].length : 0;
     if (decimalPlaces > 2) {
