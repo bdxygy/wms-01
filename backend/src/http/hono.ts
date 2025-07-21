@@ -1,5 +1,6 @@
-import { User } from "@/models";
+
 import { Hono } from "hono";
+import { User } from "src/models";
 
 export interface Applications {
   Variables: {
