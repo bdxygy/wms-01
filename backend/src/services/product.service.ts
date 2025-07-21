@@ -14,7 +14,7 @@ import type {
   ListProductsQuery,
 } from "../schemas/product.schemas";
 import type { User } from "../models/users";
-import { generateBarcode } from "src/utils/barcode";
+import { generateBarcode } from "../utils/barcode";
 
 export class ProductService {
   static async createProduct(data: CreateProductRequest, createdBy: User) {
