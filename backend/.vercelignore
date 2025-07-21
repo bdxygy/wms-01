@@ -1,0 +1,13 @@
+node_modules
+.env*
+tests
+*.test.ts
+*.test.js
+coverage
+.nyc_output
+.DS_Store
+drizzle
+tsconfig.json
+vitest.config.ts
+pnpm-lock.yaml
+pnpm-workspace.yaml
