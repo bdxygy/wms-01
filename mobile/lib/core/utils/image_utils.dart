@@ -19,7 +19,7 @@ class ImageUtils {
     int? maxHeight,
   }) async {
     try {
-      print('🖼️ ImageUtils: Compressing image ${path.basename(imageFile.path)}...');
+     debugPrint('🖼️ ImageUtils: Compressing image ${path.basename(imageFile.path)}...');
       
       // Read image bytes
       final imageBytes = await imageFile.readAsBytes();
@@ -27,11 +27,11 @@ class ImageUtils {
       // Decode image
       final image = img.decodeImage(imageBytes);
       if (image == null) {
-        print('❌ ImageUtils: Failed to decode image');
+       debugPrint('❌ ImageUtils: Failed to decode image');
         return null;
       }
 
-      print('🖼️ ImageUtils: Original size: ${image.width}x${image.height}');
+     debugPrint('🖼️ ImageUtils: Original size: ${image.width}x${image.height}');
 
       // Resize if necessary
       img.Image resizedImage = image;
@@ -56,7 +56,7 @@ class ImageUtils {
           interpolation: img.Interpolation.linear,
         );
 
-        print('🖼️ ImageUtils: Resized to: ${resizedImage.width}x${resizedImage.height}');
+       debugPrint('🖼️ ImageUtils: Resized to: ${resizedImage.width}x${resizedImage.height}');
       }
 
       // Compress and encode as JPEG
@@ -66,11 +66,11 @@ class ImageUtils {
       final compressedSize = compressedBytes.length;
       final compressionRatio = ((originalSize - compressedSize) / originalSize * 100).round();
       
-      print('✅ ImageUtils: Compressed ${formatBytes(originalSize)} → ${formatBytes(compressedSize)} ($compressionRatio% reduction)');
+     debugPrint('✅ ImageUtils: Compressed ${formatBytes(originalSize)} → ${formatBytes(compressedSize)} ($compressionRatio% reduction)');
       
       return Uint8List.fromList(compressedBytes);
     } catch (e) {
-      print('❌ ImageUtils: Failed to compress image: $e');
+     debugPrint('❌ ImageUtils: Failed to compress image: $e');
       return null;
     }
   }
@@ -86,7 +86,7 @@ class ImageUtils {
       // Decode image
       final image = img.decodeImage(imageBytes);
       if (image == null) {
-        print('❌ ImageUtils: Failed to decode image bytes');
+       debugPrint('❌ ImageUtils: Failed to decode image bytes');
         return null;
       }
 
@@ -117,7 +117,7 @@ class ImageUtils {
       final compressedBytes = img.encodeJpg(resizedImage, quality: quality);
       return Uint8List.fromList(compressedBytes);
     } catch (e) {
-      print('❌ ImageUtils: Failed to compress image bytes: $e');
+     debugPrint('❌ ImageUtils: Failed to compress image bytes: $e');
       return null;
     }
   }
@@ -129,13 +129,13 @@ class ImageUtils {
     int quality = 70,
   }) async {
     try {
-      print('🖼️ ImageUtils: Creating thumbnail for ${path.basename(imageFile.path)}...');
+     debugPrint('🖼️ ImageUtils: Creating thumbnail for ${path.basename(imageFile.path)}...');
       
       final imageBytes = await imageFile.readAsBytes();
       final image = img.decodeImage(imageBytes);
       
       if (image == null) {
-        print('❌ ImageUtils: Failed to decode image for thumbnail');
+       debugPrint('❌ ImageUtils: Failed to decode image for thumbnail');
         return null;
       }
 
@@ -143,10 +143,10 @@ class ImageUtils {
       final thumbnail = img.copyResizeCropSquare(image, size: size);
       final thumbnailBytes = img.encodeJpg(thumbnail, quality: quality);
       
-      print('✅ ImageUtils: Thumbnail created: ${size}x$size (${formatBytes(thumbnailBytes.length)})');
+     debugPrint('✅ ImageUtils: Thumbnail created: ${size}x$size (${formatBytes(thumbnailBytes.length)})');
       return Uint8List.fromList(thumbnailBytes);
     } catch (e) {
-      print('❌ ImageUtils: Failed to create thumbnail: $e');
+     debugPrint('❌ ImageUtils: Failed to create thumbnail: $e');
       return null;
     }
   }
@@ -172,7 +172,7 @@ class ImageUtils {
         'megapixels': (image.width * image.height / 1000000).toStringAsFixed(1),
       };
     } catch (e) {
-      print('❌ ImageUtils: Failed to get image info: $e');
+     debugPrint('❌ ImageUtils: Failed to get image info: $e');
       return null;
     }
   }
@@ -200,7 +200,7 @@ class ImageUtils {
           return Uint8List.fromList(img.encodeJpg(image, quality: quality));
       }
     } catch (e) {
-      print('❌ ImageUtils: Failed to convert image format: $e');
+     debugPrint('❌ ImageUtils: Failed to convert image format: $e');
       return null;
     }
   }
@@ -248,7 +248,7 @@ class ImageUtils {
 
       return Uint8List.fromList(img.encodeJpg(enhancedImage, quality: _defaultQuality));
     } catch (e) {
-      print('❌ ImageUtils: Failed to enhance image: $e');
+     debugPrint('❌ ImageUtils: Failed to enhance image: $e');
       return null;
     }
   }
@@ -283,7 +283,7 @@ class ImageUtils {
 
       return Uint8List.fromList(img.encodeJpg(rotatedImage, quality: _defaultQuality));
     } catch (e) {
-      print('❌ ImageUtils: Failed to rotate image: $e');
+     debugPrint('❌ ImageUtils: Failed to rotate image: $e');
       return null;
     }
   }

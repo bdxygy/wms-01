@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../constants/app_constants.dart';
@@ -129,7 +130,7 @@ class ErrorHandlingInterceptor extends Interceptor {
       final connectivityResults = await _connectivity.checkConnectivity();
       if (connectivityResults.contains(ConnectivityResult.none)) {
         if (AppConfig.isDebugMode) {
-          print('📶 No network connectivity detected');
+         debugPrint('📶 No network connectivity detected');
         }
         // Convert to a more specific network error
         final networkError = DioException(
@@ -152,7 +153,7 @@ class ErrorHandlingInterceptor extends Interceptor {
         final delay = _calculateRetryDelay(retryCount);
         
         if (AppConfig.isDebugMode) {
-          print('🔄 Retrying request ${err.requestOptions.path} (attempt ${retryCount + 1}/$maxRetries) after ${delay.inMilliseconds}ms');
+         debugPrint('🔄 Retrying request ${err.requestOptions.path} (attempt ${retryCount + 1}/$maxRetries) after ${delay.inMilliseconds}ms');
         }
         
         await Future.delayed(delay);
@@ -188,7 +189,7 @@ class ErrorHandlingInterceptor extends Interceptor {
         final delay = Duration(seconds: delaySeconds);
         
         if (AppConfig.isDebugMode) {
-          print('⏰ Rate limited. Retrying after ${delay.inSeconds} seconds');
+         debugPrint('⏰ Rate limited. Retrying after ${delay.inSeconds} seconds');
         }
         
         await Future.delayed(delay);
@@ -260,7 +261,7 @@ class PerformanceInterceptor extends Interceptor {
       
       // Log slow requests in debug mode
       if (AppConfig.isDebugMode && duration > 2000) {
-        print('⚠️ Slow API request: ${response.requestOptions.path} took ${duration}ms');
+       debugPrint('⚠️ Slow API request: ${response.requestOptions.path} took ${duration}ms');
       }
       
       // Store duration for potential analytics
@@ -277,7 +278,7 @@ class PerformanceInterceptor extends Interceptor {
       final duration = DateTime.now().millisecondsSinceEpoch - startTime;
       
       if (AppConfig.isDebugMode) {
-        print('❌ Failed API request: ${err.requestOptions.path} failed after ${duration}ms');
+       debugPrint('❌ Failed API request: ${err.requestOptions.path} failed after ${duration}ms');
       }
     }
     

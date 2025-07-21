@@ -9,6 +9,7 @@ import '../../../core/models/category.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/services/store_service.dart';
 import '../../../core/services/category_service.dart';
+import '../../../core/services/print_launcher.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/app_bars.dart';
@@ -33,6 +34,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final ProductService _productService = ProductService();
   final StoreService _storeService = StoreService();
   final CategoryService _categoryService = CategoryService();
+  final PrintLauncher _printLauncher = PrintLauncher();
   
   Product? _product;
   Store? _store;
@@ -93,18 +95,160 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     AppRouter.goToEditProduct(context, widget.productId);
   }
 
-  void _printBarcode() {
-    // TODO: Implement barcode printing in Phase 17
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Print Barcode ready - Thermal printing in Phase 17'),
-        backgroundColor: Colors.orange,
-        action: SnackBarAction(
-          label: 'OK',
-          onPressed: () {},
+  void _printBarcode() async {
+    if (_product == null) return;
+
+    try {
+      // Get current user for printing context
+      final user = context.read<AuthProvider>().user;
+      
+      // Use the comprehensive connect and print method
+      final result = await _printLauncher.connectAndPrint(
+        context,
+        product: _product!,
+        store: _store,
+        user: user,
+      );
+
+      if (result && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Barcode printed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMessage = e.toString();
+        
+        // Check if it's a permission issue
+        if (errorMessage.contains('permission') || 
+            errorMessage.contains('Nearby devices') ||
+            errorMessage.contains('Bluetooth')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Permission required: $e'),
+              backgroundColor: Colors.red,
+              action: SnackBarAction(
+                label: 'Settings',
+                onPressed: () => _printLauncher.showPermissionSettingsDialog(context),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to print barcode: $e'),
+              backgroundColor: Colors.red,
+              action: SnackBarAction(
+                label: 'Setup Printer',
+                onPressed: () => _printLauncher.connectAndPrint(context),
+              ),
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  void _testPrinter() async {
+    try {
+      // Use the comprehensive connect and print method (no product = test page)
+      final result = await _printLauncher.connectAndPrint(context);
+      
+      if (result && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Test page printed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Test print failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _managePrinter() async {
+    try {
+      final isConnected = await _printLauncher.isConnected;
+      
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Printer Management'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Status: ${isConnected ? 'Connected' : 'Disconnected'}'),
+              const SizedBox(height: 16),
+              const Text('Available Actions:'),
+              const SizedBox(height: 8),
+              if (!isConnected)
+                ListTile(
+                  leading: const Icon(Icons.bluetooth_connected),
+                  title: const Text('Connect to Printer'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _printLauncher.connectWithDialog(context);
+                  },
+                ),
+              if (isConnected) ...[
+                ListTile(
+                  leading: const Icon(Icons.print),
+                  title: const Text('Print Test Page'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _testPrinter();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.bluetooth_disabled),
+                  title: const Text('Disconnect'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _printLauncher.disconnect();
+                    
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Printer disconnected'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error accessing printer: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _shareProduct() {
@@ -210,6 +354,9 @@ Quantity: ${_product!.quantity}''';
                   case 'print':
                     _printBarcode();
                     break;
+                  case 'printer':
+                    _managePrinter();
+                    break;
                   case 'share':
                     _shareProduct();
                     break;
@@ -226,6 +373,16 @@ Quantity: ${_product!.quantity}''';
                       Icon(Icons.print),
                       SizedBox(width: 8),
                       Text('Print Barcode'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'printer',
+                  child: Row(
+                    children: [
+                      Icon(Icons.bluetooth),
+                      SizedBox(width: 8),
+                      Text('Printer Settings'),
                     ],
                   ),
                 ),

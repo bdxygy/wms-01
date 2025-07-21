@@ -225,7 +225,7 @@ class ScannerLauncher {
   /// ```dart
   /// final result = await ScannerLauncher.scanBarcode(context);
   /// if (result != null && result.isValid) {
-  ///   print('Scanned: ${result.formattedCode}');
+  ///  debugPrint('Scanned: ${result.formattedCode}');
   /// }
   /// ```
   static Future<BarcodeScanResult?> scanBarcode(

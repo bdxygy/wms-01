@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -36,21 +37,21 @@ class CameraService {
   /// Initialize camera service
   Future<bool> initialize() async {
     try {
-      print('📷 CameraService: Initializing camera service...');
+     debugPrint('📷 CameraService: Initializing camera service...');
       
       // Check camera permission
       final permissionStatus = await _checkCameraPermission();
       if (!permissionStatus) {
-        print('❌ CameraService: Camera permission denied');
+       debugPrint('❌ CameraService: Camera permission denied');
         return false;
       }
 
       // Get available cameras
       _cameras = await availableCameras();
-      print('📷 CameraService: Found ${_cameras?.length ?? 0} cameras');
+     debugPrint('📷 CameraService: Found ${_cameras?.length ?? 0} cameras');
 
       if (_cameras == null || _cameras!.isEmpty) {
-        print('❌ CameraService: No cameras available');
+       debugPrint('❌ CameraService: No cameras available');
         return false;
       }
 
@@ -59,10 +60,10 @@ class CameraService {
       await _initializeController();
 
       _isInitialized = true;
-      print('✅ CameraService: Camera service initialized successfully');
+     debugPrint('✅ CameraService: Camera service initialized successfully');
       return true;
     } catch (e) {
-      print('❌ CameraService: Failed to initialize camera service: $e');
+     debugPrint('❌ CameraService: Failed to initialize camera service: $e');
       _isInitialized = false;
       return false;
     }
@@ -112,18 +113,18 @@ class CameraService {
     );
 
     await _controller!.initialize();
-    print('✅ CameraService: Camera controller initialized');
+   debugPrint('✅ CameraService: Camera controller initialized');
   }
 
   /// Switch between front and back cameras
   Future<bool> switchCamera() async {
     if (_cameras == null || _cameras!.length <= 1) {
-      print('⚠️ CameraService: Cannot switch camera - insufficient cameras');
+     debugPrint('⚠️ CameraService: Cannot switch camera - insufficient cameras');
       return false;
     }
 
     try {
-      print('🔄 CameraService: Switching camera...');
+     debugPrint('🔄 CameraService: Switching camera...');
       
       // Find next camera (toggle between front and back)
       final currentDirection = _cameras![_currentCameraIndex].lensDirection;
@@ -140,17 +141,17 @@ class CameraService {
       }
 
       if (newIndex == -1) {
-        print('⚠️ CameraService: Target camera direction not found');
+       debugPrint('⚠️ CameraService: Target camera direction not found');
         return false;
       }
 
       _currentCameraIndex = newIndex;
       await _initializeController();
       
-      print('✅ CameraService: Camera switched successfully');
+     debugPrint('✅ CameraService: Camera switched successfully');
       return true;
     } catch (e) {
-      print('❌ CameraService: Failed to switch camera: $e');
+     debugPrint('❌ CameraService: Failed to switch camera: $e');
       return false;
     }
   }
@@ -161,10 +162,10 @@ class CameraService {
 
     try {
       await _controller!.setFlashMode(flashMode);
-      print('✅ CameraService: Flash mode set to $flashMode');
+     debugPrint('✅ CameraService: Flash mode set to $flashMode');
       return true;
     } catch (e) {
-      print('❌ CameraService: Failed to set flash mode: $e');
+     debugPrint('❌ CameraService: Failed to set flash mode: $e');
       return false;
     }
   }
@@ -176,12 +177,12 @@ class CameraService {
     int quality = 85,
   }) async {
     if (!isInitialized) {
-      print('❌ CameraService: Camera not initialized');
+     debugPrint('❌ CameraService: Camera not initialized');
       return null;
     }
 
     try {
-      print('📸 CameraService: Capturing photo...');
+     debugPrint('📸 CameraService: Capturing photo...');
 
       // Capture image
       final XFile image = await _controller!.takePicture();
@@ -215,7 +216,7 @@ class CameraService {
           // Delete temporary file
           await File(image.path).delete();
           
-          print('✅ CameraService: Photo captured and compressed: $outputPath');
+         debugPrint('✅ CameraService: Photo captured and compressed: $outputPath');
           return outputFile;
         }
       }
@@ -224,10 +225,10 @@ class CameraService {
       final outputFile = await File(image.path).copy(outputPath);
       await File(image.path).delete();
       
-      print('✅ CameraService: Photo captured: $outputPath');
+     debugPrint('✅ CameraService: Photo captured: $outputPath');
       return outputFile;
     } catch (e) {
-      print('❌ CameraService: Failed to capture photo: $e');
+     debugPrint('❌ CameraService: Failed to capture photo: $e');
       return null;
     }
   }
@@ -245,7 +246,7 @@ class CameraService {
       }
     }
     
-    print('✅ CameraService: Captured ${photos.length} photos');
+   debugPrint('✅ CameraService: Captured ${photos.length} photos');
     return photos;
   }
 
@@ -285,7 +286,7 @@ class CameraService {
         'photos': photoInfo,
       };
     } catch (e) {
-      print('❌ CameraService: Failed to get storage info: $e');
+     debugPrint('❌ CameraService: Failed to get storage info: $e');
       return {'totalSize': 0, 'fileCount': 0, 'photos': []};
     }
   }
@@ -312,10 +313,10 @@ class CameraService {
         }
       }
 
-      print('✅ CameraService: Cleaned up $deletedCount old photos');
+     debugPrint('✅ CameraService: Cleaned up $deletedCount old photos');
       return deletedCount;
     } catch (e) {
-      print('❌ CameraService: Failed to cleanup old photos: $e');
+     debugPrint('❌ CameraService: Failed to cleanup old photos: $e');
       return 0;
     }
   }
@@ -341,16 +342,16 @@ class CameraService {
 
   /// Dispose camera service
   Future<void> dispose() async {
-    print('🔄 CameraService: Disposing camera service...');
+   debugPrint('🔄 CameraService: Disposing camera service...');
     await _controller?.dispose();
     _controller = null;
     _isInitialized = false;
-    print('✅ CameraService: Camera service disposed');
+   debugPrint('✅ CameraService: Camera service disposed');
   }
 
   /// Reset camera service (reinitialize)
   Future<bool> reset() async {
-    print('🔄 CameraService: Resetting camera service...');
+   debugPrint('🔄 CameraService: Resetting camera service...');
     await dispose();
     return await initialize();
   }

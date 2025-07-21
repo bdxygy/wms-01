@@ -61,7 +61,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     
     if (AppConfig.isDebugMode) {
-      print('🔄 AuthProvider state changed to: $state');
+     debugPrint('🔄 AuthProvider state changed to: $state');
     }
   }
 
@@ -70,7 +70,7 @@ class AuthProvider extends ChangeNotifier {
     _setState(AuthState.error);
     
     if (AppConfig.isDebugMode) {
-      print('❌ AuthProvider error: $error');
+     debugPrint('❌ AuthProvider error: $error');
     }
   }
 
@@ -104,12 +104,12 @@ class AuthProvider extends ChangeNotifier {
         }
         
         if (AppConfig.isDebugMode) {
-          print('🔐 Auth initialized for user: ${_user!.username}');
+         debugPrint('🔐 Auth initialized for user: ${_user!.username}');
         }
       } else {
         _setState(AuthState.unauthenticated);
         if (AppConfig.isDebugMode) {
-          print('🔓 No stored authentication found');
+         debugPrint('🔓 No stored authentication found');
         }
       }
     } catch (e) {
@@ -133,12 +133,12 @@ class AuthProvider extends ChangeNotifier {
       if (!_user!.isOwner) {
         _setState(AuthState.needsStoreSelection);
         if (AppConfig.isDebugMode) {
-          print('🏪 User ${_user!.username} needs store selection');
+         debugPrint('🏪 User ${_user!.username} needs store selection');
         }
       } else {
         _setState(AuthState.authenticated);
         if (AppConfig.isDebugMode) {
-          print('👑 OWNER ${_user!.username} logged in');
+         debugPrint('👑 OWNER ${_user!.username} logged in');
         }
       }
       
@@ -171,7 +171,7 @@ class AuthProvider extends ChangeNotifier {
       _setState(AuthState.authenticated);
       
       if (AppConfig.isDebugMode) {
-        print('🏪 Store $storeId selected for user ${_user!.username}');
+       debugPrint('🏪 Store $storeId selected for user ${_user!.username}');
       }
       
       return true;
@@ -191,7 +191,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       
       if (AppConfig.isDebugMode) {
-        print('🔄 Store changed to $storeId for user ${_user!.username}');
+       debugPrint('🔄 Store changed to $storeId for user ${_user!.username}');
       }
       
       return true;
@@ -214,7 +214,7 @@ class AuthProvider extends ChangeNotifier {
       }
       
       if (AppConfig.isDebugMode) {
-        print('🗑️ Selected store cleared');
+       debugPrint('🗑️ Selected store cleared');
       }
     } catch (e) {
       _setError('Failed to clear selected store: ${e.toString()}');
@@ -234,7 +234,7 @@ class AuthProvider extends ChangeNotifier {
       _setState(AuthState.unauthenticated);
       
       if (AppConfig.isDebugMode) {
-        print('🚪 User logged out successfully');
+       debugPrint('🚪 User logged out successfully');
       }
     } catch (e) {
       _setError('Logout failed: ${e.toString()}');
@@ -288,7 +288,7 @@ class AuthProvider extends ChangeNotifier {
       await _authService.register(registerRequest);
       
       if (AppConfig.isDebugMode) {
-        print('👤 User $username registered successfully');
+       debugPrint('👤 User $username registered successfully');
       }
       
       // Don't change auth state after registration
@@ -316,7 +316,7 @@ class AuthProvider extends ChangeNotifier {
       await _authService.devRegister(name, username, password);
       
       if (AppConfig.isDebugMode) {
-        print('👑 OWNER user $username created successfully');
+       debugPrint('👑 OWNER user $username created successfully');
       }
       
       _setState(AuthState.unauthenticated);

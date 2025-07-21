@@ -61,22 +61,22 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
 
   Future<void> _initializeCamera() async {
     try {
-      print('📷 CameraScreen: Initializing camera...');
+     debugPrint('📷 CameraScreen: Initializing camera...');
       final success = await _cameraService.initialize();
       
       if (success && mounted) {
         setState(() {
           _isInitialized = true;
         });
-        print('✅ CameraScreen: Camera initialized successfully');
+       debugPrint('✅ CameraScreen: Camera initialized successfully');
       } else {
-        print('❌ CameraScreen: Failed to initialize camera');
+       debugPrint('❌ CameraScreen: Failed to initialize camera');
         if (mounted) {
           _showErrorDialog(AppLocalizations.of(context)!.cameraInitializationFailed);
         }
       }
     } catch (e) {
-      print('❌ CameraScreen: Camera initialization error: $e');
+     debugPrint('❌ CameraScreen: Camera initialization error: $e');
       if (mounted) {
         _showErrorDialog('Camera initialization failed: $e');
       }
@@ -97,11 +97,11 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     });
 
     try {
-      print('📸 CameraScreen: Capturing photo...');
+     debugPrint('📸 CameraScreen: Capturing photo...');
       final photoFile = await _cameraService.capturePhoto();
       
       if (photoFile != null) {
-        print('✅ CameraScreen: Photo captured successfully');
+       debugPrint('✅ CameraScreen: Photo captured successfully');
 
         if (widget.allowMultiple) {
           _capturedPhotos.add(photoFile);
@@ -123,7 +123,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
         _showErrorDialog(AppLocalizations.of(context)!.photoCaptureFailed);
       }
     } catch (e) {
-      print('❌ CameraScreen: Photo capture error: $e');
+     debugPrint('❌ CameraScreen: Photo capture error: $e');
       _showErrorDialog('Photo capture failed: $e');
     } finally {
       if (mounted) {

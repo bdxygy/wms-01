@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import '../api/api_client.dart';
 import '../api/api_endpoints.dart';
 import '../api/api_exceptions.dart';
@@ -47,7 +48,7 @@ class AuthService {
         await _storage.storeUser(authResponse.user);
 
         if (AppConfig.isDebugMode) {
-          print('🔐 User ${authResponse.user.username} logged in successfully');
+         debugPrint('🔐 User ${authResponse.user.username} logged in successfully');
         }
 
         return authResponse;
@@ -108,7 +109,7 @@ class AuthService {
         await _storage.storeUser(authResponse.user);
 
         if (AppConfig.isDebugMode) {
-          print('🔄 Token refreshed successfully');
+         debugPrint('🔄 Token refreshed successfully');
         }
 
         return authResponse;
@@ -147,12 +148,12 @@ class AuthService {
           );
           
           if (AppConfig.isDebugMode) {
-            print('🚪 Logout successful on server');
+           debugPrint('🚪 Logout successful on server');
           }
         } catch (e) {
           // Server logout failed, but continue with local cleanup
           if (AppConfig.isDebugMode) {
-            print('⚠️ Server logout failed, continuing with local cleanup');
+           debugPrint('⚠️ Server logout failed, continuing with local cleanup');
           }
         }
       }
@@ -164,7 +165,7 @@ class AuthService {
       ApiClient.clearInstance();
       
       if (AppConfig.isDebugMode) {
-        print('🧹 Local auth data cleared');
+       debugPrint('🧹 Local auth data cleared');
       }
     }
   }
@@ -209,7 +210,7 @@ class AuthService {
       return await _validateTokenWithServer();
     } catch (e) {
       if (AppConfig.isDebugMode) {
-        print('❌ Token validation failed: $e');
+       debugPrint('❌ Token validation failed: $e');
       }
       return false;
     }
@@ -226,7 +227,7 @@ class AuthService {
       return response.statusCode == 200;
     } catch (e) {
       if (AppConfig.isDebugMode) {
-        print('🔍 Server token validation failed: $e');
+       debugPrint('🔍 Server token validation failed: $e');
       }
       // If API call fails (401, 403, etc.), token is invalid
       return false;
@@ -246,7 +247,7 @@ class AuthService {
         final user = User.fromJson(userData);
 
         if (AppConfig.isDebugMode) {
-          print('👤 User ${user.username} registered successfully');
+         debugPrint('👤 User ${user.username} registered successfully');
         }
 
         return user;
@@ -291,7 +292,7 @@ class AuthService {
         final user = User.fromJson(userData);
 
         if (AppConfig.isDebugMode) {
-          print('👑 OWNER user ${user.username} created successfully');
+         debugPrint('👑 OWNER user ${user.username} created successfully');
         }
 
         return user;
@@ -325,7 +326,7 @@ class AuthService {
       return AuthenticationState.unauthenticated();
     } catch (e) {
       if (AppConfig.isDebugMode) {
-        print('⚠️ Error getting stored auth state: $e');
+       debugPrint('⚠️ Error getting stored auth state: $e');
       }
       return AuthenticationState.unauthenticated();
     }

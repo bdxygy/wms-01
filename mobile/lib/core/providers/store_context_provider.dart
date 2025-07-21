@@ -29,7 +29,7 @@ class StoreContextProvider extends ChangeNotifier {
     notifyListeners();
     
     if (AppConfig.isDebugMode) {
-      print('🏪 StoreContext updated: $newContext');
+     debugPrint('🏪 StoreContext updated: $newContext');
     }
   }
 
@@ -57,7 +57,7 @@ class StoreContextProvider extends ChangeNotifier {
             _updateContext(persistedContext);
             
             if (AppConfig.isDebugMode) {
-              print('🏪 Restored store context: ${persistedContext.selectedStoreName}');
+             debugPrint('🏪 Restored store context: ${persistedContext.selectedStoreName}');
             }
             return;
           }
@@ -71,7 +71,7 @@ class StoreContextProvider extends ChangeNotifier {
       _updateContext(StoreContext.error('Failed to initialize store context: ${e.toString()}'));
       
       if (AppConfig.isDebugMode) {
-        print('❌ Store context initialization failed: $e');
+       debugPrint('❌ Store context initialization failed: $e');
       }
     }
   }
@@ -100,14 +100,14 @@ class StoreContextProvider extends ChangeNotifier {
       ));
       
       if (AppConfig.isDebugMode) {
-        print('🏪 Loaded ${stores.length} available stores');
+       debugPrint('🏪 Loaded ${stores.length} available stores');
       }
       
     } catch (e) {
       _updateContext(StoreContext.error('Failed to load available stores: ${e.toString()}'));
       
       if (AppConfig.isDebugMode) {
-        print('❌ Failed to load stores: $e');
+       debugPrint('❌ Failed to load stores: $e');
       }
     }
   }
@@ -137,7 +137,7 @@ class StoreContextProvider extends ChangeNotifier {
       _updateContext(newContext);
       
       if (AppConfig.isDebugMode) {
-        print('🏪 Selected store: ${store.name}');
+       debugPrint('🏪 Selected store: ${store.name}');
       }
       
     } catch (e) {
@@ -147,7 +147,7 @@ class StoreContextProvider extends ChangeNotifier {
       ));
       
       if (AppConfig.isDebugMode) {
-        print('❌ Failed to select store: $e');
+       debugPrint('❌ Failed to select store: $e');
       }
     }
   }
@@ -169,7 +169,7 @@ class StoreContextProvider extends ChangeNotifier {
       _updateContext(newContext);
       
       if (AppConfig.isDebugMode) {
-        print('🏪 Cleared store selection');
+       debugPrint('🏪 Cleared store selection');
       }
       
     } catch (e) {
@@ -200,12 +200,12 @@ class StoreContextProvider extends ChangeNotifier {
       await prefs.setString(AppConstants.storeContextKey, contextJson);
       
       if (AppConfig.isDebugMode) {
-        print('🏪 Persisted store context');
+       debugPrint('🏪 Persisted store context');
       }
       
     } catch (e) {
       if (AppConfig.isDebugMode) {
-        print('❌ Failed to persist store context: $e');
+       debugPrint('❌ Failed to persist store context: $e');
       }
     }
   }
@@ -220,12 +220,12 @@ class StoreContextProvider extends ChangeNotifier {
       _updateContext(StoreContext.initial());
       
       if (AppConfig.isDebugMode) {
-        print('🏪 Reset store context');
+       debugPrint('🏪 Reset store context');
       }
       
     } catch (e) {
       if (AppConfig.isDebugMode) {
-        print('❌ Failed to reset store context: $e');
+       debugPrint('❌ Failed to reset store context: $e');
       }
     }
   }

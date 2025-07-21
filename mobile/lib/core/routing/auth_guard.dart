@@ -20,7 +20,7 @@ class AuthGuard {
     
     if (!authProvider.isAuthenticated) {
       if (AppConfig.isDebugMode) {
-        print('🚫 AuthGuard: Not authenticated, redirecting to login');
+       debugPrint('🚫 AuthGuard: Not authenticated, redirecting to login');
       }
       return GuardResult.redirectToLogin;
     }
@@ -41,7 +41,7 @@ class AuthGuard {
     // Non-owner users must have store selected for protected routes
     if (_requiresStoreSelection(route) && !storeProvider.hasStoreSelected) {
       if (AppConfig.isDebugMode) {
-        print('🚫 AuthGuard: Store selection required for $route');
+       debugPrint('🚫 AuthGuard: Store selection required for $route');
       }
       return GuardResult.redirectToStoreSelection;
     }
@@ -100,7 +100,7 @@ class AuthGuard {
     
     if (!hasAccess) {
       if (AppConfig.isDebugMode) {
-        print('🚫 AuthGuard: Insufficient permissions for $route');
+       debugPrint('🚫 AuthGuard: Insufficient permissions for $route');
       }
       return GuardResult.deny;
     }

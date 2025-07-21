@@ -40,10 +40,10 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     });
 
     try {
-      print('🏪 OwnerDashboard: Starting store loading...');
+      debugPrint('🏪 OwnerDashboard: Starting store loading...');
       final storeProvider = context.read<StoreContextProvider>();
 
-      print('🏪 OwnerDashboard: Calling loadAvailableStores...');
+      debugPrint('🏪 OwnerDashboard: Calling loadAvailableStores...');
       await storeProvider.loadAvailableStores().timeout(
         const Duration(seconds: 10),
         onTimeout: () {
@@ -51,7 +51,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         },
       );
 
-      print(
+      debugPrint(
           '🏪 OwnerDashboard: Store loading completed, found ${storeProvider.availableStores.length} stores');
 
       if (mounted) {
@@ -60,10 +60,10 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           _selectedStore = _stores.isNotEmpty ? _stores.first : null;
           _isLoading = false;
         });
-        print('🏪 OwnerDashboard: State updated successfully');
+        debugPrint('🏪 OwnerDashboard: State updated successfully');
       }
     } catch (e) {
-      print('❌ OwnerDashboard: Store loading failed: $e');
+      debugPrint('❌ OwnerDashboard: Store loading failed: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
