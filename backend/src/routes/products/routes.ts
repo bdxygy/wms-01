@@ -9,6 +9,7 @@ import {
 import { 
   createProductSchema, 
   updateProductSchema, 
+  updateProductWithImeisSchema,
   listProductsQuerySchema, 
   productIdParamSchema,
   barcodeParamSchema 
@@ -18,7 +19,9 @@ import {
   getProductHandler, 
   getProductByBarcodeHandler,
   listProductsHandler, 
-  updateProductHandler 
+  updateProductHandler,
+  updateProductWithImeisHandler,
+  softDeleteProductHandler
 } from "./product.handlers";
 
 const products = new Hono();
@@ -68,6 +71,27 @@ products.put(
   requireProductAccess(extractParamId("id")),
   ValidationMiddleware.body(updateProductSchema),
   updateProductHandler
+);
+
+// Update product with IMEIs endpoint (OWNER or ADMIN only)
+products.put(
+  "/:id/imeis",
+  authMiddleware,
+  requireOwnerOrAdmin(),
+  ValidationMiddleware.params(productIdParamSchema),
+  requireProductAccess(extractParamId("id")),
+  ValidationMiddleware.body(updateProductWithImeisSchema),
+  updateProductWithImeisHandler
+);
+
+// Soft delete product endpoint (OWNER only)
+products.delete(
+  "/:id",
+  authMiddleware,
+  requireOwnerOrAdmin(),
+  ValidationMiddleware.params(productIdParamSchema),
+  requireProductAccess(extractParamId("id")),
+  softDeleteProductHandler
 );
 
 export { products as productRoutes };

@@ -10,6 +10,7 @@ import { HTTPException } from "hono/http-exception";
 import type {
   CreateProductRequest,
   UpdateProductRequest,
+  UpdateProductWithImeisRequest,
   ListProductsQuery,
 } from "../schemas/product.schemas";
 import type { User } from "../models/users";
@@ -385,16 +386,18 @@ export class ProductService {
     }
 
     // Business rule validation for IMEI products
-    const finalIsImei = data.isImei !== undefined ? data.isImei : existingProduct[0].isImei;
-    const finalQuantity = data.quantity !== undefined ? data.quantity : existingProduct[0].quantity;
-    
+    const finalIsImei =
+      data.isImei !== undefined ? data.isImei : existingProduct[0].isImei;
+    const finalQuantity =
+      data.quantity !== undefined ? data.quantity : existingProduct[0].quantity;
+
     // If product is being set to IMEI tracking, validate quantity rules
     if (finalIsImei && finalQuantity !== 1) {
       throw new HTTPException(400, {
         message: "IMEI products must have quantity of 1",
       });
     }
-    
+
     // If enabling IMEI tracking on existing product, force quantity to 1
     if (data.isImei === true && !existingProduct[0].isImei) {
       // Force quantity to 1 when enabling IMEI tracking
@@ -465,12 +468,7 @@ export class ProductService {
       .from(productImeis)
       .innerJoin(products, eq(productImeis.productId, products.id))
       .innerJoin(stores, eq(products.storeId, stores.id))
-      .where(
-        and(
-          eq(productImeis.imei, imei),
-          isNull(products.deletedAt)
-        )
-      );
+      .where(and(eq(productImeis.imei, imei), isNull(products.deletedAt)));
 
     if (!productWithImei[0]) {
       throw new HTTPException(404, { message: "Product with IMEI not found" });
@@ -512,7 +510,229 @@ export class ProductService {
       createdBy: product.createdBy,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
-      imeis: allImeis.map(item => item.imei),
+      imeis: allImeis.map((item) => item.imei),
+    };
+  }
+
+  static async updateProductWithImeis(
+    id: string,
+    data: UpdateProductWithImeisRequest,
+    requestingUser: User
+  ) {
+    // Find product to update (authorization middleware has already checked access)
+    let [existingProduct] = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        storeId: products.storeId,
+        categoryId: products.categoryId,
+        sku: products.sku,
+        isImei: products.isImei,
+        quantity: products.quantity,
+        createdBy: products.createdBy,
+        storeOwnerId: stores.ownerId,
+      })
+      .from(products)
+      .innerJoin(stores, eq(products.storeId, stores.id))
+      .where(and(eq(products.id, id), isNull(products.deletedAt)));
+
+    if (!existingProduct) {
+      throw new HTTPException(404, { message: "Product not found" });
+    }
+
+    const { imeis, ...newValue } = data;
+
+    if (imeis.length) {
+      existingProduct.isImei = true;
+    }
+
+    if (!existingProduct) {
+      throw new HTTPException(404, { message: "Product not found" });
+    }
+
+    // Check if product supports IMEI tracking
+    if (!existingProduct.isImei) {
+      throw new HTTPException(400, {
+        message: "Product does not support IMEI tracking",
+      });
+    }
+
+    // Verify category exists and belongs to the same store (if provided)
+    if (data.categoryId) {
+      const category = await db
+        .select()
+        .from(categories)
+        .where(
+          and(
+            eq(categories.id, data.categoryId),
+            eq(categories.storeId, existingProduct.storeId),
+            isNull(categories.deletedAt)
+          )
+        );
+
+      if (!category[0]) {
+        throw new HTTPException(404, {
+          message: "Category not found or does not belong to this store",
+        });
+      }
+    }
+
+    // Check if SKU already exists in the store (if SKU is being updated)
+    if (data.sku && data.sku !== existingProduct.sku) {
+      const duplicateSku = await db
+        .select()
+        .from(products)
+        .where(
+          and(
+            eq(products.sku, data.sku),
+            eq(products.storeId, existingProduct.storeId),
+            isNull(products.deletedAt)
+          )
+        );
+
+      if (duplicateSku.length > 0) {
+        throw new HTTPException(400, {
+          message: "SKU already exists in this store",
+        });
+      }
+    }
+
+    if (imeis.length) {
+      // Check all provided IMEIs for conflicts with other products
+      const allExistingImeis = await db
+        .select({
+          imei: productImeis.imei,
+          productId: productImeis.productId,
+        })
+        .from(productImeis);
+
+      const conflictingImeis = data.imeis.filter((imei) => {
+        const existing = allExistingImeis.find(
+          (existing) => existing.imei === imei
+        );
+        return existing && existing.productId !== id;
+      });
+
+      if (conflictingImeis.length > 0) {
+        throw new HTTPException(400, {
+          message: `IMEIs already exist in other products: ${conflictingImeis.join(
+            ", "
+          )}`,
+        });
+      }
+    }
+
+    // Start a transaction to update product and replace IMEIs
+    const result = await db.transaction(async (tx) => {
+      // Prepare update data for product
+
+      existingProduct = {
+        ...existingProduct,
+        ...newValue,
+      };
+
+      const updateData: any = {
+        ...existingProduct,
+        updatedAt: new Date(),
+      };
+
+      // Update product
+      const updatedProduct = await tx
+        .update(products)
+        .set(updateData)
+        .where(eq(products.id, id))
+        .returning();
+
+      if (!updatedProduct[0]) {
+        throw new HTTPException(500, { message: "Failed to update product" });
+      }
+
+      // Remove all existing IMEIs for this product
+      await tx.delete(productImeis).where(eq(productImeis.productId, id));
+
+      // Add new IMEIs
+      const imeiRecords = data.imeis.map((imei) => ({
+        id: randomUUID(),
+        productId: id,
+        imei: imei,
+        createdBy: requestingUser.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+
+      const insertedImeis = await tx
+        .insert(productImeis)
+        .values(imeiRecords)
+        .returning();
+
+      return {
+        product: updatedProduct[0],
+        imeis: insertedImeis,
+      };
+    });
+
+    const response = {
+      id: result.product.id,
+      name: result.product.name,
+      storeId: result.product.storeId,
+      categoryId: result.product.categoryId,
+      sku: result.product.sku,
+      isImei: result.product.isImei,
+      barcode: result.product.barcode,
+      quantity: result.product.quantity,
+      purchasePrice: result.product.purchasePrice,
+      salePrice: result.product.salePrice,
+      createdBy: result.product.createdBy,
+      createdAt: result.product.createdAt,
+      updatedAt: result.product.updatedAt,
+      imeis: result.imeis.map((imei) => ({
+        id: imei.id,
+        imei: imei.imei,
+        createdBy: imei.createdBy,
+        createdAt: imei.createdAt.toISOString(),
+        updatedAt: imei.updatedAt.toISOString(),
+      })),
+    };
+
+    console.log("updateProductWithImeis:", response);
+
+    return response;
+  }
+
+  static async softDeleteProduct(id: string, _requestingUser: User) {
+    // Find product to delete (authorization middleware has already checked access)
+    const [existingProduct] = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        storeOwnerId: stores.ownerId,
+      })
+      .from(products)
+      .innerJoin(stores, eq(products.storeId, stores.id))
+      .where(and(eq(products.id, id), isNull(products.deletedAt)));
+
+    if (!existingProduct) {
+      throw new HTTPException(404, { message: "Product not found" });
+    }
+
+    // Perform soft delete by setting deletedAt timestamp
+    const deletedProduct = await db
+      .update(products)
+      .set({
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(products.id, id))
+      .returning();
+
+    if (!deletedProduct[0]) {
+      throw new HTTPException(500, { message: "Failed to delete product" });
+    }
+
+    return {
+      id: deletedProduct[0].id,
+      name: deletedProduct[0].name,
+      deletedAt: deletedProduct[0].deletedAt,
     };
   }
 }

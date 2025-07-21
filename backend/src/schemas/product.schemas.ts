@@ -113,9 +113,27 @@ export const productListResponseSchema = z.object({
   }),
 });
 
+// Update product with IMEIs schema
+export const updateProductWithImeisSchema = z.object({
+  name: z.string().min(1, "Product name is required").max(200, "Product name must be less than 200 characters").optional(),
+  categoryId: z.string().uuid("Invalid category ID format").optional().nullable(),
+  sku: z.string().min(1, "SKU is required").max(100, "SKU must be less than 100 characters").optional(),
+  purchasePrice: z.number().positive("Purchase price must be positive").optional(),
+  salePrice: z.number().positive("Sale price must be positive").optional().nullable(),
+  imeis: z.array(z.string().min(15, "IMEI must be at least 15 characters").max(15, "IMEI must be exactly 15 characters")).min(1, "At least one IMEI is required"),
+}).refine((data) => {
+  // Ensure IMEIs are unique
+  const uniqueImeis = new Set(data.imeis);
+  return uniqueImeis.size === data.imeis.length;
+}, {
+  message: "All IMEIs must be unique",
+  path: ["imeis"],
+});
+
 // Type exports
 export type CreateProductRequest = z.infer<typeof createProductSchema>;
 export type UpdateProductRequest = z.infer<typeof updateProductSchema>;
+export type UpdateProductWithImeisRequest = z.infer<typeof updateProductWithImeisSchema>;
 export type ListProductsQuery = z.infer<typeof listProductsQuerySchema>;
 export type ProductIdParam = z.infer<typeof productIdParamSchema>;
 export type BarcodeParam = z.infer<typeof barcodeParamSchema>;

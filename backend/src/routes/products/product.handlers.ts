@@ -2,7 +2,7 @@ import { Context } from "hono";
 import { ProductService } from "../../services/product.service";
 import { ResponseUtils } from "../../utils/responses";
 import { getValidated } from "../../utils/context";
-import type { CreateProductRequest, UpdateProductRequest, ListProductsQuery, ProductIdParam, BarcodeParam } from "../../schemas/product.schemas";
+import type { CreateProductRequest, UpdateProductRequest, UpdateProductWithImeisRequest, ListProductsQuery, ProductIdParam, BarcodeParam } from "../../schemas/product.schemas";
 
 export const createProductHandler = async (c: Context) => {
   try {
@@ -54,6 +54,40 @@ export const updateProductHandler = async (c: Context) => {
     const user = c.get("user");
     const result = await ProductService.updateProduct(id, validatedData, user);
     return ResponseUtils.sendSuccess(c, result);
+  } catch (error) {
+    return ResponseUtils.sendError(c, error);
+  }
+};
+
+export const updateProductWithImeisHandler = async (c: Context) => {
+  try {
+    console.log("updateProductWithImeisHandler called");
+    console.log("Request params:", c.req.param());
+    console.log("Request body:", await c.req.json());
+    
+    const { id } = getValidated<ProductIdParam>(c, "validatedParams");
+    console.log("Product ID:", id);
+    
+    const validatedData = getValidated<UpdateProductWithImeisRequest>(c, "validatedBody");
+    console.log("Validated data:", validatedData);
+    
+    const user = c.get("user");
+    console.log("User:", user?.id);
+    
+    const result = await ProductService.updateProductWithImeis(id, validatedData, user);
+    return ResponseUtils.sendSuccess(c, result);
+  } catch (error) {
+    console.error("Error in updateProductWithImeisHandler:", error);
+    return ResponseUtils.sendError(c, error);
+  }
+};
+
+export const softDeleteProductHandler = async (c: Context) => {
+  try {
+    const { id } = getValidated<ProductIdParam>(c, "validatedParams");
+    const user = c.get("user");
+    await ProductService.softDeleteProduct(id, user);
+    return ResponseUtils.sendSuccess(c, { message: "Product deleted successfully" });
   } catch (error) {
     return ResponseUtils.sendError(c, error);
   }
