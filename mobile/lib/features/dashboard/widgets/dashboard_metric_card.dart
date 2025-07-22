@@ -24,12 +24,29 @@ class DashboardMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isPositiveTrend = trend.startsWith('+');
     final bool isNegativeTrend = trend.startsWith('-');
-    
+
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
-        child: Padding(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                color.withValues(alpha: 0.2),
+                color.withValues(alpha: 0.0),
+                color.withValues(alpha: 0.2),
+              ],
+              stops: const [0.0, 0.5, 1.0],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,12 +65,51 @@ class DashboardMetricCard extends StatelessWidget {
                       size: 20,
                     ),
                   ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.7),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                          if (subtitle != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              subtitle!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.6),
+                                  ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
                   const Spacer(),
                   if (trend != '+0' && trend != '-0' && trend != '0')
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isPositiveTrend 
+                        color: isPositiveTrend
                             ? Colors.green.withValues(alpha: 0.1)
                             : isNegativeTrend
                                 ? Colors.red.withValues(alpha: 0.1)
@@ -64,13 +120,13 @@ class DashboardMetricCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            isPositiveTrend 
+                            isPositiveTrend
                                 ? Icons.trending_up
                                 : isNegativeTrend
                                     ? Icons.trending_down
                                     : Icons.trending_flat,
                             size: 12,
-                            color: isPositiveTrend 
+                            color: isPositiveTrend
                                 ? Colors.green[700]
                                 : isNegativeTrend
                                     ? Colors.red[700]
@@ -79,50 +135,30 @@ class DashboardMetricCard extends StatelessWidget {
                           const SizedBox(width: 2),
                           Text(
                             trend,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: isPositiveTrend 
-                                  ? Colors.green[700]
-                                  : isNegativeTrend
-                                      ? Colors.red[700]
-                                      : Colors.grey[700],
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: isPositiveTrend
+                                          ? Colors.green[700]
+                                          : isNegativeTrend
+                                              ? Colors.red[700]
+                                              : Colors.grey[700],
+                                      fontWeight: FontWeight.w600,
+                                    ),
                           ),
                         ],
                       ),
                     ),
                 ],
               ),
-              
               const SizedBox(height: 12),
-              
               Text(
                 value,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
               ),
-              
               const SizedBox(height: 4),
-              
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              
-              if (subtitle != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  subtitle!,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
             ],
           ),
         ),

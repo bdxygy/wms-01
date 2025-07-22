@@ -36,16 +36,13 @@ class DashboardQuickActions extends StatelessWidget {
         Text(
           title ?? 'Quick Actions',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
-        
+
         // Use different layouts based on number of actions
-        if (actions.length <= 4)
-          _buildGridLayout()
-        else
-          _buildListLayout(),
+        if (actions.length <= 4) _buildGridLayout() else _buildListLayout(),
       ],
     );
   }
@@ -57,7 +54,7 @@ class DashboardQuickActions extends StatelessWidget {
       crossAxisCount: 2,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.2, // Increased from 1.4 to give more height
+      childAspectRatio: 1.4, // Increased from 1.4 to give more height
       children: actions.map((action) => _buildActionCard(action)).toList(),
     );
   }
@@ -73,9 +70,12 @@ class DashboardQuickActions extends StatelessWidget {
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
           childAspectRatio: 1.2, // Increased from 1.4 to give more height
-          children: actions.take(4).map((action) => _buildActionCard(action)).toList(),
+          children: actions
+              .take(4)
+              .map((action) => _buildActionCard(action))
+              .toList(),
         ),
-        
+
         if (actions.length > 4) ...[
           const SizedBox(height: 12),
           // Remaining actions in horizontal list
@@ -103,48 +103,75 @@ class DashboardQuickActions extends StatelessWidget {
 
   Widget _buildActionCard(QuickAction action) {
     return Builder(
-      builder: (context) => Card(
-        child: InkWell(
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              (action.color ?? Theme.of(context).colorScheme.primary)
+                  .withValues(alpha: 0.1),
+              (action.color ?? Theme.of(context).colorScheme.primary)
+                  .withValues(alpha: 0.05),
+              Colors.transparent,
+            ],
+            stops: const [0.0, 0.7, 1.0],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(12),
-          onTap: action.onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0), // Reduced padding to fit content
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min, // Use minimum space needed
-              children: [
-                Icon(
-                  action.icon,
-                  size: 28, // Slightly smaller icon
-                  color: action.color ?? Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 6), // Reduced spacing
-                Flexible( // Allow text to take available space
-                  child: Text(
-                    action.title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13, // Slightly smaller font
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2, // Allow 2 lines for title
-                    overflow: TextOverflow.ellipsis,
+          border: Border.all(
+            color: (action.color ?? Theme.of(context).colorScheme.primary)
+                .withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: action.onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    action.icon,
+                    size: 28,
+                    color:
+                        action.color ?? Theme.of(context).colorScheme.primary,
                   ),
-                ),
-                const SizedBox(height: 2), // Reduced spacing
-                Flexible( // Allow text to take available space
-                  child: Text(
-                    action.subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontSize: 11, // Smaller subtitle font
+                  const SizedBox(height: 6),
+                  Flexible(
+                    child: Text(
+                      action.title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Flexible(
+                    child: Text(
+                      action.subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                            fontSize: 11,
+                          ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

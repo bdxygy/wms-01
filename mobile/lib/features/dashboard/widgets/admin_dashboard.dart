@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../generated/app_localizations.dart';
 
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/routing/app_router.dart';
@@ -19,6 +20,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final storeProvider = context.watch<StoreContextProvider>();
     final currentStore = storeProvider.selectedStore;
 
@@ -38,20 +40,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
         // Quick Actions - List Page Navigation
         DashboardQuickActions(
           role: 'ADMIN',
-          title: 'Quick Navigation (Admin Access)',
+          title: l10n.quickNavigationAdminAccess,
           actions: [
             // Primary Business Actions
             QuickAction(
               icon: Icons.add_shopping_cart,
-              title: 'New Sale',
-              subtitle: 'Create sale transaction',
+              title: l10n.newSale,
+              subtitle: l10n.createSale,
               color: Colors.green,
               onTap: () => _navigateToCreateSale(),
             ),
             QuickAction(
               icon: Icons.category,
-              title: 'Categories',
-              subtitle: 'View & manage categories',
+              title: l10n.categories,
+              subtitle: l10n.viewCategories,
               color: Colors.blue,
               onTap: () => _navigateToCategories(),
             ),
@@ -59,24 +61,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
             // Store Management
             QuickAction(
               icon: Icons.search,
-              title: 'Search Products',
-              subtitle: 'Barcode, IMEI & text search',
+              title: l10n.searchProducts,
+              subtitle: l10n.quickProductLookup,
               color: Colors.orange,
               onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.people_outline,
-              title: 'Manage Staff',
-              subtitle: 'Staff management',
+              title: l10n.manageStaff,
+              subtitle: l10n.staffManagement,
               color: Colors.orange,
               onTap: () => _navigateToManageStaff(),
-            ),
-            QuickAction(
-              icon: Icons.settings,
-              title: 'Settings',
-              subtitle: 'App settings & store',
-              color: Colors.grey,
-              onTap: () => _navigateToSettings(),
             ),
           ],
         ),
@@ -90,7 +85,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         
         // Recent Transactions
         RecentActivityCard(
-          title: 'Recent Transactions',
+          title: l10n.recentTransactions,
           activityType: 'transactions',
           onViewAll: () => _navigateToTransactions(),
           onRefresh: () => _refreshData(),
@@ -100,10 +95,28 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildStoreHeader(String storeName) {
-    return Card(
-      color: Theme.of(context).colorScheme.secondaryContainer,
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.secondaryContainer,
+            Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
             Container(
@@ -113,7 +126,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                Icons.business,
+                Icons.business_rounded,
                 color: Theme.of(context).colorScheme.onSecondary,
                 size: 24,
               ),
@@ -124,12 +137,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Store Management',
+                    l10n.storeManagement,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
+                      color: Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.7),
                     ),
                   ),
-                  const SizedBox(height: 4),
                   Text(
                     storeName,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -140,10 +152,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ],
               ),
             ),
-            TextButton.icon(
+            IconButton.filledTonal(
               onPressed: () => _navigateToStoreDetails(),
-              icon: const Icon(Icons.info_outline),
-              label: const Text('Details'),
+              icon: const Icon(Icons.info_outline_rounded),
+              tooltip: l10n.details,
             ),
           ],
         ),
@@ -152,79 +164,98 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildStoreMetrics() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Store Performance',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.storePerformance,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Products',
-                value: '0', // TODO: Get actual data
-                icon: Icons.inventory,
-                color: Colors.blue,
-                trend: '+0',
-                onTap: () => _navigateToInventory(),
-              ),
+          const SizedBox(height: 20),
+          
+          // Store Management Metrics
+          Text(
+            l10n.inventoryManagement,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.blue,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Today Sales',
-                value: '0', // TODO: Get actual data
-                icon: Icons.trending_up,
-                color: Colors.green,
-                trend: '+0',
-                onTap: () => _navigateToSalesReport(),
-              ),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.products,
+            value: '0', // TODO: Get actual data
+            icon: Icons.inventory,
+            color: Colors.blue,
+            trend: '+0',
+            onTap: () => _navigateToInventory(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.categories,
+            value: '0', // TODO: Get actual data
+            icon: Icons.category,
+            color: Colors.purple,
+            trend: '+0',
+            onTap: () => _navigateToCategories(),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Sales & Transaction Metrics
+          Text(
+            l10n.salesPerformance,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Colors.green,
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Transactions',
-                value: '0', // TODO: Get actual data
-                icon: Icons.receipt,
-                color: Colors.orange,
-                trend: '+0',
-                onTap: () => _navigateToTransactions(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Low Stock',
-                value: '0', // TODO: Get actual data
-                icon: Icons.warning,
-                color: Colors.red,
-                trend: '0',
-                onTap: () => _navigateToLowStock(),
-              ),
-            ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.todaySales,
+            value: '0', // TODO: Get actual data
+            icon: Icons.trending_up,
+            color: Colors.green,
+            trend: '+0',
+            onTap: () => _navigateToSalesReport(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.transactions,
+            value: '0', // TODO: Get actual data
+            icon: Icons.receipt,
+            color: Colors.orange,
+            trend: '+0',
+            onTap: () => _navigateToTransactions(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.lowStock,
+            value: '0', // TODO: Get actual data
+            icon: Icons.warning,
+            color: Colors.red,
+            trend: '0',
+            onTap: () => _navigateToLowStock(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildInventoryOverview() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              'Inventory Overview',
+              l10n.inventoryOverview,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -232,7 +263,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             const Spacer(),
             TextButton(
               onPressed: () => _navigateToInventory(),
-              child: const Text('View All'),
+              child: Text(l10n.viewAll),
             ),
           ],
         ),
@@ -246,7 +277,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   children: [
                     Expanded(
                       child: _buildInventoryItem(
-                        'Total Products',
+                        l10n.totalProducts,
                         '0',
                         Icons.inventory,
                         Colors.blue,
@@ -259,7 +290,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     ),
                     Expanded(
                       child: _buildInventoryItem(
-                        'Categories',
+                        l10n.categories,
                         '0',
                         Icons.category,
                         Colors.purple,
@@ -277,7 +308,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   children: [
                     Expanded(
                       child: _buildInventoryItem(
-                        'In Stock',
+                        l10n.inStock,
                         '0',
                         Icons.check_circle,
                         Colors.green,
@@ -290,7 +321,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     ),
                     Expanded(
                       child: _buildInventoryItem(
-                        'Low Stock',
+                        l10n.lowStock,
                         '0',
                         Icons.warning,
                         Colors.orange,

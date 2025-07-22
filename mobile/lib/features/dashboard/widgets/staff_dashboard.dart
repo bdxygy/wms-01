@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../generated/app_localizations.dart';
 
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/routing/app_router.dart';
@@ -15,9 +16,9 @@ class StaffDashboard extends StatefulWidget {
 }
 
 class _StaffDashboardState extends State<StaffDashboard> {
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final storeProvider = context.watch<StoreContextProvider>();
     final currentStore = storeProvider.selectedStore;
 
@@ -26,54 +27,54 @@ class _StaffDashboardState extends State<StaffDashboard> {
       children: [
         // Store Overview Header
         _buildStoreOverviewHeader(currentStore?.name ?? 'Unknown Store'),
-        
+
         const SizedBox(height: 24),
-        
+
         // Read-only Metrics
         _buildReadOnlyMetrics(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Limited Quick Actions - Staff Tools
         DashboardQuickActions(
           role: 'STAFF',
-          title: 'Quick Navigation (Read-Only Access)',
+          title: l10n.quickNavigationReadOnlyAccess,
           actions: [
             // Staff Tools
             QuickAction(
               icon: Icons.search,
-              title: 'Search Products',
-              subtitle: 'Barcode, IMEI & text search',
+              title: l10n.searchProducts,
+              subtitle: l10n.quickProductLookup,
               color: Colors.orange,
               onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.fact_check,
-              title: 'Product Check',
-              subtitle: 'Quality verification',
+              title: l10n.productCheck,
+              subtitle: l10n.qualityVerification,
               color: Colors.orange,
               onTap: () => _navigateToProductCheck(),
             ),
             QuickAction(
               icon: Icons.settings,
-              title: 'Settings',
-              subtitle: 'App settings & store',
+              title: l10n.settings,
+              subtitle: l10n.appSettings,
               color: Colors.grey,
               onTap: () => _navigateToSettings(),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Product Check Interface
         _buildProductCheckInterface(),
-        
+
         const SizedBox(height: 24),
-        
+
         // Recent Product Checks
         RecentActivityCard(
-          title: 'Recent Product Checks',
+          title: l10n.recentProductChecks,
           activityType: 'product-checks',
           onViewAll: () => _navigateToAllChecks(),
           onRefresh: () => _refreshData(),
@@ -83,10 +84,28 @@ class _StaffDashboardState extends State<StaffDashboard> {
   }
 
   Widget _buildStoreOverviewHeader(String storeName) {
-    return Card(
-      color: Theme.of(context).colorScheme.tertiaryContainer,
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.tertiaryContainer,
+            Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
             Container(
@@ -96,7 +115,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                Icons.visibility,
+                Icons.visibility_rounded,
                 color: Theme.of(context).colorScheme.onTertiary,
                 size: 24,
               ),
@@ -107,18 +126,21 @@ class _StaffDashboardState extends State<StaffDashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Store Overview (Read-Only)',
+                    l10n.storeOverviewReadOnly,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onTertiaryContainer.withValues(alpha: 0.8),
-                    ),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onTertiaryContainer
+                              .withValues(alpha: 0.7),
+                        ),
                   ),
-                  const SizedBox(height: 4),
                   Text(
                     storeName,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onTertiaryContainer,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color:
+                              Theme.of(context).colorScheme.onTertiaryContainer,
+                        ),
                   ),
                 ],
               ),
@@ -133,17 +155,17 @@ class _StaffDashboardState extends State<StaffDashboard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.remove_red_eye,
+                    Icons.remove_red_eye_rounded,
                     size: 14,
                     color: Colors.green[700],
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'View Mode',
+                    l10n.viewMode,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.green[700],
-                      fontWeight: FontWeight.w600,
-                    ),
+                          color: Colors.green[700],
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ],
               ),
@@ -155,76 +177,65 @@ class _StaffDashboardState extends State<StaffDashboard> {
   }
 
   Widget _buildReadOnlyMetrics() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Store Information',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.storeInformation,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Total Products',
-                value: '0', // TODO: Get actual data
-                icon: Icons.inventory,
-                color: Colors.blue,
-                trend: '0',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Categories',
-                value: '0', // TODO: Get actual data
-                icon: Icons.category,
-                color: Colors.purple,
-                trend: '0',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'My Checks Today',
-                value: '0', // TODO: Get actual data
-                icon: Icons.fact_check,
-                color: Colors.green,
-                trend: '+0',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Pending Checks',
-                value: '0', // TODO: Get actual data
-                icon: Icons.pending,
-                color: Colors.orange,
-                trend: '0',
-              ),
-            ),
-          ],
-        ),
-      ],
+          const SizedBox(height: 20),
+          DashboardMetricCard(
+            title: l10n.totalProducts,
+            value: '0', // TODO: Get actual data
+            icon: Icons.inventory,
+            color: Colors.blue,
+            trend: '0',
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.categories,
+            value: '0', // TODO: Get actual data
+            icon: Icons.category,
+            color: Colors.purple,
+            trend: '0',
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.myChecksToday,
+            value: '0', // TODO: Get actual data
+            icon: Icons.fact_check,
+            color: Colors.green,
+            trend: '+0',
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.pendingChecks,
+            value: '0', // TODO: Get actual data
+            icon: Icons.pending,
+            color: Colors.orange,
+            trend: '0',
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildProductCheckInterface() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Product Checking',
+          l10n.productChecking,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 16),
         Card(
@@ -241,38 +252,41 @@ class _StaffDashboardState extends State<StaffDashboard> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Quick Product Check',
+                      l10n.quickProductCheck,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Use the buttons below to quickly check product status:',
+                  l10n.useButtonsToCheck,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.7),
+                      ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: _buildCheckStatusButton(
-                        'PENDING',
+                        l10n.checkStatusPending,
                         Icons.pending,
                         Colors.orange,
-                        '0 items',
+                        l10n.itemsCount(0),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _buildCheckStatusButton(
-                        'OK',
+                        l10n.checkStatusOk,
                         Icons.check_circle,
                         Colors.green,
-                        '0 items',
+                        l10n.itemsCount(0),
                       ),
                     ),
                   ],
@@ -282,19 +296,19 @@ class _StaffDashboardState extends State<StaffDashboard> {
                   children: [
                     Expanded(
                       child: _buildCheckStatusButton(
-                        'MISSING',
+                        l10n.checkStatusMissing,
                         Icons.error,
                         Colors.red,
-                        '0 items',
+                        l10n.itemsCount(0),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _buildCheckStatusButton(
-                        'BROKEN',
+                        l10n.checkStatusBroken,
                         Icons.broken_image,
                         Colors.grey,
-                        '0 items',
+                        l10n.itemsCount(0),
                       ),
                     ),
                   ],
@@ -307,7 +321,8 @@ class _StaffDashboardState extends State<StaffDashboard> {
     );
   }
 
-  Widget _buildCheckStatusButton(String status, IconData icon, Color color, String count) {
+  Widget _buildCheckStatusButton(
+      String status, IconData icon, Color color, String count) {
     return Card(
       color: color.withValues(alpha: 0.1),
       child: InkWell(
@@ -326,16 +341,19 @@ class _StaffDashboardState extends State<StaffDashboard> {
               Text(
                 status,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 count,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.7),
+                    ),
               ),
             ],
           ),
@@ -357,13 +375,11 @@ class _StaffDashboardState extends State<StaffDashboard> {
     AppRouter.goToProductSearch(context);
   }
 
-
   void _navigateToProductCheck() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Product Check feature coming soon!')),
     );
   }
-
 
   void _navigateToAllChecks() {
     ScaffoldMessenger.of(context).showSnackBar(

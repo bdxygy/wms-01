@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../generated/app_localizations.dart';
 
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/models/store.dart';
@@ -82,6 +83,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,58 +98,65 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         const SizedBox(height: 24),
 
         // Comprehensive Quick Actions (List Page Navigation)
-        DashboardQuickActions(
-          role: 'OWNER',
-          title: 'Quick Navigation (Full Access)',
-          actions: [
-            // Primary Business Actions
-            QuickAction(
-              icon: Icons.add_shopping_cart,
-              title: 'New Sale',
-              subtitle: 'Create quick sale',
-              color: Colors.green,
-              onTap: () => _navigateToCreateSale(),
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.3),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            QuickAction(
-              icon: Icons.category,
-              title: 'Categories',
-              subtitle: 'Manage product categories',
-              color: Colors.blue,
-              onTap: () => _navigateToCategories(),
-            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: DashboardQuickActions(
+            role: 'OWNER',
+            title: l10n.quickNavigationFullAccess,
+            actions: [
+              // Primary Business Actions
+              QuickAction(
+                icon: Icons.add_shopping_cart,
+                title: l10n.newSale,
+                subtitle: l10n.createSale,
+                color: Colors.green,
+                onTap: () => _navigateToCreateSale(),
+              ),
+              QuickAction(
+                icon: Icons.category,
+                title: l10n.categories,
+                subtitle: l10n.viewCategories,
+                color: Colors.blue,
+                onTap: () => _navigateToCategories(),
+              ),
 
-            // Product Tools
-            QuickAction(
-              icon: Icons.search,
-              title: 'Search Products',
-              subtitle: 'Barcode, IMEI & text search',
-              color: Colors.orange,
-              onTap: () => _navigateToProductSearch(),
-            ),
-            QuickAction(
-              icon: Icons.fact_check,
-              title: 'Product Check',
-              subtitle: 'Quality verification',
-              color: Colors.orange,
-              onTap: () => _navigateToProductCheck(),
-            ),
-
-            // Analytics & Management
-            QuickAction(
-              icon: Icons.analytics,
-              title: 'Reports',
-              subtitle: 'Business analytics',
-              color: Colors.purple,
-              onTap: () => _navigateToReports(),
-            ),
-            QuickAction(
-              icon: Icons.settings,
-              title: 'Settings',
-              subtitle: 'App configuration',
-              color: Colors.grey,
-              onTap: () => _navigateToSettings(),
-            ),
-          ],
+              // Product Tools
+              QuickAction(
+                icon: Icons.search,
+                title: l10n.searchProducts,
+                subtitle: l10n.quickProductLookup,
+                color: Colors.orange,
+                onTap: () => _navigateToProductSearch(),
+              ),
+              QuickAction(
+                icon: Icons.fact_check,
+                title: l10n.productCheck,
+                subtitle: l10n.qualityVerification,
+                color: Colors.orange,
+                onTap: () => _navigateToProductCheck(),
+              ),
+            ],
+          ),
         ),
 
         const SizedBox(height: 24),
@@ -159,36 +168,79 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   Widget _buildStoreSwitcherPanel() {
-    return Card(
-      color: Theme.of(context).colorScheme.primaryContainer,
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primaryContainer,
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Wrap(
+            Row(
               children: [
-                Icon(
-                  Icons.dashboard,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.dashboard_rounded,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    size: 24,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Multi-Store Overview',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.multiStoreOverview,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
                       ),
+                      Text(
+                        l10n.viewStores,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer
+                                  .withValues(alpha: 0.7),
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
-                TextButton.icon(
+                IconButton.filledTonal(
                   onPressed: () => _navigateToStoreManagement(),
-                  icon: const Icon(Icons.manage_accounts),
-                  label: const Text('Manage'),
+                  icon: const Icon(Icons.settings_rounded),
+                  tooltip: l10n.storeManagement,
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else if (_stores.isEmpty)
@@ -202,6 +254,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   Widget _buildNoStoresWidget() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -216,14 +269,14 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No stores created yet',
+            l10n.noStoresCreated,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Create your first store to start managing inventory',
+            l10n.createFirstStore,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context)
                       .colorScheme
@@ -236,7 +289,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           ElevatedButton.icon(
             onPressed: () => _navigateToAddStore(),
             icon: const Icon(Icons.add),
-            label: const Text('Create Store'),
+            label: Text(l10n.createStore),
           ),
         ],
       ),
@@ -244,11 +297,12 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   Widget _buildStoreSelector() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Select store to view details (${_stores.length} total)',
+          l10n.selectStoreToView(_stores.length),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context)
                     .colorScheme
@@ -325,7 +379,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        store.isActive ? 'Active' : 'Inactive',
+                        store.isActive ? l10n.active : l10n.inactive,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: store.isActive
                                   ? Colors.green[700]
@@ -350,230 +404,187 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   Widget _buildOverviewMetrics() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          _selectedStore != null
-              ? 'Comprehensive Analytics for ${_selectedStore!.name}'
-              : 'Business Intelligence Dashboard',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 16),
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _selectedStore != null
+                ? l10n.comprehensiveAnalytics(_selectedStore!.name)
+                : l10n.businessIntelligenceDashboard,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 20),
 
-        // Store Management Metrics
-        Text(
-          'Store Management',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.purple,
-              ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Total Stores',
-                value: '${_stores.length}',
-                icon: Icons.store,
-                color: Colors.purple,
-                trend: '+0', // TODO: Calculate trend
-                onTap: () => _navigateToStoreManagement(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Active Users',
-                value: '0', // TODO: Get actual data
-                icon: Icons.people,
-                color: Colors.purple,
-                trend: '+0',
-                onTap: () => _navigateToManageUsers(),
-              ),
-            ),
-          ],
-        ),
+          // Store Management Metrics
+          Text(
+            l10n.storeManagement,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.purple,
+                ),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.totalStores,
+            value: '${_stores.length}',
+            icon: Icons.store,
+            color: Colors.purple,
+            trend: '+0', // TODO: Calculate trend
+            onTap: () => _navigateToStoreManagement(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.activeUsers,
+            value: '0', // TODO: Get actual data
+            icon: Icons.people,
+            color: Colors.purple,
+            trend: '+0',
+            onTap: () => _navigateToManageUsers(),
+          ),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        // Sales & Transaction Metrics (Cashier Features)
-        Text(
-          'Sales Performance',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.green,
-              ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Today Sales',
-                value: '0', // TODO: Get actual data
-                icon: Icons.attach_money,
-                color: Colors.green,
-                trend: '+0',
-                subtitle: 'Total revenue',
-                onTap: () => _navigateToSalesReport(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Transactions',
-                value: '0', // TODO: Get actual data
-                icon: Icons.receipt,
-                color: Colors.green,
-                trend: '+0',
-                subtitle: 'All transactions',
-                onTap: () => _navigateToTransactions(),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Avg. Sale',
-                value: '0', // TODO: Get actual data
-                icon: Icons.trending_up,
-                color: Colors.green,
-                trend: '+0',
-                subtitle: 'Average transaction',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Items Sold',
-                value: '0', // TODO: Get actual data
-                icon: Icons.shopping_bag,
-                color: Colors.green,
-                trend: '+0',
-                subtitle: 'Total items',
-              ),
-            ),
-          ],
-        ),
+          // Sales & Transaction Metrics (Cashier Features)
+          Text(
+            l10n.salesPerformance,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green,
+                ),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.todaySales,
+            value: '0', // TODO: Get actual data
+            icon: Icons.attach_money,
+            color: Colors.green,
+            trend: '+0',
+            subtitle: l10n.totalRevenue,
+            onTap: () => _navigateToSalesReport(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.transactions,
+            value: '0', // TODO: Get actual data
+            icon: Icons.receipt,
+            color: Colors.green,
+            trend: '+0',
+            subtitle: l10n.viewTransactions,
+            onTap: () => _navigateToTransactions(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.averageSale,
+            value: '0', // TODO: Get actual data
+            icon: Icons.trending_up,
+            color: Colors.green,
+            trend: '+0',
+            subtitle: l10n.averageTransaction,
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.itemsSold,
+            value: '0', // TODO: Get actual data
+            icon: Icons.shopping_bag,
+            color: Colors.green,
+            trend: '+0',
+            subtitle: l10n.totalItems,
+          ),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        // Inventory & Product Metrics (Admin Features)
-        Text(
-          'Inventory Management',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.blue,
-              ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Total Products',
-                value: '0', // TODO: Get actual data
-                icon: Icons.inventory,
-                color: Colors.blue,
-                trend: '+0',
-                onTap: () => _navigateToInventory(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Categories',
-                value: '0', // TODO: Get actual data
-                icon: Icons.category,
-                color: Colors.blue,
-                trend: '+0',
-                onTap: () => _navigateToCategories(),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Low Stock',
-                value: '0', // TODO: Get actual data
-                icon: Icons.warning,
-                color: Colors.red,
-                trend: '0',
-                onTap: () => _navigateToLowStock(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'In Stock',
-                value: '0', // TODO: Get actual data
-                icon: Icons.check_circle,
-                color: Colors.blue,
-                trend: '+0',
-              ),
-            ),
-          ],
-        ),
+          // Inventory & Product Metrics (Admin Features)
+          Text(
+            l10n.inventoryManagement,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.totalProducts,
+            value: '0', // TODO: Get actual data
+            icon: Icons.inventory,
+            color: Colors.blue,
+            trend: '+0',
+            onTap: () => _navigateToInventory(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.categories,
+            value: '0', // TODO: Get actual data
+            icon: Icons.category,
+            color: Colors.blue,
+            trend: '+0',
+            onTap: () => _navigateToCategories(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.lowStock,
+            value: '0', // TODO: Get actual data
+            icon: Icons.warning,
+            color: Colors.red,
+            trend: '0',
+            onTap: () => _navigateToLowStock(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.inStock,
+            value: '0', // TODO: Get actual data
+            icon: Icons.check_circle,
+            color: Colors.blue,
+            trend: '+0',
+          ),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-        // Staff Operations Metrics (Staff Features)
-        Text(
-          'Operations & Quality Control',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.orange,
-              ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Product Checks',
-                value: '0', // TODO: Get actual data
-                icon: Icons.fact_check,
-                color: Colors.orange,
-                trend: '+0',
-                subtitle: 'Total checks today',
-                onTap: () => _navigateToAllChecks(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Pending Checks',
-                value: '0', // TODO: Get actual data
-                icon: Icons.pending,
-                color: Colors.orange,
-                trend: '0',
-                subtitle: 'Requires attention',
-                onTap: () => _navigateToPendingChecks(),
-              ),
-            ),
-          ],
-        ),
-      ],
+          // Staff Operations Metrics (Staff Features)
+          Text(
+            l10n.operationsQualityControl,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.orange,
+                ),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.productChecks,
+            value: '0', // TODO: Get actual data
+            icon: Icons.fact_check,
+            color: Colors.orange,
+            trend: '+0',
+            subtitle: l10n.totalChecksToday,
+            onTap: () => _navigateToAllChecks(),
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.pendingChecks,
+            value: '0', // TODO: Get actual data
+            icon: Icons.pending,
+            color: Colors.orange,
+            trend: '0',
+            subtitle: l10n.requiresAttention,
+            onTap: () => _navigateToPendingChecks(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildComprehensiveActivitySections() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Recent Transactions (Cashier Feature)
         RecentActivityCard(
-          title: 'Recent Transactions (All Stores)',
+          title: l10n.recentTransactionsAllStores,
           activityType: 'transactions',
           onViewAll: () => _navigateToTransactions(),
           onRefresh: () => _refreshAllData(),
@@ -583,7 +594,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
 
         // Recent Product Checks (Staff Feature)
         RecentActivityCard(
-          title: 'Recent Product Checks',
+          title: l10n.recentProductChecks,
           activityType: 'product-checks',
           onViewAll: () => _navigateToAllChecks(),
           onRefresh: () => _refreshAllData(),
@@ -593,7 +604,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
 
         // Store Activity Overview (Admin Feature)
         RecentActivityCard(
-          title: 'Store Operations Activity',
+          title: l10n.storeOperationsActivity,
           activityType: 'store-specific',
           onViewAll: () => _navigateToStoreActivity(),
           onRefresh: () => _refreshAllData(),
@@ -603,7 +614,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
 
         // Multi-Store Overview (Owner Feature)
         RecentActivityCard(
-          title: 'Multi-Store Summary',
+          title: l10n.multiStoreSummary,
           activityType: 'multi-store',
           onViewAll: () => _navigateToAllActivity(),
           onRefresh: () => _refreshAllData(),

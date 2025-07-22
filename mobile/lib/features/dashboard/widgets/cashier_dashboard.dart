@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../generated/app_localizations.dart';
 
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/routing/app_router.dart';
@@ -18,6 +19,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final storeProvider = context.watch<StoreContextProvider>();
     final currentStore = storeProvider.selectedStore;
 
@@ -37,27 +39,27 @@ class _CashierDashboardState extends State<CashierDashboard> {
         // Quick Sale Actions - Transaction-Focused Navigation
         DashboardQuickActions(
           role: 'CASHIER',
-          title: 'Quick Navigation (Transaction Focus)',
+          title: l10n.quickNavigationTransactionFocus,
           actions: [
             // Point-of-Sale Actions
             QuickAction(
               icon: Icons.add_shopping_cart,
-              title: 'New Sale',
-              subtitle: 'Create sale transaction',
+              title: l10n.newSale,
+              subtitle: l10n.createSale,
               color: Colors.green,
               onTap: () => _navigateToNewSale(),
             ),
             QuickAction(
               icon: Icons.search,
-              title: 'Search Products',
-              subtitle: 'Barcode, IMEI & text search',
+              title: l10n.searchProducts,
+              subtitle: l10n.quickProductLookup,
               color: Colors.orange,
               onTap: () => _navigateToProductSearch(),
             ),
             QuickAction(
               icon: Icons.settings,
-              title: 'Settings',
-              subtitle: 'App settings & store',
+              title: l10n.settings,
+              subtitle: l10n.appSettings,
               color: Colors.grey,
               onTap: () => _navigateToSettings(),
             ),
@@ -73,7 +75,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
         
         // Recent Transactions
         RecentActivityCard(
-          title: 'My Recent Transactions',
+          title: l10n.myRecentTransactions,
           activityType: 'transactions',
           onViewAll: () => _navigateToMySales(),
           onRefresh: () => _refreshData(),
@@ -83,10 +85,28 @@ class _CashierDashboardState extends State<CashierDashboard> {
   }
 
   Widget _buildTransactionFocusHeader(String storeName) {
-    return Card(
-      color: Theme.of(context).colorScheme.primaryContainer,
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primaryContainer,
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
             Container(
@@ -96,7 +116,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                Icons.point_of_sale,
+                Icons.point_of_sale_rounded,
                 color: Theme.of(context).colorScheme.onPrimary,
                 size: 24,
               ),
@@ -107,12 +127,11 @@ class _CashierDashboardState extends State<CashierDashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Point of Sale',
+                    l10n.pointOfSale,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                     ),
                   ),
-                  const SizedBox(height: 4),
                   Text(
                     storeName,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -133,13 +152,13 @@ class _CashierDashboardState extends State<CashierDashboard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.sell,
+                    Icons.sell_rounded,
                     size: 14,
                     color: Colors.green[700],
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Sales Mode',
+                    l10n.salesMode,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.green[700],
                       fontWeight: FontWeight.w600,
@@ -155,77 +174,66 @@ class _CashierDashboardState extends State<CashierDashboard> {
   }
 
   Widget _buildDailySalesSummary() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Today\'s Sales Summary',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.todaysSalesSummary,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Sales Today',
-                value: '0', // TODO: Get actual data
-                icon: Icons.attach_money,
-                color: Colors.green,
-                trend: '+0',
-                subtitle: 'Total revenue',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Transactions',
-                value: '0', // TODO: Get actual data
-                icon: Icons.receipt,
-                color: Colors.blue,
-                trend: '+0',
-                subtitle: 'Number of sales',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Avg. Sale',
-                value: '0', // TODO: Get actual data
-                icon: Icons.trending_up,
-                color: Colors.orange,
-                trend: '+0',
-                subtitle: 'Average transaction',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: DashboardMetricCard(
-                title: 'Items Sold',
-                value: '0', // TODO: Get actual data
-                icon: Icons.shopping_bag,
-                color: Colors.purple,
-                trend: '+0',
-                subtitle: 'Total items',
-              ),
-            ),
-          ],
-        ),
-      ],
+          const SizedBox(height: 20),
+          DashboardMetricCard(
+            title: l10n.todaySales,
+            value: '0', // TODO: Get actual data
+            icon: Icons.attach_money,
+            color: Colors.green,
+            trend: '+0',
+            subtitle: l10n.totalRevenue,
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.transactions,
+            value: '0', // TODO: Get actual data
+            icon: Icons.receipt,
+            color: Colors.blue,
+            trend: '+0',
+            subtitle: l10n.numberOfSales,
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.averageSale,
+            value: '0', // TODO: Get actual data
+            icon: Icons.trending_up,
+            color: Colors.orange,
+            trend: '+0',
+            subtitle: l10n.averageTransaction,
+          ),
+          const SizedBox(height: 12),
+          DashboardMetricCard(
+            title: l10n.itemsSold,
+            value: '0', // TODO: Get actual data
+            icon: Icons.shopping_bag,
+            color: Colors.purple,
+            trend: '+0',
+            subtitle: l10n.totalItems,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildQuickSaleInterface() {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Quick Sale',
+          l10n.newSale,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -245,7 +253,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Fast Sale Options',
+                      l10n.fastSaleOptions,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -254,7 +262,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Select your preferred method to create a sale:',
+                  l10n.selectPreferredMethod,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
@@ -268,7 +276,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
                   child: ElevatedButton.icon(
                     onPressed: () => _navigateToNewSale(),
                     icon: const Icon(Icons.add_shopping_cart),
-                    label: const Text('Create New Sale'),
+                    label: Text(l10n.createNewSale),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -284,7 +292,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
                       child: OutlinedButton.icon(
                         onPressed: () => _navigateToScanAndSell(),
                         icon: const Icon(Icons.qr_code_scanner),
-                        label: const Text('Scan & Sell'),
+                        label: Text(l10n.scanAndSell),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -292,7 +300,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
                       child: OutlinedButton.icon(
                         onPressed: () => _navigateToProductSearch(),
                         icon: const Icon(Icons.search),
-                        label: const Text('Search'),
+                        label: Text(l10n.search),
                       ),
                     ),
                   ],
@@ -306,7 +314,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
                 
                 // Sale Shortcuts
                 Text(
-                  'Quick Actions',
+                  l10n.quickActions,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -318,17 +326,17 @@ class _CashierDashboardState extends State<CashierDashboard> {
                   runSpacing: 8,
                   children: [
                     _buildQuickActionChip(
-                      'Last Sale',
+                      l10n.lastSale,
                       Icons.history,
                       () => _viewLastSale(),
                     ),
                     _buildQuickActionChip(
-                      'Reprint Receipt',
+                      l10n.reprintReceipt,
                       Icons.print,
                       () => _reprintLastReceipt(),
                     ),
                     _buildQuickActionChip(
-                      'Daily Report',
+                      l10n.dailyReport,
                       Icons.analytics,
                       () => _viewDailyReport(),
                     ),
