@@ -10,6 +10,7 @@ import '../../../core/models/api_response.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/routing/app_router.dart';
 import '../widgets/transaction_filter_sheet.dart';
+import '../../../core/utils/number_utils.dart';
 
 /// Modern Transaction List Screen with comprehensive transaction management
 /// 
@@ -402,7 +403,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 Expanded(
                   child: _buildStatItem(
                     'Amount',
-                    totalAmount.toStringAsFixed(0),
+                    NumberUtils.formatDoubleAsInt(totalAmount),
                     Icons.monetization_on,
                     Theme.of(context).colorScheme.secondary,
                   ),
@@ -802,7 +803,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        transaction.calculatedAmount.toInt().toString(),
+                        NumberUtils.formatDoubleAsInt(transaction.calculatedAmount),
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary,

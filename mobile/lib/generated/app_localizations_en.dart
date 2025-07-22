@@ -402,6 +402,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoriesComingSoon => 'Categories feature coming soon!';
 
   @override
+  String get createCategory => 'Create Category';
+
+  @override
+  String get editCategory => 'Edit Category';
+
+  @override
+  String get categoryName => 'Category Name';
+
+  @override
+  String get categoryNameRequired => 'Category name is required';
+
+  @override
+  String get categoryNameMinLength =>
+      'Category name must be at least 2 characters';
+
+  @override
+  String get categoryNameMaxLength =>
+      'Category name must be less than 100 characters';
+
+  @override
+  String get categoryDescription => 'Description';
+
+  @override
+  String get descriptionOptional => 'Description (Optional)';
+
+  @override
+  String get categoryDescriptionHint => 'Enter category description';
+
+  @override
+  String get descriptionMaxLength =>
+      'Description must be less than 500 characters';
+
+  @override
+  String get createCategoryTitle => 'Create New Category';
+
+  @override
+  String get createCategoryDescription =>
+      'Add a new product category to organize your inventory';
+
+  @override
+  String get editCategoryTitle => 'Edit Category';
+
+  @override
+  String get editCategoryDescription =>
+      'Update category details and organization';
+
+  @override
+  String get categoryCreatedSuccessfully => 'Category created successfully';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'Category updated successfully';
+
+  @override
+  String get pleaseSelectStore => 'Please select a store';
+
+  @override
+  String get store => 'Store';
+
+  @override
+  String get categoryNameLabel => 'Category Name';
+
+  @override
+  String get categoryNameHint => 'Enter category name';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get saving => 'Saving...';
+
+  @override
+  String get updateCategory => 'Update Category';
+
+  @override
   String get settings => 'Settings';
 
   @override
@@ -508,6 +582,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get languageSettingsComingSoon =>
       'Language Settings feature coming soon!';
+
+  @override
+  String get selectLanguage => 'Select Language';
+
+  @override
+  String get selectLanguageSubtitle =>
+      'Choose your preferred language for the app interface';
+
+  @override
+  String get languageChangedTo => 'Language changed to';
+
+  @override
+  String get switchedTo => 'Switched to';
 
   @override
   String get storageSettingsComingSoon =>

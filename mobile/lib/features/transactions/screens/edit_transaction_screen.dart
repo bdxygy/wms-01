@@ -8,6 +8,7 @@ import '../../../core/models/user.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/routing/app_router.dart';
 import '../widgets/transaction_form.dart';
+import '../../../core/utils/number_utils.dart';
 
 /// Edit Transaction Screen
 /// 
@@ -126,7 +127,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Transaction updated successfully! Total: ${updatedTransaction.calculatedAmount.toInt()}'),
+            content: Text('Transaction updated successfully! Total: ${NumberUtils.formatDoubleAsInt(updatedTransaction.calculatedAmount)}'),
             backgroundColor: Colors.green,
             action: SnackBarAction(
               label: 'View',

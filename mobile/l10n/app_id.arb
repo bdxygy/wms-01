@@ -1,26 +1,8 @@
 {
   "appTitle": "WMS Mobile",
   "appTagline": "Sistem Manajemen Gudang",
+  
   "initializing": "Menginisialisasi...",
-  "login": "Masuk",
-  "logout": "Keluar",
-  "username": "Nama Pengguna",
-  "password": "Kata Sandi",
-  "forgotPassword": "Lupa Kata Sandi?",
-  "loginError": "Login gagal. Silakan periksa kredensial Anda.",
-  "networkError": "Error jaringan. Silakan periksa koneksi Anda.",
-  "dashboard": "Dasbor",
-  "products": "Produk",
-  "transactions": "Transaksi",
-  "stores": "Toko",
-  "users": "Pengguna",
-  "settings": "Pengaturan",
-  "scanner": "Pemindai",
-  "categories": "Kategori",
-  "selectStore": "Pilih Toko",
-  "welcomeChooseStore": "Selamat datang! Silakan pilih toko untuk melanjutkan.",
-  "noStoresAvailable": "Tidak ada toko yang tersedia untuk akun Anda.",
-  "contactAdmin": "Silakan hubungi administrator Anda.",
   "loading": "Memuat...",
   "retry": "Coba Lagi",
   "save": "Simpan",
@@ -38,13 +20,24 @@
   "success": "Berhasil",
   "warning": "Peringatan",
   "info": "Informasi",
+  "change": "Ubah",
+  "details": "Detail",
+  "manage": "Kelola",
+  "viewAll": "Lihat Semua",
+  
+  "login": "Masuk",
+  "logout": "Keluar",
+  "username": "Nama Pengguna",
+  "password": "Kata Sandi",
+  "email": "Email",
+  "name": "Nama",
   "welcomeToWMS": "Selamat datang di WMS",
   "signInDescription": "Masuk untuk mengakses sistem manajemen gudang Anda",
   "enterUsername": "Masukkan nama pengguna Anda",
-  "usernameRequired": "Nama pengguna diperlukan",
+  "usernameRequired": "Nama pengguna wajib diisi",
   "usernameMinLength": "Nama pengguna harus minimal 3 karakter",
   "enterPassword": "Masukkan kata sandi Anda",
-  "passwordRequired": "Kata sandi diperlukan",
+  "passwordRequired": "Kata sandi wajib diisi",
   "passwordMinLength": "Kata sandi harus minimal 4 karakter",
   "signIn": "Masuk",
   "needHelpSigningIn": "Butuh bantuan untuk masuk?",
@@ -55,5 +48,336 @@
   "networkConnectionError": "Error jaringan. Silakan periksa koneksi internet Anda.",
   "requestTimeout": "Waktu permintaan habis. Silakan coba lagi.",
   "serverError": "Error server. Silakan coba lagi nanti.",
-  "loginFailed": "Login gagal. Silakan coba lagi."
+  "loginFailed": "Login gagal. Silakan coba lagi.",
+  "forgotPassword": "Lupa Kata Sandi?",
+  "showPassword": "Tampilkan kata sandi",
+  "hidePassword": "Sembunyikan kata sandi",
+  "loginError": "Login gagal. Silakan periksa kredensial Anda.",
+  "networkError": "Error jaringan. Silakan periksa koneksi Anda.",
+  "loginInProgress": "Sedang masuk...",
+  "pleaseWait": "Silakan tunggu...",
+  
+  "dashboard": "Dasbor",
+  "ownerDashboard": "Dasbor Pemilik",
+  "adminDashboard": "Dasbor Admin",
+  "staffDashboard": "Dasbor Staf",
+  "cashierDashboard": "Dasbor Kasir",
+  "wmsDashboard": "Dasbor WMS",
+  
+  "products": "Produk",
+  "newSale": "Penjualan Baru",
+  "scanBarcode": "Pindai Barcode",
+  "scanAndSell": "Pindai & Jual",
+  "productCheck": "Pemeriksaan Produk",
+  "findProduct": "Cari Produk",
+  "addProduct": "Tambah Produk",
+  "viewProducts": "Lihat & kelola produk",
+  "viewProductsReadOnly": "Lihat produk (baca saja)",
+  "viewProductsForSale": "Lihat produk untuk dijual",
+  "quickProductLookup": "Pencarian produk cepat",
+  "qualityVerification": "Verifikasi kualitas",
+  "searchProducts": "Cari produk",
+  "productsList": "Daftar Produk",
+  "productsListReadOnly": "Halaman Daftar Produk (baca saja) segera hadir!",
+  "productsListForSales": "Halaman Daftar Produk (untuk penjualan) segera hadir!",
+  "productsListComingSoon": "Halaman Daftar Produk segera hadir!",
+  "productSearchComingSoon": "Fitur Pencarian Produk segera hadir!",
+  "scannerComingSoon": "Fitur Pemindai segera hadir!",
+  "addProductComingSoon": "Fitur Tambah Produk segera hadir!",
+  "productCheckComingSoon": "Fitur Pemeriksaan Produk segera hadir!",
+  
+  "transactions": "Transaksi",
+  "createSale": "Buat transaksi penjualan",
+  "quickBarcodeSale": "Penjualan barcode cepat",
+  "newSaleComingSoon": "Fitur Penjualan Baru segera hadir!",
+  "createSaleComingSoon": "Fitur Buat Penjualan segera hadir!",
+  "scanAndSellComingSoon": "Fitur Pindai & Jual segera hadir!",
+  "createTransactionComingSoon": "Fitur Buat Transaksi segera hadir!",
+  "transactionsListComingSoon": "Halaman Daftar Transaksi segera hadir!",
+  "myTransactionsListComingSoon": "Halaman Daftar Transaksi Saya segera hadir!",
+  "allTransactionsComingSoon": "Fitur Semua Transaksi segera hadir!",
+  "viewTransactions": "Lihat & kelola transaksi",
+  "viewMyTransactions": "Lihat transaksi saya",
+  
+  "stores": "Toko",
+  "selectStore": "Pilih Toko",
+  "currentStore": "Toko Saat Ini",
+  "noStoreSelected": "Tidak ada toko yang dipilih",
+  "changeStore": "Ganti Toko",
+  "storeSelection": "Pemilihan Toko",
+  "welcomeChooseStore": "Selamat datang! Silakan pilih toko untuk melanjutkan.",
+  "noStoresAvailable": "Tidak ada toko yang tersedia untuk akun Anda.",
+  "contactAdmin": "Silakan hubungi administrator Anda.",
+  "storeManagement": "Manajemen Toko",
+  "multiStoreOverview": "Ringkasan Multi-Toko",
+  "noStoresCreated": "Belum ada toko yang dibuat",
+  "createFirstStore": "Buat toko pertama Anda untuk mulai mengelola inventori",
+  "createStore": "Buat Toko",
+  "addStore": "Tambah Toko",
+  "selectStoreToView": "Pilih toko untuk melihat detail ({count} total)",
+  "@selectStoreToView": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storeDetailsComingSoon": "Fitur Detail Toko segera hadir!",
+  "storeManagementComingSoon": "Fitur Manajemen Toko segera hadir!",
+  "addStoreComingSoon": "Fitur Tambah Toko segera hadir!",
+  "viewStores": "Lihat & kelola toko",
+  "storesListComingSoon": "Halaman Daftar Toko segera hadir!",
+  
+  "users": "Pengguna",
+  "manageStaff": "Kelola Staf",
+  "staffManagement": "Manajemen staf",
+  "manageStaffComingSoon": "Fitur Kelola Staf segera hadir!",
+  "userManagementComingSoon": "Fitur Manajemen Pengguna segera hadir!",
+  "usersListComingSoon": "Halaman Daftar Pengguna segera hadir!",
+  "viewUsers": "Lihat & kelola pengguna",
+  
+  "categories": "Kategori",
+  "viewCategories": "Lihat & kelola kategori",
+  "categoriesListComingSoon": "Halaman Daftar Kategori segera hadir!",
+  "categoriesComingSoon": "Fitur Kategori segera hadir!",
+  
+  "createCategory": "Buat Kategori",
+  "editCategory": "Edit Kategori",
+  "categoryName": "Nama Kategori",
+  "categoryNameRequired": "Nama kategori wajib diisi",
+  "categoryNameMinLength": "Nama kategori minimal 2 karakter",
+  "categoryNameMaxLength": "Nama kategori maksimal 100 karakter",
+  "categoryDescription": "Deskripsi",
+  "descriptionOptional": "Deskripsi (Opsional)",
+  "categoryDescriptionHint": "Masukkan deskripsi kategori",
+  "descriptionMaxLength": "Deskripsi maksimal 500 karakter",
+  "createCategoryTitle": "Buat Kategori Baru",
+  "createCategoryDescription": "Tambahkan kategori produk baru untuk mengorganisir inventori Anda",
+  "editCategoryTitle": "Edit Kategori",
+  "editCategoryDescription": "Perbarui detail dan organisasi kategori",
+  "categoryCreatedSuccessfully": "Kategori berhasil dibuat",
+  "categoryUpdatedSuccessfully": "Kategori berhasil diperbarui",
+  "categoryNameLabel": "Nama Kategori",
+  "categoryNameHint": "Masukkan nama kategori",
+  "description": "Deskripsi",
+  "saving": "Menyimpan...",
+  "updateCategory": "Perbarui Kategori",
+  
+  "settings": "Pengaturan",
+  "appSettings": "Pengaturan aplikasi & toko",
+  "appConfiguration": "Konfigurasi aplikasi",
+  "userProfile": "Profil Pengguna",
+  "accountSettings": "Pengaturan Akun",
+  "appSettingsSection": "Pengaturan Aplikasi",
+  "about": "Tentang",
+  "editProfile": "Edit Profil",
+  "changePassword": "Ubah Kata Sandi",
+  "updatePassword": "Perbarui kata sandi akun Anda",
+  "emailSettings": "Pengaturan Email",
+  "manageEmailPreferences": "Kelola preferensi email",
+  "notifications": "Notifikasi",
+  "manageNotificationPreferences": "Kelola preferensi notifikasi",
+  "theme": "Tema",
+  "themeDescription": "Terang, Gelap, atau Sistem",
+  "language": "Bahasa",
+  "changeAppLanguage": "Ubah bahasa aplikasi",
+  "storage": "Penyimpanan",
+  "manageLocalData": "Kelola data lokal dan cache",
+  "appVersion": "Versi Aplikasi",
+  "helpAndSupport": "Bantuan & Dukungan",
+  "getHelpOrSupport": "Dapatkan bantuan atau hubungi dukungan",
+  "privacyPolicy": "Kebijakan Privasi",
+  "viewPrivacyPolicy": "Lihat kebijakan privasi",
+  "appInformation": "Informasi Aplikasi",
+  "warehouseManagementSystem": "Sistem Manajemen Gudang",
+  "appVersionNumber": "WMS Mobile v1.0.0",
+  "appDescription": "Sistem manajemen inventori lengkap untuk melacak barang di beberapa toko.",
+  "editProfileComingSoon": "Fitur Edit Profil segera hadir!",
+  "changePasswordComingSoon": "Fitur Ubah Kata Sandi segera hadir!",
+  "emailSettingsComingSoon": "Fitur Pengaturan Email segera hadir!",
+  "notificationSettingsComingSoon": "Fitur Pengaturan Notifikasi segera hadir!",
+  "themeSettingsComingSoon": "Fitur Pengaturan Tema segera hadir!",
+  "languageSettingsComingSoon": "Fitur Pengaturan Bahasa segera hadir!",
+  "storageSettingsComingSoon": "Fitur Pengaturan Penyimpanan segera hadir!",
+  "helpAndSupportComingSoon": "Fitur Bantuan & Dukungan segera hadir!",
+  "privacyPolicyComingSoon": "Fitur Kebijakan Privasi segera hadir!",
+  
+  "welcomeBackUser": "Selamat datang kembali, {name}!",
+  "@welcomeBackUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "roleOwner": "PEMILIK",
+  "roleAdmin": "ADMIN",
+  "roleStaff": "STAF",
+  "roleCashier": "KASIR",
+  "roleUnknown": "TIDAK DIKENAL",
+  
+  "storeOverviewReadOnly": "Ringkasan Toko (Baca Saja)",
+  "viewMode": "Mode Tampilan",
+  "salesMode": "Mode Penjualan",
+  "pointOfSale": "Titik Penjualan",
+  
+  "storePerformance": "Performa Toko",
+  "todaySales": "Penjualan Hari Ini",
+  "totalRevenue": "Total pendapatan",
+  "averageTransaction": "Rata-rata transaksi",
+  "numberOfSales": "Jumlah penjualan",
+  "averageSale": "Rata-rata Penjualan",
+  "itemsSold": "Item Terjual",
+  "totalItems": "Total item",
+  "lowStock": "Stok Rendah",
+  "inStock": "Tersedia",
+  "myChecksToday": "Pemeriksaan Saya Hari Ini",
+  "pendingChecks": "Pemeriksaan Tertunda",
+  "totalProducts": "Total Produk",
+  "businessIntelligenceDashboard": "Dasbor Intelijen Bisnis",
+  "comprehensiveAnalytics": "Analitik Komprehensif untuk {storeName}",
+  "@comprehensiveAnalytics": {
+    "placeholders": {
+      "storeName": {
+        "type": "String"
+      }
+    }
+  },
+  "salesPerformance": "Performa Penjualan",
+  "inventoryManagement": "Manajemen Inventori",
+  "operationsQualityControl": "Operasi & Kontrol Kualitas",
+  "productChecks": "Pemeriksaan Produk",
+  "totalChecksToday": "Total pemeriksaan hari ini",
+  "requiresAttention": "Perlu perhatian",
+  "activeUsers": "Pengguna Aktif",
+  "totalStores": "Total Toko",
+  
+  "quickNavigation": "Navigasi Cepat",
+  "quickNavigationFullAccess": "Navigasi Cepat (Akses Penuh)",
+  "quickNavigationAdminAccess": "Navigasi Cepat (Akses Admin)",
+  "quickNavigationReadOnlyAccess": "Navigasi Cepat (Akses Baca Saja)",
+  "quickNavigationTransactionFocus": "Navigasi Cepat (Fokus Transaksi)",
+  "quickActions": "Tindakan Cepat",
+  "fastSaleOptions": "Opsi Penjualan Cepat",
+  "selectPreferredMethod": "Pilih metode preferensi Anda untuk membuat penjualan:",
+  "createNewSale": "Buat Penjualan Baru",
+  "lastSale": "Penjualan Terakhir",
+  "reprintReceipt": "Cetak Ulang Resi",
+  "dailyReport": "Laporan Harian",
+  "lastSaleComingSoon": "Fitur Penjualan Terakhir segera hadir!",
+  "reprintReceiptComingSoon": "Fitur Cetak Ulang Resi segera hadir!",
+  "dailyReportComingSoon": "Fitur Laporan Harian segera hadir!",
+  
+  "todaysSalesSummary": "Ringkasan Penjualan Hari Ini",
+  "productChecking": "Pemeriksaan Produk",
+  "quickProductCheck": "Pemeriksaan Produk Cepat",
+  "useButtonsToCheck": "Gunakan tombol di bawah untuk memeriksa status produk dengan cepat:",
+  "storeInformation": "Informasi Toko",
+  "inventoryOverview": "Ringkasan Inventori",
+  
+  "checkStatusPending": "TERTUNDA",
+  "checkStatusOk": "OK",
+  "checkStatusMissing": "HILANG",
+  "checkStatusBroken": "RUSAK",
+  "itemsCount": "{count} item",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusProductsComingSoon": "Fitur produk {status} segera hadir!",
+  "@statusProductsComingSoon": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "recentActivity": "Aktivitas Terkini",
+  "recentTransactions": "Transaksi Terkini",
+  "recentTransactionsAllStores": "Transaksi Terkini (Semua Toko)",
+  "recentProductChecks": "Pemeriksaan Produk Terkini",
+  "myRecentTransactions": "Transaksi Saya Terkini",
+  "storeOperationsActivity": "Aktivitas Operasi Toko",
+  "multiStoreSummary": "Ringkasan Multi-Toko",
+  "allChecksComingSoon": "Fitur Semua Pemeriksaan segera hadir!",
+  "allProductChecksComingSoon": "Fitur Semua Pemeriksaan Produk segera hadir!",
+  "pendingChecksComingSoon": "Fitur Pemeriksaan Tertunda segera hadir!",
+  "mySalesComingSoon": "Fitur Penjualan Saya segera hadir!",
+  "storeActivityComingSoon": "Fitur Aktivitas Toko segera hadir!",
+  "allActivityComingSoon": "Fitur Semua Aktivitas segera hadir!",
+  "reportsComingSoon": "Fitur Laporan segera hadir!",
+  "inventoryComingSoon": "Fitur Inventori segera hadir!",
+  "lowStockComingSoon": "Fitur Stok Rendah segera hadir!",
+  "salesReportComingSoon": "Fitur Laporan Penjualan segera hadir!",
+  
+  "reports": "Laporan",
+  "businessAnalytics": "Analitik bisnis",
+  
+  "active": "Aktif",
+  "inactive": "Tidak Aktif",
+  
+  "unknownRole": "Peran Tidak Dikenal",
+  "roleNotRecognized": "Peran pengguna Anda tidak dikenali. Silakan hubungi administrator Anda.",
+  
+  "oopsWentWrong": "Ups! Terjadi kesalahan",
+  "goToDashboard": "Ke Dasbor",
+  "pageNotFound": "Halaman tidak ditemukan: {location}",
+  "@pageNotFound": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "failedToLogout": "Gagal keluar: {error}",
+  "@failedToLogout": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "welcomeUser": "Selamat datang, {name}!",
+  "@welcomeUser": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseSelectStoreToContine": "Silakan pilih toko untuk melanjutkan",
+  "loadingAvailableStores": "Memuat toko yang tersedia...",
+  "failedToLoadStoresRetry": "Gagal memuat toko. Silakan coba lagi.",
+  "availableStoresCount": "Toko Tersedia ({count})",
+  "@availableStoresCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noStoresAvailableTitle": "Tidak ada toko yang tersedia",
+  "contactAdminForStoreAssignment": "Silakan hubungi administrator Anda untuk ditugaskan ke toko.",
+  "signOut": "Keluar",
+  "continueToDashboard": "Lanjut ke Dasbor",
+  "signOutAndUseDifferentAccount": "Keluar dan gunakan akun berbeda",
+  "failedToSelectStore": "Gagal memilih toko: {error}",
+  "@failedToSelectStore": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectLanguage": "Pilih Bahasa",
+  "selectLanguageSubtitle": "Pilih bahasa yang Anda inginkan untuk antarmuka aplikasi",
+  "languageChangedTo": "Bahasa diubah ke",
+  "switchedTo": "Beralih ke"
 }

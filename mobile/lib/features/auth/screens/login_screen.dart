@@ -7,6 +7,16 @@ import 'package:go_router/go_router.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../generated/app_localizations.dart';
 
+/// Modern Login Screen with Material Design 3 and Smooth Animations
+/// 
+/// Features:
+/// - Clean, modern Material Design 3 interface
+/// - Smooth slide-in animations for form elements
+/// - Elegant gradient background with glass morphism effects
+/// - Enhanced typography and spacing
+/// - Interactive elements with haptic feedback
+/// - Professional loading states and error handling
+/// - Responsive design for different screen sizes
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -14,251 +24,618 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> 
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormBuilderState>();
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
 
+  // Animation controllers
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late AnimationController _errorController;
+  
+  // Animations
+  late Animation<Offset> _logoSlideAnimation;
+  late Animation<Offset> _formSlideAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _errorFadeAnimation;
+  late Animation<Offset> _errorSlideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimations();
+    _startAnimations();
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    _fadeController.dispose();
+    _errorController.dispose();
+    super.dispose();
+  }
+
+  void _setupAnimations() {
+    // Main slide animation controller
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    // Fade animation controller
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    // Error animation controller
+    _errorController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    // Logo slide animation (from top)
+    _logoSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, -1.0),
+      end: const Offset(0.0, 0.0),
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutBack,
+    ));
+
+    // Form slide animation (from bottom)
+    _formSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 0.3),
+      end: const Offset(0.0, 0.0),
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Fade animation
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Error animations
+    _errorFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(_errorController);
+
+    _errorSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, -0.2),
+      end: const Offset(0.0, 0.0),
+    ).animate(CurvedAnimation(
+      parent: _errorController,
+      curve: Curves.easeOutBack,
+    ));
+  }
+
+  void _startAnimations() async {
+    // Start animations with staggered timing
+    _slideController.forward();
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (mounted) {
+      _fadeController.forward();
+    }
+  }
+
+  void _showError(String message) {
+    setState(() {
+      _errorMessage = message;
+    });
+    _errorController.forward();
+  }
+
+  void _hideError() {
+    _errorController.reverse().then((_) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = null;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+      body: Container(
+        // Modern gradient background
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+            ],
+            stops: const [0.0, 0.6, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height - 
+                          MediaQuery.of(context).padding.top - 
+                          MediaQuery.of(context).padding.bottom,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 40),
+                    
+                    // Animated header section
+                    _buildAnimatedHeader(),
+                    
+                    const SizedBox(height: 48),
+                    
+                    // Animated login form
+                    _buildAnimatedLoginForm(),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Animated login button
+                    _buildAnimatedLoginButton(),
+                    
+                    // Error message with animation
+                    if (_errorMessage != null) _buildAnimatedError(),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Footer
+                    _buildAnimatedFooter(),
+                    
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedHeader() {
+    return AnimatedBuilder(
+      animation: _slideController,
+      builder: (context, child) {
+        return SlideTransition(
+          position: _logoSlideAnimation,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Column(
+              children: [
+                // Modern logo with glass morphism effect
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.warehouse_rounded,
+                    size: 60,
+                    color: Colors.white,
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Welcome text with modern typography
+                Text(
+                  AppLocalizations.of(context)!.welcomeToWMS,
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    letterSpacing: 0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Subtitle with elegant styling
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.signInDescription,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAnimatedLoginForm() {
+    return AnimatedBuilder(
+      animation: _slideController,
+      builder: (context, child) {
+        return SlideTransition(
+          position: _formSlideAnimation,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: FormBuilder(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Username field with modern styling
+                    _buildModernTextField(
+                      name: 'username',
+                      label: AppLocalizations.of(context)!.username,
+                      hint: AppLocalizations.of(context)!.enterUsername,
+                      icon: Icons.person_outline_rounded,
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(
+                          errorText: AppLocalizations.of(context)!.usernameRequired
+                        ),
+                        FormBuilderValidators.minLength(
+                          3, 
+                          errorText: AppLocalizations.of(context)!.usernameMinLength
+                        ),
+                      ]),
+                      textInputAction: TextInputAction.next,
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Password field with modern styling
+                    _buildModernTextField(
+                      name: 'password',
+                      label: AppLocalizations.of(context)!.password,
+                      hint: AppLocalizations.of(context)!.enterPassword,
+                      icon: Icons.lock_outline_rounded,
+                      obscureText: _obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword 
+                            ? Icons.visibility_outlined 
+                            : Icons.visibility_off_outlined,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(
+                          errorText: AppLocalizations.of(context)!.passwordRequired
+                        ),
+                        FormBuilderValidators.minLength(
+                          4, 
+                          errorText: AppLocalizations.of(context)!.passwordMinLength
+                        ),
+                      ]),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _handleLogin(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildModernTextField({
+    required String name,
+    required String label,
+    required String hint,
+    required IconData icon,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+    TextInputAction? textInputAction,
+    void Function(String?)? onSubmitted,
+  }) {
+    return FormBuilderTextField(
+      name: name,
+      obscureText: obscureText,
+      validator: validator,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted,
+      style: Theme.of(context).textTheme.bodyLarge,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+            size: 20,
+          ),
+        ),
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.error,
+            width: 2,
+          ),
+        ),
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surface,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedLoginButton() {
+    return AnimatedBuilder(
+      animation: _fadeController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: Container(
+            height: 56,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleLogin,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: _isLoading
+                ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.login_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        AppLocalizations.of(context)!.signIn,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAnimatedError() {
+    return AnimatedBuilder(
+      animation: _errorController,
+      builder: (context, child) {
+        return SlideTransition(
+          position: _errorSlideAnimation,
+          child: FadeTransition(
+            opacity: _errorFadeAnimation,
+            child: Container(
+              margin: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.error_outline_rounded,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _hideError,
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      size: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAnimatedFooter() {
+    return AnimatedBuilder(
+      animation: _fadeController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 60),
+              Text(
+                AppLocalizations.of(context)!.needHelpSigningIn,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
               
-              // App Logo and Title
-              _buildHeader(),
+              const SizedBox(height: 12),
               
-              const SizedBox(height: 48),
-              
-              // Login Form
-              _buildLoginForm(),
+              TextButton.icon(
+                onPressed: _showContactSupport,
+                icon: Icon(
+                  Icons.support_agent_rounded,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                label: Text(
+                  AppLocalizations.of(context)!.contactSupport,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              ),
               
               const SizedBox(height: 24),
               
-              // Login Button
-              _buildLoginButton(),
-              
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 16),
-                _buildErrorMessage(),
-              ],
-              
-              const SizedBox(height: 32),
-              
-              // Footer
-              _buildFooter(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        // App Logo
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(50),
-          ),
-          child: Icon(
-            Icons.warehouse,
-            size: 50,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-        ),
-        
-        const SizedBox(height: 24),
-        
-        // Welcome Text
-        Text(
-          AppLocalizations.of(context)!.welcomeToWMS,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        
-        const SizedBox(height: 8),
-        
-        Text(
-          AppLocalizations.of(context)!.signInDescription,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoginForm() {
-    return FormBuilder(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Username Field
-          FormBuilderTextField(
-            name: 'username',
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.username,
-              hintText: AppLocalizations.of(context)!.enterUsername,
-              prefixIcon: const Icon(Icons.person_outline),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-            ),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(errorText: AppLocalizations.of(context)!.usernameRequired),
-              FormBuilderValidators.minLength(3, errorText: AppLocalizations.of(context)!.usernameMinLength),
-            ]),
-            textInputAction: TextInputAction.next,
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Password Field
-          FormBuilderTextField(
-            name: 'password',
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context)!.password,
-              hintText: AppLocalizations.of(context)!.enterPassword,
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-            ),
-            validator: FormBuilderValidators.compose([
-              FormBuilderValidators.required(errorText: AppLocalizations.of(context)!.passwordRequired),
-              FormBuilderValidators.minLength(4, errorText: AppLocalizations.of(context)!.passwordMinLength),
-            ]),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _handleLogin(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoginButton() {
-    return SizedBox(
-      height: 48,
-      child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ElevatedButton(
-              onPressed: _handleLogin,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(
+              // Version info
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                elevation: 2,
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.signIn,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onPrimary,
+                child: Text(
+                  AppLocalizations.of(context)!.appVersionNumber,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-    );
-  }
-
-  Widget _buildErrorMessage() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Theme.of(context).colorScheme.onErrorContainer,
-            size: 20,
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _errorMessage!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onErrorContainer,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFooter() {
-    return Column(
-      children: [
-        Text(
-          AppLocalizations.of(context)!.needHelpSigningIn,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ),
-        
-        const SizedBox(height: 8),
-        
-        TextButton(
-          onPressed: () {
-            // TODO: Implement contact support
-            _showContactSupport();
-          },
-          child: Text(
-            AppLocalizations.of(context)!.contactSupport,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        
-        const SizedBox(height: 32),
-        
-        // Version info
-        Text(
-          AppLocalizations.of(context)!.appVersionNumber,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -266,7 +643,27 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.contactSupportTitle),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.support_agent_rounded,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(AppLocalizations.of(context)!.contactSupportTitle),
+          ],
+        ),
         content: Text(
           AppLocalizations.of(context)!.contactSupportMessage,
         ),
@@ -282,9 +679,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     // Clear previous error
-    setState(() {
-      _errorMessage = null;
-    });
+    if (_errorMessage != null) {
+      _hideError();
+    }
 
     // Validate form
     if (!(_formKey.currentState?.saveAndValidate() ?? false)) {
@@ -312,9 +709,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _errorMessage = _getErrorMessage(e);
-        });
+        _showError(_getErrorMessage(e));
       }
     } finally {
       if (mounted) {

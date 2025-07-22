@@ -854,6 +854,144 @@ abstract class AppLocalizations {
   /// **'Categories feature coming soon!'**
   String get categoriesComingSoon;
 
+  /// No description provided for @createCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Category'**
+  String get createCategory;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get editCategory;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get categoryName;
+
+  /// No description provided for @categoryNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name is required'**
+  String get categoryNameRequired;
+
+  /// No description provided for @categoryNameMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name must be at least 2 characters'**
+  String get categoryNameMinLength;
+
+  /// No description provided for @categoryNameMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name must be less than 100 characters'**
+  String get categoryNameMaxLength;
+
+  /// No description provided for @categoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get categoryDescription;
+
+  /// No description provided for @descriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Optional)'**
+  String get descriptionOptional;
+
+  /// No description provided for @categoryDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter category description'**
+  String get categoryDescriptionHint;
+
+  /// No description provided for @descriptionMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Description must be less than 500 characters'**
+  String get descriptionMaxLength;
+
+  /// No description provided for @createCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Category'**
+  String get createCategoryTitle;
+
+  /// No description provided for @createCategoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new product category to organize your inventory'**
+  String get createCategoryDescription;
+
+  /// No description provided for @editCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get editCategoryTitle;
+
+  /// No description provided for @editCategoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Update category details and organization'**
+  String get editCategoryDescription;
+
+  /// No description provided for @categoryCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category created successfully'**
+  String get categoryCreatedSuccessfully;
+
+  /// No description provided for @categoryUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category updated successfully'**
+  String get categoryUpdatedSuccessfully;
+
+  /// No description provided for @pleaseSelectStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a store'**
+  String get pleaseSelectStore;
+
+  /// No description provided for @store.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get store;
+
+  /// No description provided for @categoryNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get categoryNameLabel;
+
+  /// No description provided for @categoryNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter category name'**
+  String get categoryNameHint;
+
+  /// No description provided for @description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// No description provided for @saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get saving;
+
+  /// No description provided for @updateCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Category'**
+  String get updateCategory;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
@@ -1063,6 +1201,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language Settings feature coming soon!'**
   String get languageSettingsComingSoon;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// No description provided for @selectLanguageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your preferred language for the app interface'**
+  String get selectLanguageSubtitle;
+
+  /// No description provided for @languageChangedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Language changed to'**
+  String get languageChangedTo;
+
+  /// No description provided for @switchedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to'**
+  String get switchedTo;
 
   /// No description provided for @storageSettingsComingSoon.
   ///

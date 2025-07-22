@@ -8,6 +8,7 @@ import '../../../core/models/user.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../widgets/transaction_form.dart';
+import '../../../core/utils/number_utils.dart';
 
 class CreateTransactionScreen extends StatefulWidget {
   const CreateTransactionScreen({super.key});
@@ -78,7 +79,7 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Transaction created successfully! Total: ${transaction.calculatedAmount.toInt()}'),
+            content: Text('Transaction created successfully! Total: ${NumberUtils.formatDoubleAsInt(transaction.calculatedAmount)}'),
             backgroundColor: Colors.green,
             action: SnackBarAction(
               label: 'View',

@@ -69,16 +69,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get info => 'Informasi';
 
   @override
-  String get change => 'Change';
+  String get change => 'Ubah';
 
   @override
-  String get details => 'Details';
+  String get details => 'Detail';
 
   @override
-  String get manage => 'Manage';
+  String get manage => 'Kelola';
 
   @override
-  String get viewAll => 'View All';
+  String get viewAll => 'Lihat Semua';
 
   @override
   String get login => 'Masuk';
@@ -96,7 +96,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get email => 'Email';
 
   @override
-  String get name => 'Name';
+  String get name => 'Nama';
 
   @override
   String get welcomeToWMS => 'Selamat datang di WMS';
@@ -109,7 +109,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get enterUsername => 'Masukkan nama pengguna Anda';
 
   @override
-  String get usernameRequired => 'Nama pengguna diperlukan';
+  String get usernameRequired => 'Nama pengguna wajib diisi';
 
   @override
   String get usernameMinLength => 'Nama pengguna harus minimal 3 karakter';
@@ -118,7 +118,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get enterPassword => 'Masukkan kata sandi Anda';
 
   @override
-  String get passwordRequired => 'Kata sandi diperlukan';
+  String get passwordRequired => 'Kata sandi wajib diisi';
 
   @override
   String get passwordMinLength => 'Kata sandi harus minimal 4 karakter';
@@ -160,10 +160,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get forgotPassword => 'Lupa Kata Sandi?';
 
   @override
-  String get showPassword => 'Show password';
+  String get showPassword => 'Tampilkan kata sandi';
 
   @override
-  String get hidePassword => 'Hide password';
+  String get hidePassword => 'Sembunyikan kata sandi';
 
   @override
   String get loginError => 'Login gagal. Silakan periksa kredensial Anda.';
@@ -172,133 +172,132 @@ class AppLocalizationsId extends AppLocalizations {
   String get networkError => 'Error jaringan. Silakan periksa koneksi Anda.';
 
   @override
-  String get loginInProgress => 'Logging in...';
+  String get loginInProgress => 'Sedang masuk...';
 
   @override
-  String get pleaseWait => 'Please wait...';
+  String get pleaseWait => 'Silakan tunggu...';
 
   @override
   String get dashboard => 'Dasbor';
 
   @override
-  String get ownerDashboard => 'Owner Dashboard';
+  String get ownerDashboard => 'Dasbor Pemilik';
 
   @override
-  String get adminDashboard => 'Admin Dashboard';
+  String get adminDashboard => 'Dasbor Admin';
 
   @override
-  String get staffDashboard => 'Staff Dashboard';
+  String get staffDashboard => 'Dasbor Staf';
 
   @override
-  String get cashierDashboard => 'Cashier Dashboard';
+  String get cashierDashboard => 'Dasbor Kasir';
 
   @override
-  String get wmsDashboard => 'WMS Dashboard';
+  String get wmsDashboard => 'Dasbor WMS';
 
   @override
   String get products => 'Produk';
 
   @override
-  String get newSale => 'New Sale';
+  String get newSale => 'Penjualan Baru';
 
   @override
-  String get scanBarcode => 'Scan Barcode';
+  String get scanBarcode => 'Pindai Barcode';
 
   @override
-  String get scanAndSell => 'Scan & Sell';
+  String get scanAndSell => 'Pindai & Jual';
 
   @override
-  String get productCheck => 'Product Check';
+  String get productCheck => 'Pemeriksaan Produk';
 
   @override
-  String get findProduct => 'Find Product';
+  String get findProduct => 'Cari Produk';
 
   @override
-  String get addProduct => 'Add Product';
+  String get addProduct => 'Tambah Produk';
 
   @override
-  String get viewProducts => 'View & manage products';
+  String get viewProducts => 'Lihat & kelola produk';
 
   @override
-  String get viewProductsReadOnly => 'View products (read-only)';
+  String get viewProductsReadOnly => 'Lihat produk (baca saja)';
 
   @override
-  String get viewProductsForSale => 'View products for sale';
+  String get viewProductsForSale => 'Lihat produk untuk dijual';
 
   @override
-  String get quickProductLookup => 'Quick product lookup';
+  String get quickProductLookup => 'Pencarian produk cepat';
 
   @override
-  String get qualityVerification => 'Quality verification';
+  String get qualityVerification => 'Verifikasi kualitas';
 
   @override
-  String get searchProducts => 'Search products';
+  String get searchProducts => 'Cari produk';
 
   @override
-  String get productsList => 'Products List';
+  String get productsList => 'Daftar Produk';
 
   @override
   String get productsListReadOnly =>
-      'Products List (read-only) page coming soon!';
+      'Halaman Daftar Produk (baca saja) segera hadir!';
 
   @override
   String get productsListForSales =>
-      'Products List (for sales) page coming soon!';
+      'Halaman Daftar Produk (untuk penjualan) segera hadir!';
 
   @override
-  String get productsListComingSoon => 'Products List page coming soon!';
+  String get productsListComingSoon => 'Halaman Daftar Produk segera hadir!';
 
   @override
-  String get productSearchComingSoon => 'Product Search feature coming soon!';
+  String get productSearchComingSoon => 'Fitur Pencarian Produk segera hadir!';
 
   @override
-  String get scannerComingSoon => 'Scanner feature coming soon!';
+  String get scannerComingSoon => 'Fitur Pemindai segera hadir!';
 
   @override
-  String get addProductComingSoon => 'Add Product feature coming soon!';
+  String get addProductComingSoon => 'Fitur Tambah Produk segera hadir!';
 
   @override
-  String get productCheckComingSoon => 'Product Check feature coming soon!';
+  String get productCheckComingSoon => 'Fitur Pemeriksaan Produk segera hadir!';
 
   @override
   String get transactions => 'Transaksi';
 
   @override
-  String get createSale => 'Create sale transaction';
+  String get createSale => 'Buat transaksi penjualan';
 
   @override
-  String get quickBarcodeSale => 'Quick barcode sale';
+  String get quickBarcodeSale => 'Penjualan barcode cepat';
 
   @override
-  String get newSaleComingSoon => 'New Sale feature coming soon!';
+  String get newSaleComingSoon => 'Fitur Penjualan Baru segera hadir!';
 
   @override
-  String get createSaleComingSoon => 'Create Sale feature coming soon!';
+  String get createSaleComingSoon => 'Fitur Buat Penjualan segera hadir!';
 
   @override
-  String get scanAndSellComingSoon => 'Scan & Sell feature coming soon!';
+  String get scanAndSellComingSoon => 'Fitur Pindai & Jual segera hadir!';
 
   @override
   String get createTransactionComingSoon =>
-      'Create Transaction feature coming soon!';
+      'Fitur Buat Transaksi segera hadir!';
 
   @override
   String get transactionsListComingSoon =>
-      'Transactions List page coming soon!';
+      'Halaman Daftar Transaksi segera hadir!';
 
   @override
   String get myTransactionsListComingSoon =>
-      'My Transactions List page coming soon!';
+      'Halaman Daftar Transaksi Saya segera hadir!';
 
   @override
-  String get allTransactionsComingSoon =>
-      'All Transactions feature coming soon!';
+  String get allTransactionsComingSoon => 'Fitur Semua Transaksi segera hadir!';
 
   @override
-  String get viewTransactions => 'View & manage transactions';
+  String get viewTransactions => 'Lihat & kelola transaksi';
 
   @override
-  String get viewMyTransactions => 'View my transactions';
+  String get viewMyTransactions => 'Lihat transaksi saya';
 
   @override
   String get stores => 'Toko';
@@ -307,16 +306,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get selectStore => 'Pilih Toko';
 
   @override
-  String get currentStore => 'Current Store';
+  String get currentStore => 'Toko Saat Ini';
 
   @override
-  String get noStoreSelected => 'No store selected';
+  String get noStoreSelected => 'Tidak ada toko yang dipilih';
 
   @override
-  String get changeStore => 'Change Store';
+  String get changeStore => 'Ganti Toko';
 
   @override
-  String get storeSelection => 'Store Selection';
+  String get storeSelection => 'Pemilihan Toko';
 
   @override
   String get welcomeChooseStore =>
@@ -330,515 +329,601 @@ class AppLocalizationsId extends AppLocalizations {
   String get contactAdmin => 'Silakan hubungi administrator Anda.';
 
   @override
-  String get storeManagement => 'Store Management';
+  String get storeManagement => 'Manajemen Toko';
 
   @override
-  String get multiStoreOverview => 'Multi-Store Overview';
+  String get multiStoreOverview => 'Ringkasan Multi-Toko';
 
   @override
-  String get noStoresCreated => 'No stores created yet';
+  String get noStoresCreated => 'Belum ada toko yang dibuat';
 
   @override
   String get createFirstStore =>
-      'Create your first store to start managing inventory';
+      'Buat toko pertama Anda untuk mulai mengelola inventori';
 
   @override
-  String get createStore => 'Create Store';
+  String get createStore => 'Buat Toko';
 
   @override
-  String get addStore => 'Add Store';
+  String get addStore => 'Tambah Toko';
 
   @override
   String selectStoreToView(int count) {
-    return 'Select store to view details ($count total)';
+    return 'Pilih toko untuk melihat detail ($count total)';
   }
 
   @override
-  String get storeDetailsComingSoon => 'Store Details feature coming soon!';
+  String get storeDetailsComingSoon => 'Fitur Detail Toko segera hadir!';
 
   @override
-  String get storeManagementComingSoon =>
-      'Store Management feature coming soon!';
+  String get storeManagementComingSoon => 'Fitur Manajemen Toko segera hadir!';
 
   @override
-  String get addStoreComingSoon => 'Add Store feature coming soon!';
+  String get addStoreComingSoon => 'Fitur Tambah Toko segera hadir!';
 
   @override
-  String get viewStores => 'View & manage stores';
+  String get viewStores => 'Lihat & kelola toko';
 
   @override
-  String get storesListComingSoon => 'Stores List page coming soon!';
+  String get storesListComingSoon => 'Halaman Daftar Toko segera hadir!';
 
   @override
   String get users => 'Pengguna';
 
   @override
-  String get manageStaff => 'Manage Staff';
+  String get manageStaff => 'Kelola Staf';
 
   @override
-  String get staffManagement => 'Staff management';
+  String get staffManagement => 'Manajemen staf';
 
   @override
-  String get manageStaffComingSoon => 'Manage Staff feature coming soon!';
+  String get manageStaffComingSoon => 'Fitur Kelola Staf segera hadir!';
 
   @override
-  String get userManagementComingSoon => 'User Management feature coming soon!';
+  String get userManagementComingSoon =>
+      'Fitur Manajemen Pengguna segera hadir!';
 
   @override
-  String get usersListComingSoon => 'Users List page coming soon!';
+  String get usersListComingSoon => 'Halaman Daftar Pengguna segera hadir!';
 
   @override
-  String get viewUsers => 'View & manage users';
+  String get viewUsers => 'Lihat & kelola pengguna';
 
   @override
   String get categories => 'Kategori';
 
   @override
-  String get viewCategories => 'View & manage categories';
+  String get viewCategories => 'Lihat & kelola kategori';
 
   @override
-  String get categoriesListComingSoon => 'Categories List page coming soon!';
+  String get categoriesListComingSoon =>
+      'Halaman Daftar Kategori segera hadir!';
 
   @override
-  String get categoriesComingSoon => 'Categories feature coming soon!';
+  String get categoriesComingSoon => 'Fitur Kategori segera hadir!';
+
+  @override
+  String get createCategory => 'Buat Kategori';
+
+  @override
+  String get editCategory => 'Edit Kategori';
+
+  @override
+  String get categoryName => 'Nama Kategori';
+
+  @override
+  String get categoryNameRequired => 'Nama kategori wajib diisi';
+
+  @override
+  String get categoryNameMinLength => 'Nama kategori minimal 2 karakter';
+
+  @override
+  String get categoryNameMaxLength => 'Nama kategori maksimal 100 karakter';
+
+  @override
+  String get categoryDescription => 'Deskripsi';
+
+  @override
+  String get descriptionOptional => 'Deskripsi (Opsional)';
+
+  @override
+  String get categoryDescriptionHint => 'Masukkan deskripsi kategori';
+
+  @override
+  String get descriptionMaxLength => 'Deskripsi maksimal 500 karakter';
+
+  @override
+  String get createCategoryTitle => 'Buat Kategori Baru';
+
+  @override
+  String get createCategoryDescription =>
+      'Tambahkan kategori produk baru untuk mengorganisir inventori Anda';
+
+  @override
+  String get editCategoryTitle => 'Edit Kategori';
+
+  @override
+  String get editCategoryDescription =>
+      'Perbarui detail dan organisasi kategori';
+
+  @override
+  String get categoryCreatedSuccessfully => 'Kategori berhasil dibuat';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'Kategori berhasil diperbarui';
+
+  @override
+  String get pleaseSelectStore => 'Please select a store';
+
+  @override
+  String get store => 'Store';
+
+  @override
+  String get categoryNameLabel => 'Nama Kategori';
+
+  @override
+  String get categoryNameHint => 'Masukkan nama kategori';
+
+  @override
+  String get description => 'Deskripsi';
+
+  @override
+  String get saving => 'Menyimpan...';
+
+  @override
+  String get updateCategory => 'Perbarui Kategori';
 
   @override
   String get settings => 'Pengaturan';
 
   @override
-  String get appSettings => 'App settings & store';
+  String get appSettings => 'Pengaturan aplikasi & toko';
 
   @override
-  String get appConfiguration => 'App configuration';
+  String get appConfiguration => 'Konfigurasi aplikasi';
 
   @override
-  String get userProfile => 'User Profile';
+  String get userProfile => 'Profil Pengguna';
 
   @override
-  String get accountSettings => 'Account Settings';
+  String get accountSettings => 'Pengaturan Akun';
 
   @override
-  String get appSettingsSection => 'App Settings';
+  String get appSettingsSection => 'Pengaturan Aplikasi';
 
   @override
-  String get about => 'About';
+  String get about => 'Tentang';
 
   @override
-  String get editProfile => 'Edit Profile';
+  String get editProfile => 'Edit Profil';
 
   @override
-  String get changePassword => 'Change Password';
+  String get changePassword => 'Ubah Kata Sandi';
 
   @override
-  String get updatePassword => 'Update your account password';
+  String get updatePassword => 'Perbarui kata sandi akun Anda';
 
   @override
-  String get emailSettings => 'Email Settings';
+  String get emailSettings => 'Pengaturan Email';
 
   @override
-  String get manageEmailPreferences => 'Manage email preferences';
+  String get manageEmailPreferences => 'Kelola preferensi email';
 
   @override
-  String get notifications => 'Notifications';
+  String get notifications => 'Notifikasi';
 
   @override
-  String get manageNotificationPreferences => 'Manage notification preferences';
+  String get manageNotificationPreferences => 'Kelola preferensi notifikasi';
 
   @override
-  String get theme => 'Theme';
+  String get theme => 'Tema';
 
   @override
-  String get themeDescription => 'Light, Dark, or System';
+  String get themeDescription => 'Terang, Gelap, atau Sistem';
 
   @override
-  String get language => 'Language';
+  String get language => 'Bahasa';
 
   @override
-  String get changeAppLanguage => 'Change app language';
+  String get changeAppLanguage => 'Ubah bahasa aplikasi';
 
   @override
-  String get storage => 'Storage';
+  String get storage => 'Penyimpanan';
 
   @override
-  String get manageLocalData => 'Manage local data and cache';
+  String get manageLocalData => 'Kelola data lokal dan cache';
 
   @override
-  String get appVersion => 'App Version';
+  String get appVersion => 'Versi Aplikasi';
 
   @override
-  String get helpAndSupport => 'Help & Support';
+  String get helpAndSupport => 'Bantuan & Dukungan';
 
   @override
-  String get getHelpOrSupport => 'Get help or contact support';
+  String get getHelpOrSupport => 'Dapatkan bantuan atau hubungi dukungan';
 
   @override
-  String get privacyPolicy => 'Privacy Policy';
+  String get privacyPolicy => 'Kebijakan Privasi';
 
   @override
-  String get viewPrivacyPolicy => 'View privacy policy';
+  String get viewPrivacyPolicy => 'Lihat kebijakan privasi';
 
   @override
-  String get appInformation => 'App Information';
+  String get appInformation => 'Informasi Aplikasi';
 
   @override
-  String get warehouseManagementSystem => 'Warehouse Management System';
+  String get warehouseManagementSystem => 'Sistem Manajemen Gudang';
 
   @override
   String get appVersionNumber => 'WMS Mobile v1.0.0';
 
   @override
   String get appDescription =>
-      'A complete inventory management system for tracking goods across multiple stores.';
+      'Sistem manajemen inventori lengkap untuk melacak barang di beberapa toko.';
 
   @override
-  String get editProfileComingSoon => 'Edit Profile feature coming soon!';
+  String get editProfileComingSoon => 'Fitur Edit Profil segera hadir!';
 
   @override
-  String get changePasswordComingSoon => 'Change Password feature coming soon!';
+  String get changePasswordComingSoon => 'Fitur Ubah Kata Sandi segera hadir!';
 
   @override
-  String get emailSettingsComingSoon => 'Email Settings feature coming soon!';
+  String get emailSettingsComingSoon => 'Fitur Pengaturan Email segera hadir!';
 
   @override
   String get notificationSettingsComingSoon =>
-      'Notification Settings feature coming soon!';
+      'Fitur Pengaturan Notifikasi segera hadir!';
 
   @override
-  String get themeSettingsComingSoon => 'Theme Settings feature coming soon!';
+  String get themeSettingsComingSoon => 'Fitur Pengaturan Tema segera hadir!';
 
   @override
   String get languageSettingsComingSoon =>
-      'Language Settings feature coming soon!';
+      'Fitur Pengaturan Bahasa segera hadir!';
+
+  @override
+  String get selectLanguage => 'Pilih Bahasa';
+
+  @override
+  String get selectLanguageSubtitle =>
+      'Pilih bahasa yang Anda inginkan untuk antarmuka aplikasi';
+
+  @override
+  String get languageChangedTo => 'Bahasa diubah ke';
+
+  @override
+  String get switchedTo => 'Beralih ke';
 
   @override
   String get storageSettingsComingSoon =>
-      'Storage Settings feature coming soon!';
+      'Fitur Pengaturan Penyimpanan segera hadir!';
 
   @override
-  String get helpAndSupportComingSoon => 'Help & Support feature coming soon!';
+  String get helpAndSupportComingSoon =>
+      'Fitur Bantuan & Dukungan segera hadir!';
 
   @override
-  String get privacyPolicyComingSoon => 'Privacy Policy feature coming soon!';
+  String get privacyPolicyComingSoon => 'Fitur Kebijakan Privasi segera hadir!';
 
   @override
   String welcomeBackUser(String name) {
-    return 'Welcome back, $name!';
+    return 'Selamat datang kembali, $name!';
   }
 
   @override
-  String get roleOwner => 'OWNER';
+  String get roleOwner => 'PEMILIK';
 
   @override
   String get roleAdmin => 'ADMIN';
 
   @override
-  String get roleStaff => 'STAFF';
+  String get roleStaff => 'STAF';
 
   @override
-  String get roleCashier => 'CASHIER';
+  String get roleCashier => 'KASIR';
 
   @override
-  String get roleUnknown => 'UNKNOWN';
+  String get roleUnknown => 'TIDAK DIKENAL';
 
   @override
-  String get storeOverviewReadOnly => 'Store Overview (Read-Only)';
+  String get storeOverviewReadOnly => 'Ringkasan Toko (Baca Saja)';
 
   @override
-  String get viewMode => 'View Mode';
+  String get viewMode => 'Mode Tampilan';
 
   @override
-  String get salesMode => 'Sales Mode';
+  String get salesMode => 'Mode Penjualan';
 
   @override
-  String get pointOfSale => 'Point of Sale';
+  String get pointOfSale => 'Titik Penjualan';
 
   @override
-  String get storePerformance => 'Store Performance';
+  String get storePerformance => 'Performa Toko';
 
   @override
-  String get todaySales => 'Today Sales';
+  String get todaySales => 'Penjualan Hari Ini';
 
   @override
-  String get totalRevenue => 'Total revenue';
+  String get totalRevenue => 'Total pendapatan';
 
   @override
-  String get averageTransaction => 'Average transaction';
+  String get averageTransaction => 'Rata-rata transaksi';
 
   @override
-  String get numberOfSales => 'Number of sales';
+  String get numberOfSales => 'Jumlah penjualan';
 
   @override
-  String get averageSale => 'Avg. Sale';
+  String get averageSale => 'Rata-rata Penjualan';
 
   @override
-  String get itemsSold => 'Items Sold';
+  String get itemsSold => 'Item Terjual';
 
   @override
-  String get totalItems => 'Total items';
+  String get totalItems => 'Total item';
 
   @override
-  String get lowStock => 'Low Stock';
+  String get lowStock => 'Stok Rendah';
 
   @override
-  String get inStock => 'In Stock';
+  String get inStock => 'Tersedia';
 
   @override
-  String get myChecksToday => 'My Checks Today';
+  String get myChecksToday => 'Pemeriksaan Saya Hari Ini';
 
   @override
-  String get pendingChecks => 'Pending Checks';
+  String get pendingChecks => 'Pemeriksaan Tertunda';
 
   @override
-  String get totalProducts => 'Total Products';
+  String get totalProducts => 'Total Produk';
 
   @override
-  String get businessIntelligenceDashboard => 'Business Intelligence Dashboard';
+  String get businessIntelligenceDashboard => 'Dasbor Intelijen Bisnis';
 
   @override
   String comprehensiveAnalytics(String storeName) {
-    return 'Comprehensive Analytics for $storeName';
+    return 'Analitik Komprehensif untuk $storeName';
   }
 
   @override
-  String get salesPerformance => 'Sales Performance';
+  String get salesPerformance => 'Performa Penjualan';
 
   @override
-  String get inventoryManagement => 'Inventory Management';
+  String get inventoryManagement => 'Manajemen Inventori';
 
   @override
-  String get operationsQualityControl => 'Operations & Quality Control';
+  String get operationsQualityControl => 'Operasi & Kontrol Kualitas';
 
   @override
-  String get productChecks => 'Product Checks';
+  String get productChecks => 'Pemeriksaan Produk';
 
   @override
-  String get totalChecksToday => 'Total checks today';
+  String get totalChecksToday => 'Total pemeriksaan hari ini';
 
   @override
-  String get requiresAttention => 'Requires attention';
+  String get requiresAttention => 'Perlu perhatian';
 
   @override
-  String get activeUsers => 'Active Users';
+  String get activeUsers => 'Pengguna Aktif';
 
   @override
-  String get totalStores => 'Total Stores';
+  String get totalStores => 'Total Toko';
 
   @override
-  String get quickNavigation => 'Quick Navigation';
+  String get quickNavigation => 'Navigasi Cepat';
 
   @override
-  String get quickNavigationFullAccess => 'Quick Navigation (Full Access)';
+  String get quickNavigationFullAccess => 'Navigasi Cepat (Akses Penuh)';
 
   @override
-  String get quickNavigationAdminAccess => 'Quick Navigation (Admin Access)';
+  String get quickNavigationAdminAccess => 'Navigasi Cepat (Akses Admin)';
 
   @override
   String get quickNavigationReadOnlyAccess =>
-      'Quick Navigation (Read-Only Access)';
+      'Navigasi Cepat (Akses Baca Saja)';
 
   @override
   String get quickNavigationTransactionFocus =>
-      'Quick Navigation (Transaction Focus)';
+      'Navigasi Cepat (Fokus Transaksi)';
 
   @override
-  String get quickActions => 'Quick Actions';
+  String get quickActions => 'Tindakan Cepat';
 
   @override
-  String get fastSaleOptions => 'Fast Sale Options';
+  String get fastSaleOptions => 'Opsi Penjualan Cepat';
 
   @override
   String get selectPreferredMethod =>
-      'Select your preferred method to create a sale:';
+      'Pilih metode preferensi Anda untuk membuat penjualan:';
 
   @override
-  String get createNewSale => 'Create New Sale';
+  String get createNewSale => 'Buat Penjualan Baru';
 
   @override
-  String get lastSale => 'Last Sale';
+  String get lastSale => 'Penjualan Terakhir';
 
   @override
-  String get reprintReceipt => 'Reprint Receipt';
+  String get reprintReceipt => 'Cetak Ulang Resi';
 
   @override
-  String get dailyReport => 'Daily Report';
+  String get dailyReport => 'Laporan Harian';
 
   @override
-  String get lastSaleComingSoon => 'Last Sale feature coming soon!';
+  String get lastSaleComingSoon => 'Fitur Penjualan Terakhir segera hadir!';
 
   @override
-  String get reprintReceiptComingSoon => 'Reprint Receipt feature coming soon!';
+  String get reprintReceiptComingSoon => 'Fitur Cetak Ulang Resi segera hadir!';
 
   @override
-  String get dailyReportComingSoon => 'Daily Report feature coming soon!';
+  String get dailyReportComingSoon => 'Fitur Laporan Harian segera hadir!';
 
   @override
-  String get todaysSalesSummary => 'Today\'s Sales Summary';
+  String get todaysSalesSummary => 'Ringkasan Penjualan Hari Ini';
 
   @override
-  String get productChecking => 'Product Checking';
+  String get productChecking => 'Pemeriksaan Produk';
 
   @override
-  String get quickProductCheck => 'Quick Product Check';
+  String get quickProductCheck => 'Pemeriksaan Produk Cepat';
 
   @override
   String get useButtonsToCheck =>
-      'Use the buttons below to quickly check product status:';
+      'Gunakan tombol di bawah untuk memeriksa status produk dengan cepat:';
 
   @override
-  String get storeInformation => 'Store Information';
+  String get storeInformation => 'Informasi Toko';
 
   @override
-  String get inventoryOverview => 'Inventory Overview';
+  String get inventoryOverview => 'Ringkasan Inventori';
 
   @override
-  String get checkStatusPending => 'PENDING';
+  String get checkStatusPending => 'TERTUNDA';
 
   @override
   String get checkStatusOk => 'OK';
 
   @override
-  String get checkStatusMissing => 'MISSING';
+  String get checkStatusMissing => 'HILANG';
 
   @override
-  String get checkStatusBroken => 'BROKEN';
+  String get checkStatusBroken => 'RUSAK';
 
   @override
   String itemsCount(int count) {
-    return '$count items';
+    return '$count item';
   }
 
   @override
   String statusProductsComingSoon(String status) {
-    return '$status products feature coming soon!';
+    return 'Fitur produk $status segera hadir!';
   }
 
   @override
-  String get recentActivity => 'Recent Activity';
+  String get recentActivity => 'Aktivitas Terkini';
 
   @override
-  String get recentTransactions => 'Recent Transactions';
+  String get recentTransactions => 'Transaksi Terkini';
 
   @override
-  String get recentTransactionsAllStores => 'Recent Transactions (All Stores)';
+  String get recentTransactionsAllStores => 'Transaksi Terkini (Semua Toko)';
 
   @override
-  String get recentProductChecks => 'Recent Product Checks';
+  String get recentProductChecks => 'Pemeriksaan Produk Terkini';
 
   @override
-  String get myRecentTransactions => 'My Recent Transactions';
+  String get myRecentTransactions => 'Transaksi Saya Terkini';
 
   @override
-  String get storeOperationsActivity => 'Store Operations Activity';
+  String get storeOperationsActivity => 'Aktivitas Operasi Toko';
 
   @override
-  String get multiStoreSummary => 'Multi-Store Summary';
+  String get multiStoreSummary => 'Ringkasan Multi-Toko';
 
   @override
-  String get allChecksComingSoon => 'All Checks feature coming soon!';
+  String get allChecksComingSoon => 'Fitur Semua Pemeriksaan segera hadir!';
 
   @override
   String get allProductChecksComingSoon =>
-      'All Product Checks feature coming soon!';
+      'Fitur Semua Pemeriksaan Produk segera hadir!';
 
   @override
-  String get pendingChecksComingSoon => 'Pending Checks feature coming soon!';
+  String get pendingChecksComingSoon =>
+      'Fitur Pemeriksaan Tertunda segera hadir!';
 
   @override
-  String get mySalesComingSoon => 'My Sales feature coming soon!';
+  String get mySalesComingSoon => 'Fitur Penjualan Saya segera hadir!';
 
   @override
-  String get storeActivityComingSoon => 'Store Activity feature coming soon!';
+  String get storeActivityComingSoon => 'Fitur Aktivitas Toko segera hadir!';
 
   @override
-  String get allActivityComingSoon => 'All Activity feature coming soon!';
+  String get allActivityComingSoon => 'Fitur Semua Aktivitas segera hadir!';
 
   @override
-  String get reportsComingSoon => 'Reports feature coming soon!';
+  String get reportsComingSoon => 'Fitur Laporan segera hadir!';
 
   @override
-  String get inventoryComingSoon => 'Inventory feature coming soon!';
+  String get inventoryComingSoon => 'Fitur Inventori segera hadir!';
 
   @override
-  String get lowStockComingSoon => 'Low Stock feature coming soon!';
+  String get lowStockComingSoon => 'Fitur Stok Rendah segera hadir!';
 
   @override
-  String get salesReportComingSoon => 'Sales Report feature coming soon!';
+  String get salesReportComingSoon => 'Fitur Laporan Penjualan segera hadir!';
 
   @override
-  String get reports => 'Reports';
+  String get reports => 'Laporan';
 
   @override
-  String get businessAnalytics => 'Business analytics';
+  String get businessAnalytics => 'Analitik bisnis';
 
   @override
-  String get active => 'Active';
+  String get active => 'Aktif';
 
   @override
-  String get inactive => 'Inactive';
+  String get inactive => 'Tidak Aktif';
 
   @override
-  String get unknownRole => 'Unknown Role';
+  String get unknownRole => 'Peran Tidak Dikenal';
 
   @override
   String get roleNotRecognized =>
-      'Your user role is not recognized. Please contact your administrator.';
+      'Peran pengguna Anda tidak dikenali. Silakan hubungi administrator Anda.';
 
   @override
-  String get oopsWentWrong => 'Oops! Something went wrong';
+  String get oopsWentWrong => 'Ups! Terjadi kesalahan';
 
   @override
-  String get goToDashboard => 'Go to Dashboard';
+  String get goToDashboard => 'Ke Dasbor';
 
   @override
   String pageNotFound(String location) {
-    return 'Page not found: $location';
+    return 'Halaman tidak ditemukan: $location';
   }
 
   @override
   String failedToLogout(String error) {
-    return 'Failed to logout: $error';
+    return 'Gagal keluar: $error';
   }
 
   @override
   String welcomeUser(String name) {
-    return 'Welcome, $name!';
+    return 'Selamat datang, $name!';
   }
 
   @override
-  String get pleaseSelectStoreToContine => 'Please select a store to continue';
+  String get pleaseSelectStoreToContine =>
+      'Silakan pilih toko untuk melanjutkan';
 
   @override
-  String get loadingAvailableStores => 'Loading available stores...';
+  String get loadingAvailableStores => 'Memuat toko yang tersedia...';
 
   @override
-  String get failedToLoadStoresRetry =>
-      'Failed to load stores. Please try again.';
+  String get failedToLoadStoresRetry => 'Gagal memuat toko. Silakan coba lagi.';
 
   @override
   String availableStoresCount(int count) {
-    return 'Available Stores ($count)';
+    return 'Toko Tersedia ($count)';
   }
 
   @override
-  String get noStoresAvailableTitle => 'No stores available';
+  String get noStoresAvailableTitle => 'Tidak ada toko yang tersedia';
 
   @override
   String get contactAdminForStoreAssignment =>
-      'Please contact your administrator to assign you to a store.';
+      'Silakan hubungi administrator Anda untuk ditugaskan ke toko.';
 
   @override
-  String get signOut => 'Sign Out';
+  String get signOut => 'Keluar';
 
   @override
-  String get continueToDashboard => 'Continue to Dashboard';
+  String get continueToDashboard => 'Lanjut ke Dasbor';
 
   @override
-  String get signOutAndUseDifferentAccount =>
-      'Sign out and use different account';
+  String get signOutAndUseDifferentAccount => 'Keluar dan gunakan akun berbeda';
 
   @override
   String failedToSelectStore(String error) {
-    return 'Failed to select store: $error';
+    return 'Gagal memilih toko: $error';
   }
 
   @override

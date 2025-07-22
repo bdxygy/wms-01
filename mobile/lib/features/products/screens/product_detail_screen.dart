@@ -13,6 +13,7 @@ import '../../../core/services/print_launcher.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/utils/number_utils.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -254,7 +255,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 Name: ${_product!.name}
 SKU: ${_product!.sku}
 Barcode: ${_product!.barcode}
-Price: ${(_product!.salePrice ?? _product!.purchasePrice).toInt()}
+Price: ${NumberUtils.formatDoubleAsInt(_product!.salePrice ?? _product!.purchasePrice)}
 Quantity: ${_product!.quantity}''';
 
     Clipboard.setData(ClipboardData(text: productInfo));
@@ -852,7 +853,7 @@ Quantity: ${_product!.quantity}''';
               Expanded(
                 child: _buildPriceCard(
                   'Purchase Price',
-                  _product!.purchasePrice.toInt().toString(),
+                  NumberUtils.formatDoubleAsInt(_product!.purchasePrice),
                   Icons.shopping_cart_outlined,
                   Colors.blue,
                 ),
@@ -861,7 +862,7 @@ Quantity: ${_product!.quantity}''';
               Expanded(
                 child: _buildPriceCard(
                   'Sale Price',
-                  _product!.salePrice?.toInt().toString() ?? 'Not set',
+                  _product!.salePrice != null ? NumberUtils.formatDoubleAsInt(_product!.salePrice!) : 'Not set',
                   Icons.sell_outlined,
                   Colors.green,
                 ),

@@ -12,6 +12,8 @@ import '../../../core/services/product_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/widgets/cards.dart';
+import '../../../core/utils/scanner_launcher.dart';
+import '../../../core/utils/number_utils.dart';
 
 // Transaction form data model
 class TransactionFormData {
@@ -249,6 +251,79 @@ class _TransactionFormState extends State<TransactionForm> {
         price: item.price,
       );
     });
+  }
+
+  void _scanBarcodeForProduct() {
+    // Guard clause: ensure widget is mounted
+    if (!mounted) return;
+
+    // Guard clause: ensure store is selected
+    if (_selectedStoreId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a store first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    ScannerLauncher.forProductSearch(
+      context,
+      title: 'Scan Product Barcode',
+      subtitle: 'Scan barcode to add product to transaction',
+      onProductFound: (product) {
+        // Guard clause: ensure widget is mounted after scan
+        if (!mounted) return;
+        
+        // Guard clause: validate product belongs to selected store
+        if (product.storeId != _selectedStoreId) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Product "${product.name}" does not belong to the selected store'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+        
+        // Auto-add the found product
+        _addProduct(product);
+        
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Product added: ${product.name}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      onProductNotFound: (barcode) {
+        // Guard clause: ensure widget is mounted after scan
+        if (!mounted) return;
+        
+        // Show product not found message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No product found with barcode: $barcode'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'Search Manually',
+              textColor: Colors.white,
+              onPressed: () {
+                _searchController.text = barcode;
+                _searchProducts(barcode);
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 
   bool _validateForm() {
@@ -587,7 +662,7 @@ class _TransactionFormState extends State<TransactionForm> {
         _buildSectionLabel('Add Products'),
         const SizedBox(height: 8),
 
-        // Search bar with quantity
+        // Search bar with scan button and quantity
         Row(
           children: [
             Expanded(
@@ -614,6 +689,28 @@ class _TransactionFormState extends State<TransactionForm> {
                     setState(() => _showSearchResults = true);
                   }
                 },
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Barcode scan button
+            InkWell(
+              onTap: _scanBarcodeForProduct,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor.withOpacity(0.3),
+                  ),
+                ),
+                child: Icon(
+                  Icons.qr_code_scanner,
+                  color: Theme.of(context).primaryColor,
+                  size: 20,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -649,8 +746,8 @@ class _TransactionFormState extends State<TransactionForm> {
               ),
               itemBuilder: (context, index) {
                 final product = _searchResults[index];
-                final price =
-                    (product.salePrice ?? product.purchasePrice).toInt();
+                final price = product.salePrice ?? product.purchasePrice;
+                final formattedPrice = NumberUtils.formatDoubleAsInt(price);
                 return ListTile(
                   dense: true,
                   contentPadding:
@@ -662,7 +759,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     maxLines: 1,
                   ),
                   subtitle: Text(
-                    'Price: $price | Stock: ${product.quantity}',
+                    'Price: $formattedPrice | Stock: ${product.quantity}',
                     style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -722,7 +819,7 @@ class _TransactionFormState extends State<TransactionForm> {
             _buildSectionLabel('Items (${_items.length})'),
             if (_items.isNotEmpty)
               Text(
-                'Total: ${_items.fold(0.0, (sum, item) => sum + (item.price * item.quantity)).toInt()}',
+                'Total: ${NumberUtils.formatDoubleAsInt(_items.fold(0.0, (sum, item) => sum + (item.price * item.quantity)))}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
@@ -760,7 +857,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   maxLines: 1,
                 ),
                 subtitle: Text(
-                  '${item.price.toInt()} × ${item.quantity} = ${(item.price * item.quantity).toInt()}',
+                  '${NumberUtils.formatDoubleAsInt(item.price)} × ${item.quantity} = ${NumberUtils.formatDoubleAsInt(item.price * item.quantity)}',
                   style: Theme.of(context).textTheme.bodySmall,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -913,7 +1010,7 @@ class _TransactionFormState extends State<TransactionForm> {
                     ),
               ),
               Text(
-                totalAmount.toInt().toString(),
+                NumberUtils.formatDoubleAsInt(totalAmount),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).primaryColor,

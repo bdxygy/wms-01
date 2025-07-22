@@ -8,6 +8,7 @@ import '../../../core/models/transaction.dart';
 import '../../../core/models/user.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/utils/number_utils.dart';
 
 /// Modern Transaction Detail Screen with comprehensive transaction information
 ///
@@ -508,7 +509,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _transaction!.calculatedAmount.toInt().toString(),
+                        NumberUtils.formatDoubleAsInt(_transaction!.calculatedAmount),
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -851,7 +852,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           Expanded(
             flex: 1,
             child: Text(
-              item.price.toInt().toString(),
+              NumberUtils.formatDoubleAsInt(item.price),
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.right,
             ),
@@ -859,7 +860,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           Expanded(
             flex: 1,
             child: Text(
-              (item.amount ?? 0.0).toInt().toString(),
+              NumberUtils.formatDoubleAsInt(item.amount ?? 0.0),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -1172,7 +1173,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           ),
           const SizedBox(width: 8),
           Text(
-            item.price.toInt().toString(),
+            NumberUtils.formatDoubleAsInt(item.price),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

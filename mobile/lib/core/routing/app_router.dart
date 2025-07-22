@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../auth/auth_provider.dart';
 import '../providers/store_context_provider.dart';
+import '../models/category.dart';
 import '../../generated/app_localizations.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
@@ -15,6 +16,7 @@ import '../../features/transactions/screens/transactions_screen.dart';
 import '../../features/stores/screens/stores_screen.dart';
 import '../../features/users/screens/users_screen.dart';
 import '../../features/categories/screens/categories_screen.dart';
+import '../../features/categories/widgets/category_form_screen.dart';
 import '../../features/checks/screens/checks_screen.dart';
 import '../../features/products/screens/product_detail_screen.dart';
 import '../../features/products/screens/create_product_screen.dart';
@@ -180,6 +182,26 @@ class AppRouter {
           name: 'categories',
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const CategoriesScreen(),
+          routes: [
+            // Create Category Route
+            GoRoute(
+              path: '/create',
+              name: 'create-category',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) => const CategoryFormScreen(),
+            ),
+            // Edit Category Route
+            GoRoute(
+              path: '/:id/edit',
+              name: 'edit-category',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>?;
+                final category = extra?['category'];
+                return CategoryFormScreen(category: category);
+              },
+            ),
+          ],
         ),
 
         // Checks Route (Product Checks)
@@ -445,6 +467,18 @@ class AppRouter {
 
   static void goToEditTransaction(BuildContext context, String transactionId) {
     context.goNamed('edit-transaction', pathParameters: {'id': transactionId});
+  }
+
+  // Category navigation helpers
+  static void goToCreateCategory(BuildContext context) {
+    context.goNamed('create-category');
+  }
+
+  static void goToEditCategory(BuildContext context, String categoryId, Category category) {
+    context.goNamed('edit-category', 
+      pathParameters: {'id': categoryId},
+      extra: {'category': category}
+    );
   }
 
   // Check if current route requires authentication

@@ -70,10 +70,12 @@ class UpdateProductRequest {
 @JsonSerializable()
 class CreateCategoryRequest {
   final String name;
+  final String storeId;
   final String? description;
 
   CreateCategoryRequest({
     required this.name,
+    required this.storeId,
     this.description,
   });
 

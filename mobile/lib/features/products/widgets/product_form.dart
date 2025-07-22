@@ -11,6 +11,9 @@ import '../../../core/services/product_service.dart';
 import '../../../core/validators/product_validators.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/auth/auth_provider.dart';
+import '../../../core/routing/app_router.dart';
+import '../../../core/utils/scanner_launcher.dart';
+import '../../../core/utils/number_utils.dart';
 
 /// Form data model for product creation/editing
 class ProductFormData {
@@ -117,8 +120,8 @@ class _ProductFormState extends State<ProductForm> {
     final product = widget.initialProduct!;
     _nameController.text = product.name;
     _skuController.text = product.sku;
-    _purchasePriceController.text = product.purchasePrice.toInt().toString();
-    _salePriceController.text = product.salePrice?.toInt().toString() ?? '';
+    _purchasePriceController.text = NumberUtils.formatWithDots(product.purchasePrice.toInt());
+    _salePriceController.text = product.salePrice != null ? NumberUtils.formatWithDots(product.salePrice!.toInt()) : '';
     _quantityController.text = product.quantity.toString();
     _selectedStoreId = product.storeId;
     _selectedCategoryId = product.categoryId;
@@ -249,6 +252,69 @@ class _ProductFormState extends State<ProductForm> {
     if (_isImeiProduct && value != '1') {
       _quantityController.text = '1';
     }
+  }
+
+  void _scanBarcodeForImei(int index) {
+    // Guard clause: ensure widget is mounted
+    if (!mounted) return;
+
+    ScannerLauncher.forImeiEntry(
+      context,
+      title: 'Scan IMEI Barcode',
+      subtitle: 'Scan barcode to auto-fill IMEI number',
+      onImeiScanned: (scannedImei) {
+        // Guard clause: ensure widget is mounted after scan
+        if (!mounted) return;
+        
+        // Guard clause: ensure index is still valid
+        if (index >= _imeis.length) return;
+        
+        setState(() {
+          _imeis[index] = scannedImei;
+        });
+        
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('IMEI filled: ${scannedImei.length > 8 ? scannedImei.substring(0, 8) : scannedImei}...'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  void _addImeiWithScan() {
+    // Guard clause: ensure widget is mounted
+    if (!mounted) return;
+
+    ScannerLauncher.forImeiEntry(
+      context,
+      title: 'Scan IMEI Barcode',
+      subtitle: 'Scan barcode to add new IMEI',
+      onImeiScanned: (scannedImei) {
+        // Guard clause: ensure widget is mounted after scan
+        if (!mounted) return;
+        
+        setState(() {
+          _imeis.add(scannedImei);
+        });
+        
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('IMEI added: ${scannedImei.length > 8 ? scannedImei.substring(0, 8) : scannedImei}...'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    );
   }
 
   bool _validateForm() {
@@ -498,7 +564,24 @@ class _ProductFormState extends State<ProductForm> {
                 validator: ProductValidators.validatePurchasePrice,
                 icon: Icons.shopping_cart,
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+                onChanged: (value) {
+                  // Guard clause: handle null value
+                  if (value == null) return;
+                  
+                  final cleanValue = value.replaceAll('.', '');
+                  if (cleanValue.isNotEmpty) {
+                    final formatted = NumberUtils.formatWithDots(int.tryParse(cleanValue) ?? 0);
+                    if (formatted != value) {
+                      _purchasePriceController.value = TextEditingValue(
+                        text: formatted,
+                        selection: TextSelection.collapsed(offset: formatted.length),
+                      );
+                    }
+                  }
+                },
               ),
             ),
             const SizedBox(width: 12),
@@ -509,11 +592,28 @@ class _ProductFormState extends State<ProductForm> {
                 hint: '0',
                 validator: (value) => ProductValidators.validateSalePrice(
                   value,
-                  double.tryParse(_purchasePriceController.text),
+                  NumberUtils.parseDotFormatted(_purchasePriceController.text),
                 ),
                 icon: Icons.sell,
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+                onChanged: (value) {
+                  // Guard clause: handle null value
+                  if (value == null) return;
+                  
+                  final cleanValue = value.replaceAll('.', '');
+                  if (cleanValue.isNotEmpty) {
+                    final formatted = NumberUtils.formatWithDots(int.tryParse(cleanValue) ?? 0);
+                    if (formatted != value) {
+                      _salePriceController.value = TextEditingValue(
+                        text: formatted,
+                        selection: TextSelection.collapsed(offset: formatted.length),
+                      );
+                    }
+                  }
+                },
               ),
             ),
           ],
@@ -836,28 +936,55 @@ class _ProductFormState extends State<ProductForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.format_list_numbered,
-                size: 20,
-                color: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'IMEI Numbers',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+              // Title row
+              Row(
+                children: [
+                  Icon(
+                    Icons.format_list_numbered,
+                    size: 20,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'IMEI Numbers',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
+                  ),
+                ],
               ),
-              const Spacer(),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _imeis.add('');
-                  });
-                },
-                child: const Text('Add IMEI'),
+              const SizedBox(height: 8),
+              
+              // Action buttons row
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _imeis.add('');
+                        });
+                      },
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Add IMEI'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: () => _addImeiWithScan(),
+                      icon: const Icon(Icons.qr_code_scanner, size: 16),
+                      label: const Text('Scan & Add'),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -882,15 +1009,41 @@ class _ProductFormState extends State<ProductForm> {
                   children: [
                     Expanded(
                       child: TextFormField(
+                        key: ValueKey('imei_${index}_${_imeis[index]}'),
                         initialValue: _imeis[index],
                         decoration: InputDecoration(
-                          hintText: 'Enter IMEI number',
+                          hintText: 'Enter IMEI or scan barcode',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 10),
+                              horizontal: 12, vertical: 12),
                           isDense: true,
+                          suffixIcon: Container(
+                            width: 48,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () => _scanBarcodeForImei(index),
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(
+                                      Icons.qr_code_scanner,
+                                      color: Theme.of(context).primaryColor,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                         onChanged: (value) {
                           if (index < _imeis.length) {
@@ -939,10 +1092,10 @@ class _ProductFormState extends State<ProductForm> {
   String get productName => _nameController.text.trim();
   String get sku => _skuController.text.trim();
   double get purchasePrice =>
-      double.tryParse(_purchasePriceController.text) ?? 0.0;
+      NumberUtils.parseDotFormatted(_purchasePriceController.text);
   double? get salePrice {
     final text = _salePriceController.text.trim();
-    return text.isEmpty ? null : double.tryParse(text);
+    return text.isEmpty ? null : NumberUtils.parseDotFormatted(text);
   }
 
   int get quantity => int.tryParse(_quantityController.text) ?? 0;

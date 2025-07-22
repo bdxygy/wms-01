@@ -60,6 +60,7 @@ CreateCategoryRequest _$CreateCategoryRequestFromJson(
         Map<String, dynamic> json) =>
     CreateCategoryRequest(
       name: json['name'] as String,
+      storeId: json['storeId'] as String,
       description: json['description'] as String?,
     );
 
@@ -67,6 +68,7 @@ Map<String, dynamic> _$CreateCategoryRequestToJson(
         CreateCategoryRequest instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'storeId': instance.storeId,
       'description': instance.description,
     };
 

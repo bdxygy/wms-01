@@ -98,65 +98,42 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         const SizedBox(height: 24),
 
         // Comprehensive Quick Actions (List Page Navigation)
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.3),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        DashboardQuickActions(
+          role: 'OWNER',
+          title: l10n.quickNavigationFullAccess,
+          actions: [
+            // Primary Business Actions
+            QuickAction(
+              icon: Icons.add_shopping_cart,
+              title: l10n.newSale,
+              subtitle: l10n.createSale,
+              color: Colors.green,
+              onTap: () => _navigateToCreateSale(),
             ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: DashboardQuickActions(
-            role: 'OWNER',
-            title: l10n.quickNavigationFullAccess,
-            actions: [
-              // Primary Business Actions
-              QuickAction(
-                icon: Icons.add_shopping_cart,
-                title: l10n.newSale,
-                subtitle: l10n.createSale,
-                color: Colors.green,
-                onTap: () => _navigateToCreateSale(),
-              ),
-              QuickAction(
-                icon: Icons.category,
-                title: l10n.categories,
-                subtitle: l10n.viewCategories,
-                color: Colors.blue,
-                onTap: () => _navigateToCategories(),
-              ),
+            QuickAction(
+              icon: Icons.category,
+              title: l10n.categories,
+              subtitle: l10n.viewCategories,
+              color: Colors.blue,
+              onTap: () => _navigateToCategories(),
+            ),
 
-              // Product Tools
-              QuickAction(
-                icon: Icons.search,
-                title: l10n.searchProducts,
-                subtitle: l10n.quickProductLookup,
-                color: Colors.orange,
-                onTap: () => _navigateToProductSearch(),
-              ),
-              QuickAction(
-                icon: Icons.fact_check,
-                title: l10n.productCheck,
-                subtitle: l10n.qualityVerification,
-                color: Colors.orange,
-                onTap: () => _navigateToProductCheck(),
-              ),
-            ],
-          ),
+            // Product Tools
+            QuickAction(
+              icon: Icons.search,
+              title: l10n.searchProducts,
+              subtitle: l10n.quickProductLookup,
+              color: Colors.orange,
+              onTap: () => _navigateToProductSearch(),
+            ),
+            QuickAction(
+              icon: Icons.fact_check,
+              title: l10n.productCheck,
+              subtitle: l10n.qualityVerification,
+              color: Colors.orange,
+              onTap: () => _navigateToProductCheck(),
+            ),
+          ],
         ),
 
         const SizedBox(height: 24),

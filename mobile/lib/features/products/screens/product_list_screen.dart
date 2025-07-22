@@ -12,6 +12,7 @@ import '../../../core/providers/store_context_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/app_bars.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/utils/number_utils.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -794,7 +795,7 @@ class _CompactProductCard extends StatelessWidget {
                     child: _buildInfoChip(
                       context,
                       Icons.attach_money,
-                      '${(product.salePrice ?? product.purchasePrice).toInt()}',
+                      NumberUtils.formatDoubleAsInt(product.salePrice ?? product.purchasePrice),
                     ),
                   ),
                   const SizedBox(width: 8),
