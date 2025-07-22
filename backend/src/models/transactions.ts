@@ -21,7 +21,7 @@ export const transactions = sqliteTable('transactions', {
   to: text('to'),
   customerPhone: text('customer_phone'),
   amount: real('amount'),
-  isFinished: integer('is_finished', { mode: 'boolean' }).default(false),
+  isFinished: integer('is_finished', { mode: 'boolean' }).default(true),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 

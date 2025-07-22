@@ -58,11 +58,11 @@ class AppProvider extends ChangeNotifier {
   }
 
   String formatCurrency(double amount) {
-    return '${_currency.symbol}${amount.toStringAsFixed(2)}';
+    return '${_currency.symbol}${amount.toInt()}';
   }
 
   String formatCurrencyWithCode(double amount) {
-    return '${_currency.symbol}${amount.toStringAsFixed(2)} ${_currency.code}';
+    return '${_currency.symbol}${amount.toInt()} ${_currency.code}';
   }
 
   // Initialize app settings

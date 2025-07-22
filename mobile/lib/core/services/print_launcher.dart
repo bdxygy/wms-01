@@ -351,7 +351,7 @@ class PrintLauncher {
     // Price (if available)
     if (product.salePrice != null) {
       bytes += generator.text(
-        '\$${product.salePrice!.toStringAsFixed(2)}',
+        '\$${product.salePrice!.toInt()}',
         styles: PosStyles(
           align: PosAlign.center,
           bold: true,
@@ -468,11 +468,11 @@ class PrintLauncher {
 
       bytes += generator.row([
         PosColumn(
-          text: '$quantity x \$${price.toStringAsFixed(2)}',
+          text: '$quantity x \$${price.toInt()}',
           width: 8,
         ),
         PosColumn(
-          text: '\$${subtotal.toStringAsFixed(2)}',
+          text: '\$${subtotal.toInt()}',
           width: 4,
           styles: PosStyles(align: PosAlign.right),
         ),
@@ -489,7 +489,7 @@ class PrintLauncher {
         styles: PosStyles(bold: true, height: PosTextSize.size2),
       ),
       PosColumn(
-        text: '\$${totalAmount.toStringAsFixed(2)}',
+        text: '\$${totalAmount.toInt()}',
         width: 4,
         styles: PosStyles(
           align: PosAlign.right,
@@ -575,7 +575,7 @@ class PrintLauncher {
     bytes += generator.row([
       PosColumn(text: 'Amount:', width: 6, styles: PosStyles(bold: true)),
       PosColumn(
-          text: '\$${totalAmount.toStringAsFixed(2)}',
+          text: '\$${totalAmount.toInt()}',
           width: 6,
           styles: PosStyles(align: PosAlign.right)),
     ]);

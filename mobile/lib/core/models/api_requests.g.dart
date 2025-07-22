@@ -185,6 +185,7 @@ TransactionItemRequest _$TransactionItemRequestFromJson(
         Map<String, dynamic> json) =>
     TransactionItemRequest(
       productId: json['productId'] as String,
+      name: json['name'] as String,
       quantity: (json['quantity'] as num).toInt(),
       price: (json['price'] as num).toDouble(),
     );
@@ -193,6 +194,7 @@ Map<String, dynamic> _$TransactionItemRequestToJson(
         TransactionItemRequest instance) =>
     <String, dynamic>{
       'productId': instance.productId,
+      'name': instance.name,
       'quantity': instance.quantity,
       'price': instance.price,
     };

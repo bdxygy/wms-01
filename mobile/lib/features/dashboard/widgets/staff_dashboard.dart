@@ -34,20 +34,11 @@ class _StaffDashboardState extends State<StaffDashboard> {
         
         const SizedBox(height: 24),
         
-        // Limited Quick Actions - Read-Only List Navigation
+        // Limited Quick Actions - Staff Tools
         DashboardQuickActions(
           role: 'STAFF',
           title: 'Quick Navigation (Read-Only Access)',
           actions: [
-            // Read-Only List Page Navigation (STAFF can view products only)
-            QuickAction(
-              icon: Icons.inventory_2,
-              title: 'Products',
-              subtitle: 'View products (read-only)',
-              color: Colors.blue,
-              onTap: () => _navigateToProductsList(),
-            ),
-            
             // Staff Tools
             QuickAction(
               icon: Icons.search,
@@ -361,12 +352,6 @@ class _StaffDashboardState extends State<StaffDashboard> {
   }
 
   // Read-Only List Page Navigation (STAFF can view products only)
-  void _navigateToProductsList() {
-    // TODO: Navigate to products list (read-only with search)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Products List (read-only) page coming soon!')),
-    );
-  }
 
   void _navigateToProductSearch() {
     AppRouter.goToProductSearch(context);

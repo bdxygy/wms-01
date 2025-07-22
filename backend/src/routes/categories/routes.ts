@@ -16,7 +16,8 @@ import {
   createCategoryHandler, 
   getCategoryHandler, 
   listCategoriesHandler, 
-  updateCategoryHandler 
+  updateCategoryHandler,
+  deleteCategoryHandler
 } from "./category.handlers";
 
 const categories = new Hono();
@@ -56,6 +57,16 @@ categories.put(
   requireCategoryAccess(extractParamId("id")),
   ValidationMiddleware.body(updateCategorySchema),
   updateCategoryHandler
+);
+
+// Delete category endpoint (OWNER or ADMIN only)
+categories.delete(
+  "/:id",
+  authMiddleware,
+  requireOwnerOrAdmin(),
+  ValidationMiddleware.params(categoryIdParamSchema),
+  requireCategoryAccess(extractParamId("id")),
+  deleteCategoryHandler
 );
 
 export { categories as categoryRoutes };

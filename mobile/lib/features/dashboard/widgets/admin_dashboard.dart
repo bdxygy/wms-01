@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/routing/app_router.dart';
@@ -39,30 +40,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           role: 'ADMIN',
           title: 'Quick Navigation (Admin Access)',
           actions: [
-            // List Page Navigation (ADMIN can access products, categories, transactions)
-            QuickAction(
-              icon: Icons.inventory_2,
-              title: 'Products',
-              subtitle: 'View & manage products',
-              color: Colors.blue,
-              onTap: () => _navigateToProductsList(),
-            ),
-            QuickAction(
-              icon: Icons.category,
-              title: 'Categories',
-              subtitle: 'View & manage categories',
-              color: Colors.blue,
-              onTap: () => _navigateToCategoriesList(),
-            ),
-            QuickAction(
-              icon: Icons.receipt_long,
-              title: 'Transactions',
-              subtitle: 'View & manage transactions',
-              color: Colors.green,
-              onTap: () => _navigateToTransactionsList(),
-            ),
-            
-            // Quick Actions (Creation & Tools)
+            // Primary Business Actions
             QuickAction(
               icon: Icons.add_shopping_cart,
               title: 'New Sale',
@@ -70,6 +48,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
               color: Colors.green,
               onTap: () => _navigateToCreateSale(),
             ),
+            QuickAction(
+              icon: Icons.category,
+              title: 'Categories',
+              subtitle: 'View & manage categories',
+              color: Colors.blue,
+              onTap: () => _navigateToCategories(),
+            ),
+            
+            // Store Management
             QuickAction(
               icon: Icons.search,
               title: 'Search Products',
@@ -355,44 +342,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   // List Page Navigation (ADMIN access to products, categories, transactions)
-  void _navigateToProductsList() {
-    // TODO: Navigate to products list with search & create button
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Products List page coming soon!')),
-    );
-  }
-
-  void _navigateToCategoriesList() {
-    // TODO: Navigate to categories list with search & create button
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Categories List page coming soon!')),
-    );
-  }
-
-  void _navigateToTransactionsList() {
-    // TODO: Navigate to transactions list with search functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Transactions List page coming soon!')),
-    );
+  void _navigateToCategories() {
+    context.go('/categories');
   }
 
   void _navigateToCreateSale() {
-    // TODO: Navigate to create sale screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Sale feature coming soon!')),
-    );
-  }
-
-  void _navigateToAddProduct() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add Product feature coming soon!')),
-    );
-  }
-
-  void _navigateToCreateTransaction() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Transaction feature coming soon!')),
-    );
+    AppRouter.goToCreateTransaction(context);
   }
 
   void _navigateToManageStaff() {

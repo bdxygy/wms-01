@@ -235,6 +235,97 @@ void performAction() {
 - **Better error handling**: Clear validation boundaries
 - **Improved maintainability**: Easier to modify and debug
 
+### 📱 **RESPONSIVE UI PATTERNS** 📱
+
+**MANDATORY**: All widgets, screens, and UI components must be responsive and handle text/content overflow gracefully.
+
+#### **Required Responsive Patterns:**
+
+```dart
+// ✅ CORRECT: Use Flexible/Expanded for Row/Column children
+Row(
+  children: [
+    Flexible(
+      child: Text('Label', overflow: TextOverflow.ellipsis),
+    ),
+    Expanded(
+      child: Text('Long content that might overflow', 
+        overflow: TextOverflow.ellipsis),
+    ),
+  ],
+)
+
+// ✅ CORRECT: Wrap long content with overflow handling
+Container(
+  constraints: BoxConstraints(maxWidth: 200),
+  child: Text(
+    'Very long text that needs to be truncated',
+    overflow: TextOverflow.ellipsis,
+    maxLines: 1,
+  ),
+)
+
+// ✅ CORRECT: Use SingleChildScrollView for potentially long content
+SingleChildScrollView(
+  child: Column(
+    children: [...],
+  ),
+)
+
+// ❌ WRONG: Fixed width containers without overflow handling
+Container(
+  width: 200,
+  child: Text('This might overflow'), // Will cause RenderFlex errors
+)
+
+// ❌ WRONG: Row/Column without Flexible/Expanded
+Row(
+  children: [
+    Text('Label'),
+    Text('Very long content'), // Will overflow
+  ],
+)
+```
+
+#### **Responsive UI Requirements:**
+- **Always use `Flexible` or `Expanded`** for Row/Column children that contain text
+- **Always add `overflow: TextOverflow.ellipsis`** for text that might be long
+- **Use `SingleChildScrollView`** for content that might exceed screen height
+- **Test on different screen sizes** - mobile, tablet, and desktop
+- **Handle edge cases** - very long product names, UUIDs, currency amounts
+- **Wrap content appropriately** using `Wrap` widget when needed
+- **Use `LayoutBuilder`** for complex responsive layouts
+- **Add `maxLines`** parameter for multi-line text control
+
+### 📱 **MOBILE DEVICE COMPATIBILITY** 📱
+
+**MANDATORY**: All mobile UI must be optimized for standard smartphone dimensions and ensure perfect compatibility with common device sizes.
+
+#### **Target Device Specifications:**
+- **Reference Device**: 168.6 x 76.6 x 9 mm (6.64 x 3.02 x 0.35 in)
+- **Screen Width**: ~76.6mm (~375-390px logical pixels)
+- **Usable Height**: ~150mm (~700-800px logical pixels after system UI)
+
+#### **Mobile Design Requirements:**
+- **Text Breaking**: NO text overflow or word breaking - use `TextOverflow.ellipsis` and `maxLines`
+- **Button Positioning**: Minimum 44x44 logical pixels touch targets, properly spaced
+- **Content Spacing**: Minimum 16px margins, 8-24px between sections
+- **Scrollable Content**: Always use `SingleChildScrollView` for forms and long lists
+- **Responsive Widgets**: All components must adapt to narrow screen widths
+- **Safe Area**: Respect device safe areas with `SafeArea` widget
+- **Keyboard Handling**: Form fields must handle keyboard overlay properly
+- **Portrait Orientation**: Primary design for portrait mode (76.6mm width)
+- **Compact Layout**: Efficient use of vertical space, collapsible sections where appropriate
+
+#### **Mobile Testing Checklist:**
+- ✅ **No horizontal overflow** on narrow screens (375px width)
+- ✅ **Text readability** with proper font sizes (14sp minimum)
+- ✅ **Touch targets** meet accessibility guidelines (44dp minimum)
+- ✅ **Form usability** with keyboard navigation and proper scrolling
+- ✅ **Content priority** - most important information visible without scrolling
+- ✅ **Loading states** properly centered and sized for mobile
+- ✅ **Error messages** fit within screen bounds without overflow
+
 ### 🚫 **CRITICAL DATABASE MODEL PROTECTION** 🚫
 **NEVER MODIFY** these files without explicit user request:
 - `src/models/users.ts`, `src/models/stores.ts`, `src/models/categories.ts`

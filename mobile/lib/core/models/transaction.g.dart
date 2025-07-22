@@ -59,7 +59,7 @@ const _$TransactionTypeEnumMap = {
 TransactionItem _$TransactionItemFromJson(Map<String, dynamic> json) =>
     TransactionItem(
       id: json['id'] as String,
-      transactionId: json['transactionId'] as String,
+      transactionId: json['transactionId'] as String?,
       productId: json['productId'] as String,
       name: json['name'] as String,
       price: (json['price'] as num).toDouble(),

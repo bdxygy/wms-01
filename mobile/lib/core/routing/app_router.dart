@@ -20,6 +20,9 @@ import '../../features/products/screens/product_detail_screen.dart';
 import '../../features/products/screens/create_product_screen.dart';
 import '../../features/products/screens/edit_product_screen.dart';
 import '../../features/products/screens/product_search_screen.dart';
+import '../../features/transactions/screens/create_transaction_screen.dart';
+import '../../features/transactions/screens/transaction_detail_screen.dart';
+import '../../features/transactions/screens/edit_transaction_screen.dart';
 import '../../features/scanner/screens/barcode_scanner_screen.dart';
 import '../../features/scanner/screens/imei_scanner_screen.dart';
 
@@ -124,6 +127,35 @@ class AppRouter {
           name: 'transactions',
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const TransactionsScreen(),
+          routes: [
+            // Create Transaction Route
+            GoRoute(
+              path: '/create',
+              name: 'create-transaction',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) => const CreateTransactionScreen(),
+            ),
+            // Transaction Detail Route
+            GoRoute(
+              path: '/:id',
+              name: 'transaction-detail',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final transactionId = state.pathParameters['id']!;
+                return TransactionDetailScreen(transactionId: transactionId);
+              },
+            ),
+            // Edit Transaction Route
+            GoRoute(
+              path: '/:id/edit',
+              name: 'edit-transaction',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final transactionId = state.pathParameters['id']!;
+                return EditTransactionScreen(transactionId: transactionId);
+              },
+            ),
+          ],
         ),
 
         // Stores Route (OWNER only)

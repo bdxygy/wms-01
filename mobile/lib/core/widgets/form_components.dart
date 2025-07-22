@@ -907,7 +907,7 @@ class _WMSCurrencyFormFieldState extends State<WMSCurrencyFormField> {
       _controller = widget.controller!;
     } else {
       _controller = TextEditingController(
-        text: widget.initialValue?.toStringAsFixed(2) ?? '',
+        text: widget.initialValue?.toInt().toString() ?? '',
       );
       _isControllerOwned = true;
     }

@@ -225,4 +225,50 @@ export class CategoryService {
       updatedAt: updatedCategory[0].updatedAt,
     };
   }
+
+  static async deleteCategory(id: string, requestingUser: User) {
+    // Find category to delete (authorization middleware has already checked access)
+    const existingCategory = await db
+      .select({
+        id: categories.id,
+        name: categories.name,
+        storeId: categories.storeId,
+        createdBy: categories.createdBy,
+      })
+      .from(categories)
+      .where(
+        and(
+          eq(categories.id, id),
+          isNull(categories.deletedAt)
+        )
+      );
+
+    if (!existingCategory[0]) {
+      throw new HTTPException(404, { message: "Category not found" });
+    }
+
+    // Perform soft delete by setting deletedAt timestamp
+    const deletedCategory = await db
+      .update(categories)
+      .set({
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(categories.id, id))
+      .returning();
+
+    if (!deletedCategory[0]) {
+      throw new HTTPException(500, { message: "Failed to delete category" });
+    }
+
+    return {
+      id: deletedCategory[0].id,
+      name: deletedCategory[0].name,
+      storeId: deletedCategory[0].storeId,
+      createdBy: deletedCategory[0].createdBy,
+      createdAt: deletedCategory[0].createdAt,
+      updatedAt: deletedCategory[0].updatedAt,
+      deletedAt: deletedCategory[0].deletedAt,
+    };
+  }
 }

@@ -3,12 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../../../core/widgets/app_bars.dart';
 import '../../../core/services/transaction_service.dart';
-import '../../../core/models/api_requests.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/models/user.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/auth/auth_provider.dart';
-import '../../../generated/app_localizations.dart';
 import '../widgets/transaction_form.dart';
 
 class CreateTransactionScreen extends StatefulWidget {
@@ -20,12 +18,14 @@ class CreateTransactionScreen extends StatefulWidget {
 
 class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
   final TransactionService _transactionService = TransactionService();
+  bool _isLoading = false;
 
   Future<void> _createTransaction(TransactionFormData formData) async {
     final authProvider = context.read<AuthProvider>();
     
-    // Validate permissions
-    if (!authProvider.canCreateTransactions) {
+    // Validate permissions using TransactionService
+    final userRole = authProvider.currentUser?.role;
+    if (userRole == null || !TransactionService.canCreateTransactions(userRole)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('You do not have permission to create transactions'),
@@ -36,17 +36,41 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
     }
 
     try {
-      // Create transaction request
-      final request = CreateTransactionRequest(
-        type: formData.type.name.toUpperCase(),
-        storeId: formData.storeId,
-        destinationStoreId: formData.destinationStoreId,
+      setState(() => _isLoading = true);
+      // Convert form items to backend items
+      final backendItems = formData.items.map((item) => 
+        TransactionItemBackendRequest(
+          productId: item.productId,
+          name: 'Product ${item.productId}', // TODO: Get actual product name from ProductService
+          price: item.price,
+          quantity: item.quantity,
+          amount: item.price * item.quantity,
+        )
+      ).toList();
+
+      // Create transaction request with backend-compatible structure
+      final request = CreateTransactionBackendRequest(
+        type: TransactionTypes.fromTransactionTypeEnum(formData.type),
+        fromStoreId: formData.type == TransactionType.sale ? formData.storeId : formData.storeId,
+        toStoreId: formData.destinationStoreId,
         photoProofUrl: formData.photoProofUrl,
-        items: formData.items,
+        transferProofUrl: formData.transferProofUrl,
+        to: formData.customerName,
+        customerPhone: formData.customerPhone,
+        items: backendItems,
       );
       
+      // Get user role for validation
+      final userRole = authProvider.currentUser?.role;
+      
       // Validate transaction before creation
-      _transactionService.validateTransaction(request);
+      final validationErrors = _transactionService.validateTransaction(
+        request,
+        userRole: userRole,
+      );
+      if (validationErrors.isNotEmpty) {
+        throw Exception(validationErrors.values.first);
+      }
       
       final transaction = await _transactionService.createTransaction(request);
       
@@ -54,7 +78,7 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Transaction created successfully! Total: ${transaction.calculatedAmount.toStringAsFixed(2)}'),
+            content: Text('Transaction created successfully! Total: ${transaction.calculatedAmount.toInt()}'),
             backgroundColor: Colors.green,
             action: SnackBarAction(
               label: 'View',
@@ -76,6 +100,10 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }

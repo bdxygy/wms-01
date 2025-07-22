@@ -33,6 +33,7 @@ class ApiEndpoints {
   static const String categoriesCreate = categories;
   static String categoriesById(String id) => '$categories/$id';
   static String categoriesUpdate(String id) => '$categories/$id';
+  static String categoriesDelete(String id) => '$categories/$id';
 
   // Product endpoints
   static const String productsList = products;
@@ -105,6 +106,8 @@ class ApiEndpoints {
     bool? isFinished,
     DateTime? startDate,
     DateTime? endDate,
+    double? minAmount,
+    double? maxAmount,
     String? search,
   }) {
     final params = <String, dynamic>{};
@@ -113,6 +116,8 @@ class ApiEndpoints {
     if (isFinished != null) params['isFinished'] = isFinished;
     if (startDate != null) params['startDate'] = startDate.toIso8601String();
     if (endDate != null) params['endDate'] = endDate.toIso8601String();
+    if (minAmount != null) params['minAmount'] = minAmount;
+    if (maxAmount != null) params['maxAmount'] = maxAmount;
     if (search != null && search.isNotEmpty) params['search'] = search;
     return params;
   }

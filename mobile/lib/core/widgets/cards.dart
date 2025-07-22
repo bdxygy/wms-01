@@ -168,7 +168,7 @@ class WMSProductCard extends StatelessWidget {
                   children: [
                     if (price != null)
                       Text(
-                        '${price!.toStringAsFixed(2)}',
+                        '${price!.toInt()}',
                         style: WMSTypography.productPrice,
                       ),
                     const Spacer(),
@@ -270,7 +270,7 @@ class WMSTransactionCard extends StatelessWidget {
           
           // Amount
           Text(
-            '${amount.toStringAsFixed(2)}',
+            '${amount.toInt()}',
             style: WMSTypography.transactionAmount,
           ),
           

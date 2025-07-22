@@ -129,7 +129,7 @@ class Transaction {
 @JsonSerializable()
 class TransactionItem {
   final String id;
-  final String transactionId;
+  final String? transactionId;
   final String productId;
   final String name;
   final double price;
@@ -143,7 +143,7 @@ class TransactionItem {
 
   TransactionItem({
     required this.id,
-    required this.transactionId,
+    this.transactionId,
     required this.productId,
     required this.name,
     required this.price,

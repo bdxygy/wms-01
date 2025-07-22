@@ -604,7 +604,7 @@ class _ProductCard extends StatelessWidget {
                 Expanded(
                   child: _InfoChip(
                     label: 'Price',
-                    value: '${(product.salePrice ?? product.purchasePrice).toStringAsFixed(2)}',
+                    value: '${(product.salePrice ?? product.purchasePrice).toInt()}',
                     icon: Icons.attach_money,
                   ),
                 ),

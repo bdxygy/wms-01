@@ -85,4 +85,21 @@ class CategoryService {
       rethrow;
     }
   }
+
+  /// Delete category (OWNER/ADMIN only) - Soft delete
+  Future<Category> deleteCategory(String categoryId) async {
+    try {
+      final response = await _apiClient.delete(ApiEndpoints.categoriesDelete(categoryId));
+      final apiResponse = ApiResponse<Category>.fromJson(
+        response.data,
+        (json) => Category.fromJson(json as Map<String, dynamic>),
+      );
+      if (!apiResponse.success || apiResponse.data == null) {
+        throw Exception(apiResponse.error?.message ?? 'Failed to delete category');
+      }
+      return apiResponse.data!;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

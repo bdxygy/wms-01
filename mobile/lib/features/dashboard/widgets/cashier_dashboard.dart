@@ -39,22 +39,6 @@ class _CashierDashboardState extends State<CashierDashboard> {
           role: 'CASHIER',
           title: 'Quick Navigation (Transaction Focus)',
           actions: [
-            // Limited List Page Navigation (CASHIER can view products, transactions only)
-            QuickAction(
-              icon: Icons.inventory_2,
-              title: 'Products',
-              subtitle: 'View products for sale',
-              color: Colors.blue,
-              onTap: () => _navigateToProductsList(),
-            ),
-            QuickAction(
-              icon: Icons.receipt_long,
-              title: 'Transactions',
-              subtitle: 'View my transactions',
-              color: Colors.green,
-              onTap: () => _navigateToTransactionsList(),
-            ),
-            
             // Point-of-Sale Actions
             QuickAction(
               icon: Icons.add_shopping_cart,
@@ -387,24 +371,9 @@ class _CashierDashboardState extends State<CashierDashboard> {
   }
 
   // Limited List Page Navigation (CASHIER can view products and their own transactions)
-  void _navigateToProductsList() {
-    // TODO: Navigate to products list (view-only for sales)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Products List (for sales) page coming soon!')),
-    );
-  }
-
-  void _navigateToTransactionsList() {
-    // TODO: Navigate to transactions list (cashier's own transactions)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('My Transactions List page coming soon!')),
-    );
-  }
 
   void _navigateToNewSale() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('New Sale feature coming soon!')),
-    );
+    AppRouter.goToCreateTransaction(context);
   }
 
   void _navigateToScanAndSell() {

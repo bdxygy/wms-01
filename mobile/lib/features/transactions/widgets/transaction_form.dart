@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/models/transaction.dart';
 import '../../../core/models/api_requests.dart';
 import '../../../core/models/store.dart';
 import '../../../core/models/user.dart';
+import '../../../core/models/product.dart';
 import '../../../core/services/store_service.dart';
+import '../../../core/services/product_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/widgets/cards.dart';
-import '../../../core/validators/transaction_validators.dart';
-import '../widgets/transaction_item_manager.dart';
-import '../widgets/photo_proof_picker.dart';
 
 // Transaction form data model
 class TransactionFormData {
@@ -19,6 +19,7 @@ class TransactionFormData {
   final String storeId;
   final String? destinationStoreId;
   final String? photoProofUrl;
+  final String? transferProofUrl;
   final String? customerName;
   final String? customerPhone;
   final List<TransactionItemRequest> items;
@@ -28,30 +29,11 @@ class TransactionFormData {
     required this.storeId,
     this.destinationStoreId,
     this.photoProofUrl,
+    this.transferProofUrl,
     this.customerName,
     this.customerPhone,
     required this.items,
   });
-
-  TransactionFormData copyWith({
-    TransactionType? type,
-    String? storeId,
-    String? destinationStoreId,
-    String? photoProofUrl,
-    String? customerName,
-    String? customerPhone,
-    List<TransactionItemRequest>? items,
-  }) {
-    return TransactionFormData(
-      type: type ?? this.type,
-      storeId: storeId ?? this.storeId,
-      destinationStoreId: destinationStoreId ?? this.destinationStoreId,
-      photoProofUrl: photoProofUrl ?? this.photoProofUrl,
-      customerName: customerName ?? this.customerName,
-      customerPhone: customerPhone ?? this.customerPhone,
-      items: items ?? this.items,
-    );
-  }
 
   double get totalAmount {
     return items.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
@@ -77,24 +59,27 @@ class TransactionForm extends StatefulWidget {
 }
 
 class _TransactionFormState extends State<TransactionForm> {
-  final PageController _pageController = PageController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
-  final StoreService _storeService = StoreService();
-  
-  final TextEditingController _customerNameController = TextEditingController();
-  final TextEditingController _customerPhoneController = TextEditingController();
-  
+  final _formKey = GlobalKey<FormState>();
+  final _storeService = StoreService();
+  final _productService = ProductService();
+
+  final _customerNameController = TextEditingController();
+  final _customerPhoneController = TextEditingController();
+  final _searchController = TextEditingController();
+  final _quantityController = TextEditingController(text: '1');
+
   TransactionType _selectedType = TransactionType.sale;
   String? _selectedStoreId;
   String? _selectedDestinationStoreId;
   String? _photoProofUrl;
+  String? _transferProofUrl;
   List<TransactionItemRequest> _items = [];
-  
+
   List<Store> _stores = [];
-  
-  int _currentStep = 0;
-  bool _isLoading = false;
+  List<Product> _searchResults = [];
+  final bool _isLoading = false;
+  bool _isSearching = false;
+  bool _showSearchResults = false;
 
   @override
   void initState() {
@@ -105,349 +90,710 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   void dispose() {
-    _pageController.dispose();
     _customerNameController.dispose();
     _customerPhoneController.dispose();
+    _searchController.dispose();
+    _quantityController.dispose();
     super.dispose();
   }
 
   void _initializeForm() {
     final storeContext = context.read<StoreContextProvider>().selectedStore;
     final user = context.read<AuthProvider>().user;
-    
+
+    // Guard clause: Handle edit mode
     if (widget.initialTransaction != null) {
-      // Edit mode - populate with existing data
-      final transaction = widget.initialTransaction!;
-      _selectedType = transaction.type;
-      _selectedStoreId = transaction.fromStoreId;
-      _selectedDestinationStoreId = transaction.toStoreId;
-      _photoProofUrl = transaction.photoProofUrl;
-      _customerNameController.text = transaction.to ?? '';
-      _customerPhoneController.text = transaction.customerPhone ?? '';
-      _items = transaction.items?.map((item) => TransactionItemRequest(
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-      )).toList() ?? [];
-    } else {
-      // Create mode - set defaults
-      if (user?.role != UserRole.owner && storeContext != null) {
-        _selectedStoreId = storeContext.id;
-      }
+      _populateFromTransaction(widget.initialTransaction!);
+      return;
+    }
+
+    // Guard clause: Set store for non-owner users
+    if (user?.role != UserRole.owner && storeContext != null) {
+      _selectedStoreId = storeContext.id;
     }
   }
 
+  void _populateFromTransaction(Transaction transaction) {
+    _selectedType = transaction.type;
+    _selectedStoreId = transaction.fromStoreId;
+    _selectedDestinationStoreId = transaction.toStoreId;
+    _photoProofUrl = transaction.photoProofUrl;
+    _transferProofUrl = transaction.transferProofUrl;
+    _customerNameController.text = transaction.to ?? '';
+    _customerPhoneController.text = transaction.customerPhone ?? '';
+    _items = transaction.items
+            ?.map((item) => TransactionItemRequest(
+                  productId: item.productId,
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.price,
+                ))
+            .toList() ??
+        [];
+  }
+
   Future<void> _loadStores() async {
+    final user = context.read<AuthProvider>().user;
+
+    // Guard clause: Only load stores for owners
+    if (user?.role != UserRole.owner) return;
+
     try {
-      final user = context.read<AuthProvider>().user;
-      if (user?.role == UserRole.owner) {
-        final response = await _storeService.getStores(limit: 100);
-        setState(() {
-          _stores = response.data;
-        });
-      }
+      final response = await _storeService.getStores(limit: 100);
+      if (!mounted) return;
+
+      setState(() {
+        _stores = response.data;
+      });
     } catch (e) {
       debugPrint('Failed to load stores: $e');
     }
   }
 
-  void _nextStep() {
-    if (_currentStep < 2) {
+  Future<void> _searchProducts(String query) async {
+    // Guard clause: Empty query
+    if (query.trim().isEmpty) {
       setState(() {
-        _currentStep++;
+        _searchResults = [];
+        _showSearchResults = false;
       });
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+      return;
+    }
+
+    // Guard clause: No store selected
+    if (_selectedStoreId == null) return;
+
+    setState(() {
+      _isSearching = true;
+      _showSearchResults = true;
+    });
+
+    try {
+      final response = await _productService.getProducts(
+        search: query.trim(),
+        storeId: _selectedStoreId!,
+        limit: 8, // Reduced for mobile
       );
-    } else {
-      _submitForm();
+
+      if (!mounted) return;
+
+      setState(() {
+        _searchResults = response.data;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Search failed: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSearching = false);
+      }
     }
   }
 
-  void _previousStep() {
-    if (_currentStep > 0) {
-      setState(() {
-        _currentStep--;
-      });
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+  void _addProduct(Product product) {
+    // Guard clause: Invalid quantity
+    final quantity = int.tryParse(_quantityController.text) ?? 1;
+    if (quantity <= 0) return;
+
+    final existingIndex =
+        _items.indexWhere((item) => item.productId == product.id);
+
+    if (existingIndex >= 0) {
+      // Update existing item quantity
+      final existingItem = _items[existingIndex];
+      _items[existingIndex] = TransactionItemRequest(
+        productId: existingItem.productId,
+        name: existingItem.name,
+        quantity: existingItem.quantity + quantity,
+        price: existingItem.price,
       );
+    } else {
+      // Add new item
+      _items.add(TransactionItemRequest(
+        productId: product.id,
+        name: product.name,
+        quantity: quantity,
+        price: product.salePrice ?? product.purchasePrice,
+      ));
     }
+
+    setState(() {
+      _searchController.clear();
+      _quantityController.text = '1';
+      _searchResults = [];
+      _showSearchResults = false;
+    });
+  }
+
+  void _removeItem(int index) {
+    // Guard clause: Invalid index
+    if (index < 0 || index >= _items.length) return;
+
+    setState(() {
+      _items.removeAt(index);
+    });
+  }
+
+  void _updateItemQuantity(int index, int newQuantity) {
+    // Guard clause: Invalid conditions
+    if (index < 0 || index >= _items.length || newQuantity <= 0) return;
+
+    setState(() {
+      final item = _items[index];
+      _items[index] = TransactionItemRequest(
+        productId: item.productId,
+        name: item.name,
+        quantity: newQuantity,
+        price: item.price,
+      );
+    });
+  }
+
+  bool _validateForm() {
+    // Guard clause: Form validation
+    if (!_formKey.currentState!.validate()) return false;
+
+    // Guard clause: No items
+    if (_items.isEmpty) {
+      _showError('Please add at least one item');
+      return false;
+    }
+
+    // Guard clause: Store selection
+    if (_selectedStoreId == null) {
+      _showError('Please select a store');
+      return false;
+    }
+
+    // Guard clause: Transfer destination
+    if (_selectedType == TransactionType.transfer &&
+        _selectedDestinationStoreId == null) {
+      _showError('Please select destination store for transfer');
+      return false;
+    }
+
+    return true;
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   void _submitForm() {
-    if (_formKey.currentState?.validate() ?? false) {
-      if (_items.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please add at least one item to the transaction'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+    // Guard clause: Form validation
+    if (!_validateForm()) return;
 
-      if (_selectedType == TransactionType.sale && _photoProofUrl?.isEmpty != false) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Photo proof is required for SALE transactions'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
+    final formData = TransactionFormData(
+      type: _selectedType,
+      storeId: _selectedStoreId!,
+      destinationStoreId: _selectedDestinationStoreId,
+      photoProofUrl: _photoProofUrl,
+      transferProofUrl: _transferProofUrl,
+      customerName: _customerNameController.text.trim().isEmpty
+          ? null
+          : _customerNameController.text.trim(),
+      customerPhone: _customerPhoneController.text.trim().isEmpty
+          ? null
+          : _customerPhoneController.text.trim(),
+      items: _items,
+    );
 
-      final formData = TransactionFormData(
-        type: _selectedType,
-        storeId: _selectedStoreId!,
-        destinationStoreId: _selectedDestinationStoreId,
-        photoProofUrl: _photoProofUrl,
-        customerName: _customerNameController.text.trim().isNotEmpty ? _customerNameController.text.trim() : null,
-        customerPhone: _customerPhoneController.text.trim().isNotEmpty ? _customerPhoneController.text.trim() : null,
-        items: _items,
-      );
-
-      widget.onSave(formData);
-    }
+    widget.onSave(formData);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          // Progress indicator
-          _buildProgressIndicator(),
-          
-          // Form content
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildTransactionTypeStep(),
-                _buildItemManagementStep(),
-                _buildReviewStep(),
-              ],
-            ),
-          ),
-          
-          // Navigation buttons
-          _buildNavigationButtons(),
-        ],
-      ),
-    );
-  }
+    return SafeArea(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            // Header with type selection
+            _buildCompactHeader(),
 
-  Widget _buildProgressIndicator() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          for (int i = 0; i < 3; i++) ...[
+            // Main content
             Expanded(
-              child: Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  color: i <= _currentStep ? Theme.of(context).primaryColor : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    _buildStoreSection(),
+                    const SizedBox(height: 16),
+                    _buildProductSearchSection(),
+                    const SizedBox(height: 16),
+                    _buildItemsList(),
+                    const SizedBox(height: 16),
+                    if (_selectedType == TransactionType.sale) ...[
+                      _buildCustomerSection(),
+                      const SizedBox(height: 16),
+                    ],
+                    _buildCompactSummary(),
+                    const SizedBox(height: 16),
+                    _buildActionButtons(),
+                    const SizedBox(height: 16),
+                  ],
                 ),
               ),
             ),
-            if (i < 2) const SizedBox(width: 8),
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildTransactionTypeStep() {
-    final user = context.watch<AuthProvider>().user;
-    final storeContext = context.watch<StoreContextProvider>().selectedStore;
-    final showStoreSelection = user?.role == UserRole.owner;
-
-    return SingleChildScrollView(
+  Widget _buildCompactHeader() {
+    return Container(
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Transaction Details',
+            widget.isEditing ? 'Edit Transaction' : 'New Transaction',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Transaction Type Selection
-          Text(
-            'Transaction Type',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 12),
+          // Type selection as chips
           Row(
             children: [
               Expanded(
-                child: RadioListTile<TransactionType>(
-                  title: const Text('Sale'),
-                  subtitle: const Text('Sell products to customers'),
-                  value: TransactionType.sale,
-                  groupValue: _selectedType,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedType = value!;
-                      _selectedDestinationStoreId = null;
-                    });
-                  },
+                child: _buildTypeChip(
+                  TransactionType.sale,
+                  'Sale',
+                  Icons.point_of_sale,
                 ),
               ),
+              const SizedBox(width: 8),
               Expanded(
-                child: RadioListTile<TransactionType>(
-                  title: const Text('Transfer'),
-                  subtitle: const Text('Move products between stores'),
-                  value: TransactionType.transfer,
-                  groupValue: _selectedType,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedType = value!;
-                    });
-                  },
+                child: _buildTypeChip(
+                  TransactionType.transfer,
+                  'Transfer',
+                  Icons.swap_horiz,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-
-          // Store Selection (for OWNER)
-          if (showStoreSelection) ...[
-            Text(
-              'Source Store',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedStoreId,
-              decoration: const InputDecoration(
-                hintText: 'Select source store',
-                border: OutlineInputBorder(),
-              ),
-              validator: TransactionValidators.validateStoreSelection,
-              items: _stores.map((store) => DropdownMenuItem<String>(
-                value: store.id,
-                child: Text(store.name),
-              )).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedStoreId = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-          ] else if (storeContext != null) ...[
-            Text(
-              'Store: ${storeContext.name}',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
-
-          // Destination Store (for TRANSFER)
-          if (_selectedType == TransactionType.transfer) ...[
-            Text(
-              'Destination Store',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: _selectedDestinationStoreId,
-              decoration: const InputDecoration(
-                hintText: 'Select destination store',
-                border: OutlineInputBorder(),
-              ),
-              validator: _selectedType == TransactionType.transfer 
-                  ? TransactionValidators.validateDestinationStore 
-                  : null,
-              items: _stores.where((store) => store.id != _selectedStoreId).map((store) => 
-                DropdownMenuItem<String>(
-                  value: store.id,
-                  child: Text(store.name),
-                )
-              ).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedDestinationStoreId = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-
-          // Customer Information (for SALE)
-          if (_selectedType == TransactionType.sale) ...[
-            Text(
-              'Customer Information (Optional)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _customerNameController,
-              decoration: const InputDecoration(
-                labelText: 'Customer Name',
-                hintText: 'Enter customer name',
-                border: OutlineInputBorder(),
-              ),
-              validator: TransactionValidators.validateCustomerName,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _customerPhoneController,
-              decoration: const InputDecoration(
-                labelText: 'Customer Phone',
-                hintText: 'Enter customer phone number',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.phone,
-              validator: TransactionValidators.validateCustomerPhone,
-            ),
-          ],
         ],
       ),
     );
   }
 
-  Widget _buildItemManagementStep() {
+  Widget _buildTypeChip(TransactionType type, String label, IconData icon) {
+    final isSelected = _selectedType == type;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedType = type;
+          _selectedDestinationStoreId = null;
+        });
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              : Colors.transparent,
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).dividerColor,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreSection() {
+    final user = context.watch<AuthProvider>().user;
+    final storeContext = context.watch<StoreContextProvider>().selectedStore;
+    final isOwner = user?.role == UserRole.owner;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Transaction Items',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+        // Source Store
+        if (isOwner) ...[
+          _buildSectionLabel('Source Store'),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: _selectedStoreId,
+            decoration: _buildCompactInputDecoration('Select store'),
+            validator: (value) => value == null ? 'Store required' : null,
+            items: _stores
+                .map((store) => DropdownMenuItem(
+                      value: store.id,
+                      child: Text(
+                        store.name,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedStoreId = value;
+                _selectedDestinationStoreId = null;
+                _items.clear();
+                _searchResults.clear();
+                _showSearchResults = false;
+              });
+            },
+          ),
+        ] else if (storeContext != null) ...[
+          _buildSectionLabel('Store'),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color:
+                  Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Theme.of(context).dividerColor),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.store,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    storeContext.name,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        Expanded(
-          child: TransactionItemManager(
-            items: _items,
-            storeId: _selectedStoreId ?? '',
-            onItemsChanged: (items) {
+        ],
+
+        // Destination Store (for transfers)
+        if (_selectedType == TransactionType.transfer) ...[
+          const SizedBox(height: 16),
+          _buildSectionLabel('Destination Store'),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: _selectedDestinationStoreId,
+            decoration: _buildCompactInputDecoration('Select destination'),
+            validator: _selectedType == TransactionType.transfer
+                ? (value) => value == null ? 'Destination required' : null
+                : null,
+            items: _stores
+                .where((store) => store.id != _selectedStoreId)
+                .map((store) => DropdownMenuItem(
+                      value: store.id,
+                      child: Text(
+                        store.name,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ))
+                .toList(),
+            onChanged: (value) {
               setState(() {
-                _items = items;
+                _selectedDestinationStoreId = value;
               });
+            },
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildProductSearchSection() {
+    // Guard clause: No store selected
+    if (_selectedStoreId == null) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Icon(
+              Icons.store_outlined,
+              size: 32,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Select a store first',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionLabel('Add Products'),
+        const SizedBox(height: 8),
+
+        // Search bar with quantity
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: TextFormField(
+                controller: _searchController,
+                decoration:
+                    _buildCompactInputDecoration('Search products...').copyWith(
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  suffixIcon: _isSearching
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : null,
+                ),
+                onChanged: _searchProducts,
+                onTap: () {
+                  if (_searchController.text.isNotEmpty) {
+                    setState(() => _showSearchResults = true);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 70,
+              child: TextFormField(
+                controller: _quantityController,
+                decoration: _buildCompactInputDecoration('Qty'),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ),
+          ],
+        ),
+
+        // Search Results
+        if (_showSearchResults && _searchResults.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 200),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Theme.of(context).dividerColor),
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: _searchResults.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                color: Theme.of(context).dividerColor,
+              ),
+              itemBuilder: (context, index) {
+                final product = _searchResults[index];
+                final price =
+                    (product.salePrice ?? product.purchasePrice).toInt();
+                return ListTile(
+                  dense: true,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  title: Text(
+                    product.name,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  subtitle: Text(
+                    'Price: $price | Stock: ${product.quantity}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.add_circle, size: 20),
+                    onPressed: () => _addProduct(product),
+                  ),
+                  onTap: () => _addProduct(product),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildItemsList() {
+    // Guard clause: No items
+    if (_items.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Icon(
+              Icons.shopping_cart_outlined,
+              size: 32,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'No items added yet',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildSectionLabel('Items (${_items.length})'),
+            if (_items.isNotEmpty)
+              Text(
+                'Total: ${_items.fold(0.0, (sum, item) => sum + (item.price * item.quantity)).toInt()}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).primaryColor,
+                    ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Theme.of(context).dividerColor),
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _items.length,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: Theme.of(context).dividerColor,
+            ),
+            itemBuilder: (context, index) {
+              final item = _items[index];
+              return ListTile(
+                dense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                title: Text(
+                  item.name,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                subtitle: Text(
+                  '${item.price.toInt()} × ${item.quantity} = ${(item.price * item.quantity).toInt()}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildQuantityButton(
+                      Icons.remove,
+                      () => _updateItemQuantity(index, item.quantity - 1),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '${item.quantity}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                    _buildQuantityButton(
+                      Icons.add,
+                      () => _updateItemQuantity(index, item.quantity + 1),
+                    ),
+                    const SizedBox(width: 4),
+                    _buildQuantityButton(
+                      Icons.delete_outline,
+                      () => _removeItem(index),
+                      color: Colors.red,
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ),
@@ -455,134 +801,224 @@ class _TransactionFormState extends State<TransactionForm> {
     );
   }
 
-  Widget _buildReviewStep() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Review Transaction',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
+  Widget _buildQuantityButton(IconData icon, VoidCallback onPressed,
+      {Color? color}) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color:
+              (color ?? Theme.of(context).colorScheme.primary).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: color ?? Theme.of(context).colorScheme.primary,
+        ),
+      ),
+    );
+  }
 
-          // Transaction Summary
-          WMSCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Transaction Summary',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildSummaryRow('Type', _selectedType.name.toUpperCase()),
-                  if (_selectedDestinationStoreId != null)
-                    _buildSummaryRow('Destination', _stores.firstWhere((s) => s.id == _selectedDestinationStoreId).name),
-                  if (_customerNameController.text.isNotEmpty)
-                    _buildSummaryRow('Customer', _customerNameController.text),
-                  if (_customerPhoneController.text.isNotEmpty)
-                    _buildSummaryRow('Phone', _customerPhoneController.text),
-                  _buildSummaryRow('Items', '${_items.length}'),
-                  const Divider(),
-                  _buildSummaryRow(
-                    'Total Amount', 
-                    '${TransactionFormData(type: _selectedType, storeId: _selectedStoreId!, items: _items).totalAmount.toStringAsFixed(2)}',
-                    isTotal: true,
-                  ),
-                ],
+  Widget _buildCustomerSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionLabel('Customer (Optional)'),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _customerNameController,
+                decoration: _buildCompactInputDecoration('Name').copyWith(
+                  prefixIcon: const Icon(Icons.person, size: 20),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // Photo Proof (for SALE)
-          if (_selectedType == TransactionType.sale) ...[
-            Text(
-              'Photo Proof (Required)',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextFormField(
+                controller: _customerPhoneController,
+                decoration: _buildCompactInputDecoration('Phone').copyWith(
+                  prefixIcon: const Icon(Icons.phone, size: 20),
+                ),
+                keyboardType: TextInputType.phone,
               ),
-            ),
-            const SizedBox(height: 8),
-            PhotoProofPicker(
-              initialPhotoUrl: _photoProofUrl,
-              onPhotoChanged: (photoUrl) {
-                setState(() {
-                  _photoProofUrl = photoUrl;
-                });
-              },
             ),
           ],
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isTotal ? Theme.of(context).primaryColor : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildCompactSummary() {
+    final totalAmount =
+        _items.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
 
-  Widget _buildNavigationButtons() {
     return Container(
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor.withOpacity(0.05),
+            Theme.of(context).primaryColor.withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Transaction Summary',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  _selectedType.name.toUpperCase(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Amount',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              Text(
+                totalAmount.toInt().toString(),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  'Items: ${_items.length}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (_customerNameController.text.isNotEmpty)
+                Flexible(
+                  child: Text(
+                    'Customer: ${_customerNameController.text}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String text) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+    );
+  }
+
+  InputDecoration _buildCompactInputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Colors.grey[500],
+          ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Theme.of(context).dividerColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Theme.of(context).dividerColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      isDense: true,
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
       child: Row(
         children: [
-          if (_currentStep > 0) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _previousStep,
-                child: const Text('Previous'),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: widget.onCancel,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                side: BorderSide(color: Theme.of(context).primaryColor),
+              ),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Theme.of(context).primaryColor),
               ),
             ),
-            const SizedBox(width: 16),
-          ],
+          ),
+          const SizedBox(width: 12),
           Expanded(
+            flex: 2,
             child: ElevatedButton(
-              onPressed: _isLoading ? null : _nextStep,
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(_currentStep == 2 ? 'Create Transaction' : 'Next'),
+              onPressed: _submitForm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text(widget.isEditing
+                  ? 'Update Transaction'
+                  : 'Create Transaction'),
             ),
           ),
-          if (_currentStep == 0) ...[
-            const SizedBox(width: 16),
-            OutlinedButton(
-              onPressed: widget.onCancel,
-              child: const Text('Cancel'),
-            ),
-          ],
         ],
       ),
     );

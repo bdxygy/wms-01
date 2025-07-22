@@ -5,6 +5,7 @@ import { stores } from "../models/stores";
 import { products } from "../models/products";
 import { users } from "../models/users";
 import { eq, and, or, isNull, count, gte, lte } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { HTTPException } from "hono/http-exception";
 import type { CreateTransactionRequest, UpdateTransactionRequest, ListTransactionsQuery } from "../schemas/transaction.schemas";
 import type { User } from "../models/users";
@@ -42,7 +43,15 @@ export class TransactionService {
 
     // Verify all products exist and calculate total amount
     let totalAmount = 0;
-    const productChecks = [];
+    const productChecks: Array<{
+      id: string;
+      name: string;
+      storeId: string;
+      quantity: number;
+      salePrice: number | null;
+      purchasePrice: number | null;
+      storeOwnerId: string;
+    }> = [];
 
     for (const item of data.items) {
       const product = await db
@@ -109,12 +118,12 @@ export class TransactionService {
       throw new HTTPException(500, { message: "Failed to create transaction" });
     }
 
-    // Create transaction items
-    const itemsToInsert = data.items.map(item => ({
+    // Create transaction items with actual product names
+    const itemsToInsert = data.items.map((item, index) => ({
       id: randomUUID(),
       transactionId: transactionId,
       productId: item.productId,
-      name: item.name,
+      name: productChecks[index].name, // Use actual product name from database
       price: item.price,
       quantity: item.quantity,
       amount: item.amount,
@@ -122,6 +131,21 @@ export class TransactionService {
     }));
 
     const insertedItems = await db.insert(transactionItems).values(itemsToInsert).returning();
+
+    // For SALE transactions, reduce product quantities
+    if (data.type === "SALE") {
+      for (let i = 0; i < data.items.length; i++) {
+        const item = data.items[i];
+        const product = productChecks[i];
+        
+        await db
+          .update(products)
+          .set({ 
+            quantity: product.quantity - item.quantity 
+          })
+          .where(eq(products.id, item.productId));
+      }
+    }
 
     return {
       id: transaction[0].id,
@@ -150,6 +174,12 @@ export class TransactionService {
   }
 
   static async getTransactionById(id: string) {
+    // Create aliases for multiple joins
+    const fromStores = alias(stores, "fromStores");
+    const toStores = alias(stores, "toStores");
+    const createdByUsers = alias(users, "createdByUsers");
+    const approvedByUsers = alias(users, "approvedByUsers");
+
     const transaction = await db
       .select({
         id: transactions.id,
@@ -165,10 +195,18 @@ export class TransactionService {
         amount: transactions.amount,
         isFinished: transactions.isFinished,
         createdAt: transactions.createdAt,
-        fromStoreOwnerId: stores.ownerId,
+        fromStoreOwnerId: fromStores.ownerId,
+        // Join fields for names
+        fromStoreName: fromStores.name,
+        toStoreName: toStores.name,
+        createdByName: createdByUsers.name,
+        approvedByName: approvedByUsers.name,
       })
       .from(transactions)
-      .leftJoin(stores, eq(transactions.fromStoreId, stores.id))
+      .leftJoin(fromStores, eq(transactions.fromStoreId, fromStores.id))
+      .leftJoin(toStores, eq(transactions.toStoreId, toStores.id))
+      .leftJoin(createdByUsers, eq(transactions.createdBy, createdByUsers.id))
+      .leftJoin(approvedByUsers, eq(transactions.approvedBy, approvedByUsers.id))
       .where(eq(transactions.id, id));
 
     if (!transaction[0]) {
@@ -197,6 +235,11 @@ export class TransactionService {
       amount: transaction[0].amount,
       isFinished: transaction[0].isFinished,
       createdAt: transaction[0].createdAt,
+      // Include name fields from joins
+      fromStoreName: transaction[0].fromStoreName,
+      toStoreName: transaction[0].toStoreName,
+      createdByName: transaction[0].createdByName,
+      approvedByName: transaction[0].approvedByName,
       items: items.map(item => ({
         id: item.id,
         productId: item.productId,
@@ -398,6 +441,13 @@ export class TransactionService {
     // If updating items, validate them
     if (data.items) {
       let totalAmount = 0;
+      const productChecks: Array<{
+        id: string;
+        name: string;
+        storeId: string;
+        quantity: number;
+        storeOwnerId: string;
+      }> = [];
 
       for (const item of data.items) {
         const product = await db
@@ -432,6 +482,7 @@ export class TransactionService {
           }
         }
 
+        productChecks.push(product[0]);
         totalAmount += item.amount;
       }
 
@@ -440,12 +491,12 @@ export class TransactionService {
         .delete(transactionItems)
         .where(eq(transactionItems.transactionId, id));
 
-      // Insert new items
-      const itemsToInsert = data.items.map(item => ({
+      // Insert new items with actual product names
+      const itemsToInsert = data.items.map((item, index) => ({
         id: randomUUID(),
         transactionId: id,
         productId: item.productId,
-        name: item.name,
+        name: productChecks[index].name, // Use actual product name from database
         price: item.price,
         quantity: item.quantity,
         amount: item.amount,

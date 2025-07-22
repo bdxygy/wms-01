@@ -47,3 +47,14 @@ export const updateCategoryHandler = async (c: Context) => {
     return ResponseUtils.sendError(c, error);
   }
 };
+
+export const deleteCategoryHandler = async (c: Context) => {
+  try {
+    const { id } = getValidated<CategoryIdParam>(c, "validatedParams");
+    const user = c.get("user");
+    const result = await CategoryService.deleteCategory(id, user);
+    return ResponseUtils.sendSuccess(c, result);
+  } catch (error) {
+    return ResponseUtils.sendError(c, error);
+  }
+};

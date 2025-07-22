@@ -118,8 +118,8 @@ class _ProductFormState extends State<ProductForm> {
     final product = widget.initialProduct!;
     _nameController.text = product.name;
     _skuController.text = product.sku;
-    _purchasePriceController.text = product.purchasePrice.toStringAsFixed(2);
-    _salePriceController.text = product.salePrice?.toStringAsFixed(2) ?? '';
+    _purchasePriceController.text = product.purchasePrice.toInt().toString();
+    _salePriceController.text = product.salePrice?.toInt().toString() ?? '';
     _quantityController.text = product.quantity.toString();
     _descriptionController.text = ''; // Product model doesn't have description
     _selectedStoreId = product.storeId;

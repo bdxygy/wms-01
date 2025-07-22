@@ -100,38 +100,23 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
           role: 'OWNER',
           title: 'Quick Navigation (Full Access)',
           actions: [
-            // List Page Navigation (OWNER has full access)
-
-            QuickAction(
-              icon: Icons.people,
-              title: 'Users',
-              subtitle: 'View & manage users',
-              color: Colors.purple,
-              onTap: () => _navigateToUsersList(),
-            ),
-            QuickAction(
-              icon: Icons.inventory_2,
-              title: 'Products',
-              subtitle: 'View & manage products',
-              color: Colors.blue,
-              onTap: () => _navigateToProductsList(),
-            ),
-            QuickAction(
-              icon: Icons.receipt_long,
-              title: 'Transactions',
-              subtitle: 'View & manage transactions',
-              color: Colors.green,
-              onTap: () => _navigateToTransactionsList(),
-            ),
-
-            // Quick Actions (Creation & Tools)
+            // Primary Business Actions
             QuickAction(
               icon: Icons.add_shopping_cart,
-              title: 'New Sale!!',
+              title: 'New Sale',
               subtitle: 'Create quick sale',
               color: Colors.green,
               onTap: () => _navigateToCreateSale(),
             ),
+            QuickAction(
+              icon: Icons.category,
+              title: 'Categories',
+              subtitle: 'Manage product categories',
+              color: Colors.blue,
+              onTap: () => _navigateToCategories(),
+            ),
+
+            // Product Tools
             QuickAction(
               icon: Icons.search,
               title: 'Search Products',
@@ -633,43 +618,9 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   // List Page Navigation (OWNER has full access to all lists)
-  void _navigateToStoresList() {
-    // TODO: Navigate to stores list with search & create button
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Stores List page coming soon!')),
-    );
-  }
-
-  void _navigateToUsersList() {
-    // TODO: Navigate to users list with search & create button
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Users List page coming soon!')),
-    );
-  }
-
-  void _navigateToProductsList() {
-    context.goNamed('products');
-  }
-
-  void _navigateToCategoriesList() {
-    // TODO: Navigate to categories list with search & create button
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Categories List page coming soon!')),
-    );
-  }
-
-  void _navigateToTransactionsList() {
-    // TODO: Navigate to transactions list with search functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Transactions List page coming soon!')),
-    );
-  }
 
   void _navigateToCreateSale() {
-    // TODO: Navigate to create sale screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Sale feature coming soon!')),
-    );
+    AppRouter.goToCreateTransaction(context);
   }
 
   void _navigateToReports() {
@@ -715,17 +666,6 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   // Additional navigation methods for comprehensive features
 
   // Admin Features
-  void _navigateToAddProduct() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add Product feature coming soon!')),
-    );
-  }
-
-  void _navigateToCreateTransaction() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Create Transaction feature coming soon!')),
-    );
-  }
 
   void _navigateToInventory() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -734,9 +674,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   void _navigateToCategories() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Categories feature coming soon!')),
-    );
+    context.go('/categories');
   }
 
   void _navigateToLowStock() {
@@ -746,11 +684,6 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 
   // Cashier Features
-  void _navigateToQuickSale() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Quick Sale feature coming soon!')),
-    );
-  }
 
   void _navigateToTransactions() {
     ScaffoldMessenger.of(context).showSnackBar(

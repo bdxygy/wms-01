@@ -86,6 +86,7 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
       final existingItem = widget.items[existingItemIndex];
       final updatedItem = TransactionItemRequest(
         productId: existingItem.productId,
+        name: existingItem.name,
         quantity: existingItem.quantity + 1,
         price: existingItem.price,
       );
@@ -97,6 +98,7 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
       // Add new item
       final newItem = TransactionItemRequest(
         productId: product.id,
+        name: product.name,
         quantity: 1,
         price: product.salePrice ?? product.purchasePrice,
       );
@@ -136,6 +138,7 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
     final item = widget.items[index];
     final updatedItem = TransactionItemRequest(
       productId: item.productId,
+      name: item.name,
       quantity: newQuantity,
       price: item.price,
     );
@@ -149,6 +152,7 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
     final item = widget.items[index];
     final updatedItem = TransactionItemRequest(
       productId: item.productId,
+      name: item.name,
       quantity: item.quantity,
       price: newPrice,
     );
@@ -366,7 +370,7 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
             ),
           ),
           Text(
-            '${total.toStringAsFixed(2)}',
+            '${total.toInt()}',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).primaryColor,
@@ -419,7 +423,7 @@ class _SearchResultCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 4),
                   Text(
-                    '${(product.salePrice ?? product.purchasePrice).toStringAsFixed(2)}',
+                    '${(product.salePrice ?? product.purchasePrice).toInt()}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
@@ -478,7 +482,7 @@ class _TransactionItemCardState extends State<_TransactionItemCard> {
   void initState() {
     super.initState();
     _quantityController = TextEditingController(text: widget.item.quantity.toString());
-    _priceController = TextEditingController(text: widget.item.price.toStringAsFixed(2));
+    _priceController = TextEditingController(text: widget.item.price.toInt().toString());
   }
 
   @override
@@ -503,7 +507,7 @@ class _TransactionItemCardState extends State<_TransactionItemCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Product ID: ${widget.item.productId}',
+                        widget.item.name,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -512,7 +516,7 @@ class _TransactionItemCardState extends State<_TransactionItemCard> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Subtotal: ${(widget.item.price * widget.item.quantity).toStringAsFixed(2)}',
+                        'Subtotal: ${(widget.item.price * widget.item.quantity).toInt()}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w600,
