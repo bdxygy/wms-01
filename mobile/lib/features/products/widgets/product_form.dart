@@ -71,7 +71,8 @@ class _ProductFormState extends State<ProductForm> {
   // Form controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _skuController = TextEditingController();
-  final TextEditingController _purchasePriceController = TextEditingController();
+  final TextEditingController _purchasePriceController =
+      TextEditingController();
   final TextEditingController _salePriceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -165,7 +166,8 @@ class _ProductFormState extends State<ProductForm> {
 
     // Generate default SKU only if empty
     if (_skuController.text.isEmpty) {
-      final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+      final timestamp =
+          DateTime.now().millisecondsSinceEpoch.toString().substring(8);
       _skuController.text = 'PROD$timestamp';
     }
   }
@@ -201,10 +203,12 @@ class _ProductFormState extends State<ProductForm> {
 
   Future<void> _loadProductImeis(String productId) async {
     try {
-      final response = await _productService.getProductImeis(productId, limit: 100);
+      final response =
+          await _productService.getProductImeis(productId, limit: 100);
       if (!mounted) return;
 
-      final imeiList = response.data.map((imeiData) => imeiData['imei'] as String).toList();
+      final imeiList =
+          response.data.map((imeiData) => imeiData['imei'] as String).toList();
 
       setState(() {
         _imeis = imeiList;
@@ -286,7 +290,8 @@ class _ProductFormState extends State<ProductForm> {
 
     // Guard clause: validate IMEI for IMEI products
     if (_isImeiProduct) {
-      final filledImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+      final filledImeis =
+          _imeis.where((imei) => imei.trim().isNotEmpty).toList();
       final imeiError = ProductValidators.validateImeiList(filledImeis);
 
       if (imeiError != null) {
@@ -346,7 +351,7 @@ class _ProductFormState extends State<ProductForm> {
           children: [
             // Header
             _buildHeader(),
-            
+
             // Single-step form content
             Expanded(
               child: SingleChildScrollView(
@@ -357,17 +362,17 @@ class _ProductFormState extends State<ProductForm> {
                     // Basic Information Section
                     _buildBasicInfoSection(),
                     const SizedBox(height: 24),
-                    
+
                     // Pricing & Inventory Section
                     _buildPricingSection(),
                     const SizedBox(height: 24),
-                    
+
                     // Store & Category Section
                     _buildStoreSection(),
                     const SizedBox(height: 24),
-                    
+
                     // IMEI Section (if enabled)
-                    if (_isImeiProduct) ...[ 
+                    if (_isImeiProduct) ...[
                       _buildImeiSection(),
                       const SizedBox(height: 24),
                     ],
@@ -375,7 +380,7 @@ class _ProductFormState extends State<ProductForm> {
                 ),
               ),
             ),
-            
+
             // Action buttons
             _buildActionButtons(),
           ],
@@ -405,13 +410,13 @@ class _ProductFormState extends State<ProductForm> {
             child: Text(
               widget.isEditing ? 'Edit Product' : 'New Product',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
           ),
-          if (_isImeiProduct) ...[ 
+          if (_isImeiProduct) ...[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -421,9 +426,9 @@ class _ProductFormState extends State<ProductForm> {
               child: Text(
                 'IMEI',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.orange[700],
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.orange[700],
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],
@@ -442,7 +447,6 @@ class _ProductFormState extends State<ProductForm> {
           Icons.inventory_2,
         ),
         const SizedBox(height: 16),
-        
         _buildCompactTextField(
           label: 'Product Name *',
           controller: _nameController,
@@ -451,7 +455,6 @@ class _ProductFormState extends State<ProductForm> {
           icon: Icons.shopping_bag,
         ),
         const SizedBox(height: 16),
-        
         _buildCompactTextField(
           label: 'SKU *',
           controller: _skuController,
@@ -464,7 +467,6 @@ class _ProductFormState extends State<ProductForm> {
           ],
         ),
         const SizedBox(height: 16),
-        
         _buildCompactTextField(
           label: 'Description',
           controller: _descriptionController,
@@ -486,7 +488,6 @@ class _ProductFormState extends State<ProductForm> {
           Icons.attach_money,
         ),
         const SizedBox(height: 16),
-        
         Row(
           children: [
             Expanded(
@@ -518,12 +519,12 @@ class _ProductFormState extends State<ProductForm> {
           ],
         ),
         const SizedBox(height: 16),
-        
         _buildCompactTextField(
           label: 'Quantity *',
           controller: _quantityController,
           hint: _isImeiProduct ? '1 (Fixed for IMEI)' : 'Enter quantity',
-          validator: (value) => ProductValidators.validateQuantityForImei(value, _isImeiProduct),
+          validator: (value) =>
+              ProductValidators.validateQuantityForImei(value, _isImeiProduct),
           onChanged: _onQuantityChanged,
           readOnly: _isImeiProduct,
           icon: Icons.inventory,
@@ -531,7 +532,6 @@ class _ProductFormState extends State<ProductForm> {
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
         const SizedBox(height: 16),
-        
         _buildImeiToggle(),
       ],
     );
@@ -547,30 +547,32 @@ class _ProductFormState extends State<ProductForm> {
           Icons.store,
         ),
         const SizedBox(height: 16),
-        
         _buildCompactDropdown<String>(
           label: 'Store *',
-          value: _stores.isNotEmpty && _stores.any((store) => store.id == _selectedStoreId)
+          value: _stores.isNotEmpty &&
+                  _stores.any((store) => store.id == _selectedStoreId)
               ? _selectedStoreId
               : null,
           hint: _stores.isEmpty ? 'Loading stores...' : 'Select store',
           icon: Icons.store,
-          items: _stores.map((store) => DropdownMenuItem<String>(
-            value: store.id,
-            child: Text(
-              store.name,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-          )).toList(),
+          items: _stores
+              .map((store) => DropdownMenuItem<String>(
+                    value: store.id,
+                    child: Text(
+                      store.name,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ))
+              .toList(),
           onChanged: _stores.isEmpty ? null : _onStoreChanged,
           validator: ProductValidators.validateStore,
         ),
         const SizedBox(height: 16),
-        
         _buildCompactDropdown<String>(
           label: 'Category',
-          value: _categories.isNotEmpty && _categories.any((cat) => cat.id == _selectedCategoryId)
+          value: _categories.isNotEmpty &&
+                  _categories.any((cat) => cat.id == _selectedCategoryId)
               ? _selectedCategoryId
               : null,
           hint: _selectedStoreId == null
@@ -579,14 +581,16 @@ class _ProductFormState extends State<ProductForm> {
                   ? 'Loading categories...'
                   : 'Select category (optional)',
           icon: Icons.category,
-          items: _categories.map((category) => DropdownMenuItem<String>(
-            value: category.id,
-            child: Text(
-              category.name,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-          )).toList(),
+          items: _categories
+              .map((category) => DropdownMenuItem<String>(
+                    value: category.id,
+                    child: Text(
+                      category.name,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ))
+              .toList(),
           onChanged: _selectedStoreId != null && _categories.isNotEmpty
               ? (value) => setState(() => _selectedCategoryId = value)
               : null,
@@ -634,8 +638,8 @@ class _ProductFormState extends State<ProductForm> {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -643,8 +647,8 @@ class _ProductFormState extends State<ProductForm> {
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
               ),
@@ -666,7 +670,7 @@ class _ProductFormState extends State<ProductForm> {
       ),
       child: Row(
         children: [
-          if (widget.onCancel != null) ...[ 
+          if (widget.onCancel != null) ...[
             Expanded(
               child: OutlinedButton(
                 onPressed: widget.onCancel,
@@ -700,14 +704,14 @@ class _ProductFormState extends State<ProductForm> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : Text(widget.isEditing ? 'Update Product' : 'Create Product'),
+                  : Text(
+                      widget.isEditing ? 'Update Product' : 'Create Product'),
             ),
           ),
         ],
       ),
     );
   }
-
 
   Widget _buildCompactTextField({
     required String label,
@@ -736,7 +740,8 @@ class _ProductFormState extends State<ProductForm> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         isDense: true,
       ),
     );
@@ -761,7 +766,8 @@ class _ProductFormState extends State<ProductForm> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         isDense: true,
       ),
       items: items,
@@ -774,7 +780,10 @@ class _ProductFormState extends State<ProductForm> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -792,14 +801,14 @@ class _ProductFormState extends State<ProductForm> {
                 Text(
                   'IMEI Product',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 Text(
                   'Enable for electronics with IMEI tracking',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                        color: Colors.grey[600],
+                      ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -838,8 +847,8 @@ class _ProductFormState extends State<ProductForm> {
               Text(
                 'IMEI Numbers',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
               const Spacer(),
               TextButton(
@@ -853,14 +862,13 @@ class _ProductFormState extends State<ProductForm> {
             ],
           ),
           const SizedBox(height: 8),
-          
           if (_imeis.isEmpty) ...[
             Center(
               child: Text(
                 'No IMEI numbers added',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
               ),
             ),
           ] else ...[
@@ -880,7 +888,8 @@ class _ProductFormState extends State<ProductForm> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 10),
                           isDense: true,
                         ),
                         onChanged: (value) {
@@ -926,23 +935,26 @@ class _ProductFormState extends State<ProductForm> {
     );
   }
 
-
   // Getters for form data using guard clauses
   String get productName => _nameController.text.trim();
   String get sku => _skuController.text.trim();
-  double get purchasePrice => double.tryParse(_purchasePriceController.text) ?? 0.0;
+  double get purchasePrice =>
+      double.tryParse(_purchasePriceController.text) ?? 0.0;
   double? get salePrice {
     final text = _salePriceController.text.trim();
     return text.isEmpty ? null : double.tryParse(text);
   }
+
   int get quantity => int.tryParse(_quantityController.text) ?? 0;
   String? get description {
     final text = _descriptionController.text.trim();
     return text.isEmpty ? null : text;
   }
+
   String? get storeId => _selectedStoreId;
   String? get categoryId => _selectedCategoryId;
   bool get isImei => _isImeiProduct;
-  List<String> get imeis => _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+  List<String> get imeis =>
+      _imeis.where((imei) => imei.trim().isNotEmpty).toList();
   String? get photoUrl => _photoUrl;
 }

@@ -10,7 +10,7 @@ import '../../../core/auth/auth_provider.dart';
 import '../../../core/routing/app_router.dart';
 
 /// Modern Transaction Detail Screen with comprehensive transaction information
-/// 
+///
 /// Features:
 /// - Modern Material Design 3 with hero cards and gradient backgrounds
 /// - Transparent app bar with floating action button integration
@@ -21,7 +21,7 @@ import '../../../core/routing/app_router.dart';
 /// - Full internationalization support with proper i18n keys
 /// - Guard clause patterns for clean error handling and state management
 /// - Mobile-first responsive design with proper touch targets
-/// 
+///
 /// Permissions:
 /// - OWNER/ADMIN: Full view and edit access with all action buttons
 /// - CASHIER: View and limited edit for SALE transactions
@@ -35,12 +35,13 @@ class TransactionDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<TransactionDetailScreen> createState() => _TransactionDetailScreenState();
+  State<TransactionDetailScreen> createState() =>
+      _TransactionDetailScreenState();
 }
 
 class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   final TransactionService _transactionService = TransactionService();
-  
+
   Transaction? _transaction;
   bool _isLoading = true;
   String? _error;
@@ -55,18 +56,19 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Future<void> _loadTransaction() async {
     // Guard clause: ensure widget is mounted
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      final transaction = await _transactionService.getTransactionById(widget.transactionId);
-      
+      final transaction =
+          await _transactionService.getTransactionById(widget.transactionId);
+
       // Guard clause: check mounted state after async operation
       if (!mounted) return;
-      
+
       setState(() {
         _transaction = transaction;
         _isLoading = false;
@@ -74,7 +76,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     } catch (e) {
       // Guard clause: ensure still mounted before updating state
       if (!mounted) return;
-      
+
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -85,19 +87,20 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Future<void> _markFinished() async {
     // Guard clause: validate transaction and prevent concurrent updates
     if (_transaction == null || _isUpdating) return;
-    
+
     // Guard clause: check if already finished
     if (_transaction!.isFinished) return;
-    
+
     setState(() {
       _isUpdating = true;
     });
 
     try {
-      final updatedTransaction = await _transactionService.finishTransaction(_transaction!.id);
-      
+      final updatedTransaction =
+          await _transactionService.finishTransaction(_transaction!.id);
+
       if (!mounted) return;
-      
+
       setState(() {
         _transaction = updatedTransaction;
         _isUpdating = false;
@@ -111,7 +114,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _isUpdating = false;
       });
@@ -133,17 +136,17 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   bool _canEditTransaction() {
     final authProvider = context.read<AuthProvider>();
     final userRole = authProvider.user?.role;
-    
+
     // Guard clause: check if user role exists
     if (userRole == null) return false;
-    
+
     return TransactionService.canUpdateTransaction(userRole);
   }
 
   void _printReceipt() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return;
-    
+
     // TODO: Implement print functionality
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Print receipt coming soon')),
@@ -153,7 +156,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   void _viewPhoto(String photoUrl) {
     // Guard clause: validate photo URL
     if (photoUrl.isEmpty) return;
-    
+
     // TODO: Implement photo viewing with PhotoViewer
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Photo viewer coming soon')),
@@ -169,14 +172,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildModernAppBar(context, canEdit, user),
       body: _buildBody(),
-      floatingActionButton: _transaction != null && canEdit ? _buildFloatingActionButton() : null,
+      floatingActionButton:
+          _transaction != null && canEdit ? _buildFloatingActionButton() : null,
     );
   }
 
-  PreferredSizeWidget _buildModernAppBar(BuildContext context, bool canEdit, User? user) {
-    
+  PreferredSizeWidget _buildModernAppBar(
+      BuildContext context, bool canEdit, User? user) {
     return AppBar(
       elevation: 0,
+      iconTheme: Theme.of(context).iconTheme,
       backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).colorScheme.onSurface,
       title: Row(
@@ -198,8 +203,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             child: Text(
               'Transaction Detail',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -218,64 +223,68 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               child: Text(
                 'Pending',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.orange[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
-                ),
+                      color: Colors.orange[700],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
               ),
             ),
           ],
         ],
       ),
-      actions: canEdit ? [
-        PopupMenuButton<String>(
-          onSelected: (value) {
-            switch (value) {
-              case 'finish':
-                _markFinished();
-                break;
-              case 'print':
-                _printReceipt();
-                break;
-            }
-          },
-          itemBuilder: (context) => [
-            if (_transaction?.isFinished == false)
-              PopupMenuItem(
-                value: 'finish',
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle, size: 20, color: Colors.green),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Mark Finished',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+      actions: canEdit
+          ? [
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  switch (value) {
+                    case 'finish':
+                      _markFinished();
+                      break;
+                    case 'print':
+                      _printReceipt();
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  if (_transaction?.isFinished == false)
+                    PopupMenuItem(
+                      value: 'finish',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle,
+                              size: 20, color: Colors.green),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Mark Finished',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            PopupMenuItem(
-              value: 'print',
-              child: Row(
-                children: [
-                  Icon(Icons.print, size: 20, color: Theme.of(context).primaryColor),
-                  const SizedBox(width: 8),
-                  const Flexible(
-                    child: Text(
-                      'Print Receipt',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                  PopupMenuItem(
+                    value: 'print',
+                    child: Row(
+                      children: [
+                        Icon(Icons.print,
+                            size: 20, color: Theme.of(context).primaryColor),
+                        const SizedBox(width: 8),
+                        const Flexible(
+                          child: Text(
+                            'Print Receipt',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ] : null,
+            ]
+          : null,
     );
   }
 
@@ -315,7 +324,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           const SizedBox(height: 16),
           _buildItemsListCard(),
           const SizedBox(height: 16),
-          if (_transaction!.photoProofUrl != null || _transaction!.transferProofUrl != null) ...[
+          if (_transaction!.photoProofUrl != null ||
+              _transaction!.transferProofUrl != null) ...[
             _buildProofSection(),
             const SizedBox(height: 16),
           ],
@@ -328,7 +338,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   Widget _buildErrorState() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -338,7 +348,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.1),
+                color: Theme.of(context)
+                    .colorScheme
+                    .errorContainer
+                    .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -351,15 +364,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             Text(
               'Failed to load transaction',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               _error!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -389,7 +402,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -402,15 +418,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             Text(
               'Transaction not found',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'This transaction may have been deleted or moved',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -422,7 +438,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Widget _buildTransactionHeroCard() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -460,14 +476,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Total amount section
             Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -484,16 +501,19 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                       Text(
                         'Total Amount',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         _transaction!.calculatedAmount.toInt().toString(),
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor,
+                                ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -502,9 +522,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Transaction ID and date
             Row(
               children: [
@@ -518,9 +538,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   child: Text(
                     'ID: ${_transaction!.id}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontFamily: 'monospace',
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          fontFamily: 'monospace',
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -528,9 +548,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 Text(
                   _formatTransactionDate(_transaction!.createdAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               ],
             ),
@@ -543,12 +563,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Widget _buildModernTypeBadge() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
-    
+
     final isTransfer = _transaction!.type == TransactionType.transfer;
-    final color = isTransfer 
+    final color = isTransfer
         ? Theme.of(context).colorScheme.secondary
         : Theme.of(context).colorScheme.primary;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -578,10 +598,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           Text(
             _transaction!.type.name.toUpperCase(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-              fontSize: 12,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  fontSize: 12,
+                ),
           ),
         ],
       ),
@@ -591,10 +611,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Widget _buildModernStatusIndicator() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
-    
+
     final isCompleted = _transaction!.isFinished;
     final color = isCompleted ? Colors.green : Colors.orange;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -620,10 +640,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           Text(
             isCompleted ? 'Completed' : 'Pending',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: color,
-              fontSize: 12,
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                  fontSize: 12,
+                ),
           ),
         ],
       ),
@@ -641,17 +661,17 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       }
       return '${diff.inHours}h ago';
     }
-    
+
     if (diff.inDays == 1) return 'Yesterday';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
-    
+
     return '${date.day}/${date.month}/${date.year}';
   }
 
   Widget _buildTransactionInfoCard() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -678,26 +698,29 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               Icons.info_outline,
             ),
             const SizedBox(height: 16),
-            
-            _buildModernInfoRow('Date', _formatDate(_transaction!.createdAt), Icons.calendar_today),
-            
+            _buildModernInfoRow('Date', _formatDate(_transaction!.createdAt),
+                Icons.calendar_today),
             if (_transaction!.to != null)
               _buildModernInfoRow(
-                _transaction!.type == TransactionType.sale ? 'Customer' : 'Destination',
+                _transaction!.type == TransactionType.sale
+                    ? 'Customer'
+                    : 'Destination',
                 _transaction!.to!,
-                _transaction!.type == TransactionType.sale ? Icons.person : Icons.store,
+                _transaction!.type == TransactionType.sale
+                    ? Icons.person
+                    : Icons.store,
               ),
-            
             if (_transaction!.customerPhone != null)
-              _buildModernInfoRow('Phone', _transaction!.customerPhone!, Icons.phone),
-            
+              _buildModernInfoRow(
+                  'Phone', _transaction!.customerPhone!, Icons.phone),
             if (_transaction!.fromStoreName != null)
-              _buildModernInfoRow('From Store', _transaction!.fromStoreName!, Icons.store_mall_directory),
-            
+              _buildModernInfoRow('From Store', _transaction!.fromStoreName!,
+                  Icons.store_mall_directory),
             if (_transaction!.toStoreName != null)
-              _buildModernInfoRow('To Store', _transaction!.toStoreName!, Icons.store),
-            
-            _buildModernInfoRow('Items Count', '${_transaction!.items?.length ?? 0}', Icons.inventory_2),
+              _buildModernInfoRow(
+                  'To Store', _transaction!.toStoreName!, Icons.store),
+            _buildModernInfoRow('Items Count',
+                '${_transaction!.items?.length ?? 0}', Icons.inventory_2),
           ],
         ),
       ),
@@ -715,16 +738,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+                    color: Colors.grey[600],
+                  ),
             ),
           ),
           Expanded(
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
         ],
@@ -735,9 +758,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Widget _buildItemsListCard() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
-    
+
     final items = _transaction!.items ?? [];
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -764,7 +787,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               Icons.inventory_2,
             ),
             const SizedBox(height: 16),
-            
             if (items.isEmpty)
               _buildEmptyItemsState()
             else
@@ -774,10 +796,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 return Column(
                   children: [
                     _buildModernItemRow(item),
-                    if (index < items.length - 1) 
+                    if (index < items.length - 1)
                       Divider(
                         height: 24,
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withValues(alpha: 0.2),
                       ),
                   ],
                 );
@@ -802,15 +827,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 Text(
                   item.name,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 Text(
                   'ID: ${item.productId}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[600],
-                    fontFamily: 'monospace',
-                  ),
+                        color: Colors.grey[600],
+                        fontFamily: 'monospace',
+                      ),
                 ),
               ],
             ),
@@ -836,8 +861,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             child: Text(
               (item.amount ?? 0.0).toInt().toString(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -849,7 +874,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Widget _buildProofSection() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -876,7 +901,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               Icons.photo_library,
             ),
             const SizedBox(height: 16),
-            
             if (_transaction!.photoProofUrl != null) ...[
               _buildModernProofItem(
                 'Photo Proof',
@@ -885,7 +909,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               ),
               const SizedBox(height: 12),
             ],
-            
             if (_transaction!.transferProofUrl != null) ...[
               _buildModernProofItem(
                 'Transfer Proof',
@@ -911,14 +934,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
               Text(
                 url,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -940,7 +963,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   Widget _buildAuditInfoCard() {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -967,14 +990,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               Icons.history,
             ),
             const SizedBox(height: 16),
-            
-            _buildModernInfoRow('Created', _formatDateTime(_transaction!.createdAt), Icons.schedule),
-            
+            _buildModernInfoRow('Created',
+                _formatDateTime(_transaction!.createdAt), Icons.schedule),
             if (_transaction!.createdByName != null)
-              _buildModernInfoRow('Created By', _transaction!.createdByName!, Icons.person),
-            
+              _buildModernInfoRow(
+                  'Created By', _transaction!.createdByName!, Icons.person),
             if (_transaction!.approvedByName != null)
-              _buildModernInfoRow('Approved By', _transaction!.approvedByName!, Icons.verified_user),
+              _buildModernInfoRow('Approved By', _transaction!.approvedByName!,
+                  Icons.verified_user),
           ],
         ),
       ),
@@ -1005,8 +1028,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -1014,8 +1037,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -1048,16 +1071,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
@@ -1084,8 +1107,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             Text(
               'No items found',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),
@@ -1097,7 +1120,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -1111,8 +1137,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 Text(
                   item.name,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
@@ -1120,9 +1146,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 Text(
                   'ID: ${item.productId}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontFamily: 'monospace',
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontFamily: 'monospace',
+                      ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -1139,17 +1165,17 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             child: Text(
               '${item.quantity}x',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
             ),
           ),
           const SizedBox(width: 8),
           Text(
             item.price.toInt().toString(),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
@@ -1162,7 +1188,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
@@ -1186,15 +1215,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   url,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -1214,7 +1243,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       ),
     );
   }
-  
+
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }

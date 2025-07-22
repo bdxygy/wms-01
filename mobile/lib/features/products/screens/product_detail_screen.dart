@@ -31,7 +31,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final StoreService _storeService = StoreService();
   final CategoryService _categoryService = CategoryService();
   final PrintLauncher _printLauncher = PrintLauncher();
-  
+
   Product? _product;
   Store? _store;
   Category? _category;
@@ -52,7 +52,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       final product = await _productService.getProductById(widget.productId);
-      
+
       // Load store details
       Store? store;
       try {
@@ -60,17 +60,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       } catch (e) {
         debugPrint('Failed to load store: $e');
       }
-      
+
       // Load category details if category exists
       Category? category;
       if (product.categoryId != null) {
         try {
-          category = await _categoryService.getCategoryById(product.categoryId!);
+          category =
+              await _categoryService.getCategoryById(product.categoryId!);
         } catch (e) {
           debugPrint('Failed to load category: $e');
         }
       }
-      
+
       setState(() {
         _product = product;
         _store = store;
@@ -97,7 +98,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     try {
       // Get current user for printing context
       final user = context.read<AuthProvider>().user;
-      
+
       // Use the comprehensive connect and print method
       final result = await _printLauncher.connectAndPrint(
         context,
@@ -117,9 +118,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     } catch (e) {
       if (mounted) {
         final errorMessage = e.toString();
-        
+
         // Check if it's a permission issue
-        if (errorMessage.contains('permission') || 
+        if (errorMessage.contains('permission') ||
             errorMessage.contains('Nearby devices') ||
             errorMessage.contains('Bluetooth')) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -128,7 +129,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               backgroundColor: Colors.red,
               action: SnackBarAction(
                 label: 'Settings',
-                onPressed: () => _printLauncher.showPermissionSettingsDialog(context),
+                onPressed: () =>
+                    _printLauncher.showPermissionSettingsDialog(context),
               ),
             ),
           );
@@ -152,7 +154,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     try {
       // Use the comprehensive connect and print method (no product = test page)
       final result = await _printLauncher.connectAndPrint(context);
-      
+
       if (result && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -176,7 +178,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _managePrinter() async {
     try {
       final isConnected = await _printLauncher.isConnected;
-      
+
       if (!mounted) return;
       showDialog(
         context: context,
@@ -214,7 +216,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   onTap: () async {
                     Navigator.of(context).pop();
                     await _printLauncher.disconnect();
-                    
+
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -254,7 +256,7 @@ SKU: ${_product!.sku}
 Barcode: ${_product!.barcode}
 Price: ${(_product!.salePrice ?? _product!.purchasePrice).toInt()}
 Quantity: ${_product!.quantity}''';
-    
+
     Clipboard.setData(ClipboardData(text: productInfo));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -283,7 +285,8 @@ Quantity: ${_product!.quantity}''';
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Product'),
-        content: Text('Are you sure you want to delete "${_product!.name}"? This action cannot be undone.'),
+        content: Text(
+            'Are you sure you want to delete "${_product!.name}"? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -303,7 +306,7 @@ Quantity: ${_product!.quantity}''';
     if (shouldDelete == true) {
       try {
         await _productService.deleteProduct(widget.productId);
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -311,7 +314,7 @@ Quantity: ${_product!.quantity}''';
               backgroundColor: Colors.green,
             ),
           );
-          
+
           // Navigate back to products list
           Navigator.of(context).pop();
         }
@@ -337,13 +340,16 @@ Quantity: ${_product!.quantity}''';
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildModernAppBar(context, canEdit, user),
       body: _buildBody(),
-      floatingActionButton: _product != null ? _buildFloatingActionButton(canEdit) : null,
+      floatingActionButton:
+          _product != null ? _buildFloatingActionButton(canEdit) : null,
     );
   }
 
-  PreferredSizeWidget _buildModernAppBar(BuildContext context, bool canEdit, User? user) {
+  PreferredSizeWidget _buildModernAppBar(
+      BuildContext context, bool canEdit, User? user) {
     return AppBar(
       elevation: 0,
+      iconTheme: Theme.of(context).iconTheme,
       backgroundColor: Colors.transparent,
       foregroundColor: Theme.of(context).colorScheme.onSurface,
       title: Row(
@@ -365,8 +371,8 @@ Quantity: ${_product!.quantity}''';
             child: Text(
               _product?.name ?? 'Product Details',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -382,10 +388,10 @@ Quantity: ${_product!.quantity}''';
               child: Text(
                 'IMEI',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.orange[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
-                ),
+                      color: Colors.orange[700],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
               ),
             ),
           ],
@@ -442,7 +448,8 @@ Quantity: ${_product!.quantity}''';
                     children: [
                       Icon(Icons.delete_outline, color: Colors.red),
                       SizedBox(width: 12),
-                      Text('Delete Product', style: TextStyle(color: Colors.red)),
+                      Text('Delete Product',
+                          style: TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),
@@ -489,23 +496,23 @@ Quantity: ${_product!.quantity}''';
           // Hero product card
           _buildHeroCard(),
           const SizedBox(height: 16),
-          
+
           // Pricing and inventory section
           _buildPricingInventorySection(),
           const SizedBox(height: 16),
-          
+
           // Store and category section
           _buildStoreCategorySection(),
-          
+
           // IMEI Management for IMEI products
           if (_product!.isImei) ...[
             const SizedBox(height: 16),
             _buildImeiManagementCard(),
           ],
-          
+
           const SizedBox(height: 16),
           _buildAdditionalInfoSection(),
-          
+
           // Add bottom padding for FAB
           const SizedBox(height: 80),
         ],
@@ -536,15 +543,15 @@ Quantity: ${_product!.quantity}''';
             Text(
               'Failed to Load Product',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               _error!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+                    color: Colors.grey[600],
+                  ),
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -557,7 +564,8 @@ Quantity: ${_product!.quantity}''';
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
           ],
@@ -589,15 +597,15 @@ Quantity: ${_product!.quantity}''';
             Text(
               'Product Not Found',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'The product you\'re looking for doesn\'t exist or has been removed.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+                    color: Colors.grey[600],
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -637,10 +645,11 @@ Quantity: ${_product!.quantity}''';
                   children: [
                     Text(
                       _product!.name,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                     ),
@@ -660,9 +669,9 @@ Quantity: ${_product!.quantity}''';
               _buildPrintButton(),
             ],
           ),
-          
+
           const SizedBox(height: 20),
-          
+
           // Key information grid
           Row(
             children: [
@@ -693,7 +702,9 @@ Quantity: ${_product!.quantity}''';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: isActive
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isActive ? Colors.green : Colors.red,
@@ -715,9 +726,9 @@ Quantity: ${_product!.quantity}''';
           Text(
             isActive ? 'Active' : 'Inactive',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isActive ? Colors.green[700] : Colors.red[700],
-              fontWeight: FontWeight.w600,
-            ),
+                  color: isActive ? Colors.green[700] : Colors.red[700],
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),
@@ -744,9 +755,9 @@ Quantity: ${_product!.quantity}''';
           Text(
             'IMEI',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.orange[700],
-              fontWeight: FontWeight.bold,
-            ),
+                  color: Colors.orange[700],
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -791,9 +802,9 @@ Quantity: ${_product!.quantity}''';
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ],
           ),
@@ -801,8 +812,8 @@ Quantity: ${_product!.quantity}''';
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+                  fontWeight: FontWeight.w600,
+                ),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
@@ -834,7 +845,7 @@ Quantity: ${_product!.quantity}''';
             Icons.attach_money,
           ),
           const SizedBox(height: 20),
-          
+
           // Pricing grid
           Row(
             children: [
@@ -857,14 +868,17 @@ Quantity: ${_product!.quantity}''';
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Inventory information
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -882,7 +896,8 @@ Quantity: ${_product!.quantity}''';
     );
   }
 
-  Widget _buildPriceCard(String label, String value, IconData icon, Color color) {
+  Widget _buildPriceCard(
+      String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -901,9 +916,9 @@ Quantity: ${_product!.quantity}''';
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -913,9 +928,9 @@ Quantity: ${_product!.quantity}''';
           Text(
             value,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -930,16 +945,16 @@ Quantity: ${_product!.quantity}''';
         Text(
           'Current Stock',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[600],
-          ),
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+              ),
         ),
         const SizedBox(height: 4),
         Text(
           '${_product!.quantity} units',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );
@@ -950,7 +965,7 @@ Quantity: ${_product!.quantity}''';
     Color statusColor;
     String statusText;
     IconData statusIcon;
-    
+
     if (quantity == 0) {
       statusColor = Colors.red;
       statusText = 'Out of Stock';
@@ -964,7 +979,7 @@ Quantity: ${_product!.quantity}''';
       statusText = 'In Stock';
       statusIcon = Icons.check_circle_outline;
     }
-    
+
     return Column(
       children: [
         Container(
@@ -983,9 +998,9 @@ Quantity: ${_product!.quantity}''';
         Text(
           statusText,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: statusColor,
-            fontWeight: FontWeight.w600,
-          ),
+                color: statusColor,
+                fontWeight: FontWeight.w600,
+              ),
           textAlign: TextAlign.center,
         ),
       ],
@@ -1015,7 +1030,6 @@ Quantity: ${_product!.quantity}''';
             Icons.store,
           ),
           const SizedBox(height: 20),
-          
           Row(
             children: [
               Expanded(
@@ -1044,7 +1058,8 @@ Quantity: ${_product!.quantity}''';
     );
   }
 
-  Widget _buildLocationInfoCard(String label, String value, IconData icon, Color color) {
+  Widget _buildLocationInfoCard(
+      String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1063,9 +1078,9 @@ Quantity: ${_product!.quantity}''';
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        color: color,
+                        fontWeight: FontWeight.w600,
+                      ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1075,8 +1090,8 @@ Quantity: ${_product!.quantity}''';
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
           ),
@@ -1133,17 +1148,19 @@ Quantity: ${_product!.quantity}''';
                       children: [
                         Text(
                           'IMEI Product',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange[700],
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange[700],
+                                  ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'This product uses IMEI tracking for individual unit management',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1182,18 +1199,21 @@ Quantity: ${_product!.quantity}''';
             Icons.info_outlined,
           ),
           const SizedBox(height: 20),
-          
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               children: [
                 _buildInfoRow('Created', _formatDateTime(_product!.createdAt)),
                 const SizedBox(height: 12),
-                _buildInfoRow('Last Updated', _formatDateTime(_product!.updatedAt)),
+                _buildInfoRow(
+                    'Last Updated', _formatDateTime(_product!.updatedAt)),
               ],
             ),
           ),
@@ -1225,8 +1245,8 @@ Quantity: ${_product!.quantity}''';
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
@@ -1234,8 +1254,8 @@ Quantity: ${_product!.quantity}''';
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
               ),
@@ -1257,9 +1277,9 @@ Quantity: ${_product!.quantity}''';
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600],
-              ),
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600],
+                  ),
             ),
           ),
           Expanded(
@@ -1272,7 +1292,6 @@ Quantity: ${_product!.quantity}''';
       ),
     );
   }
-
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
