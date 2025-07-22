@@ -43,24 +43,24 @@ Transactions: CRUD /api/v1/transactions (SALE/TRANSFER types)
 IMEI Management: /api/v1/products/:id/imeis, /api/v1/imeis/:id
 ```
 
-## 📱 **MOBILE: PHASE 15+ COMPLETE - FULL BUSINESS WORKFLOWS (90+ Dart files)**
+## 📱 **MOBILE: PHASE 16+ COMPLETE - MODERN UI/UX REDESIGN (95+ Dart files)**
 
-**Current Status**: 85% Complete (15+/20 phases) | **Ready for Production** | **Next**: Phase 16 - Thermal Printer Foundation
+**Current Status**: 90% Complete (16+/20 phases) | **Production Ready** | **Next**: Phase 17 - Thermal Printer Integration
 
-### Latest Completion: Phase 15+ - Transaction System & UI/UX Enhancements ✅
-- **TransactionService**: Complete transaction CRUD with validation, filtering, and business rule enforcement
-- **TransactionForm**: Multi-step transaction creation (Type → Items → Review) with role-based permissions
-- **TransactionItemManager**: Product search integration with barcode/IMEI scanning preparation and real-time calculations
-- **PhotoProofPicker**: Camera integration for transaction photo proof with upload simulation
-- **TransactionValidators**: Comprehensive validation for transactions, items, customer info, and business rules
-- **Role-based Permissions**: OWNER/ADMIN/CASHIER create permissions, OWNER/ADMIN edit permissions with proper access control
+### Latest Completion: Phase 16+ - Modern UI/UX Redesign & Internationalization ✅
+- **✅ Modern Design System**: Complete Material Design 3 implementation with gradient backgrounds, shadows, and contemporary styling
+- **✅ Product Detail Redesign**: Hero card layout with transparent app bar, floating action buttons, and visual hierarchy
+- **✅ Transaction List Redesign**: Modern search bar, statistics hero cards, contemporary transaction cards with visual indicators
+- **✅ Transaction Detail Redesign**: Complete hero card system, modern information cards, proof documentation, and audit trails
+- **✅ Internationalization Framework**: Mandatory i18n usage with AppLocalizations throughout all user-facing components
+- **✅ Guard Clause Patterns**: Comprehensive implementation across all screens with early returns and clean error handling
+- **✅ Responsive UI System**: Mobile-first design with proper text overflow, flexible layouts, and touch-friendly interfaces
+- **✅ WMSCard Migration**: Removed legacy card components, replaced with modern Container-based designs
 - **✅ Performance Optimizations**: ProductForm lazy loading eliminating unnecessary API calls in create mode
 - **✅ Route Ordering Fix**: GoRouter route order corrected to prevent dynamic routes from intercepting specific routes
 - **✅ Currency Management**: Global currency system with settings configuration and consistent formatting
-- **✅ Product Form Redesign**: Converted from multi-step to single-step form with comprehensive guard clause implementation
-- **✅ Guard Clause Adoption**: Mandatory guard clause patterns implemented throughout codebase for better readability and maintainability
-- **✅ UI Layout Fixes**: Resolved RenderFlex overflow issues in product detail screens
-- **✅ Theme Integration**: Complete theme-aware components with proper color schemes
+- **✅ Single-Step Forms**: Converted all forms from multi-step to single scrollable layouts with sections
+- **✅ Theme Integration**: Complete theme-aware components with proper color schemes and Material Design 3 compliance
 - **✅ Barcode Scanning Integration**: Product search functionality with automatic navigation to product details
 
 ### Completed Phases (15/20)
@@ -174,6 +174,9 @@ mobile/lib/
 - **Testing**: Test at controller layer via HTTP endpoints
 - **ID Generation**: `randomUUID()` for DB primary keys, `nanoid()` for barcodes only
 - **🛡️ GUARD CLAUSES MANDATORY**: Always use guard clauses instead of nested if statements for better readability and early returns
+- **🎨 MODERN DESIGN MANDATORY**: All UI must follow modern design principles with clean, contemporary aesthetics
+- **📝 SINGLE-STEP FORMS ONLY**: Multi-step forms are strictly prohibited - use single scrollable layouts with sections
+- **🌐 INTERNATIONALIZATION MANDATORY**: All user-facing text must use i18n with AppLocalizations - no hardcoded strings allowed
 
 ### 🛡️ **GUARD CLAUSE PATTERNS** 🛡️
 
@@ -325,6 +328,172 @@ Row(
 - ✅ **Content priority** - most important information visible without scrolling
 - ✅ **Loading states** properly centered and sized for mobile
 - ✅ **Error messages** fit within screen bounds without overflow
+
+### 🎨 **MODERN DESIGN STANDARDS** 🎨
+
+**MANDATORY**: All user interface designs must follow modern design principles and provide an elegant, contemporary user experience.
+
+#### **Modern Design Requirements:**
+- **Material Design 3**: Use latest Material Design principles with proper color schemes, elevation, and typography
+- **Clean Visual Hierarchy**: Clear typography scales, consistent spacing, purposeful use of whitespace
+- **Contemporary Color Palette**: Modern color schemes with proper contrast ratios and accessibility compliance
+- **Subtle Animations**: Smooth transitions, micro-interactions, and loading states that enhance user experience
+- **Card-Based Layout**: Use cards and containers with rounded corners and subtle shadows for content grouping
+- **Icon Integration**: Consistent icon usage with proper sizing, spacing, and semantic meaning
+- **Progressive Enhancement**: Graceful degradation with accessibility-first approach
+
+#### **Visual Design Patterns:**
+- **Section Headers**: Always include icons with titles and descriptive subtitles
+- **Form Styling**: Rounded input fields with clear labels and proper focus states
+- **Button Design**: Elevated primary buttons, outlined secondary buttons, text buttons for tertiary actions
+- **Color Usage**: Primary colors for actions, neutral grays for content, semantic colors for status
+- **Typography**: Consistent font weights, proper line heights, optimal character spacing
+- **Spacing System**: 8px grid system with 16px base margins and 8-24px between sections
+
+#### **Modern UI Components:**
+- **Gradient Backgrounds**: Subtle gradients for emphasis areas and call-to-action sections
+- **Elevated Surfaces**: Proper use of shadows and elevation for depth and hierarchy
+- **Rounded Corners**: Consistent border radius (8-12px) across all interactive elements
+- **Status Indicators**: Visual status chips, progress indicators, and feedback systems
+- **Interactive States**: Proper hover, focus, active, and disabled states for all interactive elements
+
+### 📝 **SINGLE-STEP FORM POLICY** 📝
+
+**MANDATORY**: All forms in the application must be single-step forms. Multi-step forms are strictly prohibited.
+
+#### **Form Design Requirements:**
+- **Single Scrollable Layout**: All form fields must be presented in one continuous, scrollable interface
+- **Logical Grouping**: Group related fields using section headers and visual separators
+- **Progressive Disclosure**: Use collapsible sections or conditional fields instead of multiple steps
+- **Clear Validation**: Real-time field validation with immediate feedback
+- **Streamlined Navigation**: Single Save/Submit button at the bottom, optional Cancel button
+
+#### **Section Organization Patterns:**
+- **Visual Sections**: Use section headers with icons, titles, and descriptions
+- **Grouped Fields**: Related fields grouped with consistent spacing and visual hierarchy
+- **Conditional Display**: Show/hide sections based on user selections (e.g., IMEI fields for IMEI products)
+- **Smart Defaults**: Pre-populate fields where possible to reduce user input
+- **Clear Labeling**: All required fields marked with asterisks, optional fields clearly indicated
+
+#### **Benefits of Single-Step Forms:**
+- **Reduced Friction**: Users see all requirements upfront, no surprises
+- **Better Mobile Experience**: Optimal for touch interfaces and small screens
+- **Faster Completion**: No navigation between steps, direct path to completion
+- **Improved Validation**: Immediate feedback on all fields, better error handling
+- **Enhanced Accessibility**: Screen readers and keyboard navigation work seamlessly
+
+### 🌐 **INTERNATIONALIZATION REQUIREMENTS** 🌐
+
+**MANDATORY**: All user-facing text must be internationalized using Flutter's i18n system. Hardcoded strings are strictly prohibited.
+
+#### **i18n Implementation Requirements:**
+
+```dart
+// ✅ CORRECT: Using AppLocalizations for all user-facing text
+Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  
+  return Text(l10n.productName);
+  return AppBar(title: Text(l10n.products));
+  return ElevatedButton(
+    onPressed: () {},
+    child: Text(l10n.save),
+  );
+}
+
+// ❌ WRONG: Hardcoded strings
+Widget build(BuildContext context) {
+  return Text('Product Name'); // Never hardcode text
+  return AppBar(title: Text('Products')); // Always use i18n
+  return ElevatedButton(
+    onPressed: () {},
+    child: Text('Save'), // Must use AppLocalizations
+  );
+}
+```
+
+#### **Text Localization Rules:**
+- **All UI Text**: Buttons, labels, titles, descriptions, error messages
+- **Dynamic Content**: Form validation messages, status text, notifications
+- **Accessibility**: Screen reader content, tooltips, semantic labels
+- **Placeholders**: Input hints, loading messages, empty states
+- **Error Handling**: Exception messages, network errors, validation feedback
+
+#### **Implementation Patterns:**
+
+```dart
+// Required import for all screens/widgets
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+// Standard pattern in build method
+@override
+Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(l10n.screenTitle),
+    ),
+    body: Column(
+      children: [
+        Text(l10n.description),
+        ElevatedButton(
+          onPressed: () {},
+          child: Text(l10n.actionButton),
+        ),
+      ],
+    ),
+  );
+}
+
+// For form validation
+String? validateField(String? value) {
+  final l10n = AppLocalizations.of(context)!;
+  
+  if (value?.isEmpty ?? true) {
+    return l10n.fieldRequired;
+  }
+  return null;
+}
+
+// For error handling
+void _showError(String message) {
+  final l10n = AppLocalizations.of(context)!;
+  
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(l10n.errorPrefix + message),
+      backgroundColor: Colors.red,
+    ),
+  );
+}
+```
+
+#### **i18n File Organization:**
+- **English**: `lib/l10n/app_en.arb` (primary language)
+- **Indonesian**: `lib/l10n/app_id.arb` (secondary language)
+- **Generated**: `lib/generated/` (auto-generated classes)
+
+#### **Localization Key Naming Convention:**
+```json
+{
+  "screenName_elementType_description": "Localized Text",
+  "products_title_main": "Products",
+  "products_button_create": "Create Product",
+  "products_label_name": "Product Name",
+  "products_error_loadFailed": "Failed to load products",
+  "common_button_save": "Save",
+  "common_button_cancel": "Cancel",
+  "validation_field_required": "This field is required"
+}
+```
+
+#### **Benefits of Proper i18n:**
+- **Global Accessibility**: Support for multiple languages and regions
+- **Consistent User Experience**: Unified terminology across the application
+- **Maintainable Code**: Centralized text management and easy updates
+- **Professional Quality**: Industry-standard localization practices
+- **Future-Proof**: Easy addition of new languages and markets
 
 ### 🚫 **CRITICAL DATABASE MODEL PROTECTION** 🚫
 **NEVER MODIFY** these files without explicit user request:

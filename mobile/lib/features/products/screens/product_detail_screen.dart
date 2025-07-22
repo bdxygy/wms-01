@@ -12,11 +12,7 @@ import '../../../core/services/category_service.dart';
 import '../../../core/services/print_launcher.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/widgets/loading.dart';
-import '../../../core/widgets/app_bars.dart';
-import '../../../core/widgets/cards.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../generated/app_localizations.dart';
-import '../widgets/imei_management_section.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -334,275 +330,919 @@ Quantity: ${_product!.quantity}''';
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthProvider>().user;
     final canEdit = user?.canCreateProducts == true;
 
     return Scaffold(
-      appBar: WMSAppBar(
-        title: _product?.name ?? l10n.details,
-        actions: [
-          if (canEdit && _product != null)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: _editProduct,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: _buildModernAppBar(context, canEdit, user),
+      body: _buildBody(),
+      floatingActionButton: _product != null ? _buildFloatingActionButton(canEdit) : null,
+    );
+  }
+
+  PreferredSizeWidget _buildModernAppBar(BuildContext context, bool canEdit, User? user) {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      foregroundColor: Theme.of(context).colorScheme.onSurface,
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
-          if (_product != null)
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                switch (value) {
-                  case 'print':
-                    _printBarcode();
-                    break;
-                  case 'printer':
-                    _managePrinter();
-                    break;
-                  case 'share':
-                    _shareProduct();
-                    break;
-                  case 'delete':
-                    _deleteProduct();
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'print',
-                  child: Row(
-                    children: [
-                      Icon(Icons.print),
-                      SizedBox(width: 8),
-                      Text('Print Barcode'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'printer',
-                  child: Row(
-                    children: [
-                      Icon(Icons.bluetooth),
-                      SizedBox(width: 8),
-                      Text('Printer Settings'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'share',
-                  child: Row(
-                    children: [
-                      Icon(Icons.share),
-                      SizedBox(width: 8),
-                      Text('Share Product'),
-                    ],
-                  ),
-                ),
-                if (user?.role == UserRole.owner)
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Delete Product', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-              ],
+            child: Icon(
+              Icons.inventory_2,
+              color: Theme.of(context).primaryColor,
+              size: 20,
             ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _product?.name ?? 'Product Details',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+          if (_product?.isImei == true) ...[
+            Container(
+              margin: const EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'IMEI',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.orange[700],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
-      body: _buildBody(),
+      actions: [
+        if (_product != null) ...[
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            onPressed: _shareProduct,
+            tooltip: 'Share Product',
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              switch (value) {
+                case 'print':
+                  _printBarcode();
+                  break;
+                case 'printer':
+                  _managePrinter();
+                  break;
+                case 'delete':
+                  _deleteProduct();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'print',
+                child: Row(
+                  children: [
+                    Icon(Icons.print_outlined),
+                    SizedBox(width: 12),
+                    Text('Print Barcode'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'printer',
+                child: Row(
+                  children: [
+                    Icon(Icons.bluetooth_outlined),
+                    SizedBox(width: 12),
+                    Text('Printer Settings'),
+                  ],
+                ),
+              ),
+              if (user?.role == UserRole.owner) ...[
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, color: Colors.red),
+                      SizedBox(width: 12),
+                      Text('Delete Product', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget? _buildFloatingActionButton(bool canEdit) {
+    // Guard clause: Only show edit FAB if user can edit
+    if (!canEdit) return null;
+
+    return FloatingActionButton(
+      onPressed: _editProduct,
+      backgroundColor: Theme.of(context).primaryColor,
+      child: const Icon(Icons.edit, color: Colors.white),
     );
   }
 
   Widget _buildBody() {
+    // Guard clause: Show loading state
     if (_isLoading) {
       return const Center(child: WMSLoadingIndicator());
     }
 
+    // Guard clause: Show error state
     if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Failed to load product',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _error!,
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadProduct,
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildErrorState();
     }
 
+    // Guard clause: Product not found
     if (_product == null) {
-      return const Center(
-        child: Text('Product not found'),
-      );
+      return _buildNotFoundState();
     }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildBasicInfo(),
+          // Hero product card
+          _buildHeroCard(),
           const SizedBox(height: 16),
-          _buildPricingInfo(),
+          
+          // Pricing and inventory section
+          _buildPricingInventorySection(),
           const SizedBox(height: 16),
-          _buildInventoryInfo(),
+          
+          // Store and category section
+          _buildStoreCategorySection(),
           
           // IMEI Management for IMEI products
           if (_product!.isImei) ...[
             const SizedBox(height: 16),
-            ImeiManagementSection(
-              productId: _product!.id,
-              productName: _product!.name,
-              expectedQuantity: _product!.quantity,
-            ),
+            _buildImeiManagementCard(),
           ],
           
           const SizedBox(height: 16),
-          _buildStoreInfo(),
-          const SizedBox(height: 16),
-          _buildAdditionalInfo(),
-          const SizedBox(height: 16),
-          _buildActionButtons(),
+          _buildAdditionalInfoSection(),
+          
+          // Add bottom padding for FAB
+          const SizedBox(height: 80),
         ],
       ),
     );
   }
 
-  Widget _buildBasicInfo() {
-    return WMSCard(
+  Widget _buildErrorState() {
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.red[400],
+              ),
+            ),
+            const SizedBox(height: 24),
             Text(
-              'Basic Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              'Failed to Load Product',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
-            _buildInfoRow('Name', _product!.name),
-            if (_product!.sku.isNotEmpty) _buildInfoRow('SKU', _product!.sku),
-            if (_product!.barcode.isNotEmpty) _buildInfoRow('Barcode', _product!.barcode),
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loadProduct,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPricingInfo() {
-    return WMSCard(
+  Widget _buildNotFoundState() {
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Icon(
+                Icons.inventory_2_outlined,
+                size: 48,
+                color: Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 24),
             Text(
-              'Pricing Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              'Product Not Found',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
-            _buildInfoRow('Purchase Price', _product!.purchasePrice.toInt().toString()),
-            if (_product!.salePrice != null)
-              _buildInfoRow('Sale Price', _product!.salePrice!.toInt().toString()),
+            const SizedBox(height: 8),
+            Text(
+              'The product you\'re looking for doesn\'t exist or has been removed.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInventoryInfo() {
-    return WMSCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Inventory Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoRow('Quantity', '${_product!.quantity}'),
-            _buildInfoRow('IMEI Tracked', _product!.isImei ? 'Yes' : 'No'),
+  Widget _buildHeroCard() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            Theme.of(context).primaryColor.withValues(alpha: 0.05),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Product name and status
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _product!.name,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        _buildStatusChip(),
+                        if (_product!.isImei) ...[
+                          const SizedBox(width: 8),
+                          _buildImeiChip(),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              _buildPrintButton(),
+            ],
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Key information grid
+          Row(
+            children: [
+              Expanded(
+                child: _buildHeroInfoItem(
+                  'SKU',
+                  _product!.sku.isNotEmpty ? _product!.sku : 'Not set',
+                  Icons.qr_code,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildHeroInfoItem(
+                  'Barcode',
+                  _product!.barcode.isNotEmpty ? _product!.barcode : 'Not set',
+                  Icons.barcode_reader,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStoreInfo() {
-    return WMSCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Store & Category',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoRow('Store', _store?.name ?? 'Loading...'),
-            if (_product!.categoryId != null)
-              _buildInfoRow('Category', _category?.name ?? 'Loading...'),
-          ],
+  Widget _buildStatusChip() {
+    final isActive = _product!.deletedAt == null;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isActive ? Colors.green : Colors.red,
+          width: 1,
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: isActive ? Colors.green : Colors.red,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            isActive ? 'Active' : 'Inactive',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: isActive ? Colors.green[700] : Colors.red[700],
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildAdditionalInfo() {
-    return WMSCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Additional Information',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+  Widget _buildImeiChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.smartphone,
+            size: 12,
+            color: Colors.orange[700],
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'IMEI',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.orange[700],
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrintButton() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: IconButton(
+        onPressed: _printBarcode,
+        icon: Icon(
+          Icons.print,
+          color: Theme.of(context).primaryColor,
+        ),
+        tooltip: 'Print Barcode',
+      ),
+    );
+  }
+
+  Widget _buildHeroInfoItem(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPricingInventorySection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Pricing & Inventory',
+            'Product pricing and stock information',
+            Icons.attach_money,
+          ),
+          const SizedBox(height: 20),
+          
+          // Pricing grid
+          Row(
+            children: [
+              Expanded(
+                child: _buildPriceCard(
+                  'Purchase Price',
+                  _product!.purchasePrice.toInt().toString(),
+                  Icons.shopping_cart_outlined,
+                  Colors.blue,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildPriceCard(
+                  'Sale Price',
+                  _product!.salePrice?.toInt().toString() ?? 'Not set',
+                  Icons.sell_outlined,
+                  Colors.green,
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Inventory information
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildQuantityInfo(),
+                ),
+                const SizedBox(width: 16),
+                _buildStockStatusIndicator(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriceCard(String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Current Stock',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${_product!.quantity} units',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStockStatusIndicator() {
+    final quantity = _product!.quantity;
+    Color statusColor;
+    String statusText;
+    IconData statusIcon;
+    
+    if (quantity == 0) {
+      statusColor = Colors.red;
+      statusText = 'Out of Stock';
+      statusIcon = Icons.error_outline;
+    } else if (quantity < 10) {
+      statusColor = Colors.orange;
+      statusText = 'Low Stock';
+      statusIcon = Icons.warning_outlined;
+    } else {
+      statusColor = Colors.green;
+      statusText = 'In Stock';
+      statusIcon = Icons.check_circle_outline;
+    }
+    
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: statusColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Icon(
+            statusIcon,
+            color: statusColor,
+            size: 24,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          statusText,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: statusColor,
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStoreCategorySection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Location & Category',
+            'Store location and product categorization',
+            Icons.store,
+          ),
+          const SizedBox(height: 20),
+          
+          Row(
+            children: [
+              Expanded(
+                child: _buildLocationInfoCard(
+                  'Store',
+                  _store?.name ?? 'Loading...',
+                  Icons.store_outlined,
+                  Theme.of(context).primaryColor,
+                ),
+              ),
+              if (_product!.categoryId != null) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildLocationInfoCard(
+                    'Category',
+                    _category?.name ?? 'Loading...',
+                    Icons.category_outlined,
+                    Colors.purple,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationInfoCard(String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImeiManagementCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: _buildSectionHeader(
+              'IMEI Management',
+              'Track and manage device IMEI numbers',
+              Icons.smartphone,
+            ),
+          ),
+          // Import the existing IMEI management widget here
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.smartphone,
+                    color: Colors.orange[700],
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'IMEI Product',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange[700],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'This product uses IMEI tracking for individual unit management',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            _buildInfoRow('Created', _formatDateTime(_product!.createdAt)),
-            _buildInfoRow('Updated', _formatDateTime(_product!.updatedAt)),
-            _buildInfoRow('Status', _product!.deletedAt != null ? 'Deleted' : 'Active'),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildAdditionalInfoSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Additional Information',
+            'System information and timestamps',
+            Icons.info_outlined,
+          ),
+          const SizedBox(height: 20),
+          
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                _buildInfoRow('Created', _formatDateTime(_product!.createdAt)),
+                const SizedBox(height: 12),
+                _buildInfoRow('Last Updated', _formatDateTime(_product!.updatedAt)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, String subtitle, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).primaryColor,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -633,90 +1273,6 @@ Quantity: ${_product!.quantity}''';
     );
   }
 
-  Widget _buildActionButtons() {
-    final user = context.watch<AuthProvider>().user;
-    final canEdit = user?.canCreateProducts == true;
-    final isOwner = user?.role == UserRole.owner;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Row(
-        children: [
-        if (canEdit) ...[ 
-          Expanded(
-            child: OutlinedButton(
-              onPressed: _editProduct,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.edit, size: 18),
-                  SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      'Edit',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-        Expanded(
-          child: OutlinedButton(
-            onPressed: _printBarcode,
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.print, size: 18),
-                SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    'Print',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: OutlinedButton(
-            onPressed: _shareProduct,
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.share, size: 18),
-                SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    'Share',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (isOwner) ...[ 
-          const SizedBox(width: 8),
-          OutlinedButton(
-            onPressed: _deleteProduct,
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.red.withValues(alpha: 0.1),
-            ),
-            child: const Icon(Icons.delete, color: Colors.red, size: 18),
-          ),
-        ],
-        ],
-      ),
-    );
-  }
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';

@@ -9,7 +9,6 @@ import '../../../core/services/store_service.dart';
 import '../../../core/services/category_service.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/validators/product_validators.dart';
-import '../../../core/widgets/form_components.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/auth/auth_provider.dart';
 
@@ -42,7 +41,7 @@ class ProductFormData {
   });
 }
 
-/// Single-step product form for create and edit operations
+/// Modern, mobile-optimized single-step product form
 class ProductForm extends StatefulWidget {
   final Product? initialProduct;
   final Future<void> Function(ProductFormData)? onSave;
@@ -72,8 +71,7 @@ class _ProductFormState extends State<ProductForm> {
   // Form controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _skuController = TextEditingController();
-  final TextEditingController _purchasePriceController =
-      TextEditingController();
+  final TextEditingController _purchasePriceController = TextEditingController();
   final TextEditingController _salePriceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -121,11 +119,9 @@ class _ProductFormState extends State<ProductForm> {
     _purchasePriceController.text = product.purchasePrice.toInt().toString();
     _salePriceController.text = product.salePrice?.toInt().toString() ?? '';
     _quantityController.text = product.quantity.toString();
-    _descriptionController.text = ''; // Product model doesn't have description
     _selectedStoreId = product.storeId;
     _selectedCategoryId = product.categoryId;
     _isImeiProduct = product.isImei;
-    _photoUrl = null; // Product model doesn't have photoUrl
 
     // Load IMEIs if this is an IMEI product
     if (product.isImei) {
@@ -136,9 +132,7 @@ class _ProductFormState extends State<ProductForm> {
   Future<void> _loadFormData() async {
     if (!mounted) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       await Future.wait([
@@ -146,23 +140,14 @@ class _ProductFormState extends State<ProductForm> {
         _loadCategories(),
       ]);
 
-      // Set defaults after loading
       _setDefaults();
     } catch (e) {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load form data: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      _showError('Failed to load form data: $e');
     } finally {
-      if (!mounted) return;
-
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -173,22 +158,21 @@ class _ProductFormState extends State<ProductForm> {
     final authProvider = context.read<AuthProvider>();
     final storeProvider = context.read<StoreContextProvider>();
 
-    // Auto-select store for non-owners with guard clause
+    // Auto-select store for non-owners
     if (!authProvider.isOwner && storeProvider.hasStoreSelected) {
       _selectedStoreId = storeProvider.selectedStore!.id;
     }
 
     // Generate default SKU only if empty
     if (_skuController.text.isEmpty) {
-      final timestamp =
-          DateTime.now().millisecondsSinceEpoch.toString().substring(8);
-      _skuController.text = 'SKU$timestamp';
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+      _skuController.text = 'PROD$timestamp';
     }
   }
 
   Future<void> _loadStores() async {
     try {
-      final response = await _storeService.getStores(limit: 100);
+      final response = await _storeService.getStores(limit: 50);
       if (!mounted) return;
 
       setState(() {
@@ -203,7 +187,7 @@ class _ProductFormState extends State<ProductForm> {
     try {
       final response = await _categoryService.getCategories(
         storeId: _selectedStoreId,
-        limit: 100,
+        limit: 50,
       );
       if (!mounted) return;
 
@@ -217,39 +201,30 @@ class _ProductFormState extends State<ProductForm> {
 
   Future<void> _loadProductImeis(String productId) async {
     try {
-      final response =
-          await _productService.getProductImeis(productId, limit: 100);
-
-      final imeiJson = response.data;
-
-     debugPrint('✅ Load Product IMEIs $imeiJson');
-
+      final response = await _productService.getProductImeis(productId, limit: 100);
       if (!mounted) return;
 
-      // Extract IMEI codes from the response
-      final imeiList =
-          response.data.map((imeiData) => imeiData['imei'] as String).toList();
+      final imeiList = response.data.map((imeiData) => imeiData['imei'] as String).toList();
 
       setState(() {
         _imeis = imeiList;
       });
     } catch (e) {
       debugPrint('Failed to load product IMEIs: $e');
-      // Don't show error to user for IMEIs loading failure
     }
   }
 
   void _onStoreChanged(String? storeId) {
     setState(() {
       _selectedStoreId = storeId;
-      _selectedCategoryId = null; // Reset category when store changes
-      _categories = []; // Clear categories
+      _selectedCategoryId = null;
+      _categories = [];
     });
 
     // Guard clause: only load categories if store is selected
     if (storeId == null) return;
 
-    _loadCategories(); // Reload categories for new store
+    _loadCategories();
   }
 
   void _onImeiToggleChanged(bool value) {
@@ -259,7 +234,7 @@ class _ProductFormState extends State<ProductForm> {
       if (!value) {
         _imeis.clear();
       } else {
-        // For IMEI products, set quantity to 1 and make it read-only
+        // For IMEI products, set quantity to 1
         _quantityController.text = '1';
       }
     });
@@ -268,326 +243,413 @@ class _ProductFormState extends State<ProductForm> {
   void _onQuantityChanged(String? value) {
     // Guard clause: prevent quantity changes for IMEI products
     if (_isImeiProduct && value != '1') {
-      // Reset to 1 for IMEI products
       _quantityController.text = '1';
     }
   }
 
+  bool _validateForm() {
+    // Guard clause: Basic form validation
+    if (!_formKey.currentState!.validate()) return false;
+
+    // Guard clause: Check required fields
+    if (_nameController.text.trim().isEmpty) {
+      _showError('Product name is required');
+      return false;
+    }
+
+    if (_skuController.text.trim().isEmpty) {
+      _showError('SKU is required');
+      return false;
+    }
+
+    if (_purchasePriceController.text.trim().isEmpty) {
+      _showError('Purchase price is required');
+      return false;
+    }
+
+    if (_quantityController.text.trim().isEmpty) {
+      _showError('Quantity is required');
+      return false;
+    }
+
+    if (_selectedStoreId == null) {
+      _showError('Please select a store');
+      return false;
+    }
+
+    return true;
+  }
+
   Future<void> _saveProduct() async {
     // Guard clause: validate form first
-    if (!_formKey.currentState!.validate()) return;
+    if (!_validateForm()) return;
 
     // Guard clause: validate IMEI for IMEI products
     if (_isImeiProduct) {
-      final filledImeis =
-          _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+      final filledImeis = _imeis.where((imei) => imei.trim().isNotEmpty).toList();
       final imeiError = ProductValidators.validateImeiList(filledImeis);
 
       if (imeiError != null) {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('IMEI Validation Error: $imeiError'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        _showError('IMEI Validation Error: $imeiError');
         return;
       }
     }
 
-    setState(() {
-      _isSaving = true;
-    });
+    setState(() => _isSaving = true);
 
     try {
-      // Create form data object
       final formData = ProductFormData(
-        productName: this.productName,
-        sku: this.sku,
-        purchasePrice: this.purchasePrice,
-        salePrice: this.salePrice,
-        quantity: this.quantity,
-        description: this.description,
-        storeId: this.storeId!,
-        categoryId: this.categoryId,
-        isImei: this.isImei,
-        imeis: this.imeis,
-        photoUrl: this.photoUrl,
+        productName: productName,
+        sku: sku,
+        purchasePrice: purchasePrice,
+        salePrice: salePrice,
+        quantity: quantity,
+        description: description,
+        storeId: storeId!,
+        categoryId: categoryId,
+        isImei: isImei,
+        imeis: imeis,
+        photoUrl: photoUrl,
       );
 
-      // Call parent save handler and wait for completion
       await widget.onSave?.call(formData);
     } catch (e) {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save product: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      _showError('Failed to save product: $e');
     } finally {
-      if (!mounted) return;
-
-      setState(() {
-        _isSaving = false;
-      });
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     // Guard clause: show loading state
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          // Single scrollable form
-          Expanded(
-            child: _buildSingleStepForm(),
-          ),
-
-          // Action buttons
-          _buildActionButtons(),
-        ],
+    return SafeArea(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            // Header
+            _buildHeader(),
+            
+            // Single-step form content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Basic Information Section
+                    _buildBasicInfoSection(),
+                    const SizedBox(height: 24),
+                    
+                    // Pricing & Inventory Section
+                    _buildPricingSection(),
+                    const SizedBox(height: 24),
+                    
+                    // Store & Category Section
+                    _buildStoreSection(),
+                    const SizedBox(height: 24),
+                    
+                    // IMEI Section (if enabled)
+                    if (_isImeiProduct) ...[ 
+                      _buildImeiSection(),
+                      const SizedBox(height: 24),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            
+            // Action buttons
+            _buildActionButtons(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSingleStepForm() {
-    return SingleChildScrollView(
+  Widget _buildHeader() {
+    return Container(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
+        ),
+      ),
+      child: Row(
         children: [
-          // Basic Information Section
-          _buildSectionHeader('Basic Information'),
-          const SizedBox(height: 16),
-          _buildBasicInfoFields(),
-
-          const SizedBox(height: 32),
-
-          // Pricing & Inventory Section
-          _buildSectionHeader('Pricing & Inventory'),
-          const SizedBox(height: 16),
-          _buildPricingFields(),
-
-          const SizedBox(height: 32),
-
-          // Store & Category Section
-          _buildSectionHeader('Store & Category'),
-          const SizedBox(height: 16),
-          _buildStoreFields(),
-
-          const SizedBox(height: 32),
-
-          // Additional Information Section
-          _buildSectionHeader('Additional Information'),
-          const SizedBox(height: 16),
-          _buildAdditionalFields(),
+          Icon(
+            Icons.inventory_2,
+            color: Theme.of(context).primaryColor,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              widget.isEditing ? 'Edit Product' : 'New Product',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+          if (_isImeiProduct) ...[ 
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'IMEI',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.orange[700],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-    );
-  }
-
-  Widget _buildBasicInfoFields() {
+  Widget _buildBasicInfoSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        WMSTextFormField(
+        _buildSectionHeader(
+          'Basic Information',
+          'Enter product name and identification details',
+          Icons.inventory_2,
+        ),
+        const SizedBox(height: 16),
+        
+        _buildCompactTextField(
           label: 'Product Name *',
           controller: _nameController,
           hint: 'Enter product name',
           validator: ProductValidators.validateProductName,
-          prefixIcon: const Icon(Icons.inventory_2),
+          icon: Icons.shopping_bag,
         ),
-
         const SizedBox(height: 16),
-
-        WMSTextFormField(
+        
+        _buildCompactTextField(
           label: 'SKU *',
           controller: _skuController,
-          hint: 'Enter SKU (e.g., PROD001)',
+          hint: 'Enter SKU code',
           validator: ProductValidators.validateSku,
-          prefixIcon: const Icon(Icons.qr_code),
+          icon: Icons.qr_code,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9_-]')),
-            LengthLimitingTextInputFormatter(50),
+            LengthLimitingTextInputFormatter(30),
           ],
         ),
-
         const SizedBox(height: 16),
-
-        // WMSTextFormField(
-        //   label: 'Description',
-        //   controller: _descriptionController,
-        //   hint: 'Enter product description (optional)',
-        //   validator: ProductValidators.validateDescription,
-        //   maxLines: 3,
-        //   prefixIcon: const Icon(Icons.description),
-        // ),
+        
+        _buildCompactTextField(
+          label: 'Description',
+          controller: _descriptionController,
+          hint: 'Product description (optional)',
+          icon: Icons.description,
+          maxLines: 3,
+        ),
       ],
     );
   }
 
-  Widget _buildPricingFields() {
+  Widget _buildPricingSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        WMSCurrencyFormField(
-          label: 'Purchase Price *',
-          controller: _purchasePriceController,
-          hint: 'Enter purchase price',
-          validator: ProductValidators.validatePurchasePrice,
+        _buildSectionHeader(
+          'Pricing & Inventory',
+          'Set prices and manage stock quantity',
+          Icons.attach_money,
         ),
         const SizedBox(height: 16),
-        WMSCurrencyFormField(
-          label: 'Sale Price',
-          controller: _salePriceController,
-          hint: 'Enter sale price (optional)',
-          validator: (value) => ProductValidators.validateSalePrice(
-            value,
-            double.tryParse(_purchasePriceController.text),
-          ),
+        
+        Row(
+          children: [
+            Expanded(
+              child: _buildCompactTextField(
+                label: 'Purchase Price *',
+                controller: _purchasePriceController,
+                hint: '0',
+                validator: ProductValidators.validatePurchasePrice,
+                icon: Icons.shopping_cart,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildCompactTextField(
+                label: 'Sale Price',
+                controller: _salePriceController,
+                hint: '0',
+                validator: (value) => ProductValidators.validateSalePrice(
+                  value,
+                  double.tryParse(_purchasePriceController.text),
+                ),
+                icon: Icons.sell,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
-        WMSTextFormField(
+        
+        _buildCompactTextField(
           label: 'Quantity *',
           controller: _quantityController,
-          hint: _isImeiProduct
-              ? 'Fixed at 1 for IMEI products'
-              : 'Enter quantity',
-          keyboardType: TextInputType.number,
-          validator: (value) =>
-              ProductValidators.validateQuantityForImei(value, _isImeiProduct),
+          hint: _isImeiProduct ? '1 (Fixed for IMEI)' : 'Enter quantity',
+          validator: (value) => ProductValidators.validateQuantityForImei(value, _isImeiProduct),
           onChanged: _onQuantityChanged,
           readOnly: _isImeiProduct,
-          enabled: !_isImeiProduct,
-          prefixIcon: const Icon(Icons.inventory),
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(6),
-          ],
+          icon: Icons.inventory,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
-        const SizedBox(height: 24),
-        WMSSwitchFormField(
-          label: 'IMEI Product',
-          subtitle: 'Enable if this product requires IMEI tracking',
-          value: _isImeiProduct,
-          onChanged: _onImeiToggleChanged,
-        ),
-        if (_isImeiProduct) ...[
-          const SizedBox(height: 16),
-          WMSImeiArrayFormField(
-            label: 'IMEI Numbers',
-            initialImeis: imeis,
-            onChanged: (ims) {
-              setState(() {
-                _imeis = ims;
-              });
-            },
-            validator: (ims) {
-              return ProductValidators.validateImeiList(ims ?? []);
-            },
-          ),
-        ],
+        const SizedBox(height: 16),
+        
+        _buildImeiToggle(),
       ],
     );
   }
 
-  Widget _buildStoreFields() {
+  Widget _buildStoreSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        WMSDropdownFormField<String>(
-          label: 'Store *',
-          hint: _stores.isEmpty ? 'Loading stores...' : 'Select store',
-          value: _stores.isNotEmpty &&
-                  _stores.any((store) => store.id == _selectedStoreId)
-              ? _selectedStoreId
-              : null,
-          items: _stores.map((store) {
-            return DropdownMenuItem<String>(
-              value: store.id,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 280),
-                child: Text(
-                  '${store.name} - ${store.address}',
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: _stores.isEmpty ? null : _onStoreChanged,
-          validator: ProductValidators.validateStore,
-          prefixIcon: const Icon(Icons.store),
+        _buildSectionHeader(
+          'Store & Category',
+          'Select store location and product category',
+          Icons.store,
         ),
         const SizedBox(height: 16),
-        WMSDropdownFormField<String>(
+        
+        _buildCompactDropdown<String>(
+          label: 'Store *',
+          value: _stores.isNotEmpty && _stores.any((store) => store.id == _selectedStoreId)
+              ? _selectedStoreId
+              : null,
+          hint: _stores.isEmpty ? 'Loading stores...' : 'Select store',
+          icon: Icons.store,
+          items: _stores.map((store) => DropdownMenuItem<String>(
+            value: store.id,
+            child: Text(
+              store.name,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          )).toList(),
+          onChanged: _stores.isEmpty ? null : _onStoreChanged,
+          validator: ProductValidators.validateStore,
+        ),
+        const SizedBox(height: 16),
+        
+        _buildCompactDropdown<String>(
           label: 'Category',
+          value: _categories.isNotEmpty && _categories.any((cat) => cat.id == _selectedCategoryId)
+              ? _selectedCategoryId
+              : null,
           hint: _selectedStoreId == null
               ? 'Select store first'
               : _categories.isEmpty
                   ? 'Loading categories...'
                   : 'Select category (optional)',
-          value: _categories.isNotEmpty &&
-                  _categories
-                      .any((category) => category.id == _selectedCategoryId)
-              ? _selectedCategoryId
-              : null,
-          items: _categories.map((category) {
-            return DropdownMenuItem<String>(
-              value: category.id,
-              child: Text(category.name),
-            );
-          }).toList(),
+          icon: Icons.category,
+          items: _categories.map((category) => DropdownMenuItem<String>(
+            value: category.id,
+            child: Text(
+              category.name,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          )).toList(),
           onChanged: _selectedStoreId != null && _categories.isNotEmpty
-              ? (value) {
-                  setState(() {
-                    _selectedCategoryId = value;
-                  });
-                }
+              ? (value) => setState(() => _selectedCategoryId = value)
               : null,
-          validator: ProductValidators.validateCategory,
-          prefixIcon: const Icon(Icons.category),
           enabled: _selectedStoreId != null,
         ),
       ],
     );
   }
 
-  Widget _buildAdditionalFields() {
+  Widget _buildImeiSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        WMSPhotoFormField(
-          label: 'Product Photo',
-          imageUrl: _photoUrl,
-          onChanged: (url) {
-            setState(() {
-              _photoUrl = url;
-            });
-          },
-          onImagePicked: () {
-            // TODO: Implement image picker
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Image picker coming soon!')),
-            );
-          },
+        _buildSectionHeader(
+          'IMEI Numbers',
+          'Manage IMEI numbers for this product',
+          Icons.smartphone,
+        ),
+        const SizedBox(height: 16),
+        _buildImeiList(),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, String subtitle, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).primaryColor,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -599,60 +661,288 @@ class _ProductFormState extends State<ProductForm> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-          ),
+          top: BorderSide(color: Theme.of(context).dividerColor),
         ),
       ),
       child: Row(
         children: [
-          // Cancel button with guard clause
-          if (widget.onCancel != null) ...[
-            TextButton(
-              onPressed: widget.onCancel,
-              child: const Text('Cancel'),
+          if (widget.onCancel != null) ...[ 
+            Expanded(
+              child: OutlinedButton(
+                onPressed: widget.onCancel,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: Theme.of(context).primaryColor),
+                ),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+              ),
             ),
-            const Spacer(),
-          ] else ...[
-            const Spacer(),
+            const SizedBox(width: 16),
           ],
-
-          // Save button
-          ElevatedButton(
-            onPressed: _isSaving ? null : _saveProduct,
-            child: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(widget.isEditing ? 'Update Product' : 'Create Product'),
+          Expanded(
+            flex: 2,
+            child: ElevatedButton(
+              onPressed: _isSaving ? null : _saveProduct,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Text(widget.isEditing ? 'Update Product' : 'Create Product'),
+            ),
           ),
         ],
       ),
     );
   }
 
+
+  Widget _buildCompactTextField({
+    required String label,
+    required TextEditingController controller,
+    String? hint,
+    String? Function(String?)? validator,
+    void Function(String?)? onChanged,
+    IconData? icon,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    int? maxLines,
+    bool readOnly = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      onChanged: onChanged,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      maxLines: maxLines ?? 1,
+      readOnly: readOnly,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: icon != null ? Icon(icon, size: 20) : null,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        isDense: true,
+      ),
+    );
+  }
+
+  Widget _buildCompactDropdown<T>({
+    required String label,
+    required T? value,
+    required String hint,
+    required IconData icon,
+    required List<DropdownMenuItem<T>> items,
+    required void Function(T?)? onChanged,
+    String? Function(T?)? validator,
+    bool enabled = true,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon, size: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        isDense: true,
+      ),
+      items: items,
+      onChanged: enabled ? onChanged : null,
+      validator: validator,
+    );
+  }
+
+  Widget _buildImeiToggle() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.smartphone,
+            color: Theme.of(context).primaryColor,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'IMEI Product',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  'Enable for electronics with IMEI tracking',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _isImeiProduct,
+            onChanged: _onImeiToggleChanged,
+            activeColor: Theme.of(context).primaryColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImeiList() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.format_list_numbered,
+                size: 20,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'IMEI Numbers',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _imeis.add('');
+                  });
+                },
+                child: const Text('Add IMEI'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          
+          if (_imeis.isEmpty) ...[
+            Center(
+              child: Text(
+                'No IMEI numbers added',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ),
+          ] else ...[
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _imeis.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: _imeis[index],
+                        decoration: InputDecoration(
+                          hintText: 'Enter IMEI number',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                          isDense: true,
+                        ),
+                        onChanged: (value) {
+                          if (index < _imeis.length) {
+                            _imeis[index] = value;
+                          }
+                        },
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(15),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _imeis.removeAt(index);
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.delete,
+                          size: 16,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+
   // Getters for form data using guard clauses
   String get productName => _nameController.text.trim();
   String get sku => _skuController.text.trim();
-  double get purchasePrice =>
-      double.tryParse(_purchasePriceController.text) ?? 0.0;
+  double get purchasePrice => double.tryParse(_purchasePriceController.text) ?? 0.0;
   double? get salePrice {
     final text = _salePriceController.text.trim();
     return text.isEmpty ? null : double.tryParse(text);
   }
-
   int get quantity => int.tryParse(_quantityController.text) ?? 0;
   String? get description {
     final text = _descriptionController.text.trim();
     return text.isEmpty ? null : text;
   }
-
   String? get storeId => _selectedStoreId;
   String? get categoryId => _selectedCategoryId;
   bool get isImei => _isImeiProduct;
-  List<String> get imeis =>
-      _imeis.where((imei) => imei.trim().isNotEmpty).toList();
+  List<String> get imeis => _imeis.where((imei) => imei.trim().isNotEmpty).toList();
   String? get photoUrl => _photoUrl;
 }
