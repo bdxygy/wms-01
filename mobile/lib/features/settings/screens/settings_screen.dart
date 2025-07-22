@@ -241,13 +241,16 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                             color: _getRoleColor(role),
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            role,
-                            style: TextStyle(
-                              color: _getRoleColor(role),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              letterSpacing: 0.5,
+                          Flexible(
+                            child: Text(
+                              role,
+                              style: TextStyle(
+                                color: _getRoleColor(role),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                letterSpacing: 0.5,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

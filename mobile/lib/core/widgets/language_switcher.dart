@@ -129,6 +129,7 @@ class LanguageSettingsTile extends StatelessWidget {
           Navigator.of(dialogContext).pop();
           
           // Show success message
+          final newL10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -137,7 +138,7 @@ class LanguageSettingsTile extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '${l10n.languageChangedTo} ${language.name}',
+                      '${newL10n.languageChangedTo} ${language.name}',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
