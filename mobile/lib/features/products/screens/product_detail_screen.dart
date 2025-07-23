@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:wms_mobile/core/utils/number_utils.dart';
 
 import '../../../core/models/product.dart';
 import '../../../core/models/user.dart';
@@ -11,9 +12,11 @@ import '../../../core/services/store_service.dart';
 import '../../../core/services/category_service.dart';
 import '../../../core/services/print_launcher.dart';
 import '../../../core/auth/auth_provider.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../../core/widgets/loading.dart';
+import '../../../core/widgets/barcode_quantity_dialog.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../core/utils/number_utils.dart';
+import '../widgets/imei_management_section.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -97,22 +100,45 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (_product == null) return;
 
     try {
+      // Show barcode quantity dialog
+      final quantity = await showDialog<int>(
+        context: context,
+        builder: (context) => BarcodeQuantityDialog(
+          title: 'Print Barcode',
+          subtitle: _product!.name,
+          defaultQuantity: 1,
+        ),
+      );
+
+      // Guard clause: User cancelled dialog
+      if (quantity == null) return;
+
+      // Guard clause: Check if still mounted
+      if (!mounted) return;
+
       // Get current user for printing context
       final user = context.read<AuthProvider>().user;
 
-      // Use the comprehensive connect and print method
+      // Use the comprehensive connect and print method with quantity
       final result = await _printLauncher.connectAndPrint(
         context,
         product: _product!,
+        quantity: quantity,
         store: _store,
         user: user,
       );
 
       if (result && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Barcode printed successfully!'),
+          SnackBar(
+            content: Text(quantity == 1
+                ? 'Barcode printed successfully!'
+                : '$quantity barcodes printed successfully!'),
             backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -128,6 +154,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             SnackBar(
               content: Text('Permission required: $e'),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               action: SnackBarAction(
                 label: 'Settings',
                 onPressed: () =>
@@ -140,6 +170,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             SnackBar(
               content: Text('Failed to print barcode: $e'),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               action: SnackBarAction(
                 label: 'Setup Printer',
                 onPressed: () => _printLauncher.connectAndPrint(context),
@@ -255,7 +289,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 Name: ${_product!.name}
 SKU: ${_product!.sku}
 Barcode: ${_product!.barcode}
-Price: ${NumberUtils.formatDoubleAsInt(_product!.salePrice ?? _product!.purchasePrice)}
+Price: ${Provider.of<AppProvider>(context, listen: false).formatCurrency(_product!.salePrice ?? _product!.purchasePrice)}
 Quantity: ${_product!.quantity}''';
 
     Clipboard.setData(ClipboardData(text: productInfo));
@@ -627,10 +661,6 @@ Quantity: ${_product!.quantity}''';
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-          width: 1,
-        ),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -670,6 +700,56 @@ Quantity: ${_product!.quantity}''';
               _buildPrintButton(),
             ],
           ),
+
+          // Product description (if available)
+          if (_product!.description != null &&
+              _product!.description!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.description,
+                        size: 16,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Description',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _product!.description!,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[700],
+                          height: 1.4,
+                          fontWeight: FontWeight.w500,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           const SizedBox(height: 20),
 
@@ -846,27 +926,27 @@ Quantity: ${_product!.quantity}''';
             Icons.attach_money,
           ),
           const SizedBox(height: 20),
-
-          // Pricing grid
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: _buildPriceCard(
-                  'Purchase Price',
-                  NumberUtils.formatDoubleAsInt(_product!.purchasePrice),
-                  Icons.shopping_cart_outlined,
-                  Colors.blue,
-                ),
+              _buildPriceCard(
+                'Purchase Price',
+                Provider.of<AppProvider>(context, listen: false)
+                    .formatCurrency(_product!.purchasePrice),
+                Icons.shopping_cart_outlined,
+                Colors.blue,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildPriceCard(
-                  'Sale Price',
-                  _product!.salePrice != null ? NumberUtils.formatDoubleAsInt(_product!.salePrice!) : 'Not set',
-                  Icons.sell_outlined,
-                  Colors.green,
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
               ),
+              _buildPriceCard(
+                'Sale Price',
+                _product!.salePrice != null
+                    ? Provider.of<AppProvider>(context, listen: false)
+                        .formatCurrency(_product!.salePrice!)
+                    : 'Not set',
+                Icons.sell_outlined,
+                Colors.green,
+              )
             ],
           ),
 
@@ -952,7 +1032,7 @@ Quantity: ${_product!.quantity}''';
         ),
         const SizedBox(height: 4),
         Text(
-          '${_product!.quantity} units',
+          '${NumberUtils.formatWithDots(_product!.quantity)} units',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -1102,78 +1182,10 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildImeiManagementCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: _buildSectionHeader(
-              'IMEI Management',
-              'Track and manage device IMEI numbers',
-              Icons.smartphone,
-            ),
-          ),
-          // Import the existing IMEI management widget here
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.smartphone,
-                    color: Colors.orange[700],
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'IMEI Product',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.orange[700],
-                                  ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'This product uses IMEI tracking for individual unit management',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+    return ImeiManagementSection(
+      productId: _product!.id,
+      productName: _product!.name,
+      expectedQuantity: _product!.quantity,
     );
   }
 

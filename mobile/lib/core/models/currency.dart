@@ -36,7 +36,7 @@ class SupportedCurrencies {
   static const Currency idr = Currency(
     code: 'IDR',
     name: 'Indonesian Rupiah',
-    symbol: 'Rp',
+    symbol: 'Rp. ',
     displayName: 'IDR - Indonesian Rupiah (Rp)',
   );
 

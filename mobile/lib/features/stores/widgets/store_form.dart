@@ -115,13 +115,15 @@ class _StoreFormState extends State<StoreForm> {
       }
 
       if (!mounted) return;
-      
+
       // Show success message
       final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isEditMode ? l10n.storeUpdatedSuccessfully : l10n.storeCreatedSuccessfully,
+            _isEditMode
+                ? l10n.storeUpdatedSuccessfully
+                : l10n.storeCreatedSuccessfully,
           ),
           backgroundColor: Colors.green,
         ),
@@ -129,7 +131,6 @@ class _StoreFormState extends State<StoreForm> {
 
       // Call success callback
       widget.onSuccess?.call();
-
     } catch (e) {
       if (!mounted) return;
 
@@ -142,6 +143,12 @@ class _StoreFormState extends State<StoreForm> {
           backgroundColor: Colors.red,
         ),
       );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -154,10 +161,27 @@ class _StoreFormState extends State<StoreForm> {
   Future<void> _createStore() async {
     final request = CreateStoreRequest(
       name: _nameController.text.trim(),
-      address: _buildFullAddress(),
-      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-      email: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
-      description: null, // Could add description field if needed
+      type: _typeController.text.trim(),
+      addressLine1: _addressLine1Controller.text.trim(),
+      addressLine2: _addressLine2Controller.text.trim().isEmpty
+          ? null
+          : _addressLine2Controller.text.trim(),
+      city: _cityController.text.trim(),
+      province: _provinceController.text.trim(),
+      postalCode: _postalCodeController.text.trim(),
+      country: _countryController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      email: _emailController.text.trim().isEmpty
+          ? null
+          : _emailController.text.trim(),
+      openTime: _openTime != null ? _formatTimeForAPI(_openTime!) : null,
+      closeTime: _closeTime != null ? _formatTimeForAPI(_closeTime!) : null,
+      timezone: _timezoneController.text.trim().isEmpty
+          ? null
+          : _timezoneController.text.trim(),
+      mapLocation: _mapLocationController.text.trim().isEmpty
+          ? null
+          : _mapLocationController.text.trim(),
     );
 
     await _storeService.createStore(request);
@@ -166,31 +190,37 @@ class _StoreFormState extends State<StoreForm> {
   Future<void> _updateStore() async {
     final request = UpdateStoreRequest(
       name: _nameController.text.trim(),
-      address: _buildFullAddress(),
-      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-      email: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
-      description: null, // Could add description field if needed
+      type: _typeController.text.trim(),
+      addressLine1: _addressLine1Controller.text.trim(),
+      addressLine2: _addressLine2Controller.text.trim().isEmpty
+          ? null
+          : _addressLine2Controller.text.trim(),
+      city: _cityController.text.trim(),
+      province: _provinceController.text.trim(),
+      postalCode: _postalCodeController.text.trim(),
+      country: _countryController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      email: _emailController.text.trim().isEmpty
+          ? null
+          : _emailController.text.trim(),
+      isActive: _isActive,
+      openTime: _openTime != null ? _formatTimeForAPI(_openTime!) : null,
+      closeTime: _closeTime != null ? _formatTimeForAPI(_closeTime!) : null,
+      timezone: _timezoneController.text.trim().isEmpty
+          ? null
+          : _timezoneController.text.trim(),
+      mapLocation: _mapLocationController.text.trim().isEmpty
+          ? null
+          : _mapLocationController.text.trim(),
     );
 
     await _storeService.updateStore(widget.store!.id, request);
   }
 
-  String _buildFullAddress() {
-    final parts = [
-      _addressLine1Controller.text.trim(),
-      if (_addressLine2Controller.text.trim().isNotEmpty) _addressLine2Controller.text.trim(),
-      _cityController.text.trim(),
-      _provinceController.text.trim(),
-      _postalCodeController.text.trim(),
-      _countryController.text.trim(),
-    ];
-    return parts.where((part) => part.isNotEmpty).join(', ');
-  }
-
   Future<void> _selectTime(BuildContext context, bool isOpenTime) async {
     final l10n = AppLocalizations.of(context)!;
     final initialTime = isOpenTime ? _openTime : _closeTime;
-    
+
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initialTime ?? const TimeOfDay(hour: 9, minute: 0),
@@ -211,6 +241,14 @@ class _StoreFormState extends State<StoreForm> {
   String _formatTimeOfDay(TimeOfDay? time) {
     if (time == null) return '';
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTimeForAPI(TimeOfDay time) {
+    // Convert TimeOfDay to DateTime string for API in format: 2025-07-23T08:00:00Z
+    final now = DateTime.now();
+    final dateTime =
+        DateTime.utc(now.year, now.month, now.day, time.hour, time.minute, 0);
+    return dateTime.toIso8601String();
   }
 
   @override
@@ -406,7 +444,8 @@ class _StoreFormState extends State<StoreForm> {
                     ? const WMSLoadingIndicator(size: 20)
                     : Text(
                         _isEditMode ? l10n.updateStore : l10n.createStore,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600),
                       ),
               ),
             ),

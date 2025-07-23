@@ -1282,4 +1282,259 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToLoadImage => 'Failed to load image';
+
+  @override
+  String get common_button_cancel => 'Cancel';
+
+  @override
+  String get common_button_delete => 'Delete';
+
+  @override
+  String get common_button_settings => 'Settings';
+
+  @override
+  String get bluetooth_setup_title => 'Bluetooth Printer Setup';
+
+  @override
+  String get bluetooth_setup_subtitle => 'Connect to your thermal printer';
+
+  @override
+  String get bluetooth_setup_instructions =>
+      'Make sure your printer is turned on and in pairing mode';
+
+  @override
+  String bluetooth_paired_tab(int count) {
+    return 'Paired ($count)';
+  }
+
+  @override
+  String bluetooth_available_tab(int count) {
+    return 'Available ($count)';
+  }
+
+  @override
+  String get bluetooth_scanning => 'Scanning...';
+
+  @override
+  String get bluetooth_refresh => 'Refresh';
+
+  @override
+  String get bluetooth_connecting => 'Connecting...';
+
+  @override
+  String get bluetooth_connect => 'Connect';
+
+  @override
+  String get bluetooth_no_devices_found => 'No devices found';
+
+  @override
+  String get bluetooth_no_paired_devices => 'No paired devices';
+
+  @override
+  String get bluetooth_make_printer_discoverable =>
+      'Make sure your printer is discoverable and try scanning again';
+
+  @override
+  String get bluetooth_pair_printer_first =>
+      'Please pair your thermal printer in Bluetooth settings first';
+
+  @override
+  String get bluetooth_scan_again => 'Scan Again';
+
+  @override
+  String get bluetooth_enter_mac_address => 'Enter MAC Address';
+
+  @override
+  String get bluetooth_manual_connection => 'Manual Connection';
+
+  @override
+  String get bluetooth_enter_mac_manually =>
+      'Enter printer MAC address manually';
+
+  @override
+  String get bluetooth_mac_address_help =>
+      'MAC address format: 00:11:22:33:44:55';
+
+  @override
+  String get bluetooth_printer_name_optional => 'Printer Name (Optional)';
+
+  @override
+  String get bluetooth_printer_name_hint => 'My Thermal Printer';
+
+  @override
+  String get bluetooth_mac_address_required => 'MAC Address *';
+
+  @override
+  String get bluetooth_mac_format => 'Format: 00:11:22:33:44:55';
+
+  @override
+  String get bluetooth_invalid_mac_address => 'Invalid MAC address format';
+
+  @override
+  String get bluetooth_manual_printer_default_name => 'Manual Printer';
+
+  @override
+  String get bluetooth_manual_connection_help =>
+      'If your printer doesn\'t appear in the list, you can connect manually using its MAC address';
+
+  @override
+  String get bluetooth_unknown_device => 'Unknown Device';
+
+  @override
+  String get bluetooth_tap_to_connect => 'Tap to connect';
+
+  @override
+  String get bluetooth_error_title => 'Connection Error';
+
+  @override
+  String get bluetooth_test_print_success => 'Test page printed successfully!';
+
+  @override
+  String bluetooth_test_print_failed(String error) {
+    return 'Test print failed: $error';
+  }
+
+  @override
+  String get barcode_quantity_label => 'Number of Copies';
+
+  @override
+  String get barcode_quantity_instructions =>
+      'Select how many copies you want to print';
+
+  @override
+  String get barcode_quantity_invalid_number => 'Please enter a valid number';
+
+  @override
+  String get barcode_quantity_minimum_error => 'Minimum quantity is 1';
+
+  @override
+  String barcode_quantity_maximum_error(int max) {
+    return 'Maximum quantity is $max';
+  }
+
+  @override
+  String barcode_quantity_range(int min, int max) {
+    return 'Range: $min - $max';
+  }
+
+  @override
+  String get barcode_quantity_minimum_info => 'Minimum: 1 (no maximum limit)';
+
+  @override
+  String barcode_quantity_print_button(int count) {
+    return 'Print $count';
+  }
+
+  @override
+  String get logo_management_title => 'Receipt Logo';
+
+  @override
+  String get logo_management_subtitle => 'Upload a logo to appear on receipts';
+
+  @override
+  String get logo_delete_title => 'Delete Logo';
+
+  @override
+  String get logo_delete_message =>
+      'Are you sure you want to delete the current logo?';
+
+  @override
+  String get logo_replace_button => 'Replace Logo';
+
+  @override
+  String get logo_upload_button => 'Upload Logo';
+
+  @override
+  String get logo_empty_title => 'No Logo Uploaded';
+
+  @override
+  String get logo_empty_subtitle =>
+      'Upload a logo to display on your receipts and payment notes';
+
+  @override
+  String get logo_dimensions => 'Dimensions';
+
+  @override
+  String get logo_file_size => 'File Size';
+
+  @override
+  String get logo_preview_error => 'Failed to load logo preview';
+
+  @override
+  String get logo_select_image_source => 'Select Image Source';
+
+  @override
+  String get logo_select_image_subtitle =>
+      'Choose where to get your logo image from';
+
+  @override
+  String get logo_camera_option => 'Take Photo';
+
+  @override
+  String get logo_camera_subtitle => 'Use camera to capture logo';
+
+  @override
+  String get logo_gallery_option => 'Choose from Gallery';
+
+  @override
+  String get logo_gallery_subtitle => 'Select existing image from gallery';
+
+  @override
+  String get logo_camera_permission_title => 'Camera Permission Required';
+
+  @override
+  String get logo_camera_permission_message =>
+      'Camera access is needed to take photos. Please grant permission in settings.';
+
+  @override
+  String get logo_gallery_permission_title => 'Gallery Permission Required';
+
+  @override
+  String get logo_gallery_permission_message =>
+      'Gallery access is needed to select photos. Please grant permission in settings.';
+
+  @override
+  String get barcode_preview_title => 'Barcode Preview';
+
+  @override
+  String get barcode_preview_subtitle =>
+      'Preview how your barcode labels will look';
+
+  @override
+  String get receipt_preview_title => 'Receipt Preview';
+
+  @override
+  String get receipt_preview_subtitle => 'Preview how your receipts will look';
+
+  @override
+  String get preview_barcode => 'Preview Barcode';
+
+  @override
+  String get preview_receipt => 'Preview Receipt';
+
+  @override
+  String get logo_preview_section => 'Print Preview';
+
+  @override
+  String get logo_upload_error_no_image =>
+      'No image selected. Please try again or check permissions.';
+
+  @override
+  String get logo_upload_error_validation =>
+      'Invalid image. Please select a valid image file (minimum 50x50 pixels, maximum 2MB).';
+
+  @override
+  String get logo_upload_error_save =>
+      'Failed to save logo. Please check storage permissions and try again.';
+
+  @override
+  String get logo_upload_success => 'Logo uploaded successfully!';
+
+  @override
+  String get camera_permission_required =>
+      'Camera permission is required to take photos';
+
+  @override
+  String get gallery_permission_required =>
+      'Gallery permission is required to select photos';
 }

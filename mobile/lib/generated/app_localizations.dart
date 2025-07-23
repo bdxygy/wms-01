@@ -2527,6 +2527,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load image'**
   String get failedToLoadImage;
+
+  /// No description provided for @common_button_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get common_button_cancel;
+
+  /// No description provided for @common_button_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get common_button_delete;
+
+  /// No description provided for @common_button_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get common_button_settings;
+
+  /// No description provided for @bluetooth_setup_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Printer Setup'**
+  String get bluetooth_setup_title;
+
+  /// No description provided for @bluetooth_setup_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to your thermal printer'**
+  String get bluetooth_setup_subtitle;
+
+  /// No description provided for @bluetooth_setup_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure your printer is turned on and in pairing mode'**
+  String get bluetooth_setup_instructions;
+
+  /// No description provided for @bluetooth_paired_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Paired ({count})'**
+  String bluetooth_paired_tab(int count);
+
+  /// No description provided for @bluetooth_available_tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Available ({count})'**
+  String bluetooth_available_tab(int count);
+
+  /// No description provided for @bluetooth_scanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning...'**
+  String get bluetooth_scanning;
+
+  /// No description provided for @bluetooth_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get bluetooth_refresh;
+
+  /// No description provided for @bluetooth_connecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get bluetooth_connecting;
+
+  /// No description provided for @bluetooth_connect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get bluetooth_connect;
+
+  /// No description provided for @bluetooth_no_devices_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices found'**
+  String get bluetooth_no_devices_found;
+
+  /// No description provided for @bluetooth_no_paired_devices.
+  ///
+  /// In en, this message translates to:
+  /// **'No paired devices'**
+  String get bluetooth_no_paired_devices;
+
+  /// No description provided for @bluetooth_make_printer_discoverable.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure your printer is discoverable and try scanning again'**
+  String get bluetooth_make_printer_discoverable;
+
+  /// No description provided for @bluetooth_pair_printer_first.
+  ///
+  /// In en, this message translates to:
+  /// **'Please pair your thermal printer in Bluetooth settings first'**
+  String get bluetooth_pair_printer_first;
+
+  /// No description provided for @bluetooth_scan_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Again'**
+  String get bluetooth_scan_again;
+
+  /// No description provided for @bluetooth_enter_mac_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter MAC Address'**
+  String get bluetooth_enter_mac_address;
+
+  /// No description provided for @bluetooth_manual_connection.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Connection'**
+  String get bluetooth_manual_connection;
+
+  /// No description provided for @bluetooth_enter_mac_manually.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter printer MAC address manually'**
+  String get bluetooth_enter_mac_manually;
+
+  /// No description provided for @bluetooth_mac_address_help.
+  ///
+  /// In en, this message translates to:
+  /// **'MAC address format: 00:11:22:33:44:55'**
+  String get bluetooth_mac_address_help;
+
+  /// No description provided for @bluetooth_printer_name_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer Name (Optional)'**
+  String get bluetooth_printer_name_optional;
+
+  /// No description provided for @bluetooth_printer_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'My Thermal Printer'**
+  String get bluetooth_printer_name_hint;
+
+  /// No description provided for @bluetooth_mac_address_required.
+  ///
+  /// In en, this message translates to:
+  /// **'MAC Address *'**
+  String get bluetooth_mac_address_required;
+
+  /// No description provided for @bluetooth_mac_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Format: 00:11:22:33:44:55'**
+  String get bluetooth_mac_format;
+
+  /// No description provided for @bluetooth_invalid_mac_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid MAC address format'**
+  String get bluetooth_invalid_mac_address;
+
+  /// No description provided for @bluetooth_manual_printer_default_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Printer'**
+  String get bluetooth_manual_printer_default_name;
+
+  /// No description provided for @bluetooth_manual_connection_help.
+  ///
+  /// In en, this message translates to:
+  /// **'If your printer doesn\'t appear in the list, you can connect manually using its MAC address'**
+  String get bluetooth_manual_connection_help;
+
+  /// No description provided for @bluetooth_unknown_device.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Device'**
+  String get bluetooth_unknown_device;
+
+  /// No description provided for @bluetooth_tap_to_connect.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to connect'**
+  String get bluetooth_tap_to_connect;
+
+  /// No description provided for @bluetooth_error_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Error'**
+  String get bluetooth_error_title;
+
+  /// No description provided for @bluetooth_test_print_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Test page printed successfully!'**
+  String get bluetooth_test_print_success;
+
+  /// No description provided for @bluetooth_test_print_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Test print failed: {error}'**
+  String bluetooth_test_print_failed(String error);
+
+  /// No description provided for @barcode_quantity_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Copies'**
+  String get barcode_quantity_label;
+
+  /// No description provided for @barcode_quantity_instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Select how many copies you want to print'**
+  String get barcode_quantity_instructions;
+
+  /// No description provided for @barcode_quantity_invalid_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number'**
+  String get barcode_quantity_invalid_number;
+
+  /// No description provided for @barcode_quantity_minimum_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum quantity is 1'**
+  String get barcode_quantity_minimum_error;
+
+  /// No description provided for @barcode_quantity_maximum_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum quantity is {max}'**
+  String barcode_quantity_maximum_error(int max);
+
+  /// No description provided for @barcode_quantity_range.
+  ///
+  /// In en, this message translates to:
+  /// **'Range: {min} - {max}'**
+  String barcode_quantity_range(int min, int max);
+
+  /// No description provided for @barcode_quantity_minimum_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum: 1 (no maximum limit)'**
+  String get barcode_quantity_minimum_info;
+
+  /// No description provided for @barcode_quantity_print_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Print {count}'**
+  String barcode_quantity_print_button(int count);
+
+  /// No description provided for @logo_management_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt Logo'**
+  String get logo_management_title;
+
+  /// No description provided for @logo_management_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a logo to appear on receipts'**
+  String get logo_management_subtitle;
+
+  /// No description provided for @logo_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Logo'**
+  String get logo_delete_title;
+
+  /// No description provided for @logo_delete_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the current logo?'**
+  String get logo_delete_message;
+
+  /// No description provided for @logo_replace_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace Logo'**
+  String get logo_replace_button;
+
+  /// No description provided for @logo_upload_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Logo'**
+  String get logo_upload_button;
+
+  /// No description provided for @logo_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No Logo Uploaded'**
+  String get logo_empty_title;
+
+  /// No description provided for @logo_empty_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a logo to display on your receipts and payment notes'**
+  String get logo_empty_subtitle;
+
+  /// No description provided for @logo_dimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Dimensions'**
+  String get logo_dimensions;
+
+  /// No description provided for @logo_file_size.
+  ///
+  /// In en, this message translates to:
+  /// **'File Size'**
+  String get logo_file_size;
+
+  /// No description provided for @logo_preview_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load logo preview'**
+  String get logo_preview_error;
+
+  /// No description provided for @logo_select_image_source.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Image Source'**
+  String get logo_select_image_source;
+
+  /// No description provided for @logo_select_image_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where to get your logo image from'**
+  String get logo_select_image_subtitle;
+
+  /// No description provided for @logo_camera_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get logo_camera_option;
+
+  /// No description provided for @logo_camera_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use camera to capture logo'**
+  String get logo_camera_subtitle;
+
+  /// No description provided for @logo_gallery_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Gallery'**
+  String get logo_gallery_option;
+
+  /// No description provided for @logo_gallery_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select existing image from gallery'**
+  String get logo_gallery_subtitle;
+
+  /// No description provided for @logo_camera_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera Permission Required'**
+  String get logo_camera_permission_title;
+
+  /// No description provided for @logo_camera_permission_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is needed to take photos. Please grant permission in settings.'**
+  String get logo_camera_permission_message;
+
+  /// No description provided for @logo_gallery_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery Permission Required'**
+  String get logo_gallery_permission_title;
+
+  /// No description provided for @logo_gallery_permission_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery access is needed to select photos. Please grant permission in settings.'**
+  String get logo_gallery_permission_message;
+
+  /// No description provided for @barcode_preview_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode Preview'**
+  String get barcode_preview_title;
+
+  /// No description provided for @barcode_preview_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview how your barcode labels will look'**
+  String get barcode_preview_subtitle;
+
+  /// No description provided for @receipt_preview_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt Preview'**
+  String get receipt_preview_title;
+
+  /// No description provided for @receipt_preview_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview how your receipts will look'**
+  String get receipt_preview_subtitle;
+
+  /// No description provided for @preview_barcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Barcode'**
+  String get preview_barcode;
+
+  /// No description provided for @preview_receipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Receipt'**
+  String get preview_receipt;
+
+  /// No description provided for @logo_preview_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Preview'**
+  String get logo_preview_section;
+
+  /// No description provided for @logo_upload_error_no_image.
+  ///
+  /// In en, this message translates to:
+  /// **'No image selected. Please try again or check permissions.'**
+  String get logo_upload_error_no_image;
+
+  /// No description provided for @logo_upload_error_validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid image. Please select a valid image file (minimum 50x50 pixels, maximum 2MB).'**
+  String get logo_upload_error_validation;
+
+  /// No description provided for @logo_upload_error_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save logo. Please check storage permissions and try again.'**
+  String get logo_upload_error_save;
+
+  /// No description provided for @logo_upload_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo uploaded successfully!'**
+  String get logo_upload_success;
+
+  /// No description provided for @camera_permission_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission is required to take photos'**
+  String get camera_permission_required;
+
+  /// No description provided for @gallery_permission_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery permission is required to select photos'**
+  String get gallery_permission_required;
 }
 
 class _AppLocalizationsDelegate

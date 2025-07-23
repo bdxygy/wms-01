@@ -520,5 +520,131 @@
   "dateModified": "Date Modified",
   "deletePhoto": "Delete Photo",
   "deletePhotoConfirmation": "Are you sure you want to delete this photo?",
-  "failedToLoadImage": "Failed to load image"
+  "failedToLoadImage": "Failed to load image",
+
+  "common_button_cancel": "Cancel",
+  "common_button_delete": "Delete",
+  "common_button_settings": "Settings",
+
+  "bluetooth_setup_title": "Bluetooth Printer Setup",
+  "bluetooth_setup_subtitle": "Connect to your thermal printer",
+  "bluetooth_setup_instructions": "Make sure your printer is turned on and in pairing mode",
+  "bluetooth_paired_tab": "Paired ({count})",
+  "@bluetooth_paired_tab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bluetooth_available_tab": "Available ({count})",
+  "@bluetooth_available_tab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bluetooth_scanning": "Scanning...",
+  "bluetooth_refresh": "Refresh",
+  "bluetooth_connecting": "Connecting...",
+  "bluetooth_connect": "Connect",
+  "bluetooth_no_devices_found": "No devices found",
+  "bluetooth_no_paired_devices": "No paired devices",
+  "bluetooth_make_printer_discoverable": "Make sure your printer is discoverable and try scanning again",
+  "bluetooth_pair_printer_first": "Please pair your thermal printer in Bluetooth settings first",
+  "bluetooth_scan_again": "Scan Again",
+  "bluetooth_enter_mac_address": "Enter MAC Address",
+  "bluetooth_manual_connection": "Manual Connection",
+  "bluetooth_enter_mac_manually": "Enter printer MAC address manually",
+  "bluetooth_mac_address_help": "MAC address format: 00:11:22:33:44:55",
+  "bluetooth_printer_name_optional": "Printer Name (Optional)",
+  "bluetooth_printer_name_hint": "My Thermal Printer",
+  "bluetooth_mac_address_required": "MAC Address *",
+  "bluetooth_mac_format": "Format: 00:11:22:33:44:55",
+  "bluetooth_invalid_mac_address": "Invalid MAC address format",
+  "bluetooth_manual_printer_default_name": "Manual Printer",
+  "bluetooth_manual_connection_help": "If your printer doesn't appear in the list, you can connect manually using its MAC address",
+  "bluetooth_unknown_device": "Unknown Device",
+  "bluetooth_tap_to_connect": "Tap to connect",
+  "bluetooth_error_title": "Connection Error",
+  "bluetooth_test_print_success": "Test page printed successfully!",
+  "bluetooth_test_print_failed": "Test print failed: {error}",
+  "@bluetooth_test_print_failed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "barcode_quantity_label": "Number of Copies",
+  "barcode_quantity_instructions": "Select how many copies you want to print",
+  "barcode_quantity_invalid_number": "Please enter a valid number",
+  "barcode_quantity_minimum_error": "Minimum quantity is 1",
+  "barcode_quantity_maximum_error": "Maximum quantity is {max}",
+  "@barcode_quantity_maximum_error": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "barcode_quantity_range": "Range: {min} - {max}",
+  "@barcode_quantity_range": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "barcode_quantity_minimum_info": "Minimum: 1 (no maximum limit)",
+  "barcode_quantity_print_button": "Print {count}",
+  "@barcode_quantity_print_button": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "logo_management_title": "Receipt Logo",
+  "logo_management_subtitle": "Upload a logo to appear on receipts",
+  "logo_delete_title": "Delete Logo",
+  "logo_delete_message": "Are you sure you want to delete the current logo?",
+  "logo_replace_button": "Replace Logo",
+  "logo_upload_button": "Upload Logo",
+  "logo_empty_title": "No Logo Uploaded",
+  "logo_empty_subtitle": "Upload a logo to display on your receipts and payment notes",
+  "logo_dimensions": "Dimensions",
+  "logo_file_size": "File Size",
+  "logo_preview_error": "Failed to load logo preview",
+  "logo_select_image_source": "Select Image Source",
+  "logo_select_image_subtitle": "Choose where to get your logo image from",
+  "logo_camera_option": "Take Photo",
+  "logo_camera_subtitle": "Use camera to capture logo",
+  "logo_gallery_option": "Choose from Gallery",
+  "logo_gallery_subtitle": "Select existing image from gallery",
+  "logo_camera_permission_title": "Camera Permission Required",
+  "logo_camera_permission_message": "Camera access is needed to take photos. Please grant permission in settings.",
+  "logo_gallery_permission_title": "Gallery Permission Required",
+  "logo_gallery_permission_message": "Gallery access is needed to select photos. Please grant permission in settings.",
+
+  "barcode_preview_title": "Barcode Preview",
+  "barcode_preview_subtitle": "Preview how your barcode labels will look",
+  "receipt_preview_title": "Receipt Preview", 
+  "receipt_preview_subtitle": "Preview how your receipts will look",
+  "preview_barcode": "Preview Barcode",
+  "preview_receipt": "Preview Receipt",
+  "logo_preview_section": "Print Preview",
+
+  "logo_upload_error_no_image": "No image selected. Please try again or check permissions.",
+  "logo_upload_error_validation": "Invalid image. Please select a valid image file (minimum 50x50 pixels, maximum 2MB).",
+  "logo_upload_error_save": "Failed to save logo. Please check storage permissions and try again.",
+  "logo_upload_success": "Logo uploaded successfully!",
+  "camera_permission_required": "Camera permission is required to take photos",
+  "gallery_permission_required": "Gallery permission is required to select photos"
 }

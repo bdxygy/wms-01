@@ -201,6 +201,7 @@ class TransactionService {
   /// - isFinished: true/false for completion status
   /// - startDate/endDate: Date range filtering
   /// - minAmount/maxAmount: Amount range filtering
+  /// - customerName: Search by customer name (searches in 'to' field)
   Future<PaginatedResponse<Transaction>> getTransactions({
     int page = 1,
     int limit = 20,
@@ -211,6 +212,7 @@ class TransactionService {
     DateTime? endDate,
     double? minAmount,
     double? maxAmount,
+    String? customerName, // Search customer name in 'to' field
   }) async {
     try {
       // Build query parameters
@@ -226,6 +228,7 @@ class TransactionService {
       if (endDate != null) queryParams['endDate'] = endDate.toIso8601String();
       if (minAmount != null) queryParams['minAmount'] = minAmount;
       if (maxAmount != null) queryParams['maxAmount'] = maxAmount;
+      if (customerName != null) queryParams['customerName'] = customerName;
 
       final response = await _apiClient.get(
         ApiEndpoints.transactionsList,

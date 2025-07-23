@@ -9,10 +9,10 @@ import '../../../core/services/category_service.dart';
 import '../../../core/services/store_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/app_bars.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../core/utils/number_utils.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -25,28 +25,28 @@ class _ProductListScreenState extends State<ProductListScreen> {
   final ProductService _productService = ProductService();
   final CategoryService _categoryService = CategoryService();
   final StoreService _storeService = StoreService();
-  
+
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<Product> _products = [];
   List<Category> _categories = [];
   List<Store> _stores = [];
-  
+
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasMoreProducts = true;
   String? _error;
-  
+
   int _currentPage = 1;
   static const int _pageSize = 15; // Reduced for mobile
-  
+
   // Filter states
   String _searchQuery = '';
   String? _selectedCategoryId;
   String? _selectedStoreId;
   bool _showFilters = false;
-  
+
   @override
   void initState() {
     super.initState();
@@ -55,28 +55,33 @@ class _ProductListScreenState extends State<ProductListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
+
+    Future.microtask(() {
+      _loadInitialData();
+    });
   }
-  
+
   @override
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
-  
+
   void _onScroll() {
     // Guard clause: Check scroll position for pagination
-    if (_scrollController.position.pixels < _scrollController.position.maxScrollExtent - 200) return;
+    if (_scrollController.position.pixels <
+        _scrollController.position.maxScrollExtent - 200) return;
     if (_isLoadingMore || !_hasMoreProducts) return;
-    
+
     _loadMoreProducts();
   }
-  
+
   void _onSearchChanged() {
     // Guard clause: Prevent unnecessary searches
     if (!mounted) return;
     if (_searchController.text == _searchQuery) return;
-    
+
     // Debounce search to avoid too many API calls
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
@@ -88,15 +93,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
       }
     });
   }
-  
+
   Future<void> _loadInitialData() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
-    
+
     try {
       await Future.wait([
         _loadCategories(),
@@ -116,13 +121,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
       }
     }
   }
-  
+
   Future<void> _loadCategories() async {
     try {
       if (!mounted) return;
       final response = await _categoryService.getCategories(limit: 50);
       if (!mounted) return;
-      
+
       setState(() {
         _categories = response.data;
       });
@@ -130,10 +135,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
       debugPrint('Failed to load categories: $e');
     }
   }
-  
+
   Future<void> _loadStores() async {
     final user = context.read<AuthProvider>().user;
-    
+
     // Guard clause: Only load stores for owners
     if (user?.role != UserRole.owner) return;
 
@@ -141,7 +146,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       if (!mounted) return;
       final response = await _storeService.getStores(limit: 50);
       if (!mounted) return;
-      
+
       setState(() {
         _stores = response.data;
       });
@@ -149,28 +154,28 @@ class _ProductListScreenState extends State<ProductListScreen> {
       debugPrint('Failed to load stores: $e');
     }
   }
-  
+
   Future<void> _loadProducts({bool reset = false}) async {
     if (!mounted) return;
-    
+
     if (reset) {
       setState(() {
         _currentPage = 1;
         _hasMoreProducts = true;
       });
     }
-    
+
     try {
       if (!mounted) return;
       final storeContext = context.read<StoreContextProvider>().selectedStore;
       final user = context.read<AuthProvider>().user;
-      
+
       // Determine store filter based on user role
       String? storeFilter = _selectedStoreId;
       if (user?.role != UserRole.owner && storeContext != null) {
         storeFilter = storeContext.id;
       }
-      
+
       final response = await _productService.getProducts(
         page: _currentPage,
         limit: _pageSize,
@@ -178,9 +183,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
         storeId: storeFilter,
         categoryId: _selectedCategoryId,
       );
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         if (reset) {
           _products = response.data;
@@ -199,13 +204,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
       rethrow;
     }
   }
-  
+
   Future<void> _loadMoreProducts() async {
     // Guard clause: Prevent multiple loads
     if (_isLoadingMore || !_hasMoreProducts) return;
-    
+
     setState(() => _isLoadingMore = true);
-    
+
     try {
       _currentPage++;
       await _loadProducts();
@@ -222,7 +227,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       }
     }
   }
-  
+
   Future<void> _refreshProducts() async {
     try {
       await _loadProducts(reset: true);
@@ -234,7 +239,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       }
     }
   }
-  
+
   void _clearFilters() {
     setState(() {
       _selectedCategoryId = null;
@@ -262,7 +267,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Future<void> _searchProductByBarcode(String barcode) async {
     try {
       final product = await _productService.getProductByBarcode(barcode);
-      
+
       if (mounted) {
         AppRouter.goToProductDetail(context, product.id);
       }
@@ -277,18 +282,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
       }
     }
   }
-  
+
   bool get _hasActiveFilters {
     return _selectedCategoryId != null ||
         _selectedStoreId != null ||
         _searchQuery.isNotEmpty;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
     final canEdit = user?.canCreateProducts == true;
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: WMSAppBar(
@@ -304,8 +309,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
             icon: Icon(
               _showFilters ? Icons.filter_list : Icons.filter_list_outlined,
               size: 22,
-              color: _hasActiveFilters || _showFilters 
-                  ? Theme.of(context).primaryColor 
+              color: _hasActiveFilters || _showFilters
+                  ? Theme.of(context).primaryColor
                   : null,
             ),
             onPressed: () {
@@ -321,7 +326,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         children: [
           // Compact search and filters
           _buildSearchAndFilters(),
-          
+
           // Product list
           Expanded(
             child: _buildProductList(),
@@ -362,8 +367,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                fillColor: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.5),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 isDense: true,
               ),
             ),
@@ -387,10 +396,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               children: [
                                 Text(
                                   'Category',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 DropdownButtonFormField<String>(
@@ -400,7 +414,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
                                     isDense: true,
                                   ),
                                   items: [
@@ -408,14 +423,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                       value: null,
                                       child: Text('All Categories'),
                                     ),
-                                    ..._categories.map((category) => DropdownMenuItem<String>(
-                                      value: category.id,
-                                      child: Text(
-                                        category.name,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    )),
+                                    ..._categories.map(
+                                        (category) => DropdownMenuItem<String>(
+                                              value: category.id,
+                                              child: Text(
+                                                category.name,
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                              ),
+                                            )),
                                   ],
                                   onChanged: (value) {
                                     setState(() {
@@ -438,10 +454,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               children: [
                                 Text(
                                   'Store',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 DropdownButtonFormField<String>(
@@ -451,7 +472,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
                                     isDense: true,
                                   ),
                                   items: [
@@ -459,14 +481,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                       value: null,
                                       child: Text('All Stores'),
                                     ),
-                                    ..._stores.map((store) => DropdownMenuItem<String>(
-                                      value: store.id,
-                                      child: Text(
-                                        store.name,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    )),
+                                    ..._stores.map(
+                                        (store) => DropdownMenuItem<String>(
+                                              value: store.id,
+                                              child: Text(
+                                                store.name,
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                              ),
+                                            )),
                                   ],
                                   onChanged: (value) {
                                     setState(() {
@@ -492,7 +515,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           icon: const Icon(Icons.clear, size: 18),
                           label: const Text('Clear Filters'),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Theme.of(context).primaryColor),
+                            side: BorderSide(
+                                color: Theme.of(context).primaryColor),
                             foregroundColor: Theme.of(context).primaryColor,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                           ),
@@ -520,9 +544,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   Text(
                     'Filters active',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                   const Spacer(),
                   GestureDetector(
@@ -530,9 +554,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     child: Text(
                       'Clear',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).primaryColor,
-                        decoration: TextDecoration.underline,
-                      ),
+                            color: Theme.of(context).primaryColor,
+                            decoration: TextDecoration.underline,
+                          ),
                     ),
                   ),
                 ],
@@ -545,23 +569,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
     );
   }
-  
+
   Widget _buildProductList() {
     // Guard clause: Loading state
     if (_isLoading) {
       return const Center(child: WMSLoadingIndicator());
     }
-    
+
     // Guard clause: Error state
     if (_error != null) {
       return _buildErrorState();
     }
-    
+
     // Guard clause: Empty state
     if (_products.isEmpty) {
       return _buildEmptyState();
     }
-    
+
     return RefreshIndicator(
       onRefresh: _refreshProducts,
       child: ListView.separated(
@@ -579,7 +603,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
             );
           }
-          
+
           final product = _products[index];
           return _CompactProductCard(
             product: product,
@@ -609,15 +633,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
             Text(
               'Failed to load products',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               _error!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+                    color: Colors.grey[600],
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -645,19 +669,21 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              _hasActiveFilters ? 'No products match filters' : 'No products found',
+              _hasActiveFilters
+                  ? 'No products match filters'
+                  : 'No products found',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
-              _hasActiveFilters 
-                  ? 'Try adjusting your search or filters' 
+              _hasActiveFilters
+                  ? 'Try adjusting your search or filters'
                   : 'Add your first product to get started',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+                    color: Colors.grey[600],
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -666,7 +692,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 onPressed: _clearFilters,
                 child: const Text('Clear Filters'),
               ),
-            ] else if (context.read<AuthProvider>().user?.canCreateProducts == true) ...[
+            ] else if (context.read<AuthProvider>().user?.canCreateProducts ==
+                true) ...[
               ElevatedButton.icon(
                 onPressed: () => AppRouter.goToCreateProduct(context),
                 icon: const Icon(Icons.add),
@@ -684,13 +711,13 @@ class _CompactProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
   final VoidCallback? onEdit;
-  
+
   const _CompactProductCard({
     required this.product,
     required this.onTap,
     this.onEdit,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -717,9 +744,12 @@ class _CompactProductCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 product.name,
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -728,19 +758,24 @@ class _CompactProductCard extends StatelessWidget {
                             if (product.isImei) ...[
                               const SizedBox(width: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: Colors.orange.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: Colors.orange, width: 0.5),
+                                  border: Border.all(
+                                      color: Colors.orange, width: 0.5),
                                 ),
                                 child: Text(
                                   'IMEI',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.orange[700],
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 9,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.orange[700],
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 9,
+                                      ),
                                 ),
                               ),
                             ],
@@ -750,9 +785,10 @@ class _CompactProductCard extends StatelessWidget {
                         if (product.sku.isNotEmpty) ...[
                           Text(
                             'SKU: ${product.sku}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey[600],
+                                    ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
@@ -761,7 +797,7 @@ class _CompactProductCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   // Action button
                   if (onEdit != null) ...[
                     const SizedBox(width: 8),
@@ -772,7 +808,9 @@ class _CompactProductCard extends StatelessWidget {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
@@ -785,9 +823,9 @@ class _CompactProductCard extends StatelessWidget {
                   ],
                 ],
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Info chips row
               Row(
                 children: [
@@ -795,7 +833,8 @@ class _CompactProductCard extends StatelessWidget {
                     child: _buildInfoChip(
                       context,
                       Icons.attach_money,
-                      NumberUtils.formatDoubleAsInt(product.salePrice ?? product.purchasePrice),
+                      Provider.of<AppProvider>(context, listen: false).formatCurrency(
+                          product.salePrice ?? product.purchasePrice),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -812,7 +851,7 @@ class _CompactProductCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               // Barcode row
               if (product.barcode.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -828,9 +867,9 @@ class _CompactProductCard extends StatelessWidget {
                       child: Text(
                         product.barcode,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                          fontFamily: 'monospace',
-                        ),
+                              color: Colors.grey[600],
+                              fontFamily: 'monospace',
+                            ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -844,12 +883,15 @@ class _CompactProductCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildInfoChip(BuildContext context, IconData icon, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -865,9 +907,9 @@ class _CompactProductCard extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
-                fontSize: 11,
-              ),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
+                  ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -876,11 +918,11 @@ class _CompactProductCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildStockStatusChip(BuildContext context) {
     Color statusColor;
     String statusText;
-    
+
     if (product.quantity == 0) {
       statusColor = Colors.red;
       statusText = 'Out';
@@ -891,7 +933,7 @@ class _CompactProductCard extends StatelessWidget {
       statusColor = Colors.green;
       statusText = 'Good';
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
@@ -915,10 +957,10 @@ class _CompactProductCard extends StatelessWidget {
             child: Text(
               statusText,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: statusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
+                  ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),

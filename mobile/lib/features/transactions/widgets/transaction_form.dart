@@ -11,9 +11,8 @@ import '../../../core/services/store_service.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
-import '../../../core/widgets/cards.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../../core/utils/scanner_launcher.dart';
-import '../../../core/utils/number_utils.dart';
 
 // Transaction form data model
 class TransactionFormData {
@@ -275,22 +274,23 @@ class _TransactionFormState extends State<TransactionForm> {
       onProductFound: (product) {
         // Guard clause: ensure widget is mounted after scan
         if (!mounted) return;
-        
+
         // Guard clause: validate product belongs to selected store
         if (product.storeId != _selectedStoreId) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Product "${product.name}" does not belong to the selected store'),
+              content: Text(
+                  'Product "${product.name}" does not belong to the selected store'),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
             ),
           );
           return;
         }
-        
+
         // Auto-add the found product
         _addProduct(product);
-        
+
         // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -305,7 +305,7 @@ class _TransactionFormState extends State<TransactionForm> {
       onProductNotFound: (barcode) {
         // Guard clause: ensure widget is mounted after scan
         if (!mounted) return;
-        
+
         // Show product not found message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -480,7 +480,7 @@ class _TransactionFormState extends State<TransactionForm> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).primaryColor.withValues(alpha:0.1)
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
               : Colors.transparent,
           border: Border.all(
             color: isSelected
@@ -563,8 +563,10 @@ class _TransactionFormState extends State<TransactionForm> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color:
-                  Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceVariant
+                  .withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Theme.of(context).dividerColor),
             ),
@@ -630,7 +632,10 @@ class _TransactionFormState extends State<TransactionForm> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceVariant
+              .withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Theme.of(context).dividerColor),
         ),
@@ -700,10 +705,11 @@ class _TransactionFormState extends State<TransactionForm> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha:0.1),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Theme.of(context).primaryColor.withValues(alpha:0.3),
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Icon(
@@ -747,7 +753,9 @@ class _TransactionFormState extends State<TransactionForm> {
               itemBuilder: (context, index) {
                 final product = _searchResults[index];
                 final price = product.salePrice ?? product.purchasePrice;
-                final formattedPrice = NumberUtils.formatDoubleAsInt(price);
+                final formattedPrice =
+                    Provider.of<AppProvider>(context, listen: false)
+                        .formatCurrency(price);
                 return ListTile(
                   dense: true,
                   contentPadding:
@@ -784,7 +792,10 @@ class _TransactionFormState extends State<TransactionForm> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceVariant
+              .withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Theme.of(context).dividerColor),
         ),
@@ -819,7 +830,7 @@ class _TransactionFormState extends State<TransactionForm> {
             _buildSectionLabel('Items (${_items.length})'),
             if (_items.isNotEmpty)
               Text(
-                'Total: ${NumberUtils.formatDoubleAsInt(_items.fold(0.0, (sum, item) => sum + (item.price * item.quantity)))}',
+                'Total: ${Provider.of<AppProvider>(context, listen: false).formatCurrency(_items.fold(0.0, (sum, item) => sum + (item.price * item.quantity)))}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,
@@ -857,7 +868,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   maxLines: 1,
                 ),
                 subtitle: Text(
-                  '${NumberUtils.formatDoubleAsInt(item.price)} × ${item.quantity} = ${NumberUtils.formatDoubleAsInt(item.price * item.quantity)}',
+                  '${Provider.of<AppProvider>(context, listen: false).formatCurrency(item.price)} × ${item.quantity} = ${Provider.of<AppProvider>(context, listen: false).formatCurrency(item.price * item.quantity)}',
                   style: Theme.of(context).textTheme.bodySmall,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -907,8 +918,8 @@ class _TransactionFormState extends State<TransactionForm> {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color:
-              (color ?? Theme.of(context).colorScheme.primary).withValues(alpha:0.1),
+          color: (color ?? Theme.of(context).colorScheme.primary)
+              .withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Icon(
@@ -961,18 +972,19 @@ class _TransactionFormState extends State<TransactionForm> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).primaryColor.withValues(alpha:0.05),
-            Theme.of(context).primaryColor.withValues(alpha:0.1),
+            Theme.of(context).primaryColor.withValues(alpha: 0.05),
+            Theme.of(context).primaryColor.withValues(alpha: 0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).primaryColor.withValues(alpha:0.2),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1000,23 +1012,19 @@ class _TransactionFormState extends State<TransactionForm> {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total Amount',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              Text(
-                NumberUtils.formatDoubleAsInt(totalAmount),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-              ),
-            ],
+          Text(
+            'Total',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          Text(
+            Provider.of<AppProvider>(context, listen: false)
+                .formatCurrency(totalAmount),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
           ),
           const SizedBox(height: 8),
           Row(

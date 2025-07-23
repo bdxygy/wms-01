@@ -10,6 +10,7 @@ CreateProductRequest _$CreateProductRequestFromJson(
         Map<String, dynamic> json) =>
     CreateProductRequest(
       name: json['name'] as String,
+      description: json['description'] as String?,
       storeId: json['storeId'] as String,
       categoryId: json['categoryId'] as String?,
       sku: json['sku'] as String,
@@ -23,19 +24,21 @@ Map<String, dynamic> _$CreateProductRequestToJson(
         CreateProductRequest instance) =>
     <String, dynamic>{
       'name': instance.name,
+      if (instance.description case final value?) 'description': value,
       'storeId': instance.storeId,
-      'categoryId': instance.categoryId,
+      if (instance.categoryId case final value?) 'categoryId': value,
       'sku': instance.sku,
       'isImei': instance.isImei,
       'quantity': instance.quantity,
       'purchasePrice': instance.purchasePrice,
-      'salePrice': instance.salePrice,
+      if (instance.salePrice case final value?) 'salePrice': value,
     };
 
 UpdateProductRequest _$UpdateProductRequestFromJson(
         Map<String, dynamic> json) =>
     UpdateProductRequest(
       name: json['name'] as String?,
+      description: json['description'] as String?,
       categoryId: json['categoryId'] as String?,
       sku: json['sku'] as String?,
       isImei: json['isImei'] as bool?,
@@ -47,13 +50,14 @@ UpdateProductRequest _$UpdateProductRequestFromJson(
 Map<String, dynamic> _$UpdateProductRequestToJson(
         UpdateProductRequest instance) =>
     <String, dynamic>{
-      'name': instance.name,
-      'categoryId': instance.categoryId,
-      'sku': instance.sku,
-      'isImei': instance.isImei,
-      'quantity': instance.quantity,
-      'purchasePrice': instance.purchasePrice,
-      'salePrice': instance.salePrice,
+      if (instance.name case final value?) 'name': value,
+      if (instance.description case final value?) 'description': value,
+      if (instance.categoryId case final value?) 'categoryId': value,
+      if (instance.sku case final value?) 'sku': value,
+      if (instance.isImei case final value?) 'isImei': value,
+      if (instance.quantity case final value?) 'quantity': value,
+      if (instance.purchasePrice case final value?) 'purchasePrice': value,
+      if (instance.salePrice case final value?) 'salePrice': value,
     };
 
 CreateCategoryRequest _$CreateCategoryRequestFromJson(
@@ -69,7 +73,7 @@ Map<String, dynamic> _$CreateCategoryRequestToJson(
     <String, dynamic>{
       'name': instance.name,
       'storeId': instance.storeId,
-      'description': instance.description,
+      if (instance.description case final value?) 'description': value,
     };
 
 UpdateCategoryRequest _$UpdateCategoryRequestFromJson(
@@ -82,44 +86,82 @@ UpdateCategoryRequest _$UpdateCategoryRequestFromJson(
 Map<String, dynamic> _$UpdateCategoryRequestToJson(
         UpdateCategoryRequest instance) =>
     <String, dynamic>{
-      'name': instance.name,
-      'description': instance.description,
+      if (instance.name case final value?) 'name': value,
+      if (instance.description case final value?) 'description': value,
     };
 
 CreateStoreRequest _$CreateStoreRequestFromJson(Map<String, dynamic> json) =>
     CreateStoreRequest(
       name: json['name'] as String,
-      address: json['address'] as String,
-      phone: json['phone'] as String?,
+      type: json['type'] as String,
+      addressLine1: json['addressLine1'] as String,
+      addressLine2: json['addressLine2'] as String?,
+      city: json['city'] as String,
+      province: json['province'] as String,
+      postalCode: json['postalCode'] as String,
+      country: json['country'] as String,
+      phoneNumber: json['phoneNumber'] as String,
       email: json['email'] as String?,
-      description: json['description'] as String?,
+      openTime: json['openTime'] as String?,
+      closeTime: json['closeTime'] as String?,
+      timezone: json['timezone'] as String?,
+      mapLocation: json['mapLocation'] as String?,
     );
 
 Map<String, dynamic> _$CreateStoreRequestToJson(CreateStoreRequest instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'address': instance.address,
-      'phone': instance.phone,
-      'email': instance.email,
-      'description': instance.description,
+      'type': instance.type,
+      'addressLine1': instance.addressLine1,
+      if (instance.addressLine2 case final value?) 'addressLine2': value,
+      'city': instance.city,
+      'province': instance.province,
+      'postalCode': instance.postalCode,
+      'country': instance.country,
+      'phoneNumber': instance.phoneNumber,
+      if (instance.email case final value?) 'email': value,
+      if (instance.openTime case final value?) 'openTime': value,
+      if (instance.closeTime case final value?) 'closeTime': value,
+      if (instance.timezone case final value?) 'timezone': value,
+      if (instance.mapLocation case final value?) 'mapLocation': value,
     };
 
 UpdateStoreRequest _$UpdateStoreRequestFromJson(Map<String, dynamic> json) =>
     UpdateStoreRequest(
       name: json['name'] as String?,
-      address: json['address'] as String?,
-      phone: json['phone'] as String?,
+      type: json['type'] as String?,
+      addressLine1: json['addressLine1'] as String?,
+      addressLine2: json['addressLine2'] as String?,
+      city: json['city'] as String?,
+      province: json['province'] as String?,
+      postalCode: json['postalCode'] as String?,
+      country: json['country'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
       email: json['email'] as String?,
-      description: json['description'] as String?,
+      isActive: json['isActive'] as bool?,
+      openTime: json['openTime'] as String?,
+      closeTime: json['closeTime'] as String?,
+      timezone: json['timezone'] as String?,
+      mapLocation: json['mapLocation'] as String?,
     );
 
 Map<String, dynamic> _$UpdateStoreRequestToJson(UpdateStoreRequest instance) =>
     <String, dynamic>{
-      'name': instance.name,
-      'address': instance.address,
-      'phone': instance.phone,
-      'email': instance.email,
-      'description': instance.description,
+      if (instance.name case final value?) 'name': value,
+      if (instance.type case final value?) 'type': value,
+      if (instance.addressLine1 case final value?) 'addressLine1': value,
+      if (instance.addressLine2 case final value?) 'addressLine2': value,
+      if (instance.city case final value?) 'city': value,
+      if (instance.province case final value?) 'province': value,
+      if (instance.postalCode case final value?) 'postalCode': value,
+      if (instance.country case final value?) 'country': value,
+      if (instance.phoneNumber case final value?) 'phoneNumber': value,
+      if (instance.email case final value?) 'email': value,
+      if (instance.isActive case final value?) 'isActive': value,
+      if (instance.openTime case final value?) 'openTime': value,
+      if (instance.closeTime case final value?) 'closeTime': value,
+      if (instance.timezone case final value?) 'timezone': value,
+      if (instance.mapLocation case final value?) 'mapLocation': value,
     };
 
 CreateUserRequest _$CreateUserRequestFromJson(Map<String, dynamic> json) =>
@@ -137,7 +179,7 @@ Map<String, dynamic> _$CreateUserRequestToJson(CreateUserRequest instance) =>
       'username': instance.username,
       'password': instance.password,
       'role': instance.role,
-      'storeId': instance.storeId,
+      if (instance.storeId case final value?) 'storeId': value,
     };
 
 UpdateUserRequest _$UpdateUserRequestFromJson(Map<String, dynamic> json) =>
@@ -152,12 +194,12 @@ UpdateUserRequest _$UpdateUserRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UpdateUserRequestToJson(UpdateUserRequest instance) =>
     <String, dynamic>{
-      'name': instance.name,
-      'username': instance.username,
-      'password': instance.password,
-      'role': instance.role,
-      'storeId': instance.storeId,
-      'isActive': instance.isActive,
+      if (instance.name case final value?) 'name': value,
+      if (instance.username case final value?) 'username': value,
+      if (instance.password case final value?) 'password': value,
+      if (instance.role case final value?) 'role': value,
+      if (instance.storeId case final value?) 'storeId': value,
+      if (instance.isActive case final value?) 'isActive': value,
     };
 
 CreateTransactionRequest _$CreateTransactionRequestFromJson(
@@ -178,8 +220,9 @@ Map<String, dynamic> _$CreateTransactionRequestToJson(
     <String, dynamic>{
       'type': instance.type,
       'storeId': instance.storeId,
-      'destinationStoreId': instance.destinationStoreId,
-      'photoProofUrl': instance.photoProofUrl,
+      if (instance.destinationStoreId case final value?)
+        'destinationStoreId': value,
+      if (instance.photoProofUrl case final value?) 'photoProofUrl': value,
       'items': instance.items,
     };
 
@@ -216,10 +259,11 @@ UpdateTransactionRequest _$UpdateTransactionRequestFromJson(
 Map<String, dynamic> _$UpdateTransactionRequestToJson(
         UpdateTransactionRequest instance) =>
     <String, dynamic>{
-      'type': instance.type,
-      'destinationStoreId': instance.destinationStoreId,
-      'photoProofUrl': instance.photoProofUrl,
-      'items': instance.items,
+      if (instance.type case final value?) 'type': value,
+      if (instance.destinationStoreId case final value?)
+        'destinationStoreId': value,
+      if (instance.photoProofUrl case final value?) 'photoProofUrl': value,
+      if (instance.items case final value?) 'items': value,
     };
 
 AddImeiRequest _$AddImeiRequestFromJson(Map<String, dynamic> json) =>
@@ -236,6 +280,7 @@ CreateProductWithImeisRequest _$CreateProductWithImeisRequestFromJson(
         Map<String, dynamic> json) =>
     CreateProductWithImeisRequest(
       name: json['name'] as String,
+      description: json['description'] as String?,
       storeId: json['storeId'] as String,
       categoryId: json['categoryId'] as String?,
       sku: json['sku'] as String,
@@ -250,13 +295,14 @@ Map<String, dynamic> _$CreateProductWithImeisRequestToJson(
         CreateProductWithImeisRequest instance) =>
     <String, dynamic>{
       'name': instance.name,
+      if (instance.description case final value?) 'description': value,
       'storeId': instance.storeId,
-      'categoryId': instance.categoryId,
+      if (instance.categoryId case final value?) 'categoryId': value,
       'sku': instance.sku,
       'barcode': instance.barcode,
       'quantity': instance.quantity,
       'purchasePrice': instance.purchasePrice,
-      'salePrice': instance.salePrice,
+      if (instance.salePrice case final value?) 'salePrice': value,
       'imeis': instance.imeis,
     };
 
@@ -264,6 +310,7 @@ UpdateProductWithImeisRequest _$UpdateProductWithImeisRequestFromJson(
         Map<String, dynamic> json) =>
     UpdateProductWithImeisRequest(
       name: json['name'] as String?,
+      description: json['description'] as String?,
       categoryId: json['categoryId'] as String?,
       sku: json['sku'] as String?,
       purchasePrice: (json['purchasePrice'] as num?)?.toDouble(),
@@ -274,10 +321,11 @@ UpdateProductWithImeisRequest _$UpdateProductWithImeisRequestFromJson(
 Map<String, dynamic> _$UpdateProductWithImeisRequestToJson(
         UpdateProductWithImeisRequest instance) =>
     <String, dynamic>{
-      'name': instance.name,
-      'categoryId': instance.categoryId,
-      'sku': instance.sku,
-      'purchasePrice': instance.purchasePrice,
-      'salePrice': instance.salePrice,
+      if (instance.name case final value?) 'name': value,
+      if (instance.description case final value?) 'description': value,
+      if (instance.categoryId case final value?) 'categoryId': value,
+      if (instance.sku case final value?) 'sku': value,
+      if (instance.purchasePrice case final value?) 'purchasePrice': value,
+      if (instance.salePrice case final value?) 'salePrice': value,
       'imeis': instance.imeis,
     };

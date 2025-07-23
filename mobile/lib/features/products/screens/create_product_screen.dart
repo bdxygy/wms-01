@@ -42,6 +42,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
         // Create product with IMEIs using dedicated endpoint
         final request = CreateProductWithImeisRequest(
           name: formData.productName,
+          description: formData.description,
           storeId: formData.storeId,
           categoryId: formData.categoryId,
           sku: formData.sku,
@@ -57,6 +58,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
         // Create regular product
         final request = CreateProductRequest(
           name: formData.productName,
+          description: formData.description,
           storeId: formData.storeId,
           categoryId: formData.categoryId,
           sku: formData.sku,

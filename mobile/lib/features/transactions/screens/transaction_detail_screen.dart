@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../core/widgets/loading.dart';
+import '../../../core/widgets/barcode_quantity_dialog.dart';
 import '../../../core/services/transaction_service.dart';
+import '../../../core/services/print_launcher.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/models/user.dart';
 import '../../../core/auth/auth_provider.dart';
@@ -42,6 +44,7 @@ class TransactionDetailScreen extends StatefulWidget {
 
 class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   final TransactionService _transactionService = TransactionService();
+  final PrintLauncher _printLauncher = PrintLauncher();
 
   Transaction? _transaction;
   bool _isLoading = true;
@@ -144,14 +147,92 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return TransactionService.canUpdateTransaction(userRole);
   }
 
-  void _printReceipt() {
+  void _printReceipt() async {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return;
 
-    // TODO: Implement print functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Print receipt coming soon')),
-    );
+    try {
+      // Show receipt quantity dialog
+      final quantity = await showDialog<int>(
+        context: context,
+        builder: (context) => BarcodeQuantityDialog(
+          title: 'Print Receipt',
+          subtitle: 'Transaction #${_transaction!.id.substring(0, 8)}',
+          defaultQuantity: 1,
+        ),
+      );
+
+      // Guard clause: User cancelled dialog
+      if (quantity == null) return;
+
+      // Guard clause: Check if still mounted
+      if (!mounted) return;
+
+      // Get current user for printing context
+      final user = context.read<AuthProvider>().user;
+
+      // Print receipt using transaction data
+      final result = quantity == 1
+        ? await _printLauncher.printTransactionReceipt(
+            transaction: _transaction!.toJson(),
+            store: null, // Will be fetched if needed
+            user: user,
+          )
+        : await _printLauncher.printTransactionReceipts(
+            transaction: _transaction!.toJson(),
+            quantity: quantity,
+            store: null, // Will be fetched if needed
+            user: user,
+          );
+
+      if (result && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(quantity == 1 
+              ? 'Receipt printed successfully!'
+              : '$quantity receipts printed successfully!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMessage = e.toString();
+
+        // Check if it's a connection issue
+        if (errorMessage.contains('not connected')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Printer not connected. Setting up printer...'),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              action: SnackBarAction(
+                label: 'Setup',
+                onPressed: () => _printLauncher.connectAndPrint(context),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to print receipt: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        }
+      }
+    }
   }
 
   void _viewPhoto(String photoUrl) {

@@ -3,17 +3,21 @@ import 'package:flutter/services.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image/image.dart' as img;
 
 import '../models/product.dart';
 import '../models/user.dart';
 import '../models/store.dart';
 import '../widgets/bluetooth_setup_dialog.dart';
+import 'logo_service.dart';
 
 /// Global service for thermal printer operations via Bluetooth
 class PrintLauncher {
   static final PrintLauncher _instance = PrintLauncher._internal();
   factory PrintLauncher() => _instance;
   PrintLauncher._internal();
+
+  final LogoService _logoService = LogoService();
 
   /// Check if all required Bluetooth permissions are granted
   Future<bool> get hasBluetoothPermission async {
@@ -220,6 +224,53 @@ class PrintLauncher {
     }
   }
 
+  /// Print multiple product barcode labels
+  Future<bool> printProductBarcodes({
+    required Product product,
+    required int quantity,
+    Store? store,
+    User? user,
+  }) async {
+    if (!await isConnected) {
+      throw Exception('Printer not connected');
+    }
+
+    if (quantity <= 0) {
+      throw Exception('Invalid quantity: $quantity');
+    }
+
+    try {
+      debugPrint('Printing $quantity product barcodes...');
+
+      // Generate barcode ticket once and print multiple times
+      final bytes = await _generateProductBarcodeTicket(
+        product: product,
+        store: store,
+        user: user,
+      );
+
+      // Print each barcode with a small delay between prints
+      for (int i = 0; i < quantity; i++) {
+        debugPrint('Printing barcode ${i + 1} of $quantity');
+        final success = await PrintBluetoothThermal.writeBytes(bytes);
+
+        if (!success) {
+          throw Exception('Failed to print barcode ${i + 1} of $quantity');
+        }
+
+        // Small delay between prints to avoid printer buffer issues
+        if (i < quantity - 1) {
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint('Error printing multiple product barcodes: $e');
+      rethrow;
+    }
+  }
+
   /// Print transaction receipt
   Future<bool> printTransactionReceipt({
     required Map<String, dynamic> transaction,
@@ -240,6 +291,53 @@ class PrintLauncher {
       return await PrintBluetoothThermal.writeBytes(bytes);
     } catch (e) {
       debugPrint('Error printing transaction receipt: $e');
+      rethrow;
+    }
+  }
+
+  /// Print multiple transaction receipts
+  Future<bool> printTransactionReceipts({
+    required Map<String, dynamic> transaction,
+    required int quantity,
+    Store? store,
+    User? user,
+  }) async {
+    if (!await isConnected) {
+      throw Exception('Printer not connected');
+    }
+
+    if (quantity <= 0) {
+      throw Exception('Invalid quantity: $quantity');
+    }
+
+    try {
+      debugPrint('Printing $quantity transaction receipts...');
+
+      // Generate receipt once and print multiple times
+      final bytes = await _generateTransactionReceipt(
+        transaction: transaction,
+        store: store,
+        user: user,
+      );
+
+      // Print each receipt with a small delay between prints
+      for (int i = 0; i < quantity; i++) {
+        debugPrint('Printing receipt ${i + 1} of $quantity');
+        final success = await PrintBluetoothThermal.writeBytes(bytes);
+
+        if (!success) {
+          throw Exception('Failed to print receipt ${i + 1} of $quantity');
+        }
+
+        // Small delay between prints to avoid printer buffer issues
+        if (i < quantity - 1) {
+          await Future.delayed(const Duration(milliseconds: 800));
+        }
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint('Error printing multiple transaction receipts: $e');
       rethrow;
     }
   }
@@ -295,6 +393,21 @@ class PrintLauncher {
 
     bytes += generator.reset();
 
+    // Logo header (if available)
+    try {
+      final logoBytes = await _logoService.getLogoBytes();
+      if (logoBytes != null) {
+        final image = img.decodeImage(logoBytes);
+        if (image != null) {
+          bytes += generator.image(image);
+          bytes += generator.feed(1);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error adding logo to barcode ticket: $e');
+      // Continue without logo
+    }
+
     // Store name (if available)
     if (store != null) {
       bytes += generator.text(
@@ -333,8 +446,8 @@ class PrintLauncher {
       try {
         debugPrint('Generating barcode: ${product.barcode}');
         // Generate barcode using Code128 format
-        bytes +=
-            generator.barcode(Barcode.code128(product.barcode.split('').toList()));
+        bytes += generator
+            .barcode(Barcode.code128(product.barcode.split('').toList()));
       } catch (e) {
         debugPrint('Error generating barcode: $e');
         // Fallback to text representation
@@ -361,18 +474,7 @@ class PrintLauncher {
       );
     }
 
-    // Quantity for IMEI products
-    if (product.isImei) {
-      bytes += generator.text(
-        'IMEI Tracked',
-        styles: PosStyles(align: PosAlign.center),
-      );
-    } else {
-      bytes += generator.text(
-        'Qty: ${product.quantity}',
-        styles: PosStyles(align: PosAlign.center),
-      );
-    }
+    // No quantity or IMEI info displayed
 
     bytes += generator.feed(2);
     bytes += generator.cut();
@@ -391,6 +493,21 @@ class PrintLauncher {
     List<int> bytes = [];
 
     bytes += generator.reset();
+
+    // Logo header (if available)
+    try {
+      final logoBytes = await _logoService.getLogoBytes();
+      if (logoBytes != null) {
+        final image = img.decodeImage(logoBytes);
+        if (image != null) {
+          bytes += generator.image(image);
+          bytes += generator.feed(1);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error adding logo to receipt: $e');
+      // Continue without logo
+    }
 
     // Store header
     if (store != null) {
@@ -417,18 +534,8 @@ class PrintLauncher {
 
     bytes += generator.hr();
 
-    // Transaction details
-    final transactionType = transaction['type'] ?? 'SALE';
     final createdAt =
         transaction['createdAt'] ?? DateTime.now().toIso8601String();
-
-    bytes += generator.row([
-      PosColumn(text: 'Type:', width: 6, styles: PosStyles(bold: true)),
-      PosColumn(
-          text: transactionType,
-          width: 6,
-          styles: PosStyles(align: PosAlign.right)),
-    ]);
 
     bytes += generator.row([
       PosColumn(text: 'Date:', width: 6, styles: PosStyles(bold: true)),
@@ -447,6 +554,14 @@ class PrintLauncher {
             styles: PosStyles(align: PosAlign.right)),
       ]);
     }
+
+    bytes += generator.row([
+      PosColumn(text: 'To:', width: 6, styles: PosStyles(bold: true)),
+      PosColumn(
+          text: transaction['to'],
+          width: 6,
+          styles: PosStyles(align: PosAlign.right)),
+    ]);
 
     bytes += generator.hr();
 
@@ -524,6 +639,21 @@ class PrintLauncher {
     List<int> bytes = [];
 
     bytes += generator.reset();
+
+    // Logo header (if available)
+    try {
+      final logoBytes = await _logoService.getLogoBytes();
+      if (logoBytes != null) {
+        final image = img.decodeImage(logoBytes);
+        if (image != null) {
+          bytes += generator.image(image);
+          bytes += generator.feed(1);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error adding logo to payment note: $e');
+      // Continue without logo
+    }
 
     // Store header
     if (store != null) {
@@ -612,6 +742,21 @@ class PrintLauncher {
     List<int> bytes = [];
 
     bytes += generator.reset();
+
+    // Logo header (if available)
+    try {
+      final logoBytes = await _logoService.getLogoBytes();
+      if (logoBytes != null) {
+        final image = img.decodeImage(logoBytes);
+        if (image != null) {
+          bytes += generator.image(image);
+          bytes += generator.feed(1);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error adding logo to test ticket: $e');
+      // Continue without logo
+    }
 
     // Header
     bytes += generator.text(
@@ -861,6 +1006,7 @@ class PrintLauncher {
   Future<bool> connectAndPrint(
     BuildContext context, {
     Product? product,
+    int quantity = 1,
     Store? store,
     User? user,
   }) async {
@@ -870,11 +1016,20 @@ class PrintLauncher {
       // Check if already connected
       if (await isConnected) {
         if (product != null) {
-          return await printProductBarcode(
-            product: product,
-            store: store,
-            user: user,
-          );
+          if (quantity > 1) {
+            return await printProductBarcodes(
+              product: product,
+              quantity: quantity,
+              store: store,
+              user: user,
+            );
+          } else {
+            return await printProductBarcode(
+              product: product,
+              store: store,
+              user: user,
+            );
+          }
         } else {
           return await printTestPage();
         }
@@ -891,11 +1046,20 @@ class PrintLauncher {
       // The dialog handles connection, so just verify we're connected
       if (await isConnected) {
         if (product != null) {
-          return await printProductBarcode(
-            product: product,
-            store: store,
-            user: user,
-          );
+          if (quantity > 1) {
+            return await printProductBarcodes(
+              product: product,
+              quantity: quantity,
+              store: store,
+              user: user,
+            );
+          } else {
+            return await printProductBarcode(
+              product: product,
+              store: store,
+              user: user,
+            );
+          }
         } else {
           return await printTestPage();
         }

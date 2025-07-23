@@ -76,6 +76,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         // Use the new updateProductWithImeis endpoint for IMEI products with IMEIs
         final request = UpdateProductWithImeisRequest(
           name: formData.productName,
+          description: formData.description,
           categoryId: formData.categoryId,
           sku: formData.sku,
           purchasePrice: formData.purchasePrice,
@@ -89,6 +90,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         // Use regular update for non-IMEI products or IMEI products without IMEIs
         final request = UpdateProductRequest(
           name: formData.productName,
+          description: formData.description,
           categoryId: formData.categoryId,
           sku: formData.sku,
           isImei: formData.isImei,

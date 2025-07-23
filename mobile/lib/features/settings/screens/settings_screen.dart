@@ -10,6 +10,7 @@ import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/main_navigation_scaffold.dart';
 import '../../../core/widgets/theme_switcher.dart';
 import '../../../core/widgets/language_switcher.dart';
+import '../../../core/widgets/logo_management_card.dart';
 
 /// Modern Settings Screen with Beautiful Material Design 3 UI
 /// 
@@ -125,6 +126,11 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                       
                       // App Settings Section
                       _buildModernAppSection(l10n),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Logo Management Section
+                      const LogoManagementCard(),
                       
                       const SizedBox(height: 24),
                       

@@ -8,12 +8,12 @@ import '../../../core/services/transaction_service.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/models/api_response.dart';
 import '../../../core/auth/auth_provider.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../../core/routing/app_router.dart';
 import '../widgets/transaction_filter_sheet.dart';
-import '../../../core/utils/number_utils.dart';
 
 /// Modern Transaction List Screen with comprehensive transaction management
-/// 
+///
 /// Features:
 /// - Modern Material Design 3 with hero cards and gradient backgrounds
 /// - Role-based transaction listing with proper permissions
@@ -24,7 +24,7 @@ import '../../../core/utils/number_utils.dart';
 /// - Responsive mobile-first design with proper overflow handling
 /// - Full internationalization support
 /// - Guard clause patterns for clean code structure
-/// 
+///
 /// Permissions:
 /// - OWNER/ADMIN: Full CRUD access, can see all transactions
 /// - CASHIER: Can view and create SALE transactions, limited edit access
@@ -40,13 +40,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final TransactionService _transactionService = TransactionService();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<Transaction> _transactions = [];
   PaginatedResponse<Transaction>? _currentResponse;
   bool _isLoading = false;
   bool _isLoadingMore = false;
   String? _error;
-  
+
   // Filter state
   String? _selectedType;
   String? _selectedStoreId;
@@ -56,7 +56,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   double? _minAmount;
   double? _maxAmount;
   String _searchQuery = '';
-  
+
   // Pagination
   int _currentPage = 1;
   static const int _pageSize = 20;
@@ -79,20 +79,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void _onScroll() {
     // Guard clause: check if widget is still mounted
     if (!mounted) return;
-    
+
     // Guard clause: check scroll position for pagination trigger
-    if (_scrollController.position.pixels < _scrollController.position.maxScrollExtent - 200) return;
-    
+    if (_scrollController.position.pixels <
+        _scrollController.position.maxScrollExtent - 200) return;
+
     _loadMoreTransactions();
   }
 
   Future<void> _loadTransactions({bool refresh = false}) async {
     // Guard clause: prevent multiple loads unless refreshing
     if (_isLoading && !refresh) return;
-    
+
     // Guard clause: ensure widget is mounted
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -114,10 +115,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         endDate: _endDate,
         minAmount: _minAmount,
         maxAmount: _maxAmount,
+        customerName: _searchQuery.isNotEmpty ? _searchQuery : null,
       );
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         _currentResponse = response;
         if (refresh || _currentPage == 1) {
@@ -130,7 +132,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _error = e.toString();
         _isLoading = false;
@@ -141,7 +143,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Future<void> _loadMoreTransactions() async {
     // Guard clause: prevent multiple pagination loads
     if (_isLoadingMore || !_hasNextPage || _isLoading) return;
-    
+
     setState(() {
       _isLoadingMore = true;
       _currentPage++;
@@ -158,10 +160,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         endDate: _endDate,
         minAmount: _minAmount,
         maxAmount: _maxAmount,
+        customerName: _searchQuery.isNotEmpty ? _searchQuery : null,
       );
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         _transactions.addAll(response.data);
         _hasNextPage = response.pagination.hasNext;
@@ -169,12 +172,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _currentPage--; // Revert page increment on error
         _isLoadingMore = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to load more transactions: $e'),
@@ -232,11 +235,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     // Guard clause: prevent unnecessary state updates
     if (!mounted) return;
     if (_searchQuery == query) return;
-    
+
     setState(() {
       _searchQuery = query;
     });
-    
+
     // Debounce search to avoid too many API calls
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
@@ -253,24 +256,25 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Future<void> _onMarkFinished(Transaction transaction) async {
     // Guard clause: ensure widget is mounted
     if (!mounted) return;
-    
+
     try {
       await _transactionService.finishTransaction(transaction.id);
-      
+
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Transaction ${transaction.id.substring(0, 8)} marked as finished'),
+          content: Text(
+              'Transaction ${transaction.id.substring(0, 8)} marked as finished'),
           backgroundColor: Colors.green,
         ),
       );
-      
+
       // Refresh the list
       _loadTransactions(refresh: true);
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to mark transaction as finished: $e'),
@@ -287,173 +291,26 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   bool _canCreateTransactions() {
     final authProvider = context.read<AuthProvider>();
     final userRole = authProvider.user?.role;
-    
+
     // Guard clause: check if user role exists
     if (userRole == null) return false;
-    
+
     return TransactionService.canCreateTransactions(userRole);
   }
 
   bool _canEditTransaction(Transaction transaction) {
     final authProvider = context.read<AuthProvider>();
     final userRole = authProvider.user?.role;
-    
+
     // Guard clause: check if user role exists
     if (userRole == null) return false;
-    
+
     return TransactionService.canUpdateTransaction(userRole);
-  }
-
-  Widget _buildStatistics() {
-    final l10n = AppLocalizations.of(context)!;
-    
-    // Guard clause: return empty if no response data
-    if (_currentResponse == null) return const SizedBox.shrink();
-    
-    final totalTransactions = _currentResponse!.pagination.total;
-    final completedCount = _transactions.where((t) => t.isFinished).length;
-    final pendingCount = _transactions.where((t) => !t.isFinished).length;
-    final totalAmount = _transactions.fold<double>(
-      0.0, 
-      (sum, transaction) => sum + transaction.calculatedAmount,
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).primaryColor.withValues(alpha: 0.1),
-            Theme.of(context).primaryColor.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.analytics,
-                    color: Theme.of(context).primaryColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.transactionManagement,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    l10n.viewAll,
-                    totalTransactions.toString(),
-                    Icons.receipt_long,
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    l10n.success,
-                    completedCount.toString(),
-                    Icons.check_circle,
-                    Colors.green,
-                  ),
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    'Pending',
-                    pendingCount.toString(),
-                    Icons.pending,
-                    Colors.orange,
-                  ),
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    'Amount',
-                    NumberUtils.formatDoubleAsInt(totalAmount),
-                    Icons.monetization_on,
-                    Theme.of(context).colorScheme.secondary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
-      ],
-    );
   }
 
   Widget _buildModernSearchBar() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: Column(
@@ -466,16 +323,23 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withValues(alpha: 0.2),
                       ),
                     ),
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: '${l10n.search} ${l10n.transactions.toLowerCase()}...',
+                        hintText:
+                            '${l10n.search} customers...',
                         prefixIcon: Icon(
                           Icons.search,
                           size: 20,
@@ -491,7 +355,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
                         isDense: true,
                       ),
                       onChanged: _onSearchChanged,
@@ -501,21 +366,31 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 const SizedBox(width: 12),
                 Container(
                   decoration: BoxDecoration(
-                    color: _hasActiveFilters() 
+                    color: _hasActiveFilters()
                         ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                        : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        : Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _hasActiveFilters()
-                          ? Theme.of(context).primaryColor.withValues(alpha: 0.3)
-                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                          ? Theme.of(context)
+                              .primaryColor
+                              .withValues(alpha: 0.3)
+                          : Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withValues(alpha: 0.2),
                     ),
                   ),
                   child: IconButton(
                     icon: Icon(
-                      _hasActiveFilters() ? Icons.filter_list : Icons.filter_list_outlined,
+                      _hasActiveFilters()
+                          ? Icons.filter_list
+                          : Icons.filter_list_outlined,
                       size: 20,
-                      color: _hasActiveFilters() 
+                      color: _hasActiveFilters()
                           ? Theme.of(context).primaryColor
                           : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -542,9 +417,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   Text(
                     'Filters active',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w500,
-                    ),
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                   const Spacer(),
                   GestureDetector(
@@ -565,9 +440,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: Text(
                       'Clear',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).primaryColor,
-                        decoration: TextDecoration.underline,
-                      ),
+                            color: Theme.of(context).primaryColor,
+                            decoration: TextDecoration.underline,
+                          ),
                     ),
                   ),
                 ],
@@ -592,14 +467,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         children: [
           // Modern Search and Filter Bar
           _buildModernSearchBar(),
-
-          // Statistics Summary Hero Card
-          if (_currentResponse != null) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: _buildStatistics(),
-            ),
-          ],
 
           // Transaction List
           Expanded(
@@ -661,7 +528,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   Widget _buildErrorState() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -671,7 +538,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.1),
+                color: Theme.of(context)
+                    .colorScheme
+                    .errorContainer
+                    .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -684,15 +554,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             Text(
               'Failed to load transactions',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               _error!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -714,7 +584,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   Widget _buildEmptyState() {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -724,7 +594,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -737,17 +610,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             Text(
               'No transactions found',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
-              _hasActiveFilters() 
+              _hasActiveFilters()
                   ? 'Try adjusting your filters'
                   : 'Create your first transaction',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
               textAlign: TextAlign.center,
             ),
             if (_canCreateTransactions()) ...[
@@ -759,7 +632,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   foregroundColor: Colors.white,
                 ),
                 icon: const Icon(Icons.add),
-                label: Text('Create ${l10n.transactions.substring(0, l10n.transactions.length - 1)}'),
+                label: Text(
+                    'Create ${l10n.transactions.substring(0, l10n.transactions.length - 1)}'),
               ),
             ],
           ],
@@ -770,7 +644,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   Widget _buildModernTransactionCard(Transaction transaction) {
     final isTransfer = transaction.type == TransactionType.transfer;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -803,11 +677,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        NumberUtils.formatDoubleAsInt(transaction.calculatedAmount),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                        Provider.of<AppProvider>(context, listen: false).formatCurrency(
+                            transaction.calculatedAmount),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -831,9 +707,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: Text(
                       'ID: ${transaction.id.substring(0, 8)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontFamily: 'monospace',
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                            fontFamily: 'monospace',
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
@@ -841,8 +718,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   Text(
                     _formatTransactionDate(transaction.createdAt),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),
@@ -883,8 +760,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   Text(
                     '${transaction.items?.length ?? 0} items',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                   const Spacer(),
                   if (_canEditTransaction(transaction)) ...[
@@ -894,7 +771,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
@@ -906,7 +785,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     ),
                     const SizedBox(width: 8),
                   ],
-                  if (!transaction.isFinished && _canEditTransaction(transaction)) ...[
+                  if (!transaction.isFinished &&
+                      _canEditTransaction(transaction)) ...[
                     InkWell(
                       onTap: () => _onMarkFinished(transaction),
                       borderRadius: BorderRadius.circular(16),
@@ -935,10 +815,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   Widget _buildTransactionTypeBadge(Transaction transaction) {
     final isTransfer = transaction.type == TransactionType.transfer;
-    final color = isTransfer 
+    final color = isTransfer
         ? Theme.of(context).colorScheme.secondary
         : Theme.of(context).colorScheme.primary;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -961,10 +841,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           Text(
             transaction.type.name.toUpperCase(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-              fontSize: 11,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  fontSize: 11,
+                ),
           ),
         ],
       ),
@@ -974,7 +854,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget _buildTransactionStatusChip(Transaction transaction) {
     final isCompleted = transaction.isFinished;
     final color = isCompleted ? Colors.green : Colors.orange;
-    
+
     return Container(
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -1001,10 +881,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           Text(
             isCompleted ? 'Done' : 'Pending',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
           ),
         ],
       ),
@@ -1022,21 +902,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       }
       return '${diff.inHours}h ago';
     }
-    
+
     if (diff.inDays == 1) return 'Yesterday';
     if (diff.inDays < 7) return '${diff.inDays}d ago';
-    
+
     return '${date.day}/${date.month}/${date.year}';
   }
 
   bool _hasActiveFilters() {
     return _selectedType != null ||
-           _selectedStoreId != null ||
-           _selectedIsFinished != null ||
-           _startDate != null ||
-           _endDate != null ||
-           _minAmount != null ||
-           _maxAmount != null ||
-           _searchQuery.isNotEmpty;
+        _selectedStoreId != null ||
+        _selectedIsFinished != null ||
+        _startDate != null ||
+        _endDate != null ||
+        _minAmount != null ||
+        _maxAmount != null ||
+        _searchQuery.isNotEmpty;
   }
 }

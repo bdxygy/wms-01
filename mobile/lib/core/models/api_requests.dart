@@ -3,9 +3,10 @@ import 'package:json_annotation/json_annotation.dart';
 part 'api_requests.g.dart';
 
 // Product requests
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CreateProductRequest {
   final String name;
+  final String? description;
   final String storeId;
   final String? categoryId;
   final String sku;
@@ -16,6 +17,7 @@ class CreateProductRequest {
 
   CreateProductRequest({
     required this.name,
+    this.description,
     required this.storeId,
     this.categoryId,
     required this.sku,
@@ -31,9 +33,10 @@ class CreateProductRequest {
   Map<String, dynamic> toJson() => _$CreateProductRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class UpdateProductRequest {
   final String? name;
+  final String? description;
   final String? categoryId;
   final String? sku;
   final bool? isImei;
@@ -43,6 +46,7 @@ class UpdateProductRequest {
 
   UpdateProductRequest({
     this.name,
+    this.description,
     this.categoryId,
     this.sku,
     this.isImei,
@@ -67,7 +71,7 @@ class UpdateProductRequest {
 }
 
 // Category requests
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CreateCategoryRequest {
   final String name;
   final String storeId;
@@ -85,7 +89,7 @@ class CreateCategoryRequest {
   Map<String, dynamic> toJson() => _$CreateCategoryRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class UpdateCategoryRequest {
   final String? name;
   final String? description;
@@ -102,20 +106,38 @@ class UpdateCategoryRequest {
 }
 
 // Store requests
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CreateStoreRequest {
   final String name;
-  final String address;
-  final String? phone;
+  final String type;
+  final String addressLine1;
+  final String? addressLine2;
+  final String city;
+  final String province;
+  final String postalCode;
+  final String country;
+  final String phoneNumber;
   final String? email;
-  final String? description;
+  final String? openTime;
+  final String? closeTime;
+  final String? timezone;
+  final String? mapLocation;
 
   CreateStoreRequest({
     required this.name,
-    required this.address,
-    this.phone,
+    required this.type,
+    required this.addressLine1,
+    this.addressLine2,
+    required this.city,
+    required this.province,
+    required this.postalCode,
+    required this.country,
+    required this.phoneNumber,
     this.email,
-    this.description,
+    this.openTime,
+    this.closeTime,
+    this.timezone,
+    this.mapLocation,
   });
 
   factory CreateStoreRequest.fromJson(Map<String, dynamic> json) =>
@@ -124,20 +146,40 @@ class CreateStoreRequest {
   Map<String, dynamic> toJson() => _$CreateStoreRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class UpdateStoreRequest {
   final String? name;
-  final String? address;
-  final String? phone;
+  final String? type;
+  final String? addressLine1;
+  final String? addressLine2;
+  final String? city;
+  final String? province;
+  final String? postalCode;
+  final String? country;
+  final String? phoneNumber;
   final String? email;
-  final String? description;
+  final bool? isActive;
+  final String? openTime;
+  final String? closeTime;
+  final String? timezone;
+  final String? mapLocation;
 
   UpdateStoreRequest({
     this.name,
-    this.address,
-    this.phone,
+    this.type,
+    this.addressLine1,
+    this.addressLine2,
+    this.city,
+    this.province,
+    this.postalCode,
+    this.country,
+    this.phoneNumber,
     this.email,
-    this.description,
+    this.isActive,
+    this.openTime,
+    this.closeTime,
+    this.timezone,
+    this.mapLocation,
   });
 
   factory UpdateStoreRequest.fromJson(Map<String, dynamic> json) =>
@@ -147,7 +189,7 @@ class UpdateStoreRequest {
 }
 
 // User requests
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CreateUserRequest {
   final String name;
   final String username;
@@ -169,7 +211,7 @@ class CreateUserRequest {
   Map<String, dynamic> toJson() => _$CreateUserRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class UpdateUserRequest {
   final String? name;
   final String? username;
@@ -194,7 +236,7 @@ class UpdateUserRequest {
 }
 
 // Transaction requests
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CreateTransactionRequest {
   final String type;
   final String storeId;
@@ -216,7 +258,7 @@ class CreateTransactionRequest {
   Map<String, dynamic> toJson() => _$CreateTransactionRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class TransactionItemRequest {
   final String productId;
   final String name;
@@ -236,7 +278,7 @@ class TransactionItemRequest {
   Map<String, dynamic> toJson() => _$TransactionItemRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class UpdateTransactionRequest {
   final String? type;
   final String? destinationStoreId;
@@ -257,7 +299,7 @@ class UpdateTransactionRequest {
 }
 
 // IMEI requests
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class AddImeiRequest {
   final String imei;
 
@@ -271,9 +313,10 @@ class AddImeiRequest {
   Map<String, dynamic> toJson() => _$AddImeiRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CreateProductWithImeisRequest {
   final String name;
+  final String? description;
   final String storeId;
   final String? categoryId;
   final String sku;
@@ -285,6 +328,7 @@ class CreateProductWithImeisRequest {
 
   CreateProductWithImeisRequest({
     required this.name,
+    this.description,
     required this.storeId,
     this.categoryId,
     required this.sku,
@@ -301,9 +345,10 @@ class CreateProductWithImeisRequest {
   Map<String, dynamic> toJson() => _$CreateProductWithImeisRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class UpdateProductWithImeisRequest {
   final String? name;
+  final String? description;
   final String? categoryId;
   final String? sku;
   final double? purchasePrice;
@@ -312,6 +357,7 @@ class UpdateProductWithImeisRequest {
 
   UpdateProductWithImeisRequest({
     this.name,
+    this.description,
     this.categoryId,
     this.sku,
     this.purchasePrice,

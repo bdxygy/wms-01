@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../utils/imei_utils.dart';
 
 /// Product form validation rules
@@ -58,7 +60,13 @@ class ProductValidators {
     if (value == null || value.trim().isEmpty) {
       return 'Purchase price is required';
     }
-    final price = double.tryParse(value.trim());
+
+    debugPrint('value $value');
+
+    final price = double.tryParse(value.trim().replaceAll(".", ""));
+
+    debugPrint('price $price');
+
     if (price == null) {
       return 'Purchase price must be a valid number';
     }
@@ -73,7 +81,8 @@ class ProductValidators {
     if (value == null || value.trim().isEmpty) {
       return null; // Sale price is optional
     }
-    final price = double.tryParse(value.trim());
+    debugPrint('value $value');
+    final price = double.tryParse(value.trim().replaceAll(".", ""));
     if (price == null) {
       return 'Sale price must be a valid number';
     }
@@ -82,6 +91,7 @@ class ProductValidators {
     }
     // Cross-field validation: sale price should be >= purchase price
     if (purchasePrice != null && price < purchasePrice) {
+      debugPrint('price $price < purchasePrice $purchasePrice');
       return 'Sale price should be at least the purchase price';
     }
     return null;

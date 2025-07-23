@@ -8,6 +8,7 @@ class Product {
   final String createdBy;
   final String storeId;
   final String name;
+  final String? description;
   final String? categoryId;
   final String sku;
   final bool isImei;
@@ -29,6 +30,7 @@ class Product {
     required this.createdBy,
     required this.storeId,
     required this.name,
+    this.description,
     this.categoryId,
     required this.sku,
     required this.isImei,
@@ -74,6 +76,7 @@ class Product {
     String? createdBy,
     String? storeId,
     String? name,
+    String? description,
     String? categoryId,
     String? sku,
     bool? isImei,
@@ -93,6 +96,7 @@ class Product {
       createdBy: createdBy ?? this.createdBy,
       storeId: storeId ?? this.storeId,
       name: name ?? this.name,
+      description: description ?? this.description,
       categoryId: categoryId ?? this.categoryId,
       sku: sku ?? this.sku,
       isImei: isImei ?? this.isImei,

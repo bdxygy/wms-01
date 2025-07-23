@@ -120,6 +120,7 @@ class _ProductFormState extends State<ProductForm> {
 
     final product = widget.initialProduct!;
     _nameController.text = product.name;
+    _descriptionController.text = product.description ?? '';
     _skuController.text = product.sku;
     _purchasePriceController.text =
         NumberUtils.formatWithDots(product.purchasePrice.toInt());

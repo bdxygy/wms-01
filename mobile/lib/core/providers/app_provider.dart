@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wms_mobile/core/utils/number_utils.dart';
 import '../models/currency.dart';
 
 class AppProvider extends ChangeNotifier {
@@ -58,11 +59,11 @@ class AppProvider extends ChangeNotifier {
   }
 
   String formatCurrency(double amount) {
-    return '${_currency.symbol}${amount.toInt()}';
+    return '${_currency.symbol}${NumberUtils.formatWithDots(amount.toInt())}';
   }
 
   String formatCurrencyWithCode(double amount) {
-    return '${_currency.symbol}${amount.toInt()} ${_currency.code}';
+    return '${_currency.symbol}${NumberUtils.formatWithDots(amount.toInt())} ${_currency.code}';
   }
 
   // Initialize app settings
@@ -71,20 +72,20 @@ class AppProvider extends ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Load theme mode
       final themeIndex = prefs.getInt('theme_mode') ?? 0;
       _themeMode = ThemeMode.values[themeIndex];
-      
+
       // Load locale
       final languageCode = prefs.getString('language_code') ?? 'en';
       final countryCode = prefs.getString('country_code') ?? 'US';
       _locale = Locale(languageCode, countryCode);
-      
+
       // Load currency
       final currencyCode = prefs.getString('currency_code') ?? 'USD';
       _currency = SupportedCurrencies.fromCode(currencyCode);
-      
+
       _isInitialized = true;
       notifyListeners();
     } catch (e) {
@@ -131,7 +132,7 @@ class AppProvider extends ChangeNotifier {
       await prefs.remove('language_code');
       await prefs.remove('country_code');
       await prefs.remove('currency_code');
-      
+
       _themeMode = ThemeMode.system;
       _locale = const Locale('en', 'US');
       _currency = SupportedCurrencies.usd;
