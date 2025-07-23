@@ -253,7 +253,7 @@ class LanguageSelectorDialog extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: Material(
         color: isSelected 
-          ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+          ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha:0.5)
           : Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
@@ -266,7 +266,7 @@ class LanguageSelectorDialog extends StatelessWidget {
               border: Border.all(
                 color: isSelected
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  : Theme.of(context).colorScheme.outline.withValues(alpha:0.2),
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -280,7 +280,7 @@ class LanguageSelectorDialog extends StatelessWidget {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.outline.withValues(alpha:0.2),
                     ),
                   ),
                   child: Center(
@@ -341,7 +341,7 @@ class LanguageSelectorDialog extends StatelessWidget {
                     height: 28,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha:0.3),
                       ),
                       borderRadius: BorderRadius.circular(14),
                     ),

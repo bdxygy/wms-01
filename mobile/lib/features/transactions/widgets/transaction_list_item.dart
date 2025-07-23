@@ -176,8 +176,8 @@ class TransactionListItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isTransfer 
-            ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
-            : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            ? Theme.of(context).colorScheme.secondary.withValues(alpha:0.1)
+            : Theme.of(context).colorScheme.primary.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isTransfer 
@@ -215,7 +215,7 @@ class TransactionListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: transaction.isFinished ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+        color: transaction.isFinished ? Colors.green.withValues(alpha:0.1) : Colors.orange.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

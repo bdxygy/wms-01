@@ -369,6 +369,269 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storesListComingSoon => 'Stores List page coming soon!';
 
   @override
+  String get editStore => 'Edit Store';
+
+  @override
+  String get storeName => 'Store Name';
+
+  @override
+  String get storeType => 'Store Type';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get active => 'Active';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String get timezone => 'Timezone';
+
+  @override
+  String get openTime => 'Open Time';
+
+  @override
+  String get closeTime => 'Close Time';
+
+  @override
+  String get storeInformation => 'Store Information';
+
+  @override
+  String get addressInformation => 'Address Information';
+
+  @override
+  String get contactInformation => 'Contact Information';
+
+  @override
+  String get auditInformation => 'Audit Information';
+
+  @override
+  String get addressLine1 => 'Address Line 1';
+
+  @override
+  String get addressLine2 => 'Address Line 2';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get province => 'Province';
+
+  @override
+  String get postalCode => 'Postal Code';
+
+  @override
+  String get country => 'Country';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get mapLocation => 'Map Location';
+
+  @override
+  String get createdBy => 'Created By';
+
+  @override
+  String get createdAt => 'Created At';
+
+  @override
+  String get updatedAt => 'Updated At';
+
+  @override
+  String get deletedAt => 'Deleted At';
+
+  @override
+  String get confirmDeleteStore => 'Confirm Delete Store';
+
+  @override
+  String deleteStoreConfirmation(Object name) {
+    return 'Are you sure you want to delete store \'$name\'? This action cannot be undone.';
+  }
+
+  @override
+  String get storeDeletedSuccessfully => 'Store deleted successfully';
+
+  @override
+  String get failedToDeleteStore => 'Failed to delete store';
+
+  @override
+  String get failedToLoadStore => 'Failed to load store';
+
+  @override
+  String get failedToLoadStores => 'Failed to load stores';
+
+  @override
+  String get searchStores => 'Search stores...';
+
+  @override
+  String get manageStoresDescription =>
+      'Create and manage your store locations';
+
+  @override
+  String get noStoresFound => 'No stores found';
+
+  @override
+  String get tryDifferentSearchTerm => 'Try a different search term';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get updateStore => 'Update Store';
+
+  @override
+  String get storeCreatedSuccessfully => 'Store created successfully';
+
+  @override
+  String get storeUpdatedSuccessfully => 'Store updated successfully';
+
+  @override
+  String get failedToCreateStore => 'Failed to create store';
+
+  @override
+  String get failedToUpdateStore => 'Failed to update store';
+
+  @override
+  String get operatingHours => 'Operating Hours';
+
+  @override
+  String get selectOpenTime => 'Select Opening Time';
+
+  @override
+  String get selectCloseTime => 'Select Closing Time';
+
+  @override
+  String get enterStoreName => 'Enter store name';
+
+  @override
+  String get enterStoreType => 'Enter store type';
+
+  @override
+  String get enterTimezone => 'Enter timezone';
+
+  @override
+  String get enterAddressLine1 => 'Enter address line 1';
+
+  @override
+  String get enterAddressLine2 => 'Enter address line 2 (optional)';
+
+  @override
+  String get enterCity => 'Enter city';
+
+  @override
+  String get enterProvince => 'Enter province';
+
+  @override
+  String get enterPostalCode => 'Enter postal code';
+
+  @override
+  String get enterCountry => 'Enter country';
+
+  @override
+  String get enterMapLocation => 'Enter map location (optional)';
+
+  @override
+  String get enterPhoneNumber => 'Enter phone number';
+
+  @override
+  String get enterEmail => 'Enter email (optional)';
+
+  @override
+  String get fieldRequired => 'This field is required';
+
+  @override
+  String get goodMorning => 'Good morning';
+
+  @override
+  String get goodAfternoon => 'Good afternoon';
+
+  @override
+  String get goodEvening => 'Good evening';
+
+  @override
+  String get goodNight => 'Good night';
+
+  @override
+  String get staff => 'Staff';
+
+  @override
+  String get growth => 'Growth';
+
+  @override
+  String get orders => 'Orders';
+
+  @override
+  String get tasks => 'Tasks';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get sales => 'Sales';
+
+  @override
+  String get revenue => 'Revenue';
+
+  @override
+  String get items => 'Items';
+
+  @override
+  String get businessOverview => 'Business Overview';
+
+  @override
+  String selectStoreToViewDetails(Object count) {
+    return 'Select store to view details ($count total)';
+  }
+
+  @override
+  String get totalStores => 'Total Stores';
+
+  @override
+  String get totalRevenue => 'Total revenue';
+
+  @override
+  String get activeProducts => 'Active Products';
+
+  @override
+  String get totalStaff => 'Total Staff';
+
+  @override
+  String get businessAnalytics => 'Business analytics';
+
+  @override
+  String get last30Days => 'Last 30 days';
+
+  @override
+  String get manageStores => 'Manage Stores';
+
+  @override
+  String get addEditStores => 'Add & edit stores';
+
+  @override
+  String get manageUsers => 'Manage Users';
+
+  @override
+  String get viewReports => 'View Reports';
+
+  @override
+  String get businessReports => 'Business reports';
+
+  @override
+  String get systemSettings => 'System Settings';
+
+  @override
+  String get configureSystem => 'Configure system';
+
+  @override
+  String get recentActivity => 'Recent Activity';
+
+  @override
   String get users => 'Users';
 
   @override
@@ -607,6 +870,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyPolicyComingSoon => 'Privacy Policy feature coming soon!';
 
   @override
+  String get storeOverview => 'Store Overview';
+
+  @override
+  String get switchStore => 'Switch Store';
+
+  @override
+  String get storeMetrics => 'Store Metrics';
+
+  @override
+  String get currentlyViewing => 'Currently Viewing';
+
+  @override
+  String get createNewProduct => 'Create new product';
+
+  @override
+  String get addEmployee => 'Add Employee';
+
+  @override
+  String get createNewEmployee => 'Create new employee';
+
+  @override
   String welcomeBackUser(String name) {
     return 'Welcome back, $name!';
   }
@@ -643,9 +927,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todaySales => 'Today Sales';
-
-  @override
-  String get totalRevenue => 'Total revenue';
 
   @override
   String get averageTransaction => 'Average transaction';
@@ -705,9 +986,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activeUsers => 'Active Users';
-
-  @override
-  String get totalStores => 'Total Stores';
 
   @override
   String get quickNavigation => 'Quick Navigation';
@@ -771,9 +1049,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use the buttons below to quickly check product status:';
 
   @override
-  String get storeInformation => 'Store Information';
-
-  @override
   String get inventoryOverview => 'Inventory Overview';
 
   @override
@@ -797,9 +1072,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String statusProductsComingSoon(String status) {
     return '$status products feature coming soon!';
   }
-
-  @override
-  String get recentActivity => 'Recent Activity';
 
   @override
   String get recentTransactions => 'Recent Transactions';
@@ -852,15 +1124,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reports => 'Reports';
-
-  @override
-  String get businessAnalytics => 'Business analytics';
-
-  @override
-  String get active => 'Active';
-
-  @override
-  String get inactive => 'Inactive';
 
   @override
   String get unknownRole => 'Unknown Role';

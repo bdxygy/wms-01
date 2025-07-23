@@ -246,7 +246,7 @@ class WMSTypography {
 
   /// Apply opacity to text style
   static TextStyle withOpacity(TextStyle style, double opacity) {
-    return style.copyWith(color: style.color?.withOpacity(opacity));
+    return style.copyWith(color: style.color?.withValues(alpha:opacity));
   }
 
   /// Apply font weight to text style
@@ -355,7 +355,7 @@ extension WMSTextStyleExtension on TextStyle {
   
   /// Apply custom opacity
   TextStyle withCustomOpacity(double opacity) => copyWith(
-    color: color?.withOpacity(opacity),
+    color: color?.withValues(alpha:opacity),
   );
   
   /// Scale font size

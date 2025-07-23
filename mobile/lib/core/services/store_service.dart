@@ -84,4 +84,27 @@ class StoreService {
       rethrow;
     }
   }
+
+  /// Delete store (OWNER only)
+  Future<void> deleteStore(String storeId) async {
+    try {
+      final response = await _apiClient.delete(ApiEndpoints.storesById(storeId));
+      final apiResponse = ApiResponse<dynamic>.fromJson(response.data, (json) => json);
+      if (!apiResponse.success) {
+        throw Exception(apiResponse.error?.message ?? 'Failed to delete store');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Get stores for current user (used for store selection)
+  Future<List<Store>> getMyStores() async {
+    try {
+      final response = await getStores(limit: 100); // Get all user's stores
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

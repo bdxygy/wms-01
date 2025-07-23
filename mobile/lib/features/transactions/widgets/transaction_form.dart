@@ -480,7 +480,7 @@ class _TransactionFormState extends State<TransactionForm> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.1)
+              ? Theme.of(context).primaryColor.withValues(alpha:0.1)
               : Colors.transparent,
           border: Border.all(
             color: isSelected
@@ -564,7 +564,7 @@ class _TransactionFormState extends State<TransactionForm> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color:
-                  Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                  Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Theme.of(context).dividerColor),
             ),
@@ -630,7 +630,7 @@ class _TransactionFormState extends State<TransactionForm> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Theme.of(context).dividerColor),
         ),
@@ -700,10 +700,10 @@ class _TransactionFormState extends State<TransactionForm> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).primaryColor.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Theme.of(context).primaryColor.withOpacity(0.3),
+                    color: Theme.of(context).primaryColor.withValues(alpha:0.3),
                   ),
                 ),
                 child: Icon(
@@ -784,7 +784,7 @@ class _TransactionFormState extends State<TransactionForm> {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Theme.of(context).dividerColor),
         ),
@@ -908,7 +908,7 @@ class _TransactionFormState extends State<TransactionForm> {
         height: 32,
         decoration: BoxDecoration(
           color:
-              (color ?? Theme.of(context).colorScheme.primary).withOpacity(0.1),
+              (color ?? Theme.of(context).colorScheme.primary).withValues(alpha:0.1),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Icon(
@@ -961,15 +961,15 @@ class _TransactionFormState extends State<TransactionForm> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).primaryColor.withOpacity(0.05),
-            Theme.of(context).primaryColor.withOpacity(0.1),
+            Theme.of(context).primaryColor.withValues(alpha:0.05),
+            Theme.of(context).primaryColor.withValues(alpha:0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).primaryColor.withOpacity(0.2),
+          color: Theme.of(context).primaryColor.withValues(alpha:0.2),
         ),
       ),
       child: Column(

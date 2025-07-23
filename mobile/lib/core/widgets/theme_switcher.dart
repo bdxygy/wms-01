@@ -68,7 +68,7 @@ class WMSThemeSwitcher extends StatelessWidget {
         color: isDark ? WMSColors.surfaceVariantDark : WMSColors.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: WMSColors.outline.withOpacity(0.3),
+          color: WMSColors.outline.withValues(alpha:0.3),
         ),
       ),
       child: axis == Axis.horizontal
@@ -133,7 +133,7 @@ class _ThemeButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected 
-                ? WMSColors.primaryBlue.withOpacity(0.1)
+                ? WMSColors.primaryBlue.withValues(alpha:0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             border: isSelected
@@ -257,9 +257,9 @@ class WMSThemeModeIndicator extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: indicatorColor.withOpacity(0.1),
+            color: indicatorColor.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: indicatorColor.withOpacity(0.3)),
+            border: Border.all(color: indicatorColor.withValues(alpha:0.3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -299,7 +299,7 @@ class WMSThemeSettingsTile extends StatelessWidget {
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: WMSColors.primaryBlue.withOpacity(0.1),
+              color: WMSColors.primaryBlue.withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(

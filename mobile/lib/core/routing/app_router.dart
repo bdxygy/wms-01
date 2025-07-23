@@ -14,6 +14,9 @@ import '../../features/settings/screens/settings_screen.dart';
 import '../../features/products/screens/products_screen.dart';
 import '../../features/transactions/screens/transactions_screen.dart';
 import '../../features/stores/screens/stores_screen.dart';
+import '../../features/stores/screens/store_detail_screen.dart';
+import '../../features/stores/screens/create_store_screen.dart';
+import '../../features/stores/screens/edit_store_screen.dart';
 import '../../features/users/screens/users_screen.dart';
 import '../../features/categories/screens/categories_screen.dart';
 import '../../features/categories/widgets/category_form_screen.dart';
@@ -166,6 +169,35 @@ class AppRouter {
           name: 'stores',
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const StoresScreen(),
+          routes: [
+            // Create Store Route
+            GoRoute(
+              path: '/create',
+              name: 'createStore',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) => const CreateStoreScreen(),
+            ),
+            // Store Detail Route
+            GoRoute(
+              path: '/:id',
+              name: 'storeDetail',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final storeId = state.pathParameters['id']!;
+                return StoreDetailScreen(storeId: storeId);
+              },
+            ),
+            // Edit Store Route
+            GoRoute(
+              path: '/:id/edit',
+              name: 'editStore',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final storeId = state.pathParameters['id']!;
+                return EditStoreScreen(storeId: storeId);
+              },
+            ),
+          ],
         ),
 
         // Users Route (OWNER/ADMIN only)

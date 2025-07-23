@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:nanoid2/nanoid2.dart';
 
 import '../../../core/models/product.dart';
 import '../../../core/models/store.dart';
@@ -120,8 +121,11 @@ class _ProductFormState extends State<ProductForm> {
     final product = widget.initialProduct!;
     _nameController.text = product.name;
     _skuController.text = product.sku;
-    _purchasePriceController.text = NumberUtils.formatWithDots(product.purchasePrice.toInt());
-    _salePriceController.text = product.salePrice != null ? NumberUtils.formatWithDots(product.salePrice!.toInt()) : '';
+    _purchasePriceController.text =
+        NumberUtils.formatWithDots(product.purchasePrice.toInt());
+    _salePriceController.text = product.salePrice != null
+        ? NumberUtils.formatWithDots(product.salePrice!.toInt())
+        : '';
     _quantityController.text = product.quantity.toString();
     _selectedStoreId = product.storeId;
     _selectedCategoryId = product.categoryId;
@@ -169,9 +173,9 @@ class _ProductFormState extends State<ProductForm> {
 
     // Generate default SKU only if empty
     if (_skuController.text.isEmpty) {
-      final timestamp =
-          DateTime.now().millisecondsSinceEpoch.toString().substring(8);
-      _skuController.text = 'PROD$timestamp';
+      const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      final sku = nanoid(length: 8, alphabet: alphabet);
+      _skuController.text = sku;
     }
   }
 
@@ -265,19 +269,20 @@ class _ProductFormState extends State<ProductForm> {
       onImeiScanned: (scannedImei) {
         // Guard clause: ensure widget is mounted after scan
         if (!mounted) return;
-        
+
         // Guard clause: ensure index is still valid
         if (index >= _imeis.length) return;
-        
+
         setState(() {
           _imeis[index] = scannedImei;
         });
-        
+
         // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('IMEI filled: ${scannedImei.length > 8 ? scannedImei.substring(0, 8) : scannedImei}...'),
+              content: Text(
+                  'IMEI filled: ${scannedImei.length > 8 ? scannedImei.substring(0, 8) : scannedImei}...'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
@@ -298,16 +303,17 @@ class _ProductFormState extends State<ProductForm> {
       onImeiScanned: (scannedImei) {
         // Guard clause: ensure widget is mounted after scan
         if (!mounted) return;
-        
+
         setState(() {
           _imeis.add(scannedImei);
         });
-        
+
         // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('IMEI added: ${scannedImei.length > 8 ? scannedImei.substring(0, 8) : scannedImei}...'),
+              content: Text(
+                  'IMEI added: ${scannedImei.length > 8 ? scannedImei.substring(0, 8) : scannedImei}...'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
@@ -570,14 +576,16 @@ class _ProductFormState extends State<ProductForm> {
                 onChanged: (value) {
                   // Guard clause: handle null value
                   if (value == null) return;
-                  
+
                   final cleanValue = value.replaceAll('.', '');
                   if (cleanValue.isNotEmpty) {
-                    final formatted = NumberUtils.formatWithDots(int.tryParse(cleanValue) ?? 0);
+                    final formatted = NumberUtils.formatWithDots(
+                        int.tryParse(cleanValue) ?? 0);
                     if (formatted != value) {
                       _purchasePriceController.value = TextEditingValue(
                         text: formatted,
-                        selection: TextSelection.collapsed(offset: formatted.length),
+                        selection:
+                            TextSelection.collapsed(offset: formatted.length),
                       );
                     }
                   }
@@ -602,14 +610,16 @@ class _ProductFormState extends State<ProductForm> {
                 onChanged: (value) {
                   // Guard clause: handle null value
                   if (value == null) return;
-                  
+
                   final cleanValue = value.replaceAll('.', '');
                   if (cleanValue.isNotEmpty) {
-                    final formatted = NumberUtils.formatWithDots(int.tryParse(cleanValue) ?? 0);
+                    final formatted = NumberUtils.formatWithDots(
+                        int.tryParse(cleanValue) ?? 0);
                     if (formatted != value) {
                       _salePriceController.value = TextEditingValue(
                         text: formatted,
-                        selection: TextSelection.collapsed(offset: formatted.length),
+                        selection:
+                            TextSelection.collapsed(offset: formatted.length),
                       );
                     }
                   }
@@ -961,7 +971,7 @@ class _ProductFormState extends State<ProductForm> {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Action buttons row
               Row(
                 children: [
@@ -1031,7 +1041,9 @@ class _ProductFormState extends State<ProductForm> {
                                     width: 32,
                                     height: 32,
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: Icon(

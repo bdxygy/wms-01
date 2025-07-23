@@ -267,8 +267,8 @@ class _SplashScreenState extends State<SplashScreen>
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.primary.withOpacity(0.8),
-              Theme.of(context).colorScheme.secondary.withOpacity(0.6),
+              Theme.of(context).colorScheme.primary.withValues(alpha:0.8),
+              Theme.of(context).colorScheme.secondary.withValues(alpha:0.6),
             ],
             stops: const [0.0, 0.7, 1.0],
           ),
@@ -320,12 +320,12 @@ class _SplashScreenState extends State<SplashScreen>
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha:0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha:0.1),
                       blurRadius: 10,
                       offset: const Offset(0, -4),
                     ),
@@ -372,17 +372,17 @@ class _SplashScreenState extends State<SplashScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha:0.2),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha:0.3),
                       width: 1,
                     ),
                   ),
                   child: Text(
                     AppLocalizations.of(context)!.appTagline,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha:0.9),
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.5,
                     ),
@@ -410,7 +410,7 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha:0.2),
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Center(
@@ -420,7 +420,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: CircularProgressIndicator(
                       valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                       strokeWidth: 3,
-                      backgroundColor: Colors.white.withOpacity(0.2),
+                      backgroundColor: Colors.white.withValues(alpha:0.2),
                     ),
                   ),
                 ),
@@ -433,7 +433,7 @@ class _SplashScreenState extends State<SplashScreen>
             Text(
               AppLocalizations.of(context)!.initializing,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withOpacity(0.8),
+                color: Colors.white.withValues(alpha:0.8),
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.5,
               ),

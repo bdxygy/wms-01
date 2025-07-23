@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
-import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/main_navigation_scaffold.dart';
 import '../../../generated/app_localizations.dart';
 import '../widgets/owner_dashboard.dart';
@@ -19,38 +18,118 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimations();
+  }
+
+  void _initializeAnimations() {
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    // Start animations
+    _fadeController.forward();
+    _slideController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final storeProvider = context.watch<StoreContextProvider>();
     final user = authProvider.currentUser;
+    final theme = Theme.of(context);
 
     return NavigationAwareScaffold(
       title: _getDashboardTitle(user?.roleString ?? 'UNKNOWN'),
       currentRoute: 'dashboard',
-      body: RefreshIndicator(
-        onRefresh: _handleRefresh,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Section
-              _buildWelcomeSection(user?.name ?? 'User', user?.roleString ?? 'UNKNOWN'),
-              
-              const SizedBox(height: 24),
-              
-              // Store Context Section (for non-owner users)
-              if (!authProvider.isOwner && storeProvider.selectedStore != null)
-                _buildStoreContextSection(storeProvider.selectedStore?.name ?? 'Unknown Store'),
-              
-              if (!authProvider.isOwner && storeProvider.selectedStore != null)
-                const SizedBox(height: 24),
-              
-              // Role-specific Dashboard Content
-              _buildRoleSpecificDashboard(user?.roleString ?? 'UNKNOWN'),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              theme.colorScheme.surface,
+              theme.colorScheme.surface.withValues(alpha: 0.8),
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            ],
+            stops: const [0.0, 0.7, 1.0],
+          ),
+        ),
+        child: RefreshIndicator(
+          onRefresh: _handleRefresh,
+          color: theme.colorScheme.primary,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Hero Header Section
+              SliverToBoxAdapter(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: _buildHeroHeader(
+                      user?.name ?? 'User',
+                      user?.roleString ?? 'UNKNOWN',
+                      storeProvider.selectedStore?.name,
+                      authProvider.isOwner,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Dashboard Content
+              SliverToBoxAdapter(
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _buildRoleSpecificDashboard(
+                        user?.roleString ?? 'UNKNOWN'),
+                  ),
+                ),
+              ),
+
+              // Bottom Spacing
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 32),
+              ),
             ],
           ),
         ),
@@ -58,101 +137,186 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildWelcomeSection(String userName, String role) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(
-                Icons.person,
-                size: 30,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context)!.welcomeBackUser(userName),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getRoleColor(role).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _getLocalizedRole(role),
-                      style: TextStyle(
-                        color: _getRoleColor(role),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+  Widget _buildHeroHeader(
+      String userName, String role, String? storeName, bool isOwner) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final currentTime = DateTime.now();
+    final greeting = _getTimeBasedGreeting(currentTime);
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _getRoleColor(role),
+            _getRoleColor(role).withValues(alpha: 0.8),
+            _getRoleColor(role).withValues(alpha: 0.6),
           ],
         ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: _getRoleColor(role).withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildStoreContextSection(String storeName) {
-    return Card(
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(
-              Icons.store,
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: 0.1),
+              Colors.white.withValues(alpha: 0.05),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // User Info Row
+              Row(
                 children: [
-                  Text(
-                    AppLocalizations.of(context)!.currentStore,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  Text(
-                    storeName,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                greeting,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => context.pushNamed('settings'),
+                              icon: const Icon(
+                                Icons.settings,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              tooltip: l10n.settings,
+                            ),
+                          ],
+                        ),
+                        Text(
+                          userName,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontSize: 42,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _getLocalizedRole(role),
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-            TextButton(
-              onPressed: () => _handleChangeStore(),
-              child: Text(AppLocalizations.of(context)!.change),
-            ),
-          ],
+
+              // Store Context (for non-owners)
+              if (!isOwner && storeName != null) ...[
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.store_outlined,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.currentStore,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              storeName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _handleChangeStore,
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.white.withValues(alpha: 0.2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          l10n.change,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildRoleSpecificDashboard(String role) {
-    switch (role) {
+    switch (role.toUpperCase()) {
       case 'OWNER':
         return const OwnerDashboard();
       case 'ADMIN':
@@ -167,95 +331,209 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildUnknownRoleDashboard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Icon(
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 32),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.shadow.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.error.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Icon(
               Icons.error_outline,
               size: 48,
-              color: Theme.of(context).colorScheme.error,
+              color: theme.colorScheme.error,
             ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context)!.unknownRole,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            l10n.unknownRole,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onErrorContainer,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.roleNotRecognized,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onErrorContainer.withValues(alpha: 0.8),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _handleLogout,
+            icon: const Icon(Icons.logout),
+            label: Text(l10n.logout),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context)!.roleNotRecognized,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: () => _handleLogout(),
-              child: Text(AppLocalizations.of(context)!.logout),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  String _getLocalizedRole(String role) {
+  // Helper Methods
+  String _getTimeBasedGreeting(DateTime time) {
+    final l10n = AppLocalizations.of(context)!;
+    final hour = time.hour;
+
+    if (hour >= 5 && hour < 12) {
+      return l10n.goodMorning;
+    } else if (hour >= 12 && hour < 17) {
+      return l10n.goodAfternoon;
+    } else if (hour >= 17 && hour < 21) {
+      return l10n.goodEvening;
+    } else {
+      return l10n.goodNight;
+    }
+  }
+
+  IconData _getRoleIcon(String role) {
     switch (role.toUpperCase()) {
       case 'OWNER':
-        return AppLocalizations.of(context)!.roleOwner;
+        return Icons.business_center;
       case 'ADMIN':
-        return AppLocalizations.of(context)!.roleAdmin;
+        return Icons.admin_panel_settings;
       case 'STAFF':
-        return AppLocalizations.of(context)!.roleStaff;
+        return Icons.person_outline;
       case 'CASHIER':
-        return AppLocalizations.of(context)!.roleCashier;
+        return Icons.point_of_sale;
       default:
-        return AppLocalizations.of(context)!.roleUnknown;
+        return Icons.help_outline;
+    }
+  }
+
+  IconData _getStatIcon(String role, int index) {
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return [Icons.store, Icons.people, Icons.trending_up][index];
+      case 'ADMIN':
+        return [Icons.inventory, Icons.receipt, Icons.group][index];
+      case 'STAFF':
+        return [Icons.assignment, Icons.check_circle, Icons.schedule][index];
+      case 'CASHIER':
+        return [Icons.point_of_sale, Icons.receipt_long, Icons.payments][index];
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  String _getStatValue(String role, int index) {
+    // TODO: Replace with real data
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return ['5', '24', '↑15%'][index];
+      case 'ADMIN':
+        return ['1,234', '89', '12'][index];
+      case 'STAFF':
+        return ['8', '45', '6h'][index];
+      case 'CASHIER':
+        return ['15', '₫2.5M', '42'][index];
+      default:
+        return '-';
+    }
+  }
+
+  String _getStatLabel(String role, int index) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return [l10n.stores, l10n.staff, l10n.growth][index];
+      case 'ADMIN':
+        return [l10n.products, l10n.orders, l10n.staff][index];
+      case 'STAFF':
+        return [l10n.tasks, l10n.completed, l10n.today][index];
+      case 'CASHIER':
+        return [l10n.sales, l10n.revenue, l10n.items][index];
+      default:
+        return '-';
+    }
+  }
+
+  String _getLocalizedRole(String role) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (role.toUpperCase()) {
+      case 'OWNER':
+        return l10n.roleOwner;
+      case 'ADMIN':
+        return l10n.roleAdmin;
+      case 'STAFF':
+        return l10n.roleStaff;
+      case 'CASHIER':
+        return l10n.roleCashier;
+      default:
+        return l10n.roleUnknown;
     }
   }
 
   Color _getRoleColor(String role) {
     switch (role.toUpperCase()) {
       case 'OWNER':
-        return Colors.purple;
+        return const Color(0xFF6366F1); // Modern indigo
       case 'ADMIN':
-        return Colors.blue;
+        return const Color(0xFF3B82F6); // Modern blue
       case 'STAFF':
-        return Colors.green;
+        return const Color(0xFF10B981); // Modern green
       case 'CASHIER':
-        return Colors.orange;
+        return const Color(0xFFF59E0B); // Modern amber
       default:
-        return Colors.grey;
+        return const Color(0xFF6B7280); // Modern gray
     }
   }
 
   String _getDashboardTitle(String role) {
+    final l10n = AppLocalizations.of(context)!;
+
     switch (role.toUpperCase()) {
       case 'OWNER':
-        return AppLocalizations.of(context)!.ownerDashboard;
+        return l10n.ownerDashboard;
       case 'ADMIN':
-        return AppLocalizations.of(context)!.adminDashboard;
+        return l10n.adminDashboard;
       case 'STAFF':
-        return AppLocalizations.of(context)!.staffDashboard;
+        return l10n.staffDashboard;
       case 'CASHIER':
-        return AppLocalizations.of(context)!.cashierDashboard;
+        return l10n.cashierDashboard;
       default:
-        return AppLocalizations.of(context)!.wmsDashboard;
+        return l10n.wmsDashboard;
     }
   }
 
   Future<void> _handleRefresh() async {
-    // TODO: Implement refresh logic
-    await Future.delayed(const Duration(seconds: 1));
-  }
+    await Future.delayed(const Duration(milliseconds: 1500));
 
-  void _navigateToSettings() {
-    AppRouter.goToSettings(context);
+    // Restart animations for visual feedback
+    _fadeController.reset();
+    _slideController.reset();
+    _fadeController.forward();
+    _slideController.forward();
   }
 
   void _handleChangeStore() {
@@ -272,9 +550,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToLogout(e.toString())),
+            content: Text(l10n.failedToLogout(e.toString())),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

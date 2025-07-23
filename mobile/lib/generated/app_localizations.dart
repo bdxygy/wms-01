@@ -788,6 +788,522 @@ abstract class AppLocalizations {
   /// **'Stores List page coming soon!'**
   String get storesListComingSoon;
 
+  /// No description provided for @editStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Store'**
+  String get editStore;
+
+  /// No description provided for @storeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Name'**
+  String get storeName;
+
+  /// No description provided for @storeType.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Type'**
+  String get storeType;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get active;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @timezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone'**
+  String get timezone;
+
+  /// No description provided for @openTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Time'**
+  String get openTime;
+
+  /// No description provided for @closeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Time'**
+  String get closeTime;
+
+  /// No description provided for @storeInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Information'**
+  String get storeInformation;
+
+  /// No description provided for @addressInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Information'**
+  String get addressInformation;
+
+  /// No description provided for @contactInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information'**
+  String get contactInformation;
+
+  /// No description provided for @auditInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit Information'**
+  String get auditInformation;
+
+  /// No description provided for @addressLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Line 1'**
+  String get addressLine1;
+
+  /// No description provided for @addressLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Line 2'**
+  String get addressLine2;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @province.
+  ///
+  /// In en, this message translates to:
+  /// **'Province'**
+  String get province;
+
+  /// No description provided for @postalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal Code'**
+  String get postalCode;
+
+  /// No description provided for @country.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get country;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @mapLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Map Location'**
+  String get mapLocation;
+
+  /// No description provided for @createdBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Created By'**
+  String get createdBy;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created At'**
+  String get createdAt;
+
+  /// No description provided for @updatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated At'**
+  String get updatedAt;
+
+  /// No description provided for @deletedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted At'**
+  String get deletedAt;
+
+  /// No description provided for @confirmDeleteStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete Store'**
+  String get confirmDeleteStore;
+
+  /// No description provided for @deleteStoreConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete store \'{name}\'? This action cannot be undone.'**
+  String deleteStoreConfirmation(Object name);
+
+  /// No description provided for @storeDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Store deleted successfully'**
+  String get storeDeletedSuccessfully;
+
+  /// No description provided for @failedToDeleteStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete store'**
+  String get failedToDeleteStore;
+
+  /// No description provided for @failedToLoadStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load store'**
+  String get failedToLoadStore;
+
+  /// No description provided for @failedToLoadStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load stores'**
+  String get failedToLoadStores;
+
+  /// No description provided for @searchStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Search stores...'**
+  String get searchStores;
+
+  /// No description provided for @manageStoresDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and manage your store locations'**
+  String get manageStoresDescription;
+
+  /// No description provided for @noStoresFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No stores found'**
+  String get noStoresFound;
+
+  /// No description provided for @tryDifferentSearchTerm.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search term'**
+  String get tryDifferentSearchTerm;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @updateStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Store'**
+  String get updateStore;
+
+  /// No description provided for @storeCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Store created successfully'**
+  String get storeCreatedSuccessfully;
+
+  /// No description provided for @storeUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Store updated successfully'**
+  String get storeUpdatedSuccessfully;
+
+  /// No description provided for @failedToCreateStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create store'**
+  String get failedToCreateStore;
+
+  /// No description provided for @failedToUpdateStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update store'**
+  String get failedToUpdateStore;
+
+  /// No description provided for @operatingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Operating Hours'**
+  String get operatingHours;
+
+  /// No description provided for @selectOpenTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Opening Time'**
+  String get selectOpenTime;
+
+  /// No description provided for @selectCloseTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Closing Time'**
+  String get selectCloseTime;
+
+  /// No description provided for @enterStoreName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter store name'**
+  String get enterStoreName;
+
+  /// No description provided for @enterStoreType.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter store type'**
+  String get enterStoreType;
+
+  /// No description provided for @enterTimezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter timezone'**
+  String get enterTimezone;
+
+  /// No description provided for @enterAddressLine1.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter address line 1'**
+  String get enterAddressLine1;
+
+  /// No description provided for @enterAddressLine2.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter address line 2 (optional)'**
+  String get enterAddressLine2;
+
+  /// No description provided for @enterCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter city'**
+  String get enterCity;
+
+  /// No description provided for @enterProvince.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter province'**
+  String get enterProvince;
+
+  /// No description provided for @enterPostalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter postal code'**
+  String get enterPostalCode;
+
+  /// No description provided for @enterCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter country'**
+  String get enterCountry;
+
+  /// No description provided for @enterMapLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter map location (optional)'**
+  String get enterMapLocation;
+
+  /// No description provided for @enterPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter phone number'**
+  String get enterPhoneNumber;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email (optional)'**
+  String get enterEmail;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @goodMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get goodMorning;
+
+  /// No description provided for @goodAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon'**
+  String get goodAfternoon;
+
+  /// No description provided for @goodEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening'**
+  String get goodEvening;
+
+  /// No description provided for @goodNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Good night'**
+  String get goodNight;
+
+  /// No description provided for @staff.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get staff;
+
+  /// No description provided for @growth.
+  ///
+  /// In en, this message translates to:
+  /// **'Growth'**
+  String get growth;
+
+  /// No description provided for @orders.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders'**
+  String get orders;
+
+  /// No description provided for @tasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get tasks;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @sales.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales'**
+  String get sales;
+
+  /// No description provided for @revenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenue'**
+  String get revenue;
+
+  /// No description provided for @items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get items;
+
+  /// No description provided for @businessOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Overview'**
+  String get businessOverview;
+
+  /// No description provided for @selectStoreToViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Select store to view details ({count} total)'**
+  String selectStoreToViewDetails(Object count);
+
+  /// No description provided for @totalStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Stores'**
+  String get totalStores;
+
+  /// No description provided for @totalRevenue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total revenue'**
+  String get totalRevenue;
+
+  /// No description provided for @activeProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Products'**
+  String get activeProducts;
+
+  /// No description provided for @totalStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Staff'**
+  String get totalStaff;
+
+  /// No description provided for @businessAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Business analytics'**
+  String get businessAnalytics;
+
+  /// No description provided for @last30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 30 days'**
+  String get last30Days;
+
+  /// No description provided for @manageStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Stores'**
+  String get manageStores;
+
+  /// No description provided for @addEditStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Add & edit stores'**
+  String get addEditStores;
+
+  /// No description provided for @manageUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Users'**
+  String get manageUsers;
+
+  /// No description provided for @viewReports.
+  ///
+  /// In en, this message translates to:
+  /// **'View Reports'**
+  String get viewReports;
+
+  /// No description provided for @businessReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Business reports'**
+  String get businessReports;
+
+  /// No description provided for @systemSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'System Settings'**
+  String get systemSettings;
+
+  /// No description provided for @configureSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure system'**
+  String get configureSystem;
+
+  /// No description provided for @recentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get recentActivity;
+
   /// No description provided for @users.
   ///
   /// In en, this message translates to:
@@ -1244,6 +1760,48 @@ abstract class AppLocalizations {
   /// **'Privacy Policy feature coming soon!'**
   String get privacyPolicyComingSoon;
 
+  /// No description provided for @storeOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Overview'**
+  String get storeOverview;
+
+  /// No description provided for @switchStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Store'**
+  String get switchStore;
+
+  /// No description provided for @storeMetrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Metrics'**
+  String get storeMetrics;
+
+  /// No description provided for @currentlyViewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently Viewing'**
+  String get currentlyViewing;
+
+  /// No description provided for @createNewProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new product'**
+  String get createNewProduct;
+
+  /// No description provided for @addEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Employee'**
+  String get addEmployee;
+
+  /// No description provided for @createNewEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new employee'**
+  String get createNewEmployee;
+
   /// No description provided for @welcomeBackUser.
   ///
   /// In en, this message translates to:
@@ -1315,12 +1873,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Today Sales'**
   String get todaySales;
-
-  /// No description provided for @totalRevenue.
-  ///
-  /// In en, this message translates to:
-  /// **'Total revenue'**
-  String get totalRevenue;
 
   /// No description provided for @averageTransaction.
   ///
@@ -1436,12 +1988,6 @@ abstract class AppLocalizations {
   /// **'Active Users'**
   String get activeUsers;
 
-  /// No description provided for @totalStores.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Stores'**
-  String get totalStores;
-
   /// No description provided for @quickNavigation.
   ///
   /// In en, this message translates to:
@@ -1556,12 +2102,6 @@ abstract class AppLocalizations {
   /// **'Use the buttons below to quickly check product status:'**
   String get useButtonsToCheck;
 
-  /// No description provided for @storeInformation.
-  ///
-  /// In en, this message translates to:
-  /// **'Store Information'**
-  String get storeInformation;
-
   /// No description provided for @inventoryOverview.
   ///
   /// In en, this message translates to:
@@ -1603,12 +2143,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{status} products feature coming soon!'**
   String statusProductsComingSoon(String status);
-
-  /// No description provided for @recentActivity.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent Activity'**
-  String get recentActivity;
 
   /// No description provided for @recentTransactions.
   ///
@@ -1711,24 +2245,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reports'**
   String get reports;
-
-  /// No description provided for @businessAnalytics.
-  ///
-  /// In en, this message translates to:
-  /// **'Business analytics'**
-  String get businessAnalytics;
-
-  /// No description provided for @active.
-  ///
-  /// In en, this message translates to:
-  /// **'Active'**
-  String get active;
-
-  /// No description provided for @inactive.
-  ///
-  /// In en, this message translates to:
-  /// **'Inactive'**
-  String get inactive;
 
   /// No description provided for @unknownRole.
   ///

@@ -146,8 +146,8 @@ class _WMSSearchAppBarState extends State<WMSSearchAppBar> {
                 hintText: widget.hintText,
                 hintStyle: WMSTypography.bodyMedium.copyWith(
                   color: isDark 
-                      ? WMSColors.textSecondaryDark.withOpacity(0.7)
-                      : Colors.white.withOpacity(0.7),
+                      ? WMSColors.textSecondaryDark.withValues(alpha:0.7)
+                      : Colors.white.withValues(alpha:0.7),
                 ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -227,7 +227,7 @@ class WMSRoleAppBar extends StatelessWidget implements PreferredSizeWidget {
               style: WMSTypography.bodySmall.copyWith(
                 color: isDark 
                     ? WMSColors.textSecondaryDark
-                    : Colors.white.withOpacity(0.8),
+                    : Colors.white.withValues(alpha:0.8),
               ),
             ),
         ],
@@ -237,7 +237,7 @@ class WMSRoleAppBar extends StatelessWidget implements PreferredSizeWidget {
           margin: const EdgeInsets.only(right: 8),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: WMSColors.getRoleColor(userRole).withOpacity(0.2),
+            color: WMSColors.getRoleColor(userRole).withValues(alpha:0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -356,7 +356,7 @@ class WMSTabBar extends StatelessWidget implements PreferredSizeWidget {
       labelColor: labelColor ?? (isDark ? WMSColors.textColorDark : Colors.white),
       unselectedLabelColor: unselectedLabelColor ?? (isDark 
           ? WMSColors.textSecondaryDark 
-          : Colors.white.withOpacity(0.7)),
+          : Colors.white.withValues(alpha:0.7)),
       labelStyle: WMSTypography.tabText.copyWith(fontWeight: FontWeight.w600),
       unselectedLabelStyle: WMSTypography.tabText,
       indicatorWeight: 3,

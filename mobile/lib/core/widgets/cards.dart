@@ -131,7 +131,7 @@ class WMSProductCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: WMSColors.infoBlue.withOpacity(0.1),
+                          color: WMSColors.infoBlue.withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -177,8 +177,8 @@ class WMSProductCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: quantity! > 0 
-                              ? WMSColors.successGreen.withOpacity(0.1)
-                              : WMSColors.errorRed.withOpacity(0.1),
+                              ? WMSColors.successGreen.withValues(alpha:0.1)
+                              : WMSColors.errorRed.withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -250,7 +250,7 @@ class WMSTransactionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: WMSColors.getTransactionTypeColor(type).withOpacity(0.1),
+                  color: WMSColors.getTransactionTypeColor(type).withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -310,7 +310,7 @@ class WMSTransactionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(status).withOpacity(0.1),
+                  color: _getStatusColor(status).withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -376,7 +376,7 @@ class WMSStatsCard extends StatelessWidget {
     
     return WMSCard(
       onTap: onTap,
-      backgroundColor: cardColor.withOpacity(0.05),
+      backgroundColor: cardColor.withValues(alpha:0.05),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -385,7 +385,7 @@ class WMSStatsCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: cardColor.withOpacity(0.1),
+                  color: cardColor.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -465,7 +465,7 @@ class WMSUserCard extends StatelessWidget {
           // Avatar
           CircleAvatar(
             radius: 24,
-            backgroundColor: WMSColors.getRoleColor(role).withOpacity(0.1),
+            backgroundColor: WMSColors.getRoleColor(role).withValues(alpha:0.1),
             backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
             child: avatarUrl == null
                 ? Text(
@@ -520,7 +520,7 @@ class WMSUserCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: WMSColors.getRoleColor(role).withOpacity(0.1),
+                    color: WMSColors.getRoleColor(role).withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

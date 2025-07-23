@@ -203,7 +203,7 @@ class WMSColors {
 
   /// Get color with opacity
   static Color withOpacity(Color color, double opacity) {
-    return color.withOpacity(opacity);
+    return color.withValues(alpha:opacity);
   }
 
   /// Create a lighter version of a color

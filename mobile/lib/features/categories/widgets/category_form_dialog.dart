@@ -23,7 +23,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final CategoryService _categoryService = CategoryService();
-  
+
   bool _isLoading = false;
   String? _error;
 
@@ -55,22 +55,26 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
 
     try {
       Category result;
-      
+
       if (isEditing) {
         // Update existing category
         final request = UpdateCategoryRequest(
           name: _nameController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty 
-              ? null 
+          description: _descriptionController.text.trim().isEmpty
+              ? null
               : _descriptionController.text.trim(),
         );
-        result = await _categoryService.updateCategory(widget.category!.id, request);
+        result =
+            await _categoryService.updateCategory(widget.category!.id, request);
       } else {
         // Create new category
         final request = CreateCategoryRequest(
           name: _nameController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty 
-              ? null 
+          storeId: Provider.of<StoreContextProvider>(context, listen: false)!
+              .selectedStore!
+              .id,
+          description: _descriptionController.text.trim().isEmpty
+              ? null
               : _descriptionController.text.trim(),
         );
         result = await _categoryService.createCategory(request);
@@ -102,7 +106,10 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .error
+                        .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: Theme.of(context).colorScheme.error,
@@ -129,7 +136,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                 ),
                 const SizedBox(height: 16),
               ],
-              
+
               // Category Name Field
               TextFormField(
                 controller: _nameController,
@@ -153,9 +160,9 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                 enabled: !_isLoading,
                 textCapitalization: TextCapitalization.words,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Description Field (Optional)
               TextFormField(
                 controller: _descriptionController,
@@ -174,9 +181,9 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                 enabled: !_isLoading,
                 textCapitalization: TextCapitalization.sentences,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Store Information (Read-only)
               Consumer<StoreContextProvider>(
                 builder: (context, storeContext, child) {
@@ -184,7 +191,10 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                     return Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .error
+                            .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Row(
@@ -192,13 +202,14 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                           Icon(Icons.warning, color: Colors.orange),
                           SizedBox(width: 8),
                           Expanded(
-                            child: Text('No store selected. Please select a store first.'),
+                            child: Text(
+                                'No store selected. Please select a store first.'),
                           ),
                         ],
                       ),
                     );
                   }
-                  
+
                   return Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -225,9 +236,12 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
                               ),
                               Text(
                                 storeContext.selectedStore!.name,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
                               ),
                             ],
                           ),

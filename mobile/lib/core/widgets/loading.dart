@@ -139,7 +139,7 @@ class _WMSSkeletonLoaderState extends State<WMSSkeletonLoader>
           height: widget.height ?? 16,
           width: widget.width,
           decoration: BoxDecoration(
-            color: WMSColors.outline.withOpacity(_animation.value * 0.3),
+            color: WMSColors.outline.withValues(alpha:_animation.value * 0.3),
             borderRadius: widget.borderRadius ?? BorderRadius.circular(4),
           ),
         );

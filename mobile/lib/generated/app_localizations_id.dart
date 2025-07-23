@@ -368,6 +368,268 @@ class AppLocalizationsId extends AppLocalizations {
   String get storesListComingSoon => 'Halaman Daftar Toko segera hadir!';
 
   @override
+  String get editStore => 'Edit Toko';
+
+  @override
+  String get storeName => 'Nama Toko';
+
+  @override
+  String get storeType => 'Jenis Toko';
+
+  @override
+  String get status => 'Status';
+
+  @override
+  String get active => 'Aktif';
+
+  @override
+  String get inactive => 'Tidak Aktif';
+
+  @override
+  String get timezone => 'Zona Waktu';
+
+  @override
+  String get openTime => 'Jam Buka';
+
+  @override
+  String get closeTime => 'Jam Tutup';
+
+  @override
+  String get storeInformation => 'Informasi Toko';
+
+  @override
+  String get addressInformation => 'Informasi Alamat';
+
+  @override
+  String get contactInformation => 'Informasi Kontak';
+
+  @override
+  String get auditInformation => 'Informasi Audit';
+
+  @override
+  String get addressLine1 => 'Alamat Baris 1';
+
+  @override
+  String get addressLine2 => 'Alamat Baris 2';
+
+  @override
+  String get city => 'Kota';
+
+  @override
+  String get province => 'Provinsi';
+
+  @override
+  String get postalCode => 'Kode Pos';
+
+  @override
+  String get country => 'Negara';
+
+  @override
+  String get phoneNumber => 'Nomor Telepon';
+
+  @override
+  String get mapLocation => 'Lokasi Peta';
+
+  @override
+  String get createdBy => 'Dibuat Oleh';
+
+  @override
+  String get createdAt => 'Dibuat Pada';
+
+  @override
+  String get updatedAt => 'Diperbarui Pada';
+
+  @override
+  String get deletedAt => 'Dihapus Pada';
+
+  @override
+  String get confirmDeleteStore => 'Konfirmasi Hapus Toko';
+
+  @override
+  String deleteStoreConfirmation(Object name) {
+    return 'Apakah Anda yakin ingin menghapus toko \'$name\'? Tindakan ini tidak dapat dibatalkan.';
+  }
+
+  @override
+  String get storeDeletedSuccessfully => 'Toko berhasil dihapus';
+
+  @override
+  String get failedToDeleteStore => 'Gagal menghapus toko';
+
+  @override
+  String get failedToLoadStore => 'Gagal memuat toko';
+
+  @override
+  String get failedToLoadStores => 'Gagal memuat daftar toko';
+
+  @override
+  String get searchStores => 'Cari toko...';
+
+  @override
+  String get manageStoresDescription => 'Buat dan kelola lokasi toko Anda';
+
+  @override
+  String get noStoresFound => 'Tidak ada toko ditemukan';
+
+  @override
+  String get tryDifferentSearchTerm => 'Coba kata kunci pencarian yang berbeda';
+
+  @override
+  String get back => 'Kembali';
+
+  @override
+  String get updateStore => 'Perbarui Toko';
+
+  @override
+  String get storeCreatedSuccessfully => 'Toko berhasil dibuat';
+
+  @override
+  String get storeUpdatedSuccessfully => 'Toko berhasil diperbarui';
+
+  @override
+  String get failedToCreateStore => 'Gagal membuat toko';
+
+  @override
+  String get failedToUpdateStore => 'Gagal memperbarui toko';
+
+  @override
+  String get operatingHours => 'Jam Operasional';
+
+  @override
+  String get selectOpenTime => 'Pilih Jam Buka';
+
+  @override
+  String get selectCloseTime => 'Pilih Jam Tutup';
+
+  @override
+  String get enterStoreName => 'Masukkan nama toko';
+
+  @override
+  String get enterStoreType => 'Masukkan jenis toko';
+
+  @override
+  String get enterTimezone => 'Masukkan zona waktu';
+
+  @override
+  String get enterAddressLine1 => 'Masukkan alamat baris 1';
+
+  @override
+  String get enterAddressLine2 => 'Masukkan alamat baris 2 (opsional)';
+
+  @override
+  String get enterCity => 'Masukkan kota';
+
+  @override
+  String get enterProvince => 'Masukkan provinsi';
+
+  @override
+  String get enterPostalCode => 'Masukkan kode pos';
+
+  @override
+  String get enterCountry => 'Masukkan negara';
+
+  @override
+  String get enterMapLocation => 'Masukkan lokasi peta (opsional)';
+
+  @override
+  String get enterPhoneNumber => 'Masukkan nomor telepon';
+
+  @override
+  String get enterEmail => 'Masukkan email (opsional)';
+
+  @override
+  String get fieldRequired => 'Bidang ini wajib diisi';
+
+  @override
+  String get goodMorning => 'Selamat pagi';
+
+  @override
+  String get goodAfternoon => 'Selamat siang';
+
+  @override
+  String get goodEvening => 'Selamat sore';
+
+  @override
+  String get goodNight => 'Selamat malam';
+
+  @override
+  String get staff => 'Staf';
+
+  @override
+  String get growth => 'Pertumbuhan';
+
+  @override
+  String get orders => 'Pesanan';
+
+  @override
+  String get tasks => 'Tugas';
+
+  @override
+  String get completed => 'Selesai';
+
+  @override
+  String get today => 'Hari ini';
+
+  @override
+  String get sales => 'Penjualan';
+
+  @override
+  String get revenue => 'Pendapatan';
+
+  @override
+  String get items => 'Item';
+
+  @override
+  String get businessOverview => 'Ikhtisar Bisnis';
+
+  @override
+  String selectStoreToViewDetails(Object count) {
+    return 'Pilih toko untuk melihat detail ($count total)';
+  }
+
+  @override
+  String get totalStores => 'Total Toko';
+
+  @override
+  String get totalRevenue => 'Total pendapatan';
+
+  @override
+  String get activeProducts => 'Produk Aktif';
+
+  @override
+  String get totalStaff => 'Total Staf';
+
+  @override
+  String get businessAnalytics => 'Analitik bisnis';
+
+  @override
+  String get last30Days => '30 hari terakhir';
+
+  @override
+  String get manageStores => 'Kelola Toko';
+
+  @override
+  String get addEditStores => 'Tambah & edit toko';
+
+  @override
+  String get manageUsers => 'Kelola Pengguna';
+
+  @override
+  String get viewReports => 'Lihat Laporan';
+
+  @override
+  String get businessReports => 'Laporan bisnis';
+
+  @override
+  String get systemSettings => 'Pengaturan Sistem';
+
+  @override
+  String get configureSystem => 'Konfigurasi sistem';
+
+  @override
+  String get recentActivity => 'Aktivitas Terkini';
+
+  @override
   String get users => 'Pengguna';
 
   @override
@@ -606,6 +868,27 @@ class AppLocalizationsId extends AppLocalizations {
   String get privacyPolicyComingSoon => 'Fitur Kebijakan Privasi segera hadir!';
 
   @override
+  String get storeOverview => 'Ringkasan Toko';
+
+  @override
+  String get switchStore => 'Ganti Toko';
+
+  @override
+  String get storeMetrics => 'Metrik Toko';
+
+  @override
+  String get currentlyViewing => 'Sedang Melihat';
+
+  @override
+  String get createNewProduct => 'Buat produk baru';
+
+  @override
+  String get addEmployee => 'Tambah Karyawan';
+
+  @override
+  String get createNewEmployee => 'Buat karyawan baru';
+
+  @override
   String welcomeBackUser(String name) {
     return 'Selamat datang kembali, $name!';
   }
@@ -642,9 +925,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get todaySales => 'Penjualan Hari Ini';
-
-  @override
-  String get totalRevenue => 'Total pendapatan';
 
   @override
   String get averageTransaction => 'Rata-rata transaksi';
@@ -704,9 +984,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get activeUsers => 'Pengguna Aktif';
-
-  @override
-  String get totalStores => 'Total Toko';
 
   @override
   String get quickNavigation => 'Navigasi Cepat';
@@ -770,9 +1047,6 @@ class AppLocalizationsId extends AppLocalizations {
       'Gunakan tombol di bawah untuk memeriksa status produk dengan cepat:';
 
   @override
-  String get storeInformation => 'Informasi Toko';
-
-  @override
   String get inventoryOverview => 'Ringkasan Inventori';
 
   @override
@@ -796,9 +1070,6 @@ class AppLocalizationsId extends AppLocalizations {
   String statusProductsComingSoon(String status) {
     return 'Fitur produk $status segera hadir!';
   }
-
-  @override
-  String get recentActivity => 'Aktivitas Terkini';
 
   @override
   String get recentTransactions => 'Transaksi Terkini';
@@ -852,15 +1123,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get reports => 'Laporan';
-
-  @override
-  String get businessAnalytics => 'Analitik bisnis';
-
-  @override
-  String get active => 'Aktif';
-
-  @override
-  String get inactive => 'Tidak Aktif';
 
   @override
   String get unknownRole => 'Peran Tidak Dikenal';

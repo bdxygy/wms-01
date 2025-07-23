@@ -97,7 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                     end: Alignment.bottomCenter,
                     colors: [
                       Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                      Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
                     ],
                   ),
                 ),
@@ -157,13 +157,13 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).colorScheme.primaryContainer,
-            Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+            Theme.of(context).colorScheme.primaryContainer.withValues(alpha:0.7),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha:0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -181,7 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                   gradient: LinearGradient(
                     colors: [
                       Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                      Theme.of(context).colorScheme.primary.withValues(alpha:0.7),
                     ],
                   ),
                 ),
@@ -225,10 +225,10 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _getRoleColor(role).withOpacity(0.2),
+                        color: _getRoleColor(role).withValues(alpha:0.2),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: _getRoleColor(role).withOpacity(0.4),
+                          color: _getRoleColor(role).withValues(alpha:0.4),
                           width: 1,
                         ),
                       ),
@@ -263,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
               // Edit profile button
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                  color: Theme.of(context).colorScheme.surface.withValues(alpha:0.9),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: IconButton(
@@ -294,12 +294,12 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
           gradient: LinearGradient(
             colors: [
               Theme.of(context).colorScheme.secondaryContainer,
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.7),
+              Theme.of(context).colorScheme.secondaryContainer.withValues(alpha:0.7),
             ],
           ),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha:0.2),
           ),
         ),
         child: Row(
@@ -307,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -346,7 +346,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                 gradient: LinearGradient(
                   colors: [
                     Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                    Theme.of(context).colorScheme.primary.withValues(alpha:0.8),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
@@ -475,12 +475,12 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
         gradient: LinearGradient(
           colors: [
             Theme.of(context).colorScheme.error,
-            Theme.of(context).colorScheme.error.withOpacity(0.8),
+            Theme.of(context).colorScheme.error.withValues(alpha:0.8),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.error.withValues(alpha:0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -522,11 +522,11 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha:0.1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha:0.05),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -588,7 +588,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -648,7 +648,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            Theme.of(context).colorScheme.outline.withValues(alpha:0.2),
             Colors.transparent,
           ],
         ),
@@ -670,7 +670,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.1),
+                  color: Colors.amber.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -897,7 +897,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.2),
+                color: Colors.amber.withValues(alpha:0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -923,7 +923,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                 margin: const EdgeInsets.only(bottom: 8),
                 child: Material(
                   color: isSelected 
-                    ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+                    ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha:0.3)
                     : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
