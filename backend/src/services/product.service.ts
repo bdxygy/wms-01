@@ -1,19 +1,18 @@
 import { randomUUID } from "crypto";
-import { customAlphabet } from "nanoid";
+import { and, count, eq, gte, isNull, like, lte } from "drizzle-orm";
+import { HTTPException } from "hono/http-exception";
 import { db } from "../config/database";
-import { products } from "../models/products";
-import { stores } from "../models/stores";
 import { categories } from "../models/categories";
 import { productImeis } from "../models/product_imeis";
-import { eq, and, like, isNull, count, gte, lte } from "drizzle-orm";
-import { HTTPException } from "hono/http-exception";
+import { products } from "../models/products";
+import { stores } from "../models/stores";
+import type { User } from "../models/users";
 import type {
   CreateProductRequest,
+  ListProductsQuery,
   UpdateProductRequest,
   UpdateProductWithImeisRequest,
-  ListProductsQuery,
 } from "../schemas/product.schemas";
-import type { User } from "../models/users";
 import { generateBarcode } from "../utils/barcode";
 
 export class ProductService {
@@ -88,6 +87,8 @@ export class ProductService {
       });
     }
 
+    console.log({ data });
+
     // Create product
     const productId = randomUUID();
     const product = await db
@@ -95,6 +96,7 @@ export class ProductService {
       .values({
         id: productId,
         name: data.name,
+        description: data.description || null,
         storeId: data.storeId,
         categoryId: data.categoryId || null,
         sku: data.sku,
@@ -116,6 +118,7 @@ export class ProductService {
     return {
       id: product[0].id,
       name: product[0].name,
+      description: product[0].description,
       storeId: product[0].storeId,
       categoryId: product[0].categoryId,
       sku: product[0].sku,
@@ -135,6 +138,7 @@ export class ProductService {
       .select({
         id: products.id,
         name: products.name,
+        description: products.description,
         storeId: products.storeId,
         categoryId: products.categoryId,
         sku: products.sku,
@@ -157,6 +161,7 @@ export class ProductService {
     return {
       id: product[0].id,
       name: product[0].name,
+      description: product[0].description,
       storeId: product[0].storeId,
       categoryId: product[0].categoryId,
       sku: product[0].sku,
@@ -176,6 +181,7 @@ export class ProductService {
       .select({
         id: products.id,
         name: products.name,
+        description: products.description,
         storeId: products.storeId,
         categoryId: products.categoryId,
         sku: products.sku,
@@ -212,6 +218,7 @@ export class ProductService {
     return {
       id: product[0].id,
       name: product[0].name,
+      description: product[0].description,
       storeId: product[0].storeId,
       categoryId: product[0].categoryId,
       sku: product[0].sku,
@@ -287,6 +294,7 @@ export class ProductService {
       .select({
         id: products.id,
         name: products.name,
+        description: products.description,
         storeId: products.storeId,
         categoryId: products.categoryId,
         sku: products.sku,
@@ -410,6 +418,8 @@ export class ProductService {
     };
 
     if (data.name) updateData.name = data.name;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
     if (data.sku) updateData.sku = data.sku;
     if (data.isImei !== undefined) updateData.isImei = data.isImei;
@@ -432,6 +442,7 @@ export class ProductService {
     return {
       id: updatedProduct[0].id,
       name: updatedProduct[0].name,
+      description: updatedProduct[0].description,
       storeId: updatedProduct[0].storeId,
       categoryId: updatedProduct[0].categoryId,
       sku: updatedProduct[0].sku,
@@ -452,6 +463,7 @@ export class ProductService {
       .select({
         id: products.id,
         name: products.name,
+        description: products.description,
         storeId: products.storeId,
         categoryId: products.categoryId,
         sku: products.sku,
@@ -499,6 +511,7 @@ export class ProductService {
     return {
       id: product.id,
       name: product.name,
+      description: product.description,
       storeId: product.storeId,
       categoryId: product.categoryId,
       sku: product.sku,
@@ -674,6 +687,7 @@ export class ProductService {
     const response = {
       id: result.product.id,
       name: result.product.name,
+      description: result.product.description,
       storeId: result.product.storeId,
       categoryId: result.product.categoryId,
       sku: result.product.sku,

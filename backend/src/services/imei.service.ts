@@ -328,6 +328,7 @@ export class ImeiService {
         createdBy: createdBy.id,
         storeId: data.storeId,
         name: data.name,
+        description: data.description || null,
         categoryId: data.categoryId || null,
         sku: data.sku,
         isImei: true, // Always true for this endpoint
@@ -364,6 +365,7 @@ export class ImeiService {
       createdBy: product[0].createdBy,
       storeId: product[0].storeId,
       name: product[0].name,
+      description: product[0].description,
       categoryId: product[0].categoryId,
       sku: product[0].sku,
       isImei: product[0].isImei,

@@ -56,6 +56,7 @@ export const listTransactionsQuerySchema = z.object({
   endDate: z.coerce.date().optional(),
   minAmount: z.coerce.number().min(0).optional(),
   maxAmount: z.coerce.number().min(0).optional(),
+  customerName: z.string().min(1).optional(),
 });
 
 // Transaction ID parameter schema
@@ -69,6 +70,7 @@ export const transactionItemResponseSchema = z.object({
   productId: z.string(),
   name: z.string(),
   price: z.number(),
+  purchasePrice: z.number(),
   quantity: z.number(),
   amount: z.number(),
   createdAt: z.date(),

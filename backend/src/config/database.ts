@@ -1,25 +1,20 @@
-import { createClient } from "@libsql/client";
 import { drizzle as drizzleBetterSqlite } from "drizzle-orm/better-sqlite3";
-import { drizzle as drizzleLibsql } from "drizzle-orm/libsql";
+
 import * as schema from "../models";
 import { env } from "./env";
+import Database from "better-sqlite3";
 
 // Database type based on environment
-export type DatabaseType = "better-sqlite3" | "libsql";
+export type DatabaseType = "sqlite";
 
-let dbInstance:
-  | ReturnType<typeof drizzleBetterSqlite>
-  | ReturnType<typeof drizzleLibsql>;
+let dbInstance: ReturnType<typeof drizzleBetterSqlite>;
+
 let dbType: DatabaseType;
 
 function createDatabase() {
-  const client = createClient({
-    url: env.DATABASE_URL,
-    authToken: env.DATABASE_AUTH_TOKEN,
-  });
-
-  dbInstance = drizzleLibsql(client, { schema });
-  dbType = "libsql";
+  const sqlite = new Database(env.DATABASE_URL);
+  dbInstance = drizzleBetterSqlite(sqlite, { schema });
+  dbType = "sqlite";
 
   return { db: dbInstance, type: dbType };
 }

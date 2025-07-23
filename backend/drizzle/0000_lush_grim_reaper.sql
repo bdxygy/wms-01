@@ -56,6 +56,7 @@ CREATE TABLE `products` (
 	`created_by` text NOT NULL,
 	`store_id` text NOT NULL,
 	`name` text NOT NULL,
+	`description` text,
 	`category_id` text,
 	`sku` text NOT NULL,
 	`is_imei` integer DEFAULT false,
@@ -71,6 +72,8 @@ CREATE TABLE `products` (
 	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `unique_sku_per_store` ON `products` (`sku`,`store_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `unique_barcode` ON `products` (`barcode`);--> statement-breakpoint
 CREATE TABLE `transaction_items` (
 	`id` text PRIMARY KEY NOT NULL,
 	`transaction_id` text NOT NULL,
@@ -96,7 +99,7 @@ CREATE TABLE `transactions` (
 	`to` text,
 	`customer_phone` text,
 	`amount` real,
-	`is_finished` integer DEFAULT false,
+	`is_finished` integer DEFAULT true,
 	`created_at` integer NOT NULL,
 	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,

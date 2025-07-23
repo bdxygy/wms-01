@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "693bbe11-e85b-4863-b03c-616deadf9929",
-  "prevId": "575d4fec-765f-47a2-83df-68dec8b27e5a",
+  "id": "415853b6-5e64-4433-8029-d96f895601d4",
+  "prevId": "693bbe11-e85b-4863-b03c-616deadf9929",
   "tables": {
     "categories": {
       "name": "categories",
@@ -597,6 +597,14 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "purchase_price": {
+          "name": "purchase_price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "quantity": {
           "name": "quantity",

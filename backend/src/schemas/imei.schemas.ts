@@ -60,6 +60,7 @@ export const imeiListResponseSchema = z.object({
 // Create product with IMEIs schema
 export const createProductWithImeisSchema = z.object({
   name: z.string().min(1, "Product name is required"),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
   categoryId: z.string().uuid().optional(),
   sku: z.string().min(1, "SKU is required"),
   storeId: z.string().uuid("Store ID is required"),

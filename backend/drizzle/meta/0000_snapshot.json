@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "62f024e0-5e7a-494d-aaec-6fc95ff05db4",
+  "id": "575d4fec-765f-47a2-83df-68dec8b27e5a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "categories": {
@@ -410,6 +410,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "category_id": {
           "name": "category_id",
           "type": "text",
@@ -483,7 +490,23 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unique_sku_per_store": {
+          "name": "unique_sku_per_store",
+          "columns": [
+            "sku",
+            "store_id"
+          ],
+          "isUnique": true
+        },
+        "unique_barcode": {
+          "name": "unique_barcode",
+          "columns": [
+            "barcode"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "products_created_by_users_id_fk": {
           "name": "products_created_by_users_id_fk",
@@ -708,7 +731,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": false
+          "default": true
         },
         "created_at": {
           "name": "created_at",

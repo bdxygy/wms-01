@@ -1,14 +1,20 @@
-import type { Config } from 'drizzle-kit';
-import dotenv from 'dotenv';
+import type { Config } from "drizzle-kit";
+import dotenv from "dotenv";
 
-dotenv.config();
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : process.env.NODE_ENV === "test"
+    ? ".env.test"
+    : ".env.development";
+
+dotenv.config({ path: envFile });
 
 export default {
-  schema: './src/models/*.ts',
-  out: './drizzle',
-  dialect: 'turso',
+  schema: "./src/models/*.ts",
+  out: "./drizzle",
+  dialect: "sqlite",
   dbCredentials: {
     url: process.env.DATABASE_URL!,
-    authToken: process.env.DATABASE_AUTH_TOKEN!,
   },
 } satisfies Config;

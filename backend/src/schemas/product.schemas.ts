@@ -3,6 +3,7 @@ import { z } from "zod";
 // Create product schema (without barcode - it's auto-generated)
 export const createProductSchema = z.object({
   name: z.string().min(1, "Product name is required").max(200, "Product name must be less than 200 characters"),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
   storeId: z.string().uuid("Invalid store ID format"),
   categoryId: z.string().uuid("Invalid category ID format").optional(),
   sku: z.string().min(1, "SKU is required").max(100, "SKU must be less than 100 characters"),
@@ -15,6 +16,7 @@ export const createProductSchema = z.object({
 // Update product schema (without barcode - it's auto-generated)
 export const updateProductSchema = z.object({
   name: z.string().min(1, "Product name is required").max(200, "Product name must be less than 200 characters").optional(),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional().nullable(),
   categoryId: z.string().uuid("Invalid category ID format").optional().nullable(),
   sku: z.string().min(1, "SKU is required").max(100, "SKU must be less than 100 characters").optional(),
   isImei: z.boolean().optional(),
@@ -58,6 +60,7 @@ export const barcodeParamSchema = z.object({
 export const productResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
+  description: z.string().nullable(),
   storeId: z.string(),
   categoryId: z.string().nullable(),
   sku: z.string(),
@@ -75,6 +78,7 @@ export const productResponseSchema = z.object({
 export const productWithRelationsSchema = z.object({
   id: z.string(),
   name: z.string(),
+  description: z.string().nullable(),
   storeId: z.string(),
   categoryId: z.string().nullable(),
   sku: z.string(),
@@ -116,6 +120,7 @@ export const productListResponseSchema = z.object({
 // Update product with IMEIs schema
 export const updateProductWithImeisSchema = z.object({
   name: z.string().min(1, "Product name is required").max(200, "Product name must be less than 200 characters").optional(),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional().nullable(),
   categoryId: z.string().uuid("Invalid category ID format").optional().nullable(),
   sku: z.string().min(1, "SKU is required").max(100, "SKU must be less than 100 characters").optional(),
   purchasePrice: z.number().positive("Purchase price must be positive").optional(),

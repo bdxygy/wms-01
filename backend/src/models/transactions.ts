@@ -31,6 +31,7 @@ export const transactionItems = sqliteTable('transaction_items', {
   productId: text('product_id').notNull().references(() => products.id),
   name: text('name').notNull(),
   price: real('price').notNull(),
+  purchasePrice: real('purchase_price').default(0).notNull(),
   quantity: integer('quantity').notNull(),
   amount: real('amount'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),

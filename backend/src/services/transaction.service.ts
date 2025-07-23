@@ -4,17 +4,24 @@ import { transactions, transactionItems } from "../models/transactions";
 import { stores } from "../models/stores";
 import { products } from "../models/products";
 import { users } from "../models/users";
-import { eq, and, or, isNull, count, gte, lte } from "drizzle-orm";
+import { eq, and, or, isNull, count, gte, lte, like } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 import { HTTPException } from "hono/http-exception";
-import type { CreateTransactionRequest, UpdateTransactionRequest, ListTransactionsQuery } from "../schemas/transaction.schemas";
+import type {
+  CreateTransactionRequest,
+  UpdateTransactionRequest,
+  ListTransactionsQuery,
+} from "../schemas/transaction.schemas";
 import type { User } from "../models/users";
 
 export class TransactionService {
-  static async createTransaction(data: CreateTransactionRequest, createdBy: User) {
+  static async createTransaction(
+    data: CreateTransactionRequest,
+    createdBy: User
+  ) {
     // Verify stores exist (authorization middleware has already checked role and access)
     const storeChecks = [];
-    
+
     if (data.fromStoreId) {
       const fromStore = await db
         .select()
@@ -67,28 +74,33 @@ export class TransactionService {
         .from(products)
         .innerJoin(stores, eq(products.storeId, stores.id))
         .where(
-          and(
-            eq(products.id, item.productId),
-            isNull(products.deletedAt)
-          )
+          and(eq(products.id, item.productId), isNull(products.deletedAt))
         );
 
       if (!product[0]) {
-        throw new HTTPException(404, { message: `Product ${item.productId} not found` });
+        throw new HTTPException(404, {
+          message: `Product ${item.productId} not found`,
+        });
       }
 
       // Product access checks have been handled by authorization middleware
 
       // Check if sufficient quantity is available
       if (product[0].quantity < item.quantity) {
-        throw new HTTPException(400, { message: `Insufficient quantity for product ${product[0].name}` });
+        throw new HTTPException(400, {
+          message: `Insufficient quantity for product ${product[0].name}`,
+        });
       }
 
       // For SALE transactions, validate product belongs to fromStore or toStore
       if (data.type === "SALE") {
-        const validStore = data.fromStoreId === product[0].storeId || data.toStoreId === product[0].storeId;
+        const validStore =
+          data.fromStoreId === product[0].storeId ||
+          data.toStoreId === product[0].storeId;
         if (!validStore) {
-          throw new HTTPException(400, { message: `Product ${product[0].name} does not belong to the specified store` });
+          throw new HTTPException(400, {
+            message: `Product ${product[0].name} does not belong to the specified store`,
+          });
         }
       }
 
@@ -98,50 +110,59 @@ export class TransactionService {
 
     // Create transaction
     const transactionId = randomUUID();
-    const transaction = await db.insert(transactions).values({
-      id: transactionId,
-      type: data.type,
-      createdBy: createdBy.id,
-      approvedBy: null,
-      fromStoreId: data.fromStoreId || null,
-      toStoreId: data.toStoreId || null,
-      photoProofUrl: data.photoProofUrl || null,
-      transferProofUrl: data.transferProofUrl || null,
-      to: data.to || null,
-      customerPhone: data.customerPhone || null,
-      amount: totalAmount,
-      isFinished: false,
-      createdAt: new Date(),
-    }).returning();
+    const transaction = await db
+      .insert(transactions)
+      .values({
+        id: transactionId,
+        type: data.type,
+        createdBy: createdBy.id,
+        approvedBy: null,
+        fromStoreId: data.fromStoreId || null,
+        toStoreId: data.toStoreId || null,
+        photoProofUrl: data.photoProofUrl || null,
+        transferProofUrl: data.transferProofUrl || null,
+        to: data.to || null,
+        customerPhone: data.customerPhone || null,
+        amount: totalAmount,
+        isFinished: false,
+        createdAt: new Date(),
+      })
+      .returning();
 
     if (!transaction[0]) {
       throw new HTTPException(500, { message: "Failed to create transaction" });
     }
 
-    // Create transaction items with actual product names
+    // Create transaction items with actual product names and purchase prices
     const itemsToInsert = data.items.map((item, index) => ({
       id: randomUUID(),
       transactionId: transactionId,
       productId: item.productId,
       name: productChecks[index].name, // Use actual product name from database
       price: item.price,
+      purchasePrice: productChecks[index].purchasePrice || 0, // Auto-populate from product
       quantity: item.quantity,
       amount: item.amount,
       createdAt: new Date(),
     }));
 
-    const insertedItems = await db.insert(transactionItems).values(itemsToInsert).returning();
+    console.log({ itemsToInsert });
+
+    const insertedItems = await db
+      .insert(transactionItems)
+      .values(itemsToInsert)
+      .returning();
 
     // For SALE transactions, reduce product quantities
     if (data.type === "SALE") {
       for (let i = 0; i < data.items.length; i++) {
         const item = data.items[i];
         const product = productChecks[i];
-        
+
         await db
           .update(products)
-          .set({ 
-            quantity: product.quantity - item.quantity 
+          .set({
+            quantity: product.quantity - item.quantity,
           })
           .where(eq(products.id, item.productId));
       }
@@ -161,11 +182,12 @@ export class TransactionService {
       amount: transaction[0].amount,
       isFinished: transaction[0].isFinished,
       createdAt: transaction[0].createdAt,
-      items: insertedItems.map(item => ({
+      items: insertedItems.map((item) => ({
         id: item.id,
         productId: item.productId,
         name: item.name,
         price: item.price,
+        purchasePrice: item.purchasePrice,
         quantity: item.quantity,
         amount: item.amount,
         createdAt: item.createdAt,
@@ -206,7 +228,10 @@ export class TransactionService {
       .leftJoin(fromStores, eq(transactions.fromStoreId, fromStores.id))
       .leftJoin(toStores, eq(transactions.toStoreId, toStores.id))
       .leftJoin(createdByUsers, eq(transactions.createdBy, createdByUsers.id))
-      .leftJoin(approvedByUsers, eq(transactions.approvedBy, approvedByUsers.id))
+      .leftJoin(
+        approvedByUsers,
+        eq(transactions.approvedBy, approvedByUsers.id)
+      )
       .where(eq(transactions.id, id));
 
     if (!transaction[0]) {
@@ -240,11 +265,12 @@ export class TransactionService {
       toStoreName: transaction[0].toStoreName,
       createdByName: transaction[0].createdByName,
       approvedByName: transaction[0].approvedByName,
-      items: items.map(item => ({
+      items: items.map((item) => ({
         id: item.id,
         productId: item.productId,
         name: item.name,
         price: item.price,
+        purchasePrice: item.purchasePrice,
         quantity: item.quantity,
         amount: item.amount,
         createdAt: item.createdAt,
@@ -252,7 +278,10 @@ export class TransactionService {
     };
   }
 
-  static async listTransactions(query: ListTransactionsQuery, requestingUser: User) {
+  static async listTransactions(
+    query: ListTransactionsQuery,
+    requestingUser: User
+  ) {
     // Build where conditions
     const conditions = [];
 
@@ -264,12 +293,12 @@ export class TransactionService {
         .from(stores)
         .where(eq(stores.ownerId, requestingUser.id));
 
-      const storeIds = userStores.map(store => store.id);
+      const storeIds = userStores.map((store) => store.id);
       if (storeIds.length > 0) {
         conditions.push(
           or(
-            ...storeIds.map(storeId => eq(transactions.fromStoreId, storeId)),
-            ...storeIds.map(storeId => eq(transactions.toStoreId, storeId))
+            ...storeIds.map((storeId) => eq(transactions.fromStoreId, storeId)),
+            ...storeIds.map((storeId) => eq(transactions.toStoreId, storeId))
           )
         );
       } else {
@@ -293,12 +322,12 @@ export class TransactionService {
         .from(stores)
         .where(eq(stores.ownerId, requestingUser.ownerId!));
 
-      const storeIds = userStores.map(store => store.id);
+      const storeIds = userStores.map((store) => store.id);
       if (storeIds.length > 0) {
         conditions.push(
           or(
-            ...storeIds.map(storeId => eq(transactions.fromStoreId, storeId)),
-            ...storeIds.map(storeId => eq(transactions.toStoreId, storeId))
+            ...storeIds.map((storeId) => eq(transactions.fromStoreId, storeId)),
+            ...storeIds.map((storeId) => eq(transactions.toStoreId, storeId))
           )
         );
       } else {
@@ -355,6 +384,11 @@ export class TransactionService {
       conditions.push(lte(transactions.amount, query.maxAmount));
     }
 
+    // Customer name filter (search in 'to' field)
+    if (query.customerName) {
+      conditions.push(like(transactions.to, `%${query.customerName}%`));
+    }
+
     const whereClause = and(...conditions);
 
     // Get total count
@@ -398,11 +432,12 @@ export class TransactionService {
           amount: transaction.amount,
           isFinished: transaction.isFinished,
           createdAt: transaction.createdAt,
-          items: items.map(item => ({
+          items: items.map((item) => ({
             id: item.id,
             productId: item.productId,
             name: item.name,
             price: item.price,
+            purchasePrice: item.purchasePrice,
             quantity: item.quantity,
             amount: item.amount,
             createdAt: item.createdAt,
@@ -412,7 +447,7 @@ export class TransactionService {
     );
 
     return {
-      transactions: transactionWithItems,
+      transactions: transactionWithItems.reverse(),
       pagination: {
         page: query.page,
         limit: query.limit,
@@ -424,8 +459,11 @@ export class TransactionService {
     };
   }
 
-  static async updateTransaction(id: string, data: UpdateTransactionRequest, requestingUser: User) {
-
+  static async updateTransaction(
+    id: string,
+    data: UpdateTransactionRequest,
+    requestingUser: User
+  ) {
     // Find transaction to update
     const existingTransaction = await db
       .select()
@@ -446,6 +484,7 @@ export class TransactionService {
         name: string;
         storeId: string;
         quantity: number;
+        purchasePrice: number | null;
         storeOwnerId: string;
       }> = [];
 
@@ -456,29 +495,33 @@ export class TransactionService {
             name: products.name,
             storeId: products.storeId,
             quantity: products.quantity,
+            purchasePrice: products.purchasePrice,
             storeOwnerId: stores.ownerId,
           })
           .from(products)
           .innerJoin(stores, eq(products.storeId, stores.id))
           .where(
-            and(
-              eq(products.id, item.productId),
-              isNull(products.deletedAt)
-            )
+            and(eq(products.id, item.productId), isNull(products.deletedAt))
           );
 
         if (!product[0]) {
-          throw new HTTPException(404, { message: `Product ${item.productId} not found` });
+          throw new HTTPException(404, {
+            message: `Product ${item.productId} not found`,
+          });
         }
 
         // Check if user can access this product
         if (requestingUser.role === "OWNER") {
           if (product[0].storeOwnerId !== requestingUser.id) {
-            throw new HTTPException(403, { message: "Access denied to product" });
+            throw new HTTPException(403, {
+              message: "Access denied to product",
+            });
           }
         } else {
           if (product[0].storeOwnerId !== requestingUser.ownerId) {
-            throw new HTTPException(403, { message: "Access denied to product" });
+            throw new HTTPException(403, {
+              message: "Access denied to product",
+            });
           }
         }
 
@@ -491,13 +534,14 @@ export class TransactionService {
         .delete(transactionItems)
         .where(eq(transactionItems.transactionId, id));
 
-      // Insert new items with actual product names
+      // Insert new items with actual product names and purchase prices
       const itemsToInsert = data.items.map((item, index) => ({
         id: randomUUID(),
         transactionId: id,
         productId: item.productId,
         name: productChecks[index].name, // Use actual product name from database
         price: item.price,
+        purchasePrice: productChecks[index].purchasePrice || 0, // Auto-populate from product
         quantity: item.quantity,
         amount: item.amount,
         createdAt: new Date(),
@@ -509,15 +553,21 @@ export class TransactionService {
     // Prepare update data
     const updateData: any = {};
 
-    if (data.photoProofUrl !== undefined) updateData.photoProofUrl = data.photoProofUrl;
-    if (data.transferProofUrl !== undefined) updateData.transferProofUrl = data.transferProofUrl;
+    if (data.photoProofUrl !== undefined)
+      updateData.photoProofUrl = data.photoProofUrl;
+    if (data.transferProofUrl !== undefined)
+      updateData.transferProofUrl = data.transferProofUrl;
     if (data.to !== undefined) updateData.to = data.to;
-    if (data.customerPhone !== undefined) updateData.customerPhone = data.customerPhone;
+    if (data.customerPhone !== undefined)
+      updateData.customerPhone = data.customerPhone;
     if (data.isFinished !== undefined) updateData.isFinished = data.isFinished;
 
     // Update amount if items were updated
     if (data.items) {
-      const totalAmount = data.items.reduce((sum, item) => sum + item.amount, 0);
+      const totalAmount = data.items.reduce(
+        (sum, item) => sum + item.amount,
+        0
+      );
       updateData.amount = totalAmount;
     }
 
@@ -552,11 +602,12 @@ export class TransactionService {
       amount: updatedTransaction[0].amount,
       isFinished: updatedTransaction[0].isFinished,
       createdAt: updatedTransaction[0].createdAt,
-      items: items.map(item => ({
+      items: items.map((item) => ({
         id: item.id,
         productId: item.productId,
         name: item.name,
         price: item.price,
+        purchasePrice: item.purchasePrice,
         quantity: item.quantity,
         amount: item.amount,
         createdAt: item.createdAt,
