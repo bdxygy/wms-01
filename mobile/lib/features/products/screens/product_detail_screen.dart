@@ -11,6 +11,7 @@ import '../../../core/services/product_service.dart';
 import '../../../core/services/store_service.dart';
 import '../../../core/services/category_service.dart';
 import '../../../core/services/print_launcher.dart';
+import '../../../core/widgets/wms_app_bar.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/widgets/loading.dart';
@@ -373,126 +374,41 @@ Quantity: ${_product!.quantity}''';
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: _buildModernAppBar(context, canEdit, user),
-      body: _buildBody(),
+      appBar: _buildWMSAppBar(context, canEdit, user),
+      body: _buildBody(user),
       floatingActionButton:
           _product != null ? _buildFloatingActionButton(canEdit) : null,
     );
   }
 
-  PreferredSizeWidget _buildModernAppBar(
+  PreferredSizeWidget _buildWMSAppBar(
       BuildContext context, bool canEdit, User? user) {
-    return AppBar(
-      elevation: 0,
-      iconTheme: Theme.of(context).iconTheme,
-      backgroundColor: Colors.transparent,
-      foregroundColor: Theme.of(context).colorScheme.onSurface,
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+    // Guard clause: Check if user can access print functionality
+    final canPrint = user?.role != UserRole.cashier && _product != null;
+    
+    return WMSAppBar(
+      icon: Icons.inventory_2,
+      title: _product?.name ?? 'Product Details',
+      badge: _product?.isImei == true 
+        ? WMSAppBarBadge.imei(Theme.of(context))
+        : null,
+      shareConfig: _product != null 
+        ? WMSAppBarShare(onShare: _shareProduct)
+        : null,
+      printConfig: canPrint 
+        ? WMSAppBarPrint.barcode(
+            onPrint: _printBarcode,
+            onManagePrinter: _managePrinter,
+          )
+        : null,
+      menuItems: user?.role == UserRole.owner && _product != null 
+        ? [
+            WMSAppBarMenuItem.delete(
+              onTap: _deleteProduct,
+              title: 'Delete Product',
             ),
-            child: Icon(
-              Icons.inventory_2,
-              color: Theme.of(context).primaryColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              _product?.name ?? 'Product Details',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-          ),
-          if (_product?.isImei == true) ...[
-            Container(
-              margin: const EdgeInsets.only(left: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'IMEI',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.orange[700],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
-              ),
-            ),
-          ],
-        ],
-      ),
-      actions: [
-        if (_product != null) ...[
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: _shareProduct,
-            tooltip: 'Share Product',
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              switch (value) {
-                case 'print':
-                  _printBarcode();
-                  break;
-                case 'printer':
-                  _managePrinter();
-                  break;
-                case 'delete':
-                  _deleteProduct();
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'print',
-                child: Row(
-                  children: [
-                    Icon(Icons.print_outlined),
-                    SizedBox(width: 12),
-                    Text('Print Barcode'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'printer',
-                child: Row(
-                  children: [
-                    Icon(Icons.bluetooth_outlined),
-                    SizedBox(width: 12),
-                    Text('Printer Settings'),
-                  ],
-                ),
-              ),
-              if (user?.role == UserRole.owner) ...[
-                const PopupMenuDivider(),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: Colors.red),
-                      SizedBox(width: 12),
-                      Text('Delete Product',
-                          style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ],
+          ]
+        : null,
     );
   }
 
@@ -507,7 +423,7 @@ Quantity: ${_product!.quantity}''';
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(User? user) {
     // Guard clause: Show loading state
     if (_isLoading) {
       return const Center(child: WMSLoadingIndicator());
@@ -529,7 +445,7 @@ Quantity: ${_product!.quantity}''';
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Hero product card
-          _buildHeroCard(),
+          _buildHeroCard(user),
           const SizedBox(height: 16),
 
           // Pricing and inventory section
@@ -649,7 +565,7 @@ Quantity: ${_product!.quantity}''';
     );
   }
 
-  Widget _buildHeroCard() {
+  Widget _buildHeroCard(User? user) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -697,7 +613,8 @@ Quantity: ${_product!.quantity}''';
                   ],
                 ),
               ),
-              _buildPrintButton(),
+              // Only show print button for non-cashier roles
+              if (user?.role != UserRole.cashier) _buildPrintButton(),
             ],
           ),
 

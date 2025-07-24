@@ -646,5 +646,71 @@
   "logo_upload_error_save": "Failed to save logo. Please check storage permissions and try again.",
   "logo_upload_success": "Logo uploaded successfully!",
   "camera_permission_required": "Camera permission is required to take photos",
-  "gallery_permission_required": "Gallery permission is required to select photos"
+  "gallery_permission_required": "Gallery permission is required to select photos",
+
+  "users_title_list": "Users",
+  "users_button_create": "Create User",
+  "users_search_hint": "Search users by name or username...",
+  "users_empty_title": "No Users Found",
+  "users_empty_subtitle": "Create your first user to get started",
+  "users_role_owner": "Owner",
+  "users_role_admin": "Admin", 
+  "users_role_staff": "Staff",
+  "users_role_cashier": "Cashier",
+  "users_status_active": "Active",
+  "users_status_inactive": "Inactive",
+  "users_status_deleted": "Deleted",
+  "users_created_at": "Created {date}",
+  "@users_created_at": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "users_filter_title": "Filter Users",
+  "users_filter_role": "Filter by Role",
+  "users_filter_status": "Filter by Status",
+  "users_filter_all_roles": "All Roles",
+  "users_filter_all_statuses": "All Statuses",
+  "users_filter_active_only": "Active Only",
+  "users_filter_inactive_only": "Inactive Only",
+  "users_detail_title": "User Details",
+  "users_form_title_create": "Create User",
+  "users_form_title_edit": "Edit User",
+  "users_form_name": "Full Name",
+  "users_form_username": "Username",
+  "users_form_password": "Password",
+  "users_form_role": "Role",
+  "users_form_store": "Store Assignment",
+  "users_form_status": "Status",
+  "users_form_name_hint": "Enter full name",
+  "users_form_username_hint": "Enter username",
+  "users_form_password_hint": "Enter password",
+  "users_form_select_role": "Select role",
+  "users_form_select_store": "Select store (optional)",
+  "users_validation_name_required": "Full name is required",
+  "users_validation_username_required": "Username is required",
+  "users_validation_password_required": "Password is required",
+  "users_validation_role_required": "Role is required",
+  "users_created_successfully": "User created successfully",
+  "users_updated_successfully": "User updated successfully",
+  "users_deleted_successfully": "User deleted successfully",
+  "users_failed_to_create": "Failed to create user",
+  "users_failed_to_update": "Failed to update user",
+  "users_failed_to_delete": "Failed to delete user",
+  "users_failed_to_load": "Failed to load user",
+  "users_failed_to_load_list": "Failed to load users",
+  "users_delete_confirm_title": "Delete User",
+  "users_delete_confirm_message": "Are you sure you want to delete user '{name}'? This action cannot be undone.",
+  "@users_delete_confirm_message": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "common_button_filter": "Filter",
+  "common_button_clear_filters": "Clear Filters",
+  "common_button_apply_filters": "Apply Filters"
 }

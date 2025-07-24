@@ -29,7 +29,7 @@ class AuthProvider extends ChangeNotifier {
   User? get currentUser => _user;
   String? get selectedStoreId => _selectedStoreId;
   String? get error => _error;
-  bool get isAuthenticated => _state == AuthState.authenticated;
+  bool get isAuthenticated => _state == AuthState.authenticated || _state == AuthState.needsStoreSelection;
   bool get isLoading => _state == AuthState.loading;
   bool get needsStoreSelection => _state == AuthState.needsStoreSelection;
 

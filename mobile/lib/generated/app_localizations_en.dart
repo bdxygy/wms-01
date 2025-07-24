@@ -1537,4 +1537,161 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gallery_permission_required =>
       'Gallery permission is required to select photos';
+
+  @override
+  String get users_title_list => 'Users';
+
+  @override
+  String get users_button_create => 'Create User';
+
+  @override
+  String get users_search_hint => 'Search users by name or username...';
+
+  @override
+  String get users_empty_title => 'No Users Found';
+
+  @override
+  String get users_empty_subtitle => 'Create your first user to get started';
+
+  @override
+  String get users_role_owner => 'Owner';
+
+  @override
+  String get users_role_admin => 'Admin';
+
+  @override
+  String get users_role_staff => 'Staff';
+
+  @override
+  String get users_role_cashier => 'Cashier';
+
+  @override
+  String get users_status_active => 'Active';
+
+  @override
+  String get users_status_inactive => 'Inactive';
+
+  @override
+  String get users_status_deleted => 'Deleted';
+
+  @override
+  String users_created_at(String date) {
+    return 'Created $date';
+  }
+
+  @override
+  String get users_filter_title => 'Filter Users';
+
+  @override
+  String get users_filter_role => 'Filter by Role';
+
+  @override
+  String get users_filter_status => 'Filter by Status';
+
+  @override
+  String get users_filter_all_roles => 'All Roles';
+
+  @override
+  String get users_filter_all_statuses => 'All Statuses';
+
+  @override
+  String get users_filter_active_only => 'Active Only';
+
+  @override
+  String get users_filter_inactive_only => 'Inactive Only';
+
+  @override
+  String get users_detail_title => 'User Details';
+
+  @override
+  String get users_form_title_create => 'Create User';
+
+  @override
+  String get users_form_title_edit => 'Edit User';
+
+  @override
+  String get users_form_name => 'Full Name';
+
+  @override
+  String get users_form_username => 'Username';
+
+  @override
+  String get users_form_password => 'Password';
+
+  @override
+  String get users_form_role => 'Role';
+
+  @override
+  String get users_form_store => 'Store Assignment';
+
+  @override
+  String get users_form_status => 'Status';
+
+  @override
+  String get users_form_name_hint => 'Enter full name';
+
+  @override
+  String get users_form_username_hint => 'Enter username';
+
+  @override
+  String get users_form_password_hint => 'Enter password';
+
+  @override
+  String get users_form_select_role => 'Select role';
+
+  @override
+  String get users_form_select_store => 'Select store (optional)';
+
+  @override
+  String get users_validation_name_required => 'Full name is required';
+
+  @override
+  String get users_validation_username_required => 'Username is required';
+
+  @override
+  String get users_validation_password_required => 'Password is required';
+
+  @override
+  String get users_validation_role_required => 'Role is required';
+
+  @override
+  String get users_created_successfully => 'User created successfully';
+
+  @override
+  String get users_updated_successfully => 'User updated successfully';
+
+  @override
+  String get users_deleted_successfully => 'User deleted successfully';
+
+  @override
+  String get users_failed_to_create => 'Failed to create user';
+
+  @override
+  String get users_failed_to_update => 'Failed to update user';
+
+  @override
+  String get users_failed_to_delete => 'Failed to delete user';
+
+  @override
+  String get users_failed_to_load => 'Failed to load user';
+
+  @override
+  String get users_failed_to_load_list => 'Failed to load users';
+
+  @override
+  String get users_delete_confirm_title => 'Delete User';
+
+  @override
+  String users_delete_confirm_message(String name) {
+    return 'Are you sure you want to delete user \'$name\'? This action cannot be undone.';
+  }
+
+  @override
+  String get common_button_filter => 'Filter';
+
+  @override
+  String get common_button_clear_filters => 'Clear Filters';
+
+  @override
+  String get common_button_apply_filters => 'Apply Filters';
 }

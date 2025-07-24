@@ -3,13 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:image/image.dart' as img;
 
 import '../models/product.dart';
 import '../models/user.dart';
 import '../models/store.dart';
 import '../widgets/bluetooth_setup_dialog.dart';
-import 'logo_service.dart';
 
 /// Global service for thermal printer operations via Bluetooth
 class PrintLauncher {
@@ -17,7 +15,6 @@ class PrintLauncher {
   factory PrintLauncher() => _instance;
   PrintLauncher._internal();
 
-  final LogoService _logoService = LogoService();
 
   /// Check if all required Bluetooth permissions are granted
   Future<bool> get hasBluetoothPermission async {
@@ -393,20 +390,6 @@ class PrintLauncher {
 
     bytes += generator.reset();
 
-    // Logo header (if available)
-    try {
-      final logoBytes = await _logoService.getLogoBytes();
-      if (logoBytes != null) {
-        final image = img.decodeImage(logoBytes);
-        if (image != null) {
-          bytes += generator.image(image);
-          bytes += generator.feed(1);
-        }
-      }
-    } catch (e) {
-      debugPrint('Error adding logo to barcode ticket: $e');
-      // Continue without logo
-    }
 
     // Store name (if available)
     if (store != null) {
@@ -494,20 +477,6 @@ class PrintLauncher {
 
     bytes += generator.reset();
 
-    // Logo header (if available)
-    try {
-      final logoBytes = await _logoService.getLogoBytes();
-      if (logoBytes != null) {
-        final image = img.decodeImage(logoBytes);
-        if (image != null) {
-          bytes += generator.image(image);
-          bytes += generator.feed(1);
-        }
-      }
-    } catch (e) {
-      debugPrint('Error adding logo to receipt: $e');
-      // Continue without logo
-    }
 
     // Store header
     if (store != null) {
@@ -640,20 +609,6 @@ class PrintLauncher {
 
     bytes += generator.reset();
 
-    // Logo header (if available)
-    try {
-      final logoBytes = await _logoService.getLogoBytes();
-      if (logoBytes != null) {
-        final image = img.decodeImage(logoBytes);
-        if (image != null) {
-          bytes += generator.image(image);
-          bytes += generator.feed(1);
-        }
-      }
-    } catch (e) {
-      debugPrint('Error adding logo to payment note: $e');
-      // Continue without logo
-    }
 
     // Store header
     if (store != null) {
@@ -743,20 +698,6 @@ class PrintLauncher {
 
     bytes += generator.reset();
 
-    // Logo header (if available)
-    try {
-      final logoBytes = await _logoService.getLogoBytes();
-      if (logoBytes != null) {
-        final image = img.decodeImage(logoBytes);
-        if (image != null) {
-          bytes += generator.image(image);
-          bytes += generator.feed(1);
-        }
-      }
-    } catch (e) {
-      debugPrint('Error adding logo to test ticket: $e');
-      // Continue without logo
-    }
 
     // Header
     bytes += generator.text(

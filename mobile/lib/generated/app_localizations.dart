@@ -2977,6 +2977,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gallery permission is required to select photos'**
   String get gallery_permission_required;
+
+  /// No description provided for @users_title_list.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users_title_list;
+
+  /// No description provided for @users_button_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create User'**
+  String get users_button_create;
+
+  /// No description provided for @users_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search users by name or username...'**
+  String get users_search_hint;
+
+  /// No description provided for @users_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No Users Found'**
+  String get users_empty_title;
+
+  /// No description provided for @users_empty_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first user to get started'**
+  String get users_empty_subtitle;
+
+  /// No description provided for @users_role_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get users_role_owner;
+
+  /// No description provided for @users_role_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get users_role_admin;
+
+  /// No description provided for @users_role_staff.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get users_role_staff;
+
+  /// No description provided for @users_role_cashier.
+  ///
+  /// In en, this message translates to:
+  /// **'Cashier'**
+  String get users_role_cashier;
+
+  /// No description provided for @users_status_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get users_status_active;
+
+  /// No description provided for @users_status_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get users_status_inactive;
+
+  /// No description provided for @users_status_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted'**
+  String get users_status_deleted;
+
+  /// No description provided for @users_created_at.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {date}'**
+  String users_created_at(String date);
+
+  /// No description provided for @users_filter_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Users'**
+  String get users_filter_title;
+
+  /// No description provided for @users_filter_role.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Role'**
+  String get users_filter_role;
+
+  /// No description provided for @users_filter_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Status'**
+  String get users_filter_status;
+
+  /// No description provided for @users_filter_all_roles.
+  ///
+  /// In en, this message translates to:
+  /// **'All Roles'**
+  String get users_filter_all_roles;
+
+  /// No description provided for @users_filter_all_statuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All Statuses'**
+  String get users_filter_all_statuses;
+
+  /// No description provided for @users_filter_active_only.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Only'**
+  String get users_filter_active_only;
+
+  /// No description provided for @users_filter_inactive_only.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive Only'**
+  String get users_filter_inactive_only;
+
+  /// No description provided for @users_detail_title.
+  ///
+  /// In en, this message translates to:
+  /// **'User Details'**
+  String get users_detail_title;
+
+  /// No description provided for @users_form_title_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create User'**
+  String get users_form_title_create;
+
+  /// No description provided for @users_form_title_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit User'**
+  String get users_form_title_edit;
+
+  /// No description provided for @users_form_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get users_form_name;
+
+  /// No description provided for @users_form_username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get users_form_username;
+
+  /// No description provided for @users_form_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get users_form_password;
+
+  /// No description provided for @users_form_role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get users_form_role;
+
+  /// No description provided for @users_form_store.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Assignment'**
+  String get users_form_store;
+
+  /// No description provided for @users_form_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get users_form_status;
+
+  /// No description provided for @users_form_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter full name'**
+  String get users_form_name_hint;
+
+  /// No description provided for @users_form_username_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter username'**
+  String get users_form_username_hint;
+
+  /// No description provided for @users_form_password_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get users_form_password_hint;
+
+  /// No description provided for @users_form_select_role.
+  ///
+  /// In en, this message translates to:
+  /// **'Select role'**
+  String get users_form_select_role;
+
+  /// No description provided for @users_form_select_store.
+  ///
+  /// In en, this message translates to:
+  /// **'Select store (optional)'**
+  String get users_form_select_store;
+
+  /// No description provided for @users_validation_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name is required'**
+  String get users_validation_name_required;
+
+  /// No description provided for @users_validation_username_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Username is required'**
+  String get users_validation_username_required;
+
+  /// No description provided for @users_validation_password_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get users_validation_password_required;
+
+  /// No description provided for @users_validation_role_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Role is required'**
+  String get users_validation_role_required;
+
+  /// No description provided for @users_created_successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'User created successfully'**
+  String get users_created_successfully;
+
+  /// No description provided for @users_updated_successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'User updated successfully'**
+  String get users_updated_successfully;
+
+  /// No description provided for @users_deleted_successfully.
+  ///
+  /// In en, this message translates to:
+  /// **'User deleted successfully'**
+  String get users_deleted_successfully;
+
+  /// No description provided for @users_failed_to_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create user'**
+  String get users_failed_to_create;
+
+  /// No description provided for @users_failed_to_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update user'**
+  String get users_failed_to_update;
+
+  /// No description provided for @users_failed_to_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete user'**
+  String get users_failed_to_delete;
+
+  /// No description provided for @users_failed_to_load.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load user'**
+  String get users_failed_to_load;
+
+  /// No description provided for @users_failed_to_load_list.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load users'**
+  String get users_failed_to_load_list;
+
+  /// No description provided for @users_delete_confirm_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete User'**
+  String get users_delete_confirm_title;
+
+  /// No description provided for @users_delete_confirm_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete user \'{name}\'? This action cannot be undone.'**
+  String users_delete_confirm_message(String name);
+
+  /// No description provided for @common_button_filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get common_button_filter;
+
+  /// No description provided for @common_button_clear_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get common_button_clear_filters;
+
+  /// No description provided for @common_button_apply_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filters'**
+  String get common_button_apply_filters;
 }
 
 class _AppLocalizationsDelegate

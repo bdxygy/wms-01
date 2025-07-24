@@ -536,8 +536,29 @@ class _DashboardScreenState extends State<DashboardScreen>
     _slideController.forward();
   }
 
-  void _handleChangeStore() {
-    context.goNamed('store-selection');
+  Future<void> _handleChangeStore() async {
+    try {
+      // Clear current store selection from both providers
+      final authProvider = context.read<AuthProvider>();
+      final storeProvider = context.read<StoreContextProvider>();
+      
+      await authProvider.clearSelectedStore();
+      await storeProvider.clearStoreSelection();
+      
+      if (mounted) {
+        context.goNamed('store-selection');
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.error}: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleLogout() async {

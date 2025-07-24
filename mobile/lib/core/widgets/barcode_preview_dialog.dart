@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../generated/app_localizations.dart';
-import '../services/logo_service.dart';
 import '../models/product.dart';
 import '../models/store.dart';
 
@@ -22,41 +20,6 @@ class BarcodePreviewDialog extends StatefulWidget {
 }
 
 class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
-  final LogoService _logoService = LogoService();
-  String? _logoPath;
-  bool _hasLogo = false;
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLogoInfo();
-  }
-
-  Future<void> _loadLogoInfo() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final logoPath = await _logoService.getLogoPath();
-      final hasLogo = await _logoService.hasLogo();
-
-      if (mounted) {
-        setState(() {
-          _logoPath = logoPath;
-          _hasLogo = hasLogo;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,8 +42,7 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            if (_isLoading) _buildLoadingState(),
-            if (!_isLoading) _buildPreview(),
+            _buildPreview(),
             _buildActions(),
           ],
         ),
@@ -151,15 +113,6 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
     );
   }
 
-  Widget _buildLoadingState() {
-    return Container(
-      padding: const EdgeInsets.all(40),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-  }
-
   Widget _buildPreview() {
     return Expanded(
       child: SingleChildScrollView(
@@ -181,27 +134,6 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
           ),
           child: Column(
             children: [
-              // Logo header (if available)
-              if (_hasLogo && _logoPath != null) ...[
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 80),
-                  child: Image.file(
-                    File(_logoPath!),
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 60,
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          size: 40,
-                          color: Colors.grey[400],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
               
               // Store name
               Text(
@@ -209,6 +141,7 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -220,6 +153,7 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -229,9 +163,9 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
               // SKU
               Text(
                 'SKU: ${widget.product?.sku ?? 'SAMPLE123'}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -269,6 +203,7 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
                       style: const TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 10,
+                        color: Colors.black,
                       ),
                     ),
                   ],
@@ -284,6 +219,7 @@ class _BarcodePreviewDialogState extends State<BarcodePreviewDialog> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),

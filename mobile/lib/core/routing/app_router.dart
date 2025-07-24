@@ -18,6 +18,8 @@ import '../../features/stores/screens/store_detail_screen.dart';
 import '../../features/stores/screens/create_store_screen.dart';
 import '../../features/stores/screens/edit_store_screen.dart';
 import '../../features/users/screens/users_screen.dart';
+import '../../features/users/screens/user_detail_screen.dart';
+import '../../features/users/screens/user_form_screen.dart';
 import '../../features/categories/screens/categories_screen.dart';
 import '../../features/categories/widgets/category_form_screen.dart';
 import '../../features/checks/screens/checks_screen.dart';
@@ -206,6 +208,35 @@ class AppRouter {
           name: 'users',
           redirect: (context, state) => _protectedRedirect(context, state),
           builder: (context, state) => const UsersScreen(),
+          routes: [
+            // Create User Route
+            GoRoute(
+              path: '/create',
+              name: 'create-user',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) => const UserFormScreen(),
+            ),
+            // User Detail Route
+            GoRoute(
+              path: '/:id',
+              name: 'user-detail',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final userId = state.pathParameters['id']!;
+                return UserDetailScreen(userId: userId);
+              },
+            ),
+            // Edit User Route
+            GoRoute(
+              path: '/:id/edit',
+              name: 'edit-user',
+              redirect: (context, state) => _protectedRedirect(context, state),
+              builder: (context, state) {
+                final userId = state.pathParameters['id']!;
+                return UserFormScreen(userId: userId);
+              },
+            ),
+          ],
         ),
 
         // Categories Route

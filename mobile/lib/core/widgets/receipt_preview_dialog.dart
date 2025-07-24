@@ -214,6 +214,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -223,10 +224,10 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
               // Receipt title
               Text(
                 'RECEIPT',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -282,6 +283,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                   Text(
@@ -289,6 +291,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -299,9 +302,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
               // Footer
               Text(
                 'Thank you for your purchase!',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -323,12 +326,14 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
           Text(
             value,
             style: const TextStyle(
               fontSize: 12,
+              color: Colors.black,
             ),
           ),
         ],
@@ -355,6 +360,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
           ),
@@ -365,11 +371,11 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
             children: [
               Text(
                 '$quantity x ${Provider.of<AppProvider>(context, listen: false).formatCurrency(price)}',
-                style: const TextStyle(fontSize: 11),
+                style: const TextStyle(fontSize: 11, color: Colors.black),
               ),
               Text(
                 Provider.of<AppProvider>(context, listen: false).formatCurrency(subtotal),
-                style: const TextStyle(fontSize: 11),
+                style: const TextStyle(fontSize: 11, color: Colors.black),
               ),
             ],
           ),

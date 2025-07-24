@@ -26,7 +26,11 @@ class StoreContextProvider extends ChangeNotifier {
   // Update context and notify listeners
   void _updateContext(StoreContext newContext) {
     _context = newContext;
-    notifyListeners();
+    
+    // Defer notifyListeners to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
     
     if (AppConfig.isDebugMode) {
      debugPrint('🏪 StoreContext updated: $newContext');

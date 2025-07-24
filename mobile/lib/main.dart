@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'core/utils/app_config.dart';
@@ -31,6 +32,29 @@ class WMSApp extends StatelessWidget {
       ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, child) {
+          // Apply system overlay style based on theme mode
+          final isDarkMode = appProvider.themeMode == ThemeMode.dark ||
+              (appProvider.themeMode == ThemeMode.system &&
+                  MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+          
+          SystemChrome.setSystemUIOverlayStyle(
+            isDarkMode
+                ? const SystemUiOverlayStyle(
+                    statusBarColor: Colors.transparent,
+                    statusBarIconBrightness: Brightness.light, // Light icons in dark mode
+                    statusBarBrightness: Brightness.dark, // Dark status bar background
+                    systemNavigationBarColor: Colors.black,
+                    systemNavigationBarIconBrightness: Brightness.light,
+                  )
+                : const SystemUiOverlayStyle(
+                    statusBarColor: Colors.transparent,
+                    statusBarIconBrightness: Brightness.dark, // Dark icons in light mode
+                    statusBarBrightness: Brightness.light, // Light status bar background
+                    systemNavigationBarColor: Colors.white,
+                    systemNavigationBarIconBrightness: Brightness.dark,
+                  ),
+          );
+          
           return MaterialApp.router(
             title: 'WMS Mobile',
             debugShowCheckedModeBanner: false,

@@ -82,7 +82,7 @@ class AppTheme {
       textTheme: WMSTypography.createTextTheme(isDark: false),
       iconTheme: const IconThemeData(
         size: 24.0,
-        color: WMSColors.iconColor,
+        color: WMSColors.textColor, // Dark icons in light mode
       ),
       appBarTheme: _buildAppBarTheme(isDark: false),
       bottomNavigationBarTheme: _buildBottomNavigationBarTheme(isDark: false),
@@ -147,7 +147,6 @@ class AppTheme {
     );
   }
 
-
   // Custom app bar theme
   static AppBarTheme _buildAppBarTheme({required bool isDark}) {
     return AppBarTheme(
@@ -159,13 +158,17 @@ class AppTheme {
       systemOverlayStyle: isDark
           ? const SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
-              statusBarIconBrightness: Brightness.light,
-              statusBarBrightness: Brightness.dark,
+              statusBarIconBrightness:
+                  Brightness.light, // Light icons in dark mode
+              statusBarBrightness:
+                  Brightness.dark, // Dark status bar background
             )
           : const SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
-              statusBarIconBrightness: Brightness.light,
-              statusBarBrightness: Brightness.dark,
+              statusBarIconBrightness:
+                  Brightness.dark, // Dark icons in light mode
+              statusBarBrightness:
+                  Brightness.light, // Light status bar background
             ),
       titleTextStyle: WMSTypography.appBarTitle.copyWith(
         color: isDark ? WMSColors.textColorDark : Colors.white,
@@ -182,12 +185,14 @@ class AppTheme {
   }
 
   // Custom bottom navigation bar theme
-  static BottomNavigationBarThemeData _buildBottomNavigationBarTheme({required bool isDark}) {
+  static BottomNavigationBarThemeData _buildBottomNavigationBarTheme(
+      {required bool isDark}) {
     return BottomNavigationBarThemeData(
       type: BottomNavigationBarType.fixed,
       backgroundColor: isDark ? WMSColors.surfaceDark : Colors.white,
       selectedItemColor: WMSColors.primaryBlue,
-      unselectedItemColor: isDark ? WMSColors.textSecondaryDark : WMSColors.textSecondary,
+      unselectedItemColor:
+          isDark ? WMSColors.textSecondaryDark : WMSColors.textSecondary,
       selectedLabelStyle: WMSTypography.labelSmall.copyWith(
         fontWeight: FontWeight.w500,
       ),
@@ -219,17 +224,17 @@ class AppTheme {
 class SystemUIStyles {
   static const SystemUiOverlayStyle lightStatusBar = SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: Colors.white,
-    systemNavigationBarIconBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.light, // Light icons on dark background
+    statusBarBrightness: Brightness.dark, // Dark status bar background
+    systemNavigationBarColor: Colors.black,
+    systemNavigationBarIconBrightness: Brightness.light,
   );
 
   static const SystemUiOverlayStyle darkStatusBar = SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-    systemNavigationBarColor: Colors.black,
-    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark, // Dark icons on light background
+    statusBarBrightness: Brightness.light, // Light status bar background
+    systemNavigationBarColor: Colors.white,
+    systemNavigationBarIconBrightness: Brightness.dark,
   );
 }

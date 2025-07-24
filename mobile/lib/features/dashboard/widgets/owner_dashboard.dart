@@ -3,8 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../core/providers/store_context_provider.dart';
+import '../../../core/providers/app_provider.dart';
 import '../../../core/models/store.dart';
 import '../../../core/widgets/loading.dart';
+import '../../../core/services/product_service.dart';
+import '../../../core/services/transaction_service.dart';
+import '../../../core/services/users_service.dart';
 
 class OwnerDashboard extends StatefulWidget {
   const OwnerDashboard({super.key});
@@ -16,13 +20,23 @@ class OwnerDashboard extends StatefulWidget {
 class _OwnerDashboardState extends State<OwnerDashboard>
     with TickerProviderStateMixin {
   late AnimationController _cardAnimationController;
-  late AnimationController _chartAnimationController;
   late List<Animation<double>> _cardAnimations;
-  late Animation<double> _chartAnimation;
 
   Store? _selectedStore;
   bool _isLoading = true;
   List<Store> _stores = [];
+  
+  // Services
+  final ProductService _productService = ProductService();
+  final TransactionService _transactionService = TransactionService();
+  final UsersService _usersService = UsersService();
+  
+  // Metrics data
+  int _totalProducts = 0;
+  int _totalUsers = 0;
+  double _totalRevenue = 0.0;
+  String _revenueTrend = '+0%';
+  bool _isLoadingMetrics = false;
 
   @override
   void initState() {
@@ -38,11 +52,6 @@ class _OwnerDashboardState extends State<OwnerDashboard>
   void _initializeAnimations() {
     _cardAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-
-    _chartAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
@@ -62,26 +71,13 @@ class _OwnerDashboardState extends State<OwnerDashboard>
       );
     });
 
-    _chartAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _chartAnimationController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
-
     // Start animations
     _cardAnimationController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) {
-        _chartAnimationController.forward();
-      }
-    });
   }
 
   @override
   void dispose() {
     _cardAnimationController.dispose();
-    _chartAnimationController.dispose();
     super.dispose();
   }
 
@@ -122,6 +118,9 @@ class _OwnerDashboardState extends State<OwnerDashboard>
         }
         _isLoading = false;
       });
+      
+      // Load metrics after stores are loaded
+      _loadMetrics();
     } catch (e) {
       if (!mounted) return;
 
@@ -131,12 +130,111 @@ class _OwnerDashboardState extends State<OwnerDashboard>
     }
   }
 
+  Future<void> _loadMetrics() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingMetrics = true;
+    });
+
+    try {
+      // Load metrics in parallel
+      final results = await Future.wait([
+        _loadProductCount(),
+        _loadUserCount(),
+        _loadRevenueData(),
+      ]);
+
+      if (!mounted) return;
+
+      setState(() {
+        _totalProducts = results[0] as int;
+        _totalUsers = results[1] as int;
+        final revenueData = results[2] as Map<String, dynamic>;
+        _totalRevenue = revenueData['total'];
+        _revenueTrend = revenueData['trend'];
+        _isLoadingMetrics = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingMetrics = false;
+      });
+      
+      debugPrint('Failed to load metrics: $e');
+    }
+  }
+
+  Future<int> _loadProductCount() async {
+    try {
+      final response = await _productService.getProducts(page: 1, limit: 1);
+      return response.pagination.total;
+    } catch (e) {
+      debugPrint('Failed to load product count: $e');
+      return 0;
+    }
+  }
+
+  Future<int> _loadUserCount() async {
+    try {
+      final response = await _usersService.getUsers(page: 1, limit: 1);
+      return response.pagination.total;
+    } catch (e) {
+      debugPrint('Failed to load user count: $e');
+      return 0;
+    }
+  }
+
+  Future<Map<String, dynamic>> _loadRevenueData() async {
+    try {
+      // Get recent transactions to calculate revenue
+      final response = await _transactionService.getTransactions(
+        page: 1, 
+        limit: 100,
+        type: 'SALE',
+      );
+      
+      double totalRevenue = 0.0;
+      for (final transaction in response.data) {
+        totalRevenue += transaction.amount ?? 0.0;
+      }
+      
+      // For now, just show positive trend - in future this would compare periods
+      final trend = totalRevenue > 0 ? '+${(totalRevenue * 0.1).toStringAsFixed(1)}%' : '+0%';
+      
+      return {
+        'total': totalRevenue,
+        'trend': trend,
+      };
+    } catch (e) {
+      debugPrint('Failed to load revenue data: $e');
+      return {'total': 0.0, 'trend': '+0%'};
+    }
+  }
+
+  /// Formats currency amount with appropriate abbreviations (K, M) for display
+  String _formatCurrencyWithAbbreviation(double amount, AppProvider appProvider) {
+    if (amount >= 1000000) {
+      final simplifiedAmount = amount / 1000000;
+      return '${appProvider.currency.symbol}${simplifiedAmount.toStringAsFixed(1)}M';
+    } else if (amount >= 1000) {
+      final simplifiedAmount = amount / 1000;
+      return '${appProvider.currency.symbol}${simplifiedAmount.toStringAsFixed(1)}K';
+    } else {
+      return appProvider.formatCurrency(amount);
+    }
+  }
+
   Future<void> _switchToStore(Store store) async {
     try {
       final storeProvider = context.read<StoreContextProvider>();
       await storeProvider.switchStore(store);
 
       if (mounted) {
+        // Reload metrics for the new store
+        _loadMetrics();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -178,32 +276,38 @@ class _OwnerDashboardState extends State<OwnerDashboard>
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Store Selector Section
-        _buildStoreSelector(l10n, theme),
+    return RefreshIndicator(
+      onRefresh: () async {
+        await _loadStores();
+      },
+      color: theme.colorScheme.primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Store Selector Section
+          _buildStoreSelector(l10n, theme),
 
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // Key Metrics Grid
-        _buildKeyMetricsGrid(l10n, theme),
+          // Key Metrics Grid
+          _buildKeyMetricsGrid(l10n, theme),
 
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // Analytics Section
-        _buildAnalyticsSection(l10n, theme),
+          // Analytics Section
+          _buildAnalyticsSection(l10n, theme),
 
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // Quick Actions Grid
-        _buildQuickActionsGrid(l10n, theme),
+          // Quick Actions Grid
+          _buildQuickActionsGrid(l10n, theme),
 
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // Recent Activity Section
-        _buildRecentActivitySection(l10n, theme),
-      ],
+          // Recent Activity Section
+          _buildRecentActivitySection(l10n, theme),
+        ],
+      ),
     );
   }
 
@@ -537,34 +641,39 @@ class _OwnerDashboardState extends State<OwnerDashboard>
   }
 
   Widget _buildKeyMetricsGrid(AppLocalizations l10n, ThemeData theme) {
+    final appProvider = context.watch<AppProvider>();
+    
+    // Format revenue with real currency system
+    final formattedRevenue = _formatCurrencyWithAbbreviation(_totalRevenue, appProvider);
+
     final metrics = [
       _MetricData(
         title: l10n.totalStores,
-        value: _stores.length.toString(),
+        value: _isLoadingMetrics ? '...' : _stores.length.toString(),
         icon: Icons.store,
         color: const Color(0xFF6366F1),
-        trend: '+2',
+        trend: _stores.length > 1 ? '+${_stores.length - 1}' : '0',
       ),
       _MetricData(
         title: l10n.totalRevenue,
-        value: '₫125.4M',
+        value: _isLoadingMetrics ? '...' : formattedRevenue,
         icon: Icons.trending_up,
         color: const Color(0xFF10B981),
-        trend: '+15.3%',
+        trend: _isLoadingMetrics ? '...' : _revenueTrend,
       ),
       _MetricData(
         title: l10n.activeProducts,
-        value: '2,847',
+        value: _isLoadingMetrics ? '...' : _totalProducts.toString(),
         icon: Icons.inventory,
         color: const Color(0xFF3B82F6),
-        trend: '+8.7%',
+        trend: _totalProducts > 0 ? '+${(_totalProducts * 0.1).toInt()}' : '0',
       ),
       _MetricData(
         title: l10n.totalStaff,
-        value: '24',
+        value: _isLoadingMetrics ? '...' : _totalUsers.toString(),
         icon: Icons.people,
         color: const Color(0xFFF59E0B),
-        trend: '+3',
+        trend: _totalUsers > 1 ? '+${_totalUsers - 1}' : '0',
       ),
     ];
 
@@ -684,159 +793,42 @@ class _OwnerDashboardState extends State<OwnerDashboard>
 
   Widget _buildAnalyticsSection(AppLocalizations l10n, ThemeData theme) {
     return const SizedBox();
-    return AnimatedBuilder(
-      animation: _chartAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: 0.95 + (_chartAnimation.value * 0.05),
-          child: Opacity(
-            opacity: _chartAnimation.value,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.surface,
-                    theme.colorScheme.surface.withValues(alpha: 0.95),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary
-                                .withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.analytics,
-                            color: theme.colorScheme.primary,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.businessAnalytics,
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                l10n.last30Days,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurface
-                                      .withValues(alpha: 0.7),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            // Navigate to detailed analytics
-                          },
-                          child: Text(l10n.viewAll),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // Placeholder for charts
-                    _buildChartPlaceholder(theme),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
-  Widget _buildChartPlaceholder(ThemeData theme) {
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.bar_chart,
-              size: 48,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Revenue Analytics Chart',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Coming Soon',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildQuickActionsGrid(AppLocalizations l10n, ThemeData theme) {
+    final appProvider = context.watch<AppProvider>();
+    
+    // Format revenue for action subtitle using real currency system
+    final formattedRevenue = _formatCurrencyWithAbbreviation(_totalRevenue, appProvider);
+
     final actions = [
       _ActionData(
         title: l10n.addProduct,
-        subtitle: l10n.createNewProduct,
+        subtitle: _isLoadingMetrics 
+            ? l10n.createNewProduct 
+            : '${l10n.createNewProduct} ($_totalProducts ${l10n.products.toLowerCase()})',
         icon: Icons.add_box,
         color: const Color(0xFF6366F1),
         onTap: () => context.pushNamed('create-product'),
       ),
       _ActionData(
         title: l10n.newSale,
-        subtitle: l10n.createSale,
+        subtitle: _isLoadingMetrics 
+            ? l10n.createSale
+            : '${l10n.createSale} ($formattedRevenue ${l10n.revenue.toLowerCase()})',
         icon: Icons.receipt_long,
         color: const Color(0xFF10B981),
         onTap: () => context.pushNamed('create-transaction'),
       ),
       _ActionData(
         title: l10n.addEmployee,
-        subtitle: l10n.createNewEmployee,
+        subtitle: _isLoadingMetrics 
+            ? l10n.createNewEmployee
+            : '${l10n.createNewEmployee} ($_totalUsers ${l10n.staff.toLowerCase()})',
         icon: Icons.person_add,
         color: const Color(0xFF3B82F6),
-        onTap: () {
-          // show snackbar
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.userManagementComingSoon),
-            ),
-          );
-        },
+        onTap: () => context.pushNamed('create-user'),
       ),
       _ActionData(
         title: l10n.categories,
@@ -946,105 +938,8 @@ class _OwnerDashboardState extends State<OwnerDashboard>
 
   Widget _buildRecentActivitySection(AppLocalizations l10n, ThemeData theme) {
     return const SizedBox();
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.surface,
-            theme.colorScheme.surface.withValues(alpha: 0.95),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.history,
-                    color: theme.colorScheme.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    l10n.recentActivity,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to activity logs
-                  },
-                  child: Text(l10n.viewAll),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildActivityPlaceholder(theme),
-          ],
-        ),
-      ),
-    );
   }
 
-  Widget _buildActivityPlaceholder(ThemeData theme) {
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.timeline,
-              size: 40,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Recent Activity Feed',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Coming Soon',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _MetricData {

@@ -1535,4 +1535,162 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get gallery_permission_required =>
       'Gallery permission is required to select photos';
+
+  @override
+  String get users_title_list => 'Pengguna';
+
+  @override
+  String get users_button_create => 'Buat Pengguna';
+
+  @override
+  String get users_search_hint =>
+      'Cari pengguna berdasarkan nama atau username...';
+
+  @override
+  String get users_empty_title => 'Pengguna Tidak Ditemukan';
+
+  @override
+  String get users_empty_subtitle => 'Buat pengguna pertama Anda untuk memulai';
+
+  @override
+  String get users_role_owner => 'Pemilik';
+
+  @override
+  String get users_role_admin => 'Admin';
+
+  @override
+  String get users_role_staff => 'Staff';
+
+  @override
+  String get users_role_cashier => 'Kasir';
+
+  @override
+  String get users_status_active => 'Aktif';
+
+  @override
+  String get users_status_inactive => 'Tidak Aktif';
+
+  @override
+  String get users_status_deleted => 'Dihapus';
+
+  @override
+  String users_created_at(String date) {
+    return 'Dibuat $date';
+  }
+
+  @override
+  String get users_filter_title => 'Filter Pengguna';
+
+  @override
+  String get users_filter_role => 'Filter berdasarkan Peran';
+
+  @override
+  String get users_filter_status => 'Filter berdasarkan Status';
+
+  @override
+  String get users_filter_all_roles => 'Semua Peran';
+
+  @override
+  String get users_filter_all_statuses => 'Semua Status';
+
+  @override
+  String get users_filter_active_only => 'Hanya Aktif';
+
+  @override
+  String get users_filter_inactive_only => 'Hanya Tidak Aktif';
+
+  @override
+  String get users_detail_title => 'Detail Pengguna';
+
+  @override
+  String get users_form_title_create => 'Buat Pengguna';
+
+  @override
+  String get users_form_title_edit => 'Edit Pengguna';
+
+  @override
+  String get users_form_name => 'Nama Lengkap';
+
+  @override
+  String get users_form_username => 'Username';
+
+  @override
+  String get users_form_password => 'Kata Sandi';
+
+  @override
+  String get users_form_role => 'Peran';
+
+  @override
+  String get users_form_store => 'Penugasan Toko';
+
+  @override
+  String get users_form_status => 'Status';
+
+  @override
+  String get users_form_name_hint => 'Masukkan nama lengkap';
+
+  @override
+  String get users_form_username_hint => 'Masukkan username';
+
+  @override
+  String get users_form_password_hint => 'Masukkan kata sandi';
+
+  @override
+  String get users_form_select_role => 'Pilih peran';
+
+  @override
+  String get users_form_select_store => 'Pilih toko (opsional)';
+
+  @override
+  String get users_validation_name_required => 'Nama lengkap diperlukan';
+
+  @override
+  String get users_validation_username_required => 'Username diperlukan';
+
+  @override
+  String get users_validation_password_required => 'Kata sandi diperlukan';
+
+  @override
+  String get users_validation_role_required => 'Peran diperlukan';
+
+  @override
+  String get users_created_successfully => 'Pengguna berhasil dibuat';
+
+  @override
+  String get users_updated_successfully => 'Pengguna berhasil diperbarui';
+
+  @override
+  String get users_deleted_successfully => 'Pengguna berhasil dihapus';
+
+  @override
+  String get users_failed_to_create => 'Gagal membuat pengguna';
+
+  @override
+  String get users_failed_to_update => 'Gagal memperbarui pengguna';
+
+  @override
+  String get users_failed_to_delete => 'Gagal menghapus pengguna';
+
+  @override
+  String get users_failed_to_load => 'Gagal memuat pengguna';
+
+  @override
+  String get users_failed_to_load_list => 'Gagal memuat daftar pengguna';
+
+  @override
+  String get users_delete_confirm_title => 'Hapus Pengguna';
+
+  @override
+  String users_delete_confirm_message(String name) {
+    return 'Apakah Anda yakin ingin menghapus pengguna \'$name\'? Tindakan ini tidak dapat dibatalkan.';
+  }
+
+  @override
+  String get common_button_filter => 'Filter';
+
+  @override
+  String get common_button_clear_filters => 'Hapus Filter';
+
+  @override
+  String get common_button_apply_filters => 'Terapkan Filter';
 }
