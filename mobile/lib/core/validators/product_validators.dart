@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../utils/imei_utils.dart';
-
 /// Product form validation rules
 class ProductValidators {
   /// Product name validation
@@ -212,8 +210,9 @@ class ProductValidators {
     if (barcodeError != null) errors['barcode'] = barcodeError;
 
     final purchasePriceError = validatePurchasePrice(purchasePrice);
-    if (purchasePriceError != null)
+    if (purchasePriceError != null) {
       errors['purchasePrice'] = purchasePriceError;
+    }
 
     final parsedPurchasePrice = double.tryParse(purchasePrice ?? '');
     final salePriceError = validateSalePrice(salePrice, parsedPurchasePrice);

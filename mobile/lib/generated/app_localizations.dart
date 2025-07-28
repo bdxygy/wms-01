@@ -948,7 +948,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to delete store \'{name}\'? This action cannot be undone.'**
-  String deleteStoreConfirmation(Object name);
+  String deleteStoreConfirmation(String name);
 
   /// No description provided for @storeDeletedSuccessfully.
   ///
@@ -3283,6 +3283,540 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Apply Filters'**
   String get common_button_apply_filters;
+
+  /// No description provided for @products_action_printBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Barcode'**
+  String get products_action_printBarcode;
+
+  /// No description provided for @products_action_deleteProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Product'**
+  String get products_action_deleteProduct;
+
+  /// No description provided for @products_message_barcodePrintedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode printed successfully!'**
+  String get products_message_barcodePrintedSuccess;
+
+  /// No description provided for @products_message_barcodesPrintedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} barcodes printed successfully!'**
+  String products_message_barcodesPrintedSuccess(String count);
+
+  /// No description provided for @products_error_printBarcodeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to print barcode: {error}'**
+  String products_error_printBarcodeFailed(String error);
+
+  /// No description provided for @products_message_deleteConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"? This action cannot be undone.'**
+  String products_message_deleteConfirmation(String name);
+
+  /// No description provided for @products_message_deleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Product \"{name}\" deleted successfully'**
+  String products_message_deleteSuccess(String name);
+
+  /// No description provided for @products_error_deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete product: {error}'**
+  String products_error_deleteFailed(String error);
+
+  /// No description provided for @products_error_onlyOwnersCanDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Only owners can delete products'**
+  String get products_error_onlyOwnersCanDelete;
+
+  /// No description provided for @products_title_deleteProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Product'**
+  String get products_title_deleteProduct;
+
+  /// No description provided for @products_title_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Details'**
+  String get products_title_details;
+
+  /// No description provided for @products_error_loadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to Load Product'**
+  String get products_error_loadFailed;
+
+  /// No description provided for @products_error_notFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Not Found'**
+  String get products_error_notFound;
+
+  /// No description provided for @products_error_notFoundDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The product you\'re looking for doesn\'t exist or has been removed.'**
+  String get products_error_notFoundDescription;
+
+  /// No description provided for @products_section_pricingInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing & Inventory'**
+  String get products_section_pricingInventory;
+
+  /// No description provided for @products_section_pricingInventoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Product pricing and stock information'**
+  String get products_section_pricingInventoryDescription;
+
+  /// No description provided for @products_section_locationCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Location & Category'**
+  String get products_section_locationCategory;
+
+  /// No description provided for @products_section_locationCategoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Store location and product categorization'**
+  String get products_section_locationCategoryDescription;
+
+  /// No description provided for @products_section_additionalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Information'**
+  String get products_section_additionalInfo;
+
+  /// No description provided for @products_section_additionalInfoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'System information and timestamps'**
+  String get products_section_additionalInfoDescription;
+
+  /// No description provided for @products_label_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get products_label_name;
+
+  /// No description provided for @products_label_sku.
+  ///
+  /// In en, this message translates to:
+  /// **'SKU'**
+  String get products_label_sku;
+
+  /// No description provided for @products_label_barcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get products_label_barcode;
+
+  /// No description provided for @products_label_price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get products_label_price;
+
+  /// No description provided for @products_label_quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get products_label_quantity;
+
+  /// No description provided for @products_label_purchasePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase Price'**
+  String get products_label_purchasePrice;
+
+  /// No description provided for @products_label_salePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale Price'**
+  String get products_label_salePrice;
+
+  /// No description provided for @products_label_currentStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Stock'**
+  String get products_label_currentStock;
+
+  /// No description provided for @products_label_units.
+  ///
+  /// In en, this message translates to:
+  /// **'units'**
+  String get products_label_units;
+
+  /// No description provided for @products_label_imei.
+  ///
+  /// In en, this message translates to:
+  /// **'IMEI'**
+  String get products_label_imei;
+
+  /// No description provided for @products_status_outOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Stock'**
+  String get products_status_outOfStock;
+
+  /// No description provided for @products_status_lowStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Stock'**
+  String get products_status_lowStock;
+
+  /// No description provided for @products_status_inStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock'**
+  String get products_status_inStock;
+
+  /// No description provided for @transactions_action_printReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Receipt'**
+  String get transactions_action_printReceipt;
+
+  /// No description provided for @transactions_action_markFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Finished'**
+  String get transactions_action_markFinished;
+
+  /// No description provided for @transactions_label_transactionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction'**
+  String get transactions_label_transactionId;
+
+  /// No description provided for @transactions_message_receiptPrintedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt printed successfully!'**
+  String get transactions_message_receiptPrintedSuccess;
+
+  /// No description provided for @transactions_message_receiptsPrintedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} receipts printed successfully'**
+  String transactions_message_receiptsPrintedSuccess(String count);
+
+  /// No description provided for @transactions_error_printReceiptFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to print receipt: {error}'**
+  String transactions_error_printReceiptFailed(String error);
+
+  /// No description provided for @transactions_message_markedFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction marked as finished'**
+  String get transactions_message_markedFinished;
+
+  /// No description provided for @transactions_error_markFinishedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to mark transaction as finished: {error}'**
+  String transactions_error_markFinishedFailed(String error);
+
+  /// No description provided for @transactions_title_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Detail'**
+  String get transactions_title_detail;
+
+  /// No description provided for @transactions_title_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Details'**
+  String get transactions_title_details;
+
+  /// No description provided for @transactions_label_id.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get transactions_label_id;
+
+  /// No description provided for @transactions_label_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get transactions_label_type;
+
+  /// No description provided for @transactions_label_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transactions_label_amount;
+
+  /// No description provided for @transactions_label_items.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get transactions_label_items;
+
+  /// No description provided for @transactions_label_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get transactions_label_status;
+
+  /// No description provided for @transactions_label_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get transactions_label_date;
+
+  /// No description provided for @stores_title_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Details'**
+  String get stores_title_details;
+
+  /// No description provided for @stores_action_deleteStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Store'**
+  String get stores_action_deleteStore;
+
+  /// No description provided for @stores_label_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get stores_label_name;
+
+  /// No description provided for @stores_label_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get stores_label_type;
+
+  /// No description provided for @stores_label_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get stores_label_status;
+
+  /// No description provided for @stores_label_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get stores_label_address;
+
+  /// No description provided for @stores_label_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get stores_label_phone;
+
+  /// No description provided for @stores_label_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get stores_label_email;
+
+  /// No description provided for @common_error_permissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission required: {error}'**
+  String common_error_permissionRequired(String error);
+
+  /// No description provided for @common_action_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get common_action_settings;
+
+  /// No description provided for @common_action_setupPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup Printer'**
+  String get common_action_setupPrinter;
+
+  /// No description provided for @common_action_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get common_action_retry;
+
+  /// No description provided for @common_action_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get common_action_cancel;
+
+  /// No description provided for @common_action_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get common_action_delete;
+
+  /// No description provided for @common_action_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get common_action_close;
+
+  /// No description provided for @common_action_setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get common_action_setup;
+
+  /// No description provided for @common_message_testPagePrintedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Test page printed successfully!'**
+  String get common_message_testPagePrintedSuccess;
+
+  /// No description provided for @common_error_testPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Test print failed: {error}'**
+  String common_error_testPrintFailed(String error);
+
+  /// No description provided for @common_title_printerManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer Management'**
+  String get common_title_printerManagement;
+
+  /// No description provided for @common_label_printerStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String common_label_printerStatus(String status);
+
+  /// No description provided for @common_status_connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get common_status_connected;
+
+  /// No description provided for @common_status_disconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get common_status_disconnected;
+
+  /// No description provided for @common_label_availableActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Actions:'**
+  String get common_label_availableActions;
+
+  /// No description provided for @common_action_connectToPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to Printer'**
+  String get common_action_connectToPrinter;
+
+  /// No description provided for @common_action_printTestPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Test Page'**
+  String get common_action_printTestPage;
+
+  /// No description provided for @common_action_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get common_action_disconnect;
+
+  /// No description provided for @common_message_printerDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer disconnected'**
+  String get common_message_printerDisconnected;
+
+  /// No description provided for @common_error_printerAccessFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Error accessing printer: {error}'**
+  String common_error_printerAccessFailed(String error);
+
+  /// No description provided for @common_message_copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Information copied to clipboard'**
+  String get common_message_copiedToClipboard;
+
+  /// No description provided for @common_label_notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get common_label_notSet;
+
+  /// No description provided for @common_label_store.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get common_label_store;
+
+  /// No description provided for @common_label_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get common_label_category;
+
+  /// No description provided for @common_status_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get common_status_loading;
+
+  /// No description provided for @common_status_active.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get common_status_active;
+
+  /// No description provided for @common_status_inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get common_status_inactive;
+
+  /// No description provided for @common_label_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get common_label_created;
+
+  /// No description provided for @common_label_lastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated'**
+  String get common_label_lastUpdated;
+
+  /// No description provided for @common_status_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get common_status_completed;
+
+  /// No description provided for @common_status_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get common_status_pending;
+
+  /// No description provided for @common_error_printerNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer not connected. Setting up printer...'**
+  String get common_error_printerNotConnected;
 }
 
 class _AppLocalizationsDelegate

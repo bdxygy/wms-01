@@ -5,7 +5,6 @@ import '../../../core/services/imei_scanner_service.dart';
 import '../../../core/utils/imei_utils.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/models/product.dart';
-import '../../../generated/app_localizations.dart';
 
 /// Screen for managing IMEIs associated with a product
 class ProductImeiManagementScreen extends StatefulWidget {

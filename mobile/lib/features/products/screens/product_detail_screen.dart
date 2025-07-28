@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:wms_mobile/core/utils/number_utils.dart';
 
+import '../../../generated/app_localizations.dart';
 import '../../../core/models/product.dart';
 import '../../../core/models/user.dart';
 import '../../../core/models/store.dart';
@@ -100,12 +101,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _printBarcode() async {
     if (_product == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     try {
       // Show barcode quantity dialog
       final quantity = await showDialog<int>(
         context: context,
         builder: (context) => BarcodeQuantityDialog(
-          title: 'Print Barcode',
+          title: l10n.products_action_printBarcode ?? 'Print Barcode',
           subtitle: _product!.name,
           defaultQuantity: 1,
         ),
@@ -133,8 +136,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(quantity == 1
-                ? 'Barcode printed successfully!'
-                : '$quantity barcodes printed successfully!'),
+                ? l10n.products_message_barcodePrintedSuccess ?? 'Barcode printed successfully!'
+                : l10n.products_message_barcodesPrintedSuccess(quantity.toString())),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -153,14 +156,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             errorMessage.contains('Bluetooth')) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Permission required: $e'),
+              content: Text(l10n.common_error_permissionRequired(e.toString())),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
               action: SnackBarAction(
-                label: 'Settings',
+                label: l10n.common_action_settings ?? 'Settings',
                 onPressed: () =>
                     _printLauncher.showPermissionSettingsDialog(context),
               ),
@@ -169,14 +172,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to print barcode: $e'),
+              content: Text(l10n.products_error_printBarcodeFailed(e.toString())),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
               action: SnackBarAction(
-                label: 'Setup Printer',
+                label: l10n.common_action_setupPrinter ?? 'Setup Printer',
                 onPressed: () => _printLauncher.connectAndPrint(context),
               ),
             ),
@@ -187,14 +190,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _testPrinter() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     try {
       // Use the comprehensive connect and print method (no product = test page)
       final result = await _printLauncher.connectAndPrint(context);
 
       if (result && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Test page printed successfully!'),
+          SnackBar(
+            content: Text(l10n.common_message_testPagePrintedSuccess ?? 'Test page printed successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -203,7 +208,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Test print failed: $e'),
+            content: Text(l10n.common_error_testPrintFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -212,6 +217,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _managePrinter() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     try {
       final isConnected = await _printLauncher.isConnected;
 
@@ -219,19 +226,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Printer Management'),
+          title: Text(l10n.common_title_printerManagement ?? 'Printer Management'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Status: ${isConnected ? 'Connected' : 'Disconnected'}'),
+              Text(l10n.common_label_printerStatus(isConnected ? l10n.common_status_connected : l10n.common_status_disconnected)),
               const SizedBox(height: 16),
-              const Text('Available Actions:'),
+              Text(l10n.common_label_availableActions ?? 'Available Actions:'),
               const SizedBox(height: 8),
               if (!isConnected)
                 ListTile(
                   leading: const Icon(Icons.bluetooth_connected),
-                  title: const Text('Connect to Printer'),
+                  title: Text(l10n.common_action_connectToPrinter ?? 'Connect to Printer'),
                   onTap: () async {
                     Navigator.of(context).pop();
                     await _printLauncher.connectWithDialog(context);
@@ -240,7 +247,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               if (isConnected) ...[
                 ListTile(
                   leading: const Icon(Icons.print),
-                  title: const Text('Print Test Page'),
+                  title: Text(l10n.common_action_printTestPage ?? 'Print Test Page'),
                   onTap: () {
                     Navigator.of(context).pop();
                     _testPrinter();
@@ -248,15 +255,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.bluetooth_disabled),
-                  title: const Text('Disconnect'),
+                  title: Text(l10n.common_action_disconnect ?? 'Disconnect'),
                   onTap: () async {
                     Navigator.of(context).pop();
                     await _printLauncher.disconnect();
 
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Printer disconnected'),
+                      SnackBar(
+                        content: Text(l10n.common_message_printerDisconnected ?? 'Printer disconnected'),
                         backgroundColor: Colors.orange,
                       ),
                     );
@@ -268,7 +275,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+              child: Text(l10n.common_action_close ?? 'Close'),
             ),
           ],
         ),
@@ -277,7 +284,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error accessing printer: $e'),
+            content: Text(l10n.common_error_printerAccessFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -286,29 +293,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _shareProduct() {
-    final productInfo = '''Product Details:
-Name: ${_product!.name}
-SKU: ${_product!.sku}
-Barcode: ${_product!.barcode}
-Price: ${Provider.of<AppProvider>(context, listen: false).formatCurrency(_product!.salePrice ?? _product!.purchasePrice)}
-Quantity: ${_product!.quantity}''';
+    final l10n = AppLocalizations.of(context)!;
+    final productInfo = '''${l10n.products_title_details ?? 'Product Details'}:
+${l10n.products_label_name ?? 'Name'}: ${_product!.name}
+${l10n.products_label_sku ?? 'SKU'}: ${_product!.sku}
+${l10n.products_label_barcode ?? 'Barcode'}: ${_product!.barcode}
+${l10n.products_label_price ?? 'Price'}: ${Provider.of<AppProvider>(context, listen: false).formatCurrency(_product!.salePrice ?? _product!.purchasePrice)}
+${l10n.products_label_quantity ?? 'Quantity'}: ${_product!.quantity}''';
 
     Clipboard.setData(ClipboardData(text: productInfo));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Product information copied to clipboard'),
+      SnackBar(
+        content: Text(l10n.common_message_copiedToClipboard ?? 'Product information copied to clipboard'),
         backgroundColor: Colors.green,
       ),
     );
   }
 
   void _deleteProduct() async {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.read<AuthProvider>().user;
+    
     if (user?.role != UserRole.owner) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Only owners can delete products'),
+          SnackBar(
+            content: Text(l10n.products_error_onlyOwnersCanDelete ?? 'Only owners can delete products'),
             backgroundColor: Colors.red,
           ),
         );
@@ -320,20 +330,19 @@ Quantity: ${_product!.quantity}''';
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Product'),
-        content: Text(
-            'Are you sure you want to delete "${_product!.name}"? This action cannot be undone.'),
+        title: Text(l10n.products_title_deleteProduct ?? 'Delete Product'),
+        content: Text(l10n.products_message_deleteConfirmation(_product!.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_action_cancel ?? 'Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.common_action_delete ?? 'Delete', style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -346,7 +355,7 @@ Quantity: ${_product!.quantity}''';
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Product "${_product!.name}" deleted successfully'),
+              content: Text(l10n.products_message_deleteSuccess(_product!.name)),
               backgroundColor: Colors.green,
             ),
           );
@@ -358,7 +367,7 @@ Quantity: ${_product!.quantity}''';
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to delete product: $e'),
+              content: Text(l10n.products_error_deleteFailed(e.toString())),
               backgroundColor: Colors.red,
             ),
           );
@@ -383,19 +392,21 @@ Quantity: ${_product!.quantity}''';
 
   PreferredSizeWidget _buildWMSAppBar(
       BuildContext context, bool canEdit, User? user) {
-    // Guard clause: Check if user can access print functionality
-    final canPrint = user?.role != UserRole.cashier && _product != null;
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Guard clause: Only Owner and Admin can print barcodes
+    final canPrintBarcode = (user?.role == UserRole.owner || user?.role == UserRole.admin) && _product != null;
     
     return WMSAppBar(
       icon: Icons.inventory_2,
-      title: _product?.name ?? 'Product Details',
+      title: _product?.name ?? l10n.products_title_details ?? 'Product Details',
       badge: _product?.isImei == true 
         ? WMSAppBarBadge.imei(Theme.of(context))
         : null,
       shareConfig: _product != null 
         ? WMSAppBarShare(onShare: _shareProduct)
         : null,
-      printConfig: canPrint 
+      printConfig: canPrintBarcode 
         ? WMSAppBarPrint.barcode(
             onPrint: _printBarcode,
             onManagePrinter: _managePrinter,
@@ -405,7 +416,7 @@ Quantity: ${_product!.quantity}''';
         ? [
             WMSAppBarMenuItem.delete(
               onTap: _deleteProduct,
-              title: 'Delete Product',
+              title: l10n.products_action_deleteProduct ?? 'Delete Product',
             ),
           ]
         : null,
@@ -472,6 +483,8 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildErrorState() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -492,7 +505,7 @@ Quantity: ${_product!.quantity}''';
             ),
             const SizedBox(height: 24),
             Text(
-              'Failed to Load Product',
+              l10n.products_error_loadFailed ?? 'Failed to Load Product',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -511,7 +524,7 @@ Quantity: ${_product!.quantity}''';
             ElevatedButton.icon(
               onPressed: _loadProduct,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(l10n.common_action_retry ?? 'Retry'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
@@ -526,6 +539,8 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildNotFoundState() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -546,14 +561,14 @@ Quantity: ${_product!.quantity}''';
             ),
             const SizedBox(height: 24),
             Text(
-              'Product Not Found',
+              l10n.products_error_notFound ?? 'Product Not Found',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'The product you\'re looking for doesn\'t exist or has been removed.',
+              l10n.products_error_notFoundDescription ?? 'The product you\'re looking for doesn\'t exist or has been removed.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -613,8 +628,8 @@ Quantity: ${_product!.quantity}''';
                   ],
                 ),
               ),
-              // Only show print button for non-cashier roles
-              if (user?.role != UserRole.cashier) _buildPrintButton(),
+              // Only show print button for Owner and Admin roles
+              if (user?.role == UserRole.owner || user?.role == UserRole.admin) _buildPrintButton(),
             ],
           ),
 
@@ -696,6 +711,7 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildStatusChip() {
+    final l10n = AppLocalizations.of(context)!;
     final isActive = _product!.deletedAt == null;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -722,7 +738,7 @@ Quantity: ${_product!.quantity}''';
           ),
           const SizedBox(width: 6),
           Text(
-            isActive ? 'Active' : 'Inactive',
+            isActive ? l10n.common_status_active ?? 'Active' : l10n.common_status_inactive ?? 'Inactive',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: isActive ? Colors.green[700] : Colors.red[700],
                   fontWeight: FontWeight.w600,
@@ -734,6 +750,8 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildImeiChip() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -751,7 +769,7 @@ Quantity: ${_product!.quantity}''';
           ),
           const SizedBox(width: 4),
           Text(
-            'IMEI',
+            l10n.products_label_imei ?? 'IMEI',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.orange[700],
                   fontWeight: FontWeight.bold,
@@ -763,6 +781,8 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildPrintButton() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
@@ -774,7 +794,7 @@ Quantity: ${_product!.quantity}''';
           Icons.print,
           color: Theme.of(context).primaryColor,
         ),
-        tooltip: 'Print Barcode',
+        tooltip: l10n.products_action_printBarcode ?? 'Print Barcode',
       ),
     );
   }
@@ -821,6 +841,8 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildPricingInventorySection() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -838,15 +860,15 @@ Quantity: ${_product!.quantity}''';
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader(
-            'Pricing & Inventory',
-            'Product pricing and stock information',
+            l10n.products_section_pricingInventory ?? 'Pricing & Inventory',
+            l10n.products_section_pricingInventoryDescription ?? 'Product pricing and stock information',
             Icons.attach_money,
           ),
           const SizedBox(height: 20),
           Column(
             children: [
               _buildPriceCard(
-                'Purchase Price',
+                l10n.products_label_purchasePrice ?? 'Purchase Price',
                 Provider.of<AppProvider>(context, listen: false)
                     .formatCurrency(_product!.purchasePrice),
                 Icons.shopping_cart_outlined,
@@ -856,11 +878,11 @@ Quantity: ${_product!.quantity}''';
                 padding: const EdgeInsets.symmetric(vertical: 8),
               ),
               _buildPriceCard(
-                'Sale Price',
+                l10n.products_label_salePrice ?? 'Sale Price',
                 _product!.salePrice != null
                     ? Provider.of<AppProvider>(context, listen: false)
                         .formatCurrency(_product!.salePrice!)
-                    : 'Not set',
+                    : l10n.common_label_notSet ?? 'Not set',
                 Icons.sell_outlined,
                 Colors.green,
               )
@@ -937,11 +959,13 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildQuantityInfo() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Current Stock',
+          l10n.products_label_currentStock ?? 'Current Stock',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[600],
@@ -949,7 +973,7 @@ Quantity: ${_product!.quantity}''';
         ),
         const SizedBox(height: 4),
         Text(
-          '${NumberUtils.formatWithDots(_product!.quantity)} units',
+          '${NumberUtils.formatWithDots(_product!.quantity)} ${l10n.products_label_units ?? 'units'}',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -959,6 +983,7 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildStockStatusIndicator() {
+    final l10n = AppLocalizations.of(context)!;
     final quantity = _product!.quantity;
     Color statusColor;
     String statusText;
@@ -966,15 +991,15 @@ Quantity: ${_product!.quantity}''';
 
     if (quantity == 0) {
       statusColor = Colors.red;
-      statusText = 'Out of Stock';
+      statusText = l10n.products_status_outOfStock ?? 'Out of Stock';
       statusIcon = Icons.error_outline;
     } else if (quantity < 10) {
       statusColor = Colors.orange;
-      statusText = 'Low Stock';
+      statusText = l10n.products_status_lowStock ?? 'Low Stock';
       statusIcon = Icons.warning_outlined;
     } else {
       statusColor = Colors.green;
-      statusText = 'In Stock';
+      statusText = l10n.products_status_inStock ?? 'In Stock';
       statusIcon = Icons.check_circle_outline;
     }
 
@@ -1006,6 +1031,8 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildStoreCategorySection() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -1023,8 +1050,8 @@ Quantity: ${_product!.quantity}''';
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader(
-            'Location & Category',
-            'Store location and product categorization',
+            l10n.products_section_locationCategory ?? 'Location & Category',
+            l10n.products_section_locationCategoryDescription ?? 'Store location and product categorization',
             Icons.store,
           ),
           const SizedBox(height: 20),
@@ -1032,8 +1059,8 @@ Quantity: ${_product!.quantity}''';
             children: [
               Expanded(
                 child: _buildLocationInfoCard(
-                  'Store',
-                  _store?.name ?? 'Loading...',
+                  l10n.common_label_store ?? 'Store',
+                  _store?.name ?? l10n.common_status_loading ?? 'Loading...',
                   Icons.store_outlined,
                   Theme.of(context).primaryColor,
                 ),
@@ -1042,8 +1069,8 @@ Quantity: ${_product!.quantity}''';
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildLocationInfoCard(
-                    'Category',
-                    _category?.name ?? 'Loading...',
+                    l10n.common_label_category ?? 'Category',
+                    _category?.name ?? l10n.common_status_loading ?? 'Loading...',
                     Icons.category_outlined,
                     Colors.purple,
                   ),
@@ -1107,6 +1134,8 @@ Quantity: ${_product!.quantity}''';
   }
 
   Widget _buildAdditionalInfoSection() {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -1124,8 +1153,8 @@ Quantity: ${_product!.quantity}''';
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionHeader(
-            'Additional Information',
-            'System information and timestamps',
+            l10n.products_section_additionalInfo ?? 'Additional Information',
+            l10n.products_section_additionalInfoDescription ?? 'System information and timestamps',
             Icons.info_outlined,
           ),
           const SizedBox(height: 20),
@@ -1140,10 +1169,10 @@ Quantity: ${_product!.quantity}''';
             ),
             child: Column(
               children: [
-                _buildInfoRow('Created', _formatDateTime(_product!.createdAt)),
+                _buildInfoRow(l10n.common_label_created ?? 'Created', _formatDateTime(_product!.createdAt)),
                 const SizedBox(height: 12),
                 _buildInfoRow(
-                    'Last Updated', _formatDateTime(_product!.updatedAt)),
+                    l10n.common_label_lastUpdated ?? 'Last Updated', _formatDateTime(_product!.updatedAt)),
               ],
             ),
           ),

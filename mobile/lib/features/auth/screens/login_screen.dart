@@ -156,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen>
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.5),
+              Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha:0.5),
               Theme.of(context).colorScheme.primaryContainer.withValues(alpha:0.3),
             ],
             stops: const [0.0, 0.6, 1.0],
@@ -268,7 +268,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.5),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha:0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -621,7 +621,7 @@ class _LoginScreenState extends State<LoginScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.5),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha:0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

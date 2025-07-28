@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 import '../theme/theme_colors.dart';
 import '../theme/typography.dart';
 import '../utils/imei_utils.dart';
 import '../providers/app_provider.dart';
-import '../routing/app_router.dart';
 import '../utils/scanner_launcher.dart';
 
 /// Form components for the WMS application

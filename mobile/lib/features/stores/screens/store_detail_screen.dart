@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../generated/app_localizations.dart';
@@ -7,6 +8,7 @@ import '../../../core/services/store_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/models/user.dart';
 import '../../../core/widgets/loading.dart';
+import '../../../core/widgets/wms_app_bar.dart';
 
 class StoreDetailScreen extends StatefulWidget {
   final String storeId;
@@ -60,6 +62,32 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _shareStore() {
+    // Guard clause: ensure store exists
+    if (_store == null) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final storeInfo = '''${l10n.stores_title_details ?? 'Store Details'}:
+${l10n.stores_label_name ?? 'Name'}: ${_store!.name}
+${l10n.stores_label_type ?? 'Type'}: ${_store!.type}
+${l10n.stores_label_status ?? 'Status'}: ${_store!.isActive ? l10n.active : l10n.inactive}
+${l10n.stores_label_address ?? 'Address'}: ${_store!.addressLine1}, ${_store!.city}, ${_store!.province}
+${l10n.stores_label_phone ?? 'Phone'}: ${_store!.phoneNumber}
+${_store!.email?.isNotEmpty == true ? '${l10n.stores_label_email ?? 'Email'}: ${_store!.email}' : ''}''';
+
+    Clipboard.setData(ClipboardData(text: storeInfo));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.common_message_copiedToClipboard ?? 'Store information copied to clipboard'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
 
   Future<void> _deleteStore() async {
@@ -123,11 +151,48 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     final isOwner = authProvider.currentUser?.role == UserRole.owner;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      appBar: _buildWMSAppBar(context, isOwner),
       body: _isLoading
           ? const Center(child: WMSLoadingIndicator())
           : _hasError
               ? _buildErrorView(l10n, theme)
               : _buildContent(l10n, theme, isOwner),
+      floatingActionButton: _store != null && isOwner ? _buildFloatingActionButton(l10n) : null,
+    );
+  }
+
+  PreferredSizeWidget _buildWMSAppBar(BuildContext context, bool isOwner) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return WMSAppBar(
+      icon: Icons.store,
+      title: _store?.name ?? l10n.stores_title_details ?? 'Store Details',
+      badge: _store?.isActive == true
+        ? WMSAppBarBadge.active(Theme.of(context))
+        : _store?.isActive == false
+          ? WMSAppBarBadge.inactive(Theme.of(context))
+          : null,
+      shareConfig: _store != null 
+        ? WMSAppBarShare(onShare: _shareStore)
+        : null,
+      menuItems: isOwner && _store != null 
+        ? [
+            WMSAppBarMenuItem.delete(
+              onTap: _deleteStore,
+              title: l10n.stores_action_deleteStore ?? 'Delete Store',
+            ),
+          ]
+        : null,
+    );
+  }
+
+  Widget _buildFloatingActionButton(AppLocalizations l10n) {
+    return FloatingActionButton(
+      onPressed: () => context.pushNamed('editStore', pathParameters: {'id': widget.storeId}),
+      backgroundColor: Theme.of(context).primaryColor,
+      tooltip: l10n.editStore,
+      child: const Icon(Icons.edit, color: Colors.white),
     );
   }
 
@@ -185,199 +250,198 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
       return const Center(child: WMSLoadingIndicator());
     }
 
-    return CustomScrollView(
-      slivers: [
-        // Hero App Bar
-        SliverAppBar(
-          expandedHeight: 200,
-          pinned: true,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.primary.withValues(alpha: 0.8),
-                    theme.colorScheme.secondary.withValues(alpha: 0.6),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hero Store Card
+          _buildHeroCard(l10n, theme),
+          
+          const SizedBox(height: 16),
+
+          // Store Information Card
+          _buildInfoCard(
+            l10n.storeInformation,
+            Icons.info_outline,
+            [
+              _buildInfoRow(l10n.storeName, _store!.name),
+              _buildInfoRow(l10n.storeType, _store!.type),
+              _buildInfoRow(l10n.status, _store!.isActive ? l10n.active : l10n.inactive),
+              _buildInfoRow(l10n.timezone, _store!.timezone),
+              if (_store!.hasOperatingHours) ...[
+                _buildInfoRow(l10n.openTime, _store!.openTime?.toString().split(' ')[1] ?? ''),
+                _buildInfoRow(l10n.closeTime, _store!.closeTime?.toString().split(' ')[1] ?? ''),
+              ],
+            ],
+            theme,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Address Information Card
+          _buildInfoCard(
+            l10n.addressInformation,
+            Icons.location_on_outlined,
+            [
+              _buildInfoRow(l10n.addressLine1, _store!.addressLine1),
+              if (_store!.addressLine2?.isNotEmpty == true)
+                _buildInfoRow(l10n.addressLine2, _store!.addressLine2!),
+              _buildInfoRow(l10n.city, _store!.city),
+              _buildInfoRow(l10n.province, _store!.province),
+              _buildInfoRow(l10n.postalCode, _store!.postalCode),
+              _buildInfoRow(l10n.country, _store!.country),
+              if (_store!.mapLocation?.isNotEmpty == true)
+                _buildInfoRow(l10n.mapLocation, _store!.mapLocation!),
+            ],
+            theme,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Contact Information Card
+          _buildInfoCard(
+            l10n.contactInformation,
+            Icons.contact_phone_outlined,
+            [
+              _buildInfoRow(l10n.phoneNumber, _store!.phoneNumber),
+              if (_store!.email?.isNotEmpty == true)
+                _buildInfoRow(l10n.email, _store!.email!),
+            ],
+            theme,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Audit Information Card
+          _buildInfoCard(
+            l10n.auditInformation,
+            Icons.history,
+            [
+              _buildInfoRow(l10n.createdBy, _store!.createdBy),
+              _buildInfoRow(l10n.createdAt, _formatDateTime(_store!.createdAt)),
+              _buildInfoRow(l10n.updatedAt, _formatDateTime(_store!.updatedAt)),
+              if (_store!.deletedAt != null)
+                _buildInfoRow(l10n.deletedAt, _formatDateTime(_store!.deletedAt!)),
+            ],
+            theme,
+          ),
+
+          const SizedBox(height: 80), // Space for FAB
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroCard(AppLocalizations l10n, ThemeData theme) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            theme.primaryColor.withValues(alpha: 0.1),
+            theme.primaryColor.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.primaryColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.store,
+                  color: theme.primaryColor,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _store!.name,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _store!.type,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.store,
-                          color: theme.colorScheme.onPrimary,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _store!.name,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _store!.isActive
-                                  ? Colors.green.withValues(alpha: 0.2)
-                                  : Colors.red.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _store!.isActive ? l10n.active : l10n.inactive,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: _store!.isActive ? Colors.green : Colors.red,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            _store!.type,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          actions: [
-            if (isOwner) ...[
-              IconButton(
-                onPressed: () => context.pushNamed('editStore', pathParameters: {'id': widget.storeId}),
-                icon: const Icon(Icons.edit),
-                tooltip: l10n.editStore,
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'delete') {
-                    _deleteStore();
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.delete, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Text(l10n.delete, style: const TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ],
-          ],
-        ),
-
-        // Content
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Store Information Card
-                _buildInfoCard(
-                  l10n.storeInformation,
-                  Icons.info_outline,
-                  [
-                    _buildInfoRow(l10n.storeName, _store!.name),
-                    _buildInfoRow(l10n.storeType, _store!.type),
-                    _buildInfoRow(l10n.status, _store!.isActive ? l10n.active : l10n.inactive),
-                    _buildInfoRow(l10n.timezone, _store!.timezone),
-                    if (_store!.hasOperatingHours) ...[
-                      _buildInfoRow(l10n.openTime, _store!.openTime?.toString().split(' ')[1] ?? ''),
-                      _buildInfoRow(l10n.closeTime, _store!.closeTime?.toString().split(' ')[1] ?? ''),
-                    ],
-                  ],
-                  theme,
-                ),
-
-                const SizedBox(height: 16),
-
-                // Address Information Card
-                _buildInfoCard(
-                  l10n.addressInformation,
-                  Icons.location_on_outlined,
-                  [
-                    _buildInfoRow(l10n.addressLine1, _store!.addressLine1),
-                    if (_store!.addressLine2?.isNotEmpty == true)
-                      _buildInfoRow(l10n.addressLine2, _store!.addressLine2!),
-                    _buildInfoRow(l10n.city, _store!.city),
-                    _buildInfoRow(l10n.province, _store!.province),
-                    _buildInfoRow(l10n.postalCode, _store!.postalCode),
-                    _buildInfoRow(l10n.country, _store!.country),
-                    if (_store!.mapLocation?.isNotEmpty == true)
-                      _buildInfoRow(l10n.mapLocation, _store!.mapLocation!),
-                  ],
-                  theme,
-                ),
-
-                const SizedBox(height: 16),
-
-                // Contact Information Card
-                _buildInfoCard(
-                  l10n.contactInformation,
-                  Icons.contact_phone_outlined,
-                  [
-                    _buildInfoRow(l10n.phoneNumber, _store!.phoneNumber),
-                    if (_store!.email?.isNotEmpty == true)
-                      _buildInfoRow(l10n.email, _store!.email!),
-                  ],
-                  theme,
-                ),
-
-                const SizedBox(height: 16),
-
-                // Audit Information Card
-                _buildInfoCard(
-                  l10n.auditInformation,
-                  Icons.history,
-                  [
-                    _buildInfoRow(l10n.createdBy, _store!.createdBy),
-                    _buildInfoRow(l10n.createdAt, _formatDateTime(_store!.createdAt)),
-                    _buildInfoRow(l10n.updatedAt, _formatDateTime(_store!.updatedAt)),
-                    if (_store!.deletedAt != null)
-                      _buildInfoRow(l10n.deletedAt, _formatDateTime(_store!.deletedAt!)),
-                  ],
-                  theme,
-                ),
-
-                const SizedBox(height: 24),
-              ],
-            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _store!.isActive
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _store!.isActive ? Colors.green : Colors.red,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: _store!.isActive ? Colors.green : Colors.red,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _store!.isActive ? l10n.active : l10n.inactive,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: _store!.isActive ? Colors.green[700] : Colors.red[700],
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

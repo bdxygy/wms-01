@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/barcode_quantity_dialog.dart';
+import '../../../core/widgets/wms_app_bar.dart';
 import '../../../core/services/transaction_service.dart';
 import '../../../core/services/print_launcher.dart';
 import '../../../core/models/transaction.dart';
@@ -110,9 +112,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         _isUpdating = false;
       });
 
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Transaction marked as finished'),
+        SnackBar(
+          content: Text(l10n.transactions_message_markedFinished),
           backgroundColor: Colors.green,
         ),
       );
@@ -123,9 +126,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         _isUpdating = false;
       });
 
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to mark transaction as finished: $e'),
+          content: Text(l10n.transactions_error_markFinishedFailed(e.toString())),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -151,13 +155,15 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     // Guard clause: ensure transaction exists
     if (_transaction == null) return;
 
+    final l10n = AppLocalizations.of(context)!;
+
     try {
       // Show receipt quantity dialog
       final quantity = await showDialog<int>(
         context: context,
         builder: (context) => BarcodeQuantityDialog(
-          title: 'Print Receipt',
-          subtitle: 'Transaction #${_transaction!.id.substring(0, 8)}',
+          title: l10n.transactions_action_printReceipt,
+          subtitle: '${l10n.transactions_label_id} #${_transaction!.id.substring(0, 8)}',
           defaultQuantity: 1,
         ),
       );
@@ -186,11 +192,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           );
 
       if (result && mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(quantity == 1 
-              ? 'Receipt printed successfully!'
-              : '$quantity receipts printed successfully!'),
+              ? l10n.transactions_message_receiptPrintedSuccess
+              : l10n.transactions_message_receiptsPrintedSuccess(quantity.toString())),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -203,18 +210,20 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
       if (mounted) {
         final errorMessage = e.toString();
 
+        final l10n = AppLocalizations.of(context)!;
+        
         // Check if it's a connection issue
         if (errorMessage.contains('not connected')) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Printer not connected. Setting up printer...'),
+              content: Text(l10n.common_error_printerNotConnected),
               backgroundColor: Colors.orange,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
               action: SnackBarAction(
-                label: 'Setup',
+                label: l10n.common_action_setup,
                 onPressed: () => _printLauncher.connectAndPrint(context),
               ),
             ),
@@ -222,7 +231,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to print receipt: $e'),
+              content: Text(l10n.transactions_error_printReceiptFailed(e.toString())),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -233,6 +242,128 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         }
       }
     }
+  }
+
+  void _managePrinter() async {
+    try {
+      final isConnected = await _printLauncher.isConnected;
+
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Printer Management'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Status: ${isConnected ? 'Connected' : 'Disconnected'}'),
+              const SizedBox(height: 16),
+              const Text('Available Actions:'),
+              const SizedBox(height: 8),
+              if (!isConnected)
+                ListTile(
+                  leading: const Icon(Icons.bluetooth_connected),
+                  title: const Text('Connect to Printer'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _printLauncher.connectWithDialog(context);
+                  },
+                ),
+              if (isConnected) ...[
+                ListTile(
+                  leading: const Icon(Icons.print),
+                  title: const Text('Print Test Page'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _testPrinter();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.bluetooth_disabled),
+                  title: const Text('Disconnect'),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _printLauncher.disconnect();
+
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Printer disconnected'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error accessing printer: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _testPrinter() async {
+    try {
+      // Use the comprehensive connect and print method (no product = test page)
+      final result = await _printLauncher.connectAndPrint(context);
+
+      if (result && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Test page printed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Test print failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _shareTransaction() {
+    // Guard clause: ensure transaction exists
+    if (_transaction == null) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final transactionInfo = '''${l10n.transactions_title_details}:
+${l10n.transactions_label_id}: ${_transaction!.id}
+${l10n.transactions_label_type}: ${_transaction!.type.name.toUpperCase()}
+${l10n.transactions_label_amount}: ${NumberUtils.formatDoubleAsInt(_transaction!.calculatedAmount)}
+${l10n.transactions_label_items}: ${_transaction!.items?.length ?? 0}
+${l10n.transactions_label_status}: ${_transaction!.isFinished ? l10n.common_status_completed : l10n.common_status_pending}
+${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
+
+    // Copy to clipboard (simplified sharing)
+    Clipboard.setData(ClipboardData(text: transactionInfo));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.common_message_copiedToClipboard),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   void _viewPhoto(String photoUrl) {
@@ -252,121 +383,49 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: _buildModernAppBar(context, canEdit, user),
+      appBar: _buildWMSAppBar(context, canEdit, user),
       body: _buildBody(),
       floatingActionButton:
           _transaction != null && canEdit ? _buildFloatingActionButton() : null,
     );
   }
 
-  PreferredSizeWidget _buildModernAppBar(
+  PreferredSizeWidget _buildWMSAppBar(
       BuildContext context, bool canEdit, User? user) {
-    return AppBar(
-      elevation: 0,
-      iconTheme: Theme.of(context).iconTheme,
-      backgroundColor: Colors.transparent,
-      foregroundColor: Theme.of(context).colorScheme.onSurface,
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.receipt_long,
-              color: Theme.of(context).primaryColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Transaction Detail',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-          ),
-          if (_transaction?.isFinished == false) ...[
-            Container(
-              margin: const EdgeInsets.only(left: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.orange.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Text(
-                'Pending',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.orange[700],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
-              ),
-            ),
-          ],
-        ],
-      ),
-      actions: canEdit
-          ? [
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  switch (value) {
-                    case 'finish':
-                      _markFinished();
-                      break;
-                    case 'print':
-                      _printReceipt();
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  if (_transaction?.isFinished == false)
-                    PopupMenuItem(
-                      value: 'finish',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check_circle,
-                              size: 20, color: Colors.green),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              'Mark Finished',
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  PopupMenuItem(
-                    value: 'print',
-                    child: Row(
-                      children: [
-                        Icon(Icons.print,
-                            size: 20, color: Theme.of(context).primaryColor),
-                        const SizedBox(width: 8),
-                        const Flexible(
-                          child: Text(
-                            'Print Receipt',
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ]
+    // Guard clause: Owner, Admin, and Cashier can print receipts, Staff cannot
+    final canPrintReceipt = (user?.role == UserRole.owner || 
+                            user?.role == UserRole.admin || 
+                            user?.role == UserRole.cashier) && _transaction != null;
+    
+    final l10n = AppLocalizations.of(context)!;
+    
+    return WMSAppBar(
+      icon: Icons.receipt_long,
+      title: l10n.transactions_title_detail,
+      badge: _transaction?.isFinished == false 
+        ? WMSAppBarBadge.pending(Theme.of(context))
+        : _transaction?.isFinished == true
+          ? WMSAppBarBadge.completed(Theme.of(context))
           : null,
+      shareConfig: _transaction != null 
+        ? WMSAppBarShare(onShare: _shareTransaction)
+        : null,
+      printConfig: canPrintReceipt 
+        ? WMSAppBarPrint.receipt(
+            onPrint: _printReceipt,
+            onManagePrinter: _managePrinter,
+          )
+        : null,
+      menuItems: canEdit && _transaction?.isFinished == false 
+        ? [
+            WMSAppBarMenuItem(
+              value: 'finish',
+              title: l10n.transactions_action_markFinished,
+              icon: Icons.check_circle,
+              onTap: _markFinished,
+            ),
+          ]
+        : null,
     );
   }
 

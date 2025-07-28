@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../services/product_service.dart';
-import '../routing/app_router.dart';
 import '../widgets/global_barcode_scanner.dart';
 
 /// Utility class for launching the global barcode scanner with different configurations

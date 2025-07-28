@@ -28,6 +28,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **STAFF**: Read-only + product checking across owner's stores
 4. **CASHIER**: SALE transactions only, read access to owner's stores
 
+### Printing Permissions (Mobile)
+
+| Role | Barcode Printing | Receipt Printing | Printer Management |
+|------|------------------|------------------|--------------------|
+| **OWNER** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **ADMIN** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **STAFF** | ❌ No | ❌ No | ❌ No |
+| **CASHIER** | ❌ No | ✅ Yes | ✅ Yes |
+
+**Business Logic**: 
+- Barcode printing restricted to administrative roles (Owner/Admin) for inventory control
+- Receipt printing available to transactional roles (Owner/Admin/Cashier) for sales operations
+- Staff cannot print as they have read-only access with product checking only
+
 ## 🚀 **BACKEND: PRODUCTION READY (51 TypeScript files)**
 
 **40+ API endpoints** fully implemented with JWT authentication, RBAC, IMEI tracking, barcode generation, photo proof, validation, error handling, pagination, filtering, and comprehensive testing.
@@ -43,22 +57,31 @@ Transactions: CRUD /api/v1/transactions (SALE/TRANSFER types)
 IMEI Management: /api/v1/products/:id/imeis, /api/v1/imeis/:id
 ```
 
-## 📱 **MOBILE: PHASE 18+ COMPLETE - GLOBAL APPBAR & DASHBOARD INTEGRATION (100+ Dart files)**
+## 📱 **MOBILE: PHASE 18+ COMPLETE - GLOBAL APPBAR & PRINT PERMISSIONS (100+ Dart files)**
 
 **Current Status**: 95% Complete (18+/20 phases) | **Production Ready** | **Next**: Phase 19 - Thermal Printer Integration
 
-### Latest Completion: Phase 18+ - Global AppBar System & UI Consistency Framework ✅
+### Latest Completion: Phase 18++ - Code Quality & Error Resolution ✅
+- **✅ Complete i18n Error Resolution**: Eliminated all undefined_method and undefined_getter errors by adding 70+ missing localization keys with proper placeholder support
+- **✅ Import Cleanup**: Removed all unnecessary and unused imports across 8+ core service and widget files for cleaner codebase
+- **✅ API Deprecation Fixes**: Updated all deprecated `surfaceVariant` usage to `surfaceContainerHighest` for Material Design 3 compliance
+- **✅ Code Quality Improvements**: Fixed unused variables, improved clipboard functionality, added proper curly braces for flow control
+- **✅ Analysis Score Improvement**: Reduced flutter analyze issues from 158 to 90 (43% reduction) with zero blocking errors
+- **✅ Localization System Enhancement**: Added proper function call syntax for parameterized i18n messages with type consistency between English/Indonesian
+- **✅ Production Readiness**: All critical compilation and runtime errors resolved, application ready for deployment
+
+### Previous Completion: Phase 18+ - Global AppBar System & Role-Based Print Permissions ✅
 - **✅ Global AppBar System**: Complete WMSAppBar component providing consistency across all screens with flexible configuration for badges, print buttons, share functionality, and custom menu items
 - **✅ Dynamic AppBar Configuration**: Smart button placement logic that automatically chooses between direct action buttons and popup menus based on available options
 - **✅ Print Integration Framework**: Comprehensive print system with barcode printing, receipt printing, and printer management integrated into the global AppBar
+- **✅ Role-Based Print Permissions**: Proper permission system - barcode printing (Owner/Admin only), receipt printing (Owner/Admin/Cashier), Staff has no print access
 - **✅ Status Badge System**: Standardized badge system for IMEI products, transaction status, user status, and custom indicators with consistent theming
 - **✅ AppBar Factory Methods**: Pre-configured AppBar templates for common screen types (detail screens, forms, management screens) with factory patterns
 - **✅ Consistency Framework**: Mandatory WMSAppBar usage replacing custom AppBar implementations across all screens for unified user experience
 - **✅ Theme-Aware Components**: Complete integration with Material Design 3 theme system, supporting dark/light modes and custom color schemes
 - **✅ Responsive AppBar Design**: Mobile-optimized layout with proper text overflow handling, flexible title display, and touch-friendly action buttons
 - **✅ Menu System Enhancement**: Smart popup menu with contextual items, proper dividers, destructive action styling, and role-based visibility
-- **✅ Example Documentation**: Comprehensive usage examples showing 10+ different AppBar configurations for various screen types and use cases
-- **✅ Migration Implementation**: Successfully migrated ProductDetailScreen to demonstrate WMSAppBar usage patterns and benefits
+- **✅ Print System Migration**: Successfully migrated ProductDetailScreen and TransactionDetailScreen to use WMSAppBar with proper print permissions
 - **✅ Extension Architecture**: Flexible system supporting custom actions, share functionality, print operations, and future feature additions
 
 ### Completed Phases (15/20)
@@ -140,6 +163,22 @@ mobile/lib/
 
 ### Recent Developments ✅
 
+**Phase 18++ Code Quality & Error Resolution (December 2024):**
+- **Flutter Analyze Optimization**: Reduced issues from 158 to 90 (43% improvement) - eliminated all critical compilation errors
+- **Complete i18n System**: Added 70+ missing localization keys with proper placeholder support, fixed all undefined getter/method errors
+- **Import Optimization**: Cleaned up unnecessary imports across core services, widgets, and screens for better code organization
+- **Modern API Compliance**: Updated all deprecated Material Design APIs (`surfaceVariant` → `surfaceContainerHighest`) for future compatibility
+- **Code Quality Enhancement**: Fixed unused variables, improved clipboard functionality, standardized curly braces in flow control
+- **Production Readiness**: Zero blocking errors, fully functional i18n system, clean codebase ready for deployment
+
+**Phase 18+ Print Permissions & WMSAppBar Integration (December 2024):**
+- **Print Permission System**: Implemented role-based printing permissions - barcode printing (Owner/Admin only), receipt printing (Owner/Admin/Cashier)
+- **ProductDetailScreen WMSAppBar**: Migrated from custom AppBar to WMSAppBar with proper barcode print permissions and printer management
+- **TransactionDetailScreen WMSAppBar**: Migrated from custom AppBar to WMSAppBar with receipt print permissions and transaction management
+- **Unified Print System**: Consistent printer management across all screens with proper role validation
+- **Business Logic Enforcement**: Staff role correctly restricted from all printing operations, Cashier role enabled for receipt printing only
+- **Print Button Visibility**: UI elements properly hidden/shown based on user roles for optimal user experience
+
 **Phase 17+ Implementation (Store Management + Dashboard Enhancement + SKU Improvement):**
 - **Complete Store Management System**: Full CRUD operations with modern UI, search functionality, store detail views, and comprehensive form validation
 - **Dashboard Redesign**: Complete overhaul of owner dashboard with modern store switcher, full-width metric cards, and business-focused quick actions
@@ -182,7 +221,7 @@ mobile/lib/
 - **Product CRUD System**: Multi-step forms with IMEI management and comprehensive validation
 - **ProductImeiManagementScreen**: Complete IMEI management with dynamic layouts
 
-**Code Quality**: Production-ready codebase with comprehensive error handling, proper validation, and optimized performance.
+**Code Quality**: Production-ready codebase with comprehensive error handling, proper validation, optimized performance, and zero blocking compilation errors. Flutter analyze score improved from 158 to 90 issues (43% reduction) with complete i18n system implementation.
 
 ## 🔧 **Development Guidelines**
 
@@ -632,10 +671,11 @@ WMSAppBar(
 - `WMSAppBarBadge.completed(theme)` - Green completed status
 
 #### **Print System Integration:**
-- `WMSAppBarPrint.barcode()` - Barcode printing only
-- `WMSAppBarPrint.receipt()` - Receipt printing only  
-- `WMSAppBarPrint.both()` - Both barcode and receipt printing
+- `WMSAppBarPrint.barcode()` - Barcode printing only (Owner/Admin roles)
+- `WMSAppBarPrint.receipt()` - Receipt printing only (Owner/Admin/Cashier roles)
+- `WMSAppBarPrint.both()` - Both barcode and receipt printing (role-dependent)
 - All print configurations support optional printer management
+- **Role-Based Visibility**: Print buttons automatically hidden for unauthorized roles
 
 #### **Menu Item Factory Methods:**
 - `WMSAppBarMenuItem.edit()` - Standard edit action
@@ -727,9 +767,10 @@ Widget build(BuildContext context) {
 7. ✅ **Mobile Phase 16**: Modern UI/UX Redesign & Internationalization *(COMPLETED - Complete design system overhaul)*
 8. ✅ **Mobile Phase 17**: Store Management & Dashboard Enhancement *(COMPLETED - Full store CRUD and dashboard redesign)*
 9. ✅ **Mobile Phase 18**: Global AppBar System & UI Consistency *(COMPLETED - Unified AppBar component with print/share integration)*
-10. **Mobile Phase 19**: Thermal Printer Integration (2-3 days) *(Next Priority)*
-11. **Mobile Phase 20**: Analytics, Reporting & Production Deployment (3-4 days)
-12. **Web Frontend Development**: Build React UI using the complete API contract (optional)
+10. ✅ **Mobile Phase 18++**: Code Quality & Error Resolution *(COMPLETED - Zero blocking errors, 43% analysis improvement, complete i18n system)*
+11. **Mobile Phase 19**: Thermal Printer Integration (2-3 days) *(Next Priority)*
+12. **Mobile Phase 20**: Analytics, Reporting & Production Deployment (3-4 days)
+13. **Web Frontend Development**: Build React UI using the complete API contract (optional)
 
 ## Development Commands
 

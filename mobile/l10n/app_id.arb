@@ -156,7 +156,6 @@
   "updatedAt": "Diperbarui Pada",
   "deletedAt": "Dihapus Pada",
   "confirmDeleteStore": "Konfirmasi Hapus Toko",
-  "deleteStoreConfirmation": "Apakah Anda yakin ingin menghapus toko '{name}'? Tindakan ini tidak dapat dibatalkan.",
   "storeDeletedSuccessfully": "Toko berhasil dihapus",
   "failedToDeleteStore": "Gagal menghapus toko",
   "failedToLoadStore": "Gagal memuat toko",
@@ -531,5 +530,283 @@
   "users_delete_confirm_message": "Apakah Anda yakin ingin menghapus pengguna '{name}'? Tindakan ini tidak dapat dibatalkan.",
   "common_button_filter": "Filter",
   "common_button_clear_filters": "Hapus Filter",
-  "common_button_apply_filters": "Terapkan Filter"
+  "common_button_apply_filters": "Terapkan Filter",
+
+  "products_title_list": "Produk",
+  "products_title_details": "Detail Produk",
+  "products_title_create": "Buat Produk",
+  "products_title_edit": "Edit Produk",
+  "products_button_create": "Buat Produk",
+  "products_button_edit": "Edit Produk",
+  "products_button_delete": "Hapus Produk",
+  "products_action_printBarcode": "Cetak Barcode",
+  "products_action_deleteProduct": "Hapus Produk",
+  "products_action_manageImeis": "Kelola IMEI",
+  "products_label_name": "Nama Produk",
+  "products_label_sku": "SKU",
+  "products_label_barcode": "Barcode",
+  "products_label_price": "Harga",
+  "products_label_category": "Kategori",
+  "products_label_store": "Toko",
+  "products_label_stock": "Stok",
+  "products_label_description": "Deskripsi",
+  "products_label_isImei": "Produk IMEI",
+  "products_label_status": "Status",
+  "products_label_createdAt": "Dibuat Pada",
+  "products_label_updatedAt": "Diperbarui Pada",
+  "products_search_hint": "Cari produk berdasarkan nama, SKU, atau barcode...",
+  "products_empty_title": "Produk Tidak Ditemukan",
+  "products_empty_subtitle": "Buat produk pertama Anda untuk memulai",
+  "products_filter_title": "Filter Produk",
+  "products_filter_category": "Filter berdasarkan Kategori",
+  "products_filter_store": "Filter berdasarkan Toko",
+  "products_filter_status": "Filter berdasarkan Status",
+  "products_filter_all_categories": "Semua Kategori",
+  "products_filter_all_stores": "Semua Toko",
+  "products_filter_all_statuses": "Semua Status",
+  "products_filter_active_only": "Hanya Aktif",
+  "products_filter_inactive_only": "Hanya Tidak Aktif",
+  "products_validation_name_required": "Nama produk diperlukan",
+  "products_validation_sku_required": "SKU diperlukan",
+  "products_validation_price_required": "Harga diperlukan",
+  "products_validation_category_required": "Kategori diperlukan",
+  "products_validation_store_required": "Toko diperlukan",
+  "products_validation_description_required": "Deskripsi diperlukan",
+  "products_message_created_successfully": "Produk berhasil dibuat",
+  "products_message_updated_successfully": "Produk berhasil diperbarui",
+  "products_message_deleted_successfully": "Produk berhasil dihapus",
+  "products_message_failed_to_create": "Gagal membuat produk",
+  "products_message_failed_to_update": "Gagal memperbarui produk",
+  "products_message_failed_to_delete": "Gagal menghapus produk",
+  "products_message_failed_to_load": "Gagal memuat produk",
+  "products_message_failed_to_load_list": "Gagal memuat daftar produk",
+  "products_message_barcodePrintedSuccess": "Barcode berhasil dicetak",
+  "products_message_barcodesPrintedSuccess": "{count} barcode berhasil dicetak",
+  "@products_message_barcodesPrintedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "products_error_printBarcodeFailed": "Gagal mencetak barcode: {error}",
+  "@products_error_printBarcodeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "products_message_deleteConfirmation": "Apakah Anda yakin ingin menghapus \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
+  "@products_message_deleteConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "products_message_deleteSuccess": "Produk \"{name}\" berhasil dihapus",
+  "@products_message_deleteSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "products_error_deleteFailed": "Gagal menghapus produk: {error}",
+  "@products_error_deleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "products_message_barcodePrintFailed": "Gagal mencetak barcode",
+  "products_confirm_delete_title": "Hapus Produk",
+  "products_confirm_delete_message": "Apakah Anda yakin ingin menghapus produk '{name}'? Tindakan ini tidak dapat dibatalkan.",
+  "products_info_imei_product": "Produk IMEI",
+  "products_info_regular_product": "Produk Reguler",
+  "products_status_active": "Aktif",
+  "products_status_inactive": "Tidak Aktif",
+
+  "transactions_title_list": "Transaksi",
+  "transactions_title_details": "Detail Transaksi",
+  "transactions_title_create": "Buat Transaksi",
+  "transactions_title_edit": "Edit Transaksi",
+  "transactions_button_create": "Buat Transaksi",
+  "transactions_button_edit": "Edit Transaksi",
+  "transactions_button_delete": "Hapus Transaksi",
+  "transactions_action_printReceipt": "Cetak Struk",
+  "transactions_action_deleteTransaction": "Hapus Transaksi",
+  "transactions_label_id": "ID Transaksi",
+  "transactions_label_type": "Jenis Transaksi",
+  "transactions_label_status": "Status",
+  "transactions_label_total": "Total",
+  "transactions_label_quantity": "Jumlah",
+  "transactions_label_notes": "Catatan",
+  "transactions_label_createdBy": "Dibuat Oleh",
+  "transactions_label_createdAt": "Dibuat Pada",
+  "transactions_label_completedAt": "Diselesaikan Pada",
+  "transactions_search_hint": "Cari transaksi berdasarkan ID atau catatan...",
+  "transactions_empty_title": "Transaksi Tidak Ditemukan",
+  "transactions_empty_subtitle": "Buat transaksi pertama Anda untuk memulai",
+  "transactions_filter_title": "Filter Transaksi",
+  "transactions_filter_type": "Filter berdasarkan Jenis",
+  "transactions_filter_status": "Filter berdasarkan Status",
+  "transactions_filter_all_types": "Semua Jenis",
+  "transactions_filter_all_statuses": "Semua Status",
+  "transactions_filter_pending_only": "Hanya Tertunda",
+  "transactions_filter_completed_only": "Hanya Selesai",
+  "transactions_type_sale": "Penjualan",
+  "transactions_type_transfer": "Transfer",
+  "transactions_status_pending": "Tertunda",
+  "transactions_status_completed": "Selesai",
+  "transactions_validation_type_required": "Jenis transaksi diperlukan",
+  "transactions_validation_notes_required": "Catatan diperlukan",
+  "transactions_message_created_successfully": "Transaksi berhasil dibuat",
+  "transactions_message_updated_successfully": "Transaksi berhasil diperbarui",
+  "transactions_message_deleted_successfully": "Transaksi berhasil dihapus",
+  "transactions_message_failed_to_create": "Gagal membuat transaksi",
+  "transactions_message_failed_to_update": "Gagal memperbarui transaksi",
+  "transactions_message_failed_to_delete": "Gagal menghapus transaksi",
+  "transactions_message_failed_to_load": "Gagal memuat transaksi",
+  "transactions_message_failed_to_load_list": "Gagal memuat daftar transaksi",
+  "transactions_message_receiptPrintedSuccess": "Struk berhasil dicetak",
+  "transactions_message_receiptPrintFailed": "Gagal mencetak struk",
+  "transactions_confirm_delete_title": "Hapus Transaksi",
+  "transactions_confirm_delete_message": "Apakah Anda yakin ingin menghapus transaksi '{id}'? Tindakan ini tidak dapat dibatalkan.",
+  "transactions_dialog_print_quantity_title": "Jumlah Cetak",
+  "transactions_dialog_print_quantity_message": "Berapa banyak struk yang ingin Anda cetak?",
+  "transactions_dialog_print_quantity_label": "Jumlah",
+  "transactions_dialog_print_quantity_hint": "Masukkan jumlah (1-10)",
+  "transactions_dialog_print_quantity_validation": "Jumlah harus antara 1 dan 10",
+  "transactions_action_markFinished": "Tandai Selesai",
+  "transactions_action_printReceipt": "Cetak Struk",
+  "transactions_message_markedFinished": "Transaksi ditandai selesai",
+  "transactions_error_markFinishedFailed": "Gagal menandai transaksi selesai: {error}",
+  "@transactions_error_markFinishedFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_message_receiptsPrintedSuccess": "{count} struk berhasil dicetak",
+  "@transactions_message_receiptsPrintedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_printReceiptFailed": "Gagal mencetak struk: {error}",
+  "@transactions_error_printReceiptFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_label_amount": "Jumlah",
+  "transactions_label_items": "Item",
+  "transactions_label_date": "Tanggal",
+  "transactions_title_detail": "Detail Transaksi",
+
+  "stores_title_list": "Toko",
+  "stores_title_details": "Detail Toko",
+  "stores_title_create": "Buat Toko",
+  "stores_title_edit": "Edit Toko",
+  "stores_button_create": "Buat Toko",  
+  "stores_button_edit": "Edit Toko",
+  "stores_button_delete": "Hapus Toko",
+  "stores_action_deleteStore": "Hapus Toko",
+  "stores_label_name": "Nama Toko",
+  "stores_label_type": "Jenis Toko", 
+  "stores_label_status": "Status",
+  "stores_label_address": "Alamat",
+  "stores_label_phone": "Telepon",
+  "stores_label_email": "Email",
+  "stores_label_timezone": "Zona Waktu",
+  "stores_label_openTime": "Jam Buka",
+  "stores_label_closeTime": "Jam Tutup",
+  "stores_label_createdAt": "Dibuat Pada",
+  "stores_label_updatedAt": "Diperbarui Pada",
+  "stores_search_hint": "Cari toko berdasarkan nama atau alamat...",
+  "stores_empty_title": "Toko Tidak Ditemukan",
+  "stores_empty_subtitle": "Buat toko pertama Anda untuk memulai",
+  "stores_filter_title": "Filter Toko",
+  "stores_filter_status": "Filter berdasarkan Status",
+  "stores_filter_type": "Filter berdasarkan Jenis",
+  "stores_filter_all_statuses": "Semua Status",
+  "stores_filter_all_types": "Semua Jenis",
+  "stores_filter_active_only": "Hanya Aktif",
+  "stores_filter_inactive_only": "Hanya Tidak Aktif",
+  "stores_validation_name_required": "Nama toko diperlukan",
+  "stores_validation_type_required": "Jenis toko diperlukan",
+  "stores_validation_address_required": "Alamat diperlukan",
+  "stores_validation_phone_required": "Nomor telepon diperlukan",
+  "stores_validation_timezone_required": "Zona waktu diperlukan",
+  "stores_message_created_successfully": "Toko berhasil dibuat",
+  "stores_message_updated_successfully": "Toko berhasil diperbarui",
+  "stores_message_deleted_successfully": "Toko berhasil dihapus",
+  "stores_message_failed_to_create": "Gagal membuat toko",
+  "stores_message_failed_to_update": "Gagal memperbarui toko",
+  "stores_message_failed_to_delete": "Gagal menghapus toko",
+  "stores_message_failed_to_load": "Gagal memuat toko",
+  "stores_message_failed_to_load_list": "Gagal memuat daftar toko",
+  "stores_confirm_delete_title": "Hapus Toko",
+  "stores_confirm_delete_message": "Apakah Anda yakin ingin menghapus toko '{name}'? Tindakan ini tidak dapat dibatalkan.",
+  "stores_status_active": "Aktif",
+  "stores_status_inactive": "Tidak Aktif",
+
+  "common_message_copiedToClipboard": "Informasi berhasil disalin ke clipboard",
+  "common_action_share": "Bagikan",
+  "common_action_print": "Cetak",
+  "common_action_manage": "Kelola",
+  "common_action_test": "Tes",
+  "common_printer_manage": "Kelola Printer",
+  "common_printer_test": "Tes Printer",
+  "common_printer_connect": "Hubungkan Printer",
+  "common_printer_status": "Status Printer",
+  "common_printer_connected": "Printer Terhubung",
+  "common_printer_disconnected": "Printer Terputus",
+  "common_printer_searching": "Mencari Printer...",
+  "common_printer_failed_to_connect": "Gagal menghubungkan printer",
+  "common_printer_connection_lost": "Koneksi printer terputus",
+  "common_error_permission_denied": "Izin ditolak",
+  "common_error_network_error": "Error jaringan",
+  "common_error_unknown": "Error tidak dikenal",
+  "common_status_pending": "Tertunda",
+  "common_status_completed": "Selesai",
+  "common_status_failed": "Gagal",
+  "common_status_processing": "Memproses",
+  "common_info_no_data": "Tidak ada data tersedia",
+  "common_info_loading": "Memuat...",
+  "common_info_refreshing": "Menyegarkan...",
+  "common_dialog_confirm": "Konfirmasi",
+  "common_dialog_warning": "Peringatan",
+  "common_dialog_error": "Error",
+  "common_dialog_info": "Informasi",
+  "common_error_printerNotConnected": "Printer tidak terhubung",
+  "common_error_permissionRequired": "Izin diperlukan: {error}",
+  "@common_error_permissionRequired": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "common_action_setup": "Atur",
+  "confirmDeleteStore": "Konfirmasi Hapus Toko",  
+  "deleteStoreConfirmation": "Apakah Anda yakin ingin menghapus toko '{name}'? Tindakan ini tidak dapat dibatalkan.",
+  "@deleteStoreConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "storeDeletedSuccessfully": "Toko berhasil dihapus",
+  "failedToDeleteStore": "Gagal menghapus toko",
+  "failedToLoadStore": "Gagal memuat toko"
 }

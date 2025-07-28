@@ -19,7 +19,6 @@ class CreateTransactionScreen extends StatefulWidget {
 
 class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
   final TransactionService _transactionService = TransactionService();
-  bool _isLoading = false;
 
   Future<void> _createTransaction(TransactionFormData formData) async {
     final authProvider = context.read<AuthProvider>();
@@ -37,7 +36,6 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
     }
 
     try {
-      setState(() => _isLoading = true);
       // Convert form items to backend items
       final backendItems = formData.items.map((item) => 
         TransactionItemBackendRequest(
@@ -101,10 +99,6 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }

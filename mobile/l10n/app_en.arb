@@ -157,6 +157,13 @@
   "deletedAt": "Deleted At",
   "confirmDeleteStore": "Confirm Delete Store",
   "deleteStoreConfirmation": "Are you sure you want to delete store '{name}'? This action cannot be undone.",
+  "@deleteStoreConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "storeDeletedSuccessfully": "Store deleted successfully",
   "failedToDeleteStore": "Failed to delete store",
   "failedToLoadStore": "Failed to load store",
@@ -712,5 +719,217 @@
   },
   "common_button_filter": "Filter",
   "common_button_clear_filters": "Clear Filters",
-  "common_button_apply_filters": "Apply Filters"
+  "common_button_apply_filters": "Apply Filters",
+
+  "products_action_printBarcode": "Print Barcode",
+  "products_action_deleteProduct": "Delete Product",
+  "products_message_barcodePrintedSuccess": "Barcode printed successfully!",
+  "products_message_barcodesPrintedSuccess": "{count} barcodes printed successfully!",
+  "@products_message_barcodesPrintedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "products_error_printBarcodeFailed": "Failed to print barcode: {error}",
+  "@products_error_printBarcodeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "products_message_deleteConfirmation": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+  "@products_message_deleteConfirmation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "products_message_deleteSuccess": "Product \"{name}\" deleted successfully",
+  "@products_message_deleteSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "products_error_deleteFailed": "Failed to delete product: {error}",
+  "@products_error_deleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "products_error_onlyOwnersCanDelete": "Only owners can delete products",
+  "products_title_deleteProduct": "Delete Product",
+  "products_title_details": "Product Details",
+  "products_error_loadFailed": "Failed to Load Product",
+  "products_error_notFound": "Product Not Found",
+  "products_error_notFoundDescription": "The product you're looking for doesn't exist or has been removed.",
+  "products_section_pricingInventory": "Pricing & Inventory",
+  "products_section_pricingInventoryDescription": "Product pricing and stock information",
+  "products_section_locationCategory": "Location & Category",
+  "products_section_locationCategoryDescription": "Store location and product categorization",
+  "products_section_additionalInfo": "Additional Information",
+  "products_section_additionalInfoDescription": "System information and timestamps",
+  "products_label_name": "Name",
+  "products_label_sku": "SKU",
+  "products_label_barcode": "Barcode",
+  "products_label_price": "Price",
+  "products_label_quantity": "Quantity",
+  "products_label_purchasePrice": "Purchase Price",
+  "products_label_salePrice": "Sale Price",
+  "products_label_currentStock": "Current Stock",
+  "products_label_units": "units",
+  "products_label_imei": "IMEI",
+  "products_status_outOfStock": "Out of Stock",
+  "products_status_lowStock": "Low Stock",
+  "products_status_inStock": "In Stock",
+
+  "transactions_action_printReceipt": "Print Receipt",
+  "transactions_action_markFinished": "Mark Finished",
+  "transactions_label_transactionId": "Transaction",
+  "transactions_message_receiptPrintedSuccess": "Receipt printed successfully!",
+  "transactions_message_receiptsPrintedSuccess": "{count} receipts printed successfully!",
+  "@transactions_message_receiptsPrintedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_printReceiptFailed": "Failed to print receipt: {error}",
+  "@transactions_error_printReceiptFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_message_markedFinished": "Transaction marked as finished",
+  "transactions_error_markFinishedFailed": "Failed to mark transaction as finished: {error}",
+  "@transactions_error_markFinishedFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_title_detail": "Transaction Detail",
+  "transactions_title_details": "Transaction Details",
+  "transactions_label_id": "ID",
+  "transactions_label_type": "Type",
+  "transactions_label_amount": "Amount",
+  "transactions_label_items": "Items",
+  "transactions_label_status": "Status",
+  "transactions_label_date": "Date",
+  "transactions_action_markFinished": "Mark as Finished",
+  "transactions_action_printReceipt": "Print Receipt",
+  "transactions_message_markedFinished": "Transaction marked as finished",
+  "transactions_error_markFinishedFailed": "Failed to mark transaction as finished: {error}",
+  "@transactions_error_markFinishedFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_message_receiptsPrintedSuccess": "{count} receipts printed successfully",
+  "@transactions_message_receiptsPrintedSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_printReceiptFailed": "Failed to print receipt: {error}",
+  "@transactions_error_printReceiptFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "stores_title_details": "Store Details",
+  "stores_action_deleteStore": "Delete Store",
+  "stores_label_name": "Name",
+  "stores_label_type": "Type",
+  "stores_label_status": "Status",
+  "stores_label_address": "Address",
+  "stores_label_phone": "Phone",
+  "stores_label_email": "Email",
+
+  "common_error_permissionRequired": "Permission required: {error}",
+  "@common_error_permissionRequired": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "common_action_settings": "Settings",
+  "common_action_setupPrinter": "Setup Printer",
+  "common_action_retry": "Retry",
+  "common_action_cancel": "Cancel",
+  "common_action_delete": "Delete",
+  "common_action_close": "Close",
+  "common_action_setup": "Setup",
+  "common_message_testPagePrintedSuccess": "Test page printed successfully!",
+  "common_error_testPrintFailed": "Test print failed: {error}",
+  "@common_error_testPrintFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "common_title_printerManagement": "Printer Management",
+  "common_label_printerStatus": "Status: {status}",
+  "@common_label_printerStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "common_status_connected": "Connected",
+  "common_status_disconnected": "Disconnected",
+  "common_label_availableActions": "Available Actions:",
+  "common_action_connectToPrinter": "Connect to Printer",
+  "common_action_printTestPage": "Print Test Page",
+  "common_action_disconnect": "Disconnect",
+  "common_message_printerDisconnected": "Printer disconnected",
+  "common_error_printerAccessFailed": "Error accessing printer: {error}",
+  "@common_error_printerAccessFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "common_message_copiedToClipboard": "Information copied to clipboard",
+  "common_label_notSet": "Not set",
+  "common_label_store": "Store",
+  "common_label_category": "Category",
+  "common_status_loading": "Loading...",
+  "common_status_active": "Active",
+  "common_status_inactive": "Inactive",
+  "common_label_created": "Created",
+  "common_label_lastUpdated": "Last Updated",
+  "common_status_completed": "Completed",
+  "common_status_pending": "Pending",
+  "common_error_printerNotConnected": "Printer not connected. Setting up printer...",
+  "common_error_permissionRequired": "Permission required: {error}",
+  "@common_error_permissionRequired": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

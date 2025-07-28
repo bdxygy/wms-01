@@ -3,7 +3,6 @@ import '../api/api_endpoints.dart';
 import '../models/api_response.dart';
 import '../models/api_requests.dart';
 import '../models/product.dart';
-import '../validators/product_validators.dart';
 
 class ProductService {
   final ApiClient _apiClient = ApiClient.instance;

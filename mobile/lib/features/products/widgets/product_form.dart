@@ -12,7 +12,6 @@ import '../../../core/services/product_service.dart';
 import '../../../core/validators/product_validators.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/auth/auth_provider.dart';
-import '../../../core/routing/app_router.dart';
 import '../../../core/utils/scanner_launcher.dart';
 import '../../../core/utils/number_utils.dart';
 

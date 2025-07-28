@@ -565,7 +565,7 @@ class _TransactionFormState extends State<TransactionForm> {
             decoration: BoxDecoration(
               color: Theme.of(context)
                   .colorScheme
-                  .surfaceVariant
+                  .surfaceContainerHighest
                   .withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Theme.of(context).dividerColor),
@@ -634,7 +634,7 @@ class _TransactionFormState extends State<TransactionForm> {
         decoration: BoxDecoration(
           color: Theme.of(context)
               .colorScheme
-              .surfaceVariant
+              .surfaceContainerHighest
               .withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Theme.of(context).dividerColor),
@@ -794,7 +794,7 @@ class _TransactionFormState extends State<TransactionForm> {
         decoration: BoxDecoration(
           color: Theme.of(context)
               .colorScheme
-              .surfaceVariant
+              .surfaceContainerHighest
               .withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Theme.of(context).dividerColor),

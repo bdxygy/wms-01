@@ -447,7 +447,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDeleteStore => 'Confirm Delete Store';
 
   @override
-  String deleteStoreConfirmation(Object name) {
+  String deleteStoreConfirmation(String name) {
     return 'Are you sure you want to delete store \'$name\'? This action cannot be undone.';
   }
 
@@ -1694,4 +1694,306 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_button_apply_filters => 'Apply Filters';
+
+  @override
+  String get products_action_printBarcode => 'Print Barcode';
+
+  @override
+  String get products_action_deleteProduct => 'Delete Product';
+
+  @override
+  String get products_message_barcodePrintedSuccess =>
+      'Barcode printed successfully!';
+
+  @override
+  String products_message_barcodesPrintedSuccess(String count) {
+    return '$count barcodes printed successfully!';
+  }
+
+  @override
+  String products_error_printBarcodeFailed(String error) {
+    return 'Failed to print barcode: $error';
+  }
+
+  @override
+  String products_message_deleteConfirmation(String name) {
+    return 'Are you sure you want to delete \"$name\"? This action cannot be undone.';
+  }
+
+  @override
+  String products_message_deleteSuccess(String name) {
+    return 'Product \"$name\" deleted successfully';
+  }
+
+  @override
+  String products_error_deleteFailed(String error) {
+    return 'Failed to delete product: $error';
+  }
+
+  @override
+  String get products_error_onlyOwnersCanDelete =>
+      'Only owners can delete products';
+
+  @override
+  String get products_title_deleteProduct => 'Delete Product';
+
+  @override
+  String get products_title_details => 'Product Details';
+
+  @override
+  String get products_error_loadFailed => 'Failed to Load Product';
+
+  @override
+  String get products_error_notFound => 'Product Not Found';
+
+  @override
+  String get products_error_notFoundDescription =>
+      'The product you\'re looking for doesn\'t exist or has been removed.';
+
+  @override
+  String get products_section_pricingInventory => 'Pricing & Inventory';
+
+  @override
+  String get products_section_pricingInventoryDescription =>
+      'Product pricing and stock information';
+
+  @override
+  String get products_section_locationCategory => 'Location & Category';
+
+  @override
+  String get products_section_locationCategoryDescription =>
+      'Store location and product categorization';
+
+  @override
+  String get products_section_additionalInfo => 'Additional Information';
+
+  @override
+  String get products_section_additionalInfoDescription =>
+      'System information and timestamps';
+
+  @override
+  String get products_label_name => 'Name';
+
+  @override
+  String get products_label_sku => 'SKU';
+
+  @override
+  String get products_label_barcode => 'Barcode';
+
+  @override
+  String get products_label_price => 'Price';
+
+  @override
+  String get products_label_quantity => 'Quantity';
+
+  @override
+  String get products_label_purchasePrice => 'Purchase Price';
+
+  @override
+  String get products_label_salePrice => 'Sale Price';
+
+  @override
+  String get products_label_currentStock => 'Current Stock';
+
+  @override
+  String get products_label_units => 'units';
+
+  @override
+  String get products_label_imei => 'IMEI';
+
+  @override
+  String get products_status_outOfStock => 'Out of Stock';
+
+  @override
+  String get products_status_lowStock => 'Low Stock';
+
+  @override
+  String get products_status_inStock => 'In Stock';
+
+  @override
+  String get transactions_action_printReceipt => 'Print Receipt';
+
+  @override
+  String get transactions_action_markFinished => 'Mark as Finished';
+
+  @override
+  String get transactions_label_transactionId => 'Transaction';
+
+  @override
+  String get transactions_message_receiptPrintedSuccess =>
+      'Receipt printed successfully!';
+
+  @override
+  String transactions_message_receiptsPrintedSuccess(String count) {
+    return '$count receipts printed successfully';
+  }
+
+  @override
+  String transactions_error_printReceiptFailed(String error) {
+    return 'Failed to print receipt: $error';
+  }
+
+  @override
+  String get transactions_message_markedFinished =>
+      'Transaction marked as finished';
+
+  @override
+  String transactions_error_markFinishedFailed(String error) {
+    return 'Failed to mark transaction as finished: $error';
+  }
+
+  @override
+  String get transactions_title_detail => 'Transaction Detail';
+
+  @override
+  String get transactions_title_details => 'Transaction Details';
+
+  @override
+  String get transactions_label_id => 'ID';
+
+  @override
+  String get transactions_label_type => 'Type';
+
+  @override
+  String get transactions_label_amount => 'Amount';
+
+  @override
+  String get transactions_label_items => 'Items';
+
+  @override
+  String get transactions_label_status => 'Status';
+
+  @override
+  String get transactions_label_date => 'Date';
+
+  @override
+  String get stores_title_details => 'Store Details';
+
+  @override
+  String get stores_action_deleteStore => 'Delete Store';
+
+  @override
+  String get stores_label_name => 'Name';
+
+  @override
+  String get stores_label_type => 'Type';
+
+  @override
+  String get stores_label_status => 'Status';
+
+  @override
+  String get stores_label_address => 'Address';
+
+  @override
+  String get stores_label_phone => 'Phone';
+
+  @override
+  String get stores_label_email => 'Email';
+
+  @override
+  String common_error_permissionRequired(String error) {
+    return 'Permission required: $error';
+  }
+
+  @override
+  String get common_action_settings => 'Settings';
+
+  @override
+  String get common_action_setupPrinter => 'Setup Printer';
+
+  @override
+  String get common_action_retry => 'Retry';
+
+  @override
+  String get common_action_cancel => 'Cancel';
+
+  @override
+  String get common_action_delete => 'Delete';
+
+  @override
+  String get common_action_close => 'Close';
+
+  @override
+  String get common_action_setup => 'Setup';
+
+  @override
+  String get common_message_testPagePrintedSuccess =>
+      'Test page printed successfully!';
+
+  @override
+  String common_error_testPrintFailed(String error) {
+    return 'Test print failed: $error';
+  }
+
+  @override
+  String get common_title_printerManagement => 'Printer Management';
+
+  @override
+  String common_label_printerStatus(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String get common_status_connected => 'Connected';
+
+  @override
+  String get common_status_disconnected => 'Disconnected';
+
+  @override
+  String get common_label_availableActions => 'Available Actions:';
+
+  @override
+  String get common_action_connectToPrinter => 'Connect to Printer';
+
+  @override
+  String get common_action_printTestPage => 'Print Test Page';
+
+  @override
+  String get common_action_disconnect => 'Disconnect';
+
+  @override
+  String get common_message_printerDisconnected => 'Printer disconnected';
+
+  @override
+  String common_error_printerAccessFailed(String error) {
+    return 'Error accessing printer: $error';
+  }
+
+  @override
+  String get common_message_copiedToClipboard =>
+      'Information copied to clipboard';
+
+  @override
+  String get common_label_notSet => 'Not set';
+
+  @override
+  String get common_label_store => 'Store';
+
+  @override
+  String get common_label_category => 'Category';
+
+  @override
+  String get common_status_loading => 'Loading...';
+
+  @override
+  String get common_status_active => 'Active';
+
+  @override
+  String get common_status_inactive => 'Inactive';
+
+  @override
+  String get common_label_created => 'Created';
+
+  @override
+  String get common_label_lastUpdated => 'Last Updated';
+
+  @override
+  String get common_status_completed => 'Completed';
+
+  @override
+  String get common_status_pending => 'Pending';
+
+  @override
+  String get common_error_printerNotConnected =>
+      'Printer not connected. Setting up printer...';
 }

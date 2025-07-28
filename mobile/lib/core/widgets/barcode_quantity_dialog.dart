@@ -127,8 +127,6 @@ class _BarcodeQuantityDialogState extends State<BarcodeQuantityDialog>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    
     return Dialog(
       backgroundColor: Colors.transparent,
       child: AnimatedBuilder(

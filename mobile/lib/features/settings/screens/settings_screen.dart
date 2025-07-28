@@ -98,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                     end: Alignment.bottomCenter,
                     colors: [
                       Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.surfaceVariant.withValues(alpha:0.3),
+                      Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha:0.3),
                     ],
                   ),
                 ),
@@ -630,7 +630,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -958,7 +958,7 @@ class _SettingsScreenState extends State<SettingsScreen> with TickerProviderStat
                             decoration: BoxDecoration(
                               color: isSelected 
                                   ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.surfaceVariant,
+                                  : Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Center(

@@ -446,7 +446,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get confirmDeleteStore => 'Konfirmasi Hapus Toko';
 
   @override
-  String deleteStoreConfirmation(Object name) {
+  String deleteStoreConfirmation(String name) {
     return 'Apakah Anda yakin ingin menghapus toko \'$name\'? Tindakan ini tidak dapat dibatalkan.';
   }
 
@@ -1693,4 +1693,305 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get common_button_apply_filters => 'Terapkan Filter';
+
+  @override
+  String get products_action_printBarcode => 'Cetak Barcode';
+
+  @override
+  String get products_action_deleteProduct => 'Hapus Produk';
+
+  @override
+  String get products_message_barcodePrintedSuccess =>
+      'Barcode berhasil dicetak';
+
+  @override
+  String products_message_barcodesPrintedSuccess(String count) {
+    return '$count barcode berhasil dicetak';
+  }
+
+  @override
+  String products_error_printBarcodeFailed(String error) {
+    return 'Gagal mencetak barcode: $error';
+  }
+
+  @override
+  String products_message_deleteConfirmation(String name) {
+    return 'Apakah Anda yakin ingin menghapus \"$name\"? Tindakan ini tidak dapat dibatalkan.';
+  }
+
+  @override
+  String products_message_deleteSuccess(String name) {
+    return 'Produk \"$name\" berhasil dihapus';
+  }
+
+  @override
+  String products_error_deleteFailed(String error) {
+    return 'Gagal menghapus produk: $error';
+  }
+
+  @override
+  String get products_error_onlyOwnersCanDelete =>
+      'Only owners can delete products';
+
+  @override
+  String get products_title_deleteProduct => 'Delete Product';
+
+  @override
+  String get products_title_details => 'Detail Produk';
+
+  @override
+  String get products_error_loadFailed => 'Failed to Load Product';
+
+  @override
+  String get products_error_notFound => 'Product Not Found';
+
+  @override
+  String get products_error_notFoundDescription =>
+      'The product you\'re looking for doesn\'t exist or has been removed.';
+
+  @override
+  String get products_section_pricingInventory => 'Pricing & Inventory';
+
+  @override
+  String get products_section_pricingInventoryDescription =>
+      'Product pricing and stock information';
+
+  @override
+  String get products_section_locationCategory => 'Location & Category';
+
+  @override
+  String get products_section_locationCategoryDescription =>
+      'Store location and product categorization';
+
+  @override
+  String get products_section_additionalInfo => 'Additional Information';
+
+  @override
+  String get products_section_additionalInfoDescription =>
+      'System information and timestamps';
+
+  @override
+  String get products_label_name => 'Nama Produk';
+
+  @override
+  String get products_label_sku => 'SKU';
+
+  @override
+  String get products_label_barcode => 'Barcode';
+
+  @override
+  String get products_label_price => 'Harga';
+
+  @override
+  String get products_label_quantity => 'Quantity';
+
+  @override
+  String get products_label_purchasePrice => 'Purchase Price';
+
+  @override
+  String get products_label_salePrice => 'Sale Price';
+
+  @override
+  String get products_label_currentStock => 'Current Stock';
+
+  @override
+  String get products_label_units => 'units';
+
+  @override
+  String get products_label_imei => 'IMEI';
+
+  @override
+  String get products_status_outOfStock => 'Out of Stock';
+
+  @override
+  String get products_status_lowStock => 'Low Stock';
+
+  @override
+  String get products_status_inStock => 'In Stock';
+
+  @override
+  String get transactions_action_printReceipt => 'Cetak Struk';
+
+  @override
+  String get transactions_action_markFinished => 'Tandai Selesai';
+
+  @override
+  String get transactions_label_transactionId => 'Transaction';
+
+  @override
+  String get transactions_message_receiptPrintedSuccess =>
+      'Struk berhasil dicetak';
+
+  @override
+  String transactions_message_receiptsPrintedSuccess(String count) {
+    return '$count struk berhasil dicetak';
+  }
+
+  @override
+  String transactions_error_printReceiptFailed(String error) {
+    return 'Gagal mencetak struk: $error';
+  }
+
+  @override
+  String get transactions_message_markedFinished =>
+      'Transaksi ditandai selesai';
+
+  @override
+  String transactions_error_markFinishedFailed(String error) {
+    return 'Gagal menandai transaksi selesai: $error';
+  }
+
+  @override
+  String get transactions_title_detail => 'Detail Transaksi';
+
+  @override
+  String get transactions_title_details => 'Detail Transaksi';
+
+  @override
+  String get transactions_label_id => 'ID Transaksi';
+
+  @override
+  String get transactions_label_type => 'Jenis Transaksi';
+
+  @override
+  String get transactions_label_amount => 'Jumlah';
+
+  @override
+  String get transactions_label_items => 'Item';
+
+  @override
+  String get transactions_label_status => 'Status';
+
+  @override
+  String get transactions_label_date => 'Tanggal';
+
+  @override
+  String get stores_title_details => 'Detail Toko';
+
+  @override
+  String get stores_action_deleteStore => 'Hapus Toko';
+
+  @override
+  String get stores_label_name => 'Nama Toko';
+
+  @override
+  String get stores_label_type => 'Jenis Toko';
+
+  @override
+  String get stores_label_status => 'Status';
+
+  @override
+  String get stores_label_address => 'Alamat';
+
+  @override
+  String get stores_label_phone => 'Telepon';
+
+  @override
+  String get stores_label_email => 'Email';
+
+  @override
+  String common_error_permissionRequired(String error) {
+    return 'Izin diperlukan: $error';
+  }
+
+  @override
+  String get common_action_settings => 'Settings';
+
+  @override
+  String get common_action_setupPrinter => 'Setup Printer';
+
+  @override
+  String get common_action_retry => 'Retry';
+
+  @override
+  String get common_action_cancel => 'Cancel';
+
+  @override
+  String get common_action_delete => 'Delete';
+
+  @override
+  String get common_action_close => 'Close';
+
+  @override
+  String get common_action_setup => 'Atur';
+
+  @override
+  String get common_message_testPagePrintedSuccess =>
+      'Test page printed successfully!';
+
+  @override
+  String common_error_testPrintFailed(String error) {
+    return 'Test print failed: $error';
+  }
+
+  @override
+  String get common_title_printerManagement => 'Printer Management';
+
+  @override
+  String common_label_printerStatus(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String get common_status_connected => 'Connected';
+
+  @override
+  String get common_status_disconnected => 'Disconnected';
+
+  @override
+  String get common_label_availableActions => 'Available Actions:';
+
+  @override
+  String get common_action_connectToPrinter => 'Connect to Printer';
+
+  @override
+  String get common_action_printTestPage => 'Print Test Page';
+
+  @override
+  String get common_action_disconnect => 'Disconnect';
+
+  @override
+  String get common_message_printerDisconnected => 'Printer disconnected';
+
+  @override
+  String common_error_printerAccessFailed(String error) {
+    return 'Error accessing printer: $error';
+  }
+
+  @override
+  String get common_message_copiedToClipboard =>
+      'Informasi berhasil disalin ke clipboard';
+
+  @override
+  String get common_label_notSet => 'Not set';
+
+  @override
+  String get common_label_store => 'Store';
+
+  @override
+  String get common_label_category => 'Category';
+
+  @override
+  String get common_status_loading => 'Loading...';
+
+  @override
+  String get common_status_active => 'Active';
+
+  @override
+  String get common_status_inactive => 'Inactive';
+
+  @override
+  String get common_label_created => 'Created';
+
+  @override
+  String get common_label_lastUpdated => 'Last Updated';
+
+  @override
+  String get common_status_completed => 'Selesai';
+
+  @override
+  String get common_status_pending => 'Tertunda';
+
+  @override
+  String get common_error_printerNotConnected => 'Printer tidak terhubung';
 }
