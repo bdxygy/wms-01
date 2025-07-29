@@ -23,6 +23,7 @@ class TransactionFormData {
   final String? transferProofUrl;
   final String? customerName;
   final String? customerPhone;
+  final String? tradeInProductId;
   final List<TransactionItemRequest> items;
 
   TransactionFormData({
@@ -33,6 +34,7 @@ class TransactionFormData {
     this.transferProofUrl,
     this.customerName,
     this.customerPhone,
+    this.tradeInProductId,
     required this.items,
   });
 
@@ -74,6 +76,8 @@ class _TransactionFormState extends State<TransactionForm> {
   String? _selectedDestinationStoreId;
   String? _photoProofUrl;
   String? _transferProofUrl;
+  String? _selectedTradeInProductId;
+  Product? _selectedTradeInProduct;
   List<TransactionItemRequest> _items = [];
 
   List<Store> _stores = [];
@@ -105,7 +109,17 @@ class _TransactionFormState extends State<TransactionForm> {
     // Guard clause: Handle edit mode
     if (widget.initialTransaction != null) {
       _populateFromTransaction(widget.initialTransaction!);
+      
+      // Guard clause: Ensure CASHIER users can only access SALE transactions
+      if (user?.role == UserRole.cashier && _selectedType != TransactionType.sale) {
+        _selectedType = TransactionType.sale;
+      }
       return;
+    }
+
+    // Guard clause: Set default transaction type for CASHIER users
+    if (user?.role == UserRole.cashier) {
+      _selectedType = TransactionType.sale;
     }
 
     // Guard clause: Set store for non-owner users
@@ -327,8 +341,16 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   bool _validateForm() {
+    final user = context.read<AuthProvider>().user;
+    
     // Guard clause: Form validation
     if (!_formKey.currentState!.validate()) return false;
+
+    // Guard clause: Role-based transaction type validation
+    if (user?.role == UserRole.cashier && _selectedType != TransactionType.sale) {
+      _showError('Cashier users can only create SALE transactions');
+      return false;
+    }
 
     // Guard clause: No items
     if (_items.isEmpty) {
@@ -346,6 +368,13 @@ class _TransactionFormState extends State<TransactionForm> {
     if (_selectedType == TransactionType.transfer &&
         _selectedDestinationStoreId == null) {
       _showError('Please select destination store for transfer');
+      return false;
+    }
+
+    // Guard clause: Trade-in product
+    if (_selectedType == TransactionType.trade &&
+        _selectedTradeInProductId == null) {
+      _showError('Please select a product for trade-in');
       return false;
     }
 
@@ -374,6 +403,7 @@ class _TransactionFormState extends State<TransactionForm> {
       customerPhone: _customerPhoneController.text.trim().isEmpty
           ? null
           : _customerPhoneController.text.trim(),
+      tradeInProductId: _selectedTradeInProductId,
       items: _items,
     );
 
@@ -400,6 +430,10 @@ class _TransactionFormState extends State<TransactionForm> {
                     const SizedBox(height: 8),
                     _buildStoreSection(),
                     const SizedBox(height: 16),
+                    if (_selectedType == TransactionType.trade) ...[
+                      _buildTradeInProductSection(),
+                      const SizedBox(height: 16),
+                    ],
                     _buildProductSearchSection(),
                     const SizedBox(height: 16),
                     _buildItemsList(),
@@ -441,40 +475,79 @@ class _TransactionFormState extends State<TransactionForm> {
                 ),
           ),
           const SizedBox(height: 12),
-          // Type selection as chips
-          Row(
-            children: [
-              Expanded(
-                child: _buildTypeChip(
-                  TransactionType.sale,
-                  'Sale',
-                  Icons.point_of_sale,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildTypeChip(
-                  TransactionType.transfer,
-                  'Transfer',
-                  Icons.swap_horiz,
-                ),
-              ),
-            ],
-          ),
+          // Type selection as chips (role-based filtering)
+          _buildTransactionTypeChips(),
         ],
       ),
     );
   }
 
+  Widget _buildTransactionTypeChips() {
+    final user = context.watch<AuthProvider>().user;
+    
+    // Guard clause: Handle null user case - default to SALE only
+    if (user == null) {
+      return _buildTypeChip(TransactionType.sale, 'Sale', Icons.shopping_cart);
+    }
+    
+    // Define available transaction types based on role permissions:
+    // - CASHIER: SALE only (as per role-permissions.md)
+    // - OWNER/ADMIN: All transaction types (SALE, TRANSFER, TRADE)
+    // - STAFF: Not typically creating transactions, but default to SALE if needed
+    final List<Map<String, dynamic>> availableTypes = [];
+    
+    // SALE is always available for all roles
+    availableTypes.add({
+      'type': TransactionType.sale,
+      'label': 'Sale',
+      'icon': Icons.shopping_cart,
+    });
+    
+    // TRANSFER and TRADE are restricted to OWNER and ADMIN roles only
+    if (user.role == UserRole.owner || user.role == UserRole.admin) {
+      availableTypes.addAll([
+        {
+          'type': TransactionType.transfer,
+          'label': 'Transfer',
+          'icon': Icons.swap_horiz,
+        },
+        {
+          'type': TransactionType.trade,
+          'label': 'Trade',
+          'icon': Icons.swap_calls,
+        },
+      ]);
+    }
+    
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: availableTypes
+          .map((typeData) => _buildTypeChip(
+                typeData['type'] as TransactionType,
+                typeData['label'] as String,
+                typeData['icon'] as IconData,
+              ))
+          .toList(),
+    );
+  }
+
   Widget _buildTypeChip(TransactionType type, String label, IconData icon) {
+    final user = context.watch<AuthProvider>().user;
     final isSelected = _selectedType == type;
+    
+    // Check if this transaction type is available for the current user role
+    final isAvailable = user == null || 
+        type == TransactionType.sale || 
+        (user.role == UserRole.owner || user.role == UserRole.admin);
+    
     return InkWell(
-      onTap: () {
+      onTap: isAvailable ? () {
         setState(() {
           _selectedType = type;
           _selectedDestinationStoreId = null;
         });
-      },
+      } : null,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -550,6 +623,8 @@ class _TransactionFormState extends State<TransactionForm> {
               setState(() {
                 _selectedStoreId = value;
                 _selectedDestinationStoreId = null;
+                _selectedTradeInProduct = null;
+                _selectedTradeInProductId = null;
                 _items.clear();
                 _searchResults.clear();
                 _showSearchResults = false;
@@ -623,6 +698,248 @@ class _TransactionFormState extends State<TransactionForm> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildTradeInProductSection() {
+    // Guard clause: No store selected
+    if (_selectedStoreId == null) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Icon(
+              Icons.store_outlined,
+              size: 32,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Select a store first',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionLabel('Trade-In Product'),
+        const SizedBox(height: 8),
+        
+        // Trade-in product selection section
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.purple.withValues(alpha: 0.1),
+                Colors.purple.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.purple.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.swap_calls,
+                    color: Colors.purple,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Scan or search for trade-in product',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.purple[700],
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              if (_selectedTradeInProduct == null) ...[
+                // Scan button for trade-in product
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _scanBarcodeForTradeInProduct,
+                        icon: const Icon(Icons.qr_code_scanner, size: 20),
+                        label: const Text('Scan Barcode'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.purple,
+                          side: BorderSide(color: Colors.purple.withValues(alpha: 0.5)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // Selected trade-in product display
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.purple.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          Icons.devices,
+                          color: Colors.purple,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _selectedTradeInProduct!.name,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'ID: ${_selectedTradeInProduct!.id}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey[600],
+                                    fontFamily: 'monospace',
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedTradeInProduct = null;
+                            _selectedTradeInProductId = null;
+                          });
+                        },
+                        icon: const Icon(Icons.close, size: 20),
+                        style: IconButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          padding: const EdgeInsets.all(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _scanBarcodeForTradeInProduct() {
+    // Guard clause: ensure widget is mounted
+    if (!mounted) return;
+
+    // Guard clause: ensure store is selected
+    if (_selectedStoreId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a store first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    ScannerLauncher.forProductSearch(
+      context,
+      title: 'Scan Trade-In Product',
+      subtitle: 'Scan barcode of product to accept for trade-in',
+      onProductFound: (product) {
+        // Guard clause: ensure widget is mounted after scan
+        if (!mounted) return;
+
+        // Guard clause: validate product belongs to selected store
+        if (product.storeId != _selectedStoreId) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Product "${product.name}" does not belong to the selected store'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+
+        // Set the trade-in product
+        setState(() {
+          _selectedTradeInProduct = product;
+          _selectedTradeInProductId = product.id;
+        });
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Trade-in product selected: ${product.name}'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      onProductNotFound: (barcode) {
+        // Guard clause: ensure widget is mounted after scan
+        if (!mounted) return;
+
+        // Show product not found message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No product found with barcode: $barcode'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      },
     );
   }
 

@@ -6,7 +6,7 @@ import { stores } from './stores';
 import { products } from './products';
 import { randomUUID } from "crypto";
 
-export const transactionTypes = ['SALE', 'TRANSFER'] as const;
+export const transactionTypes = ['SALE', 'TRANSFER', 'TRADE'] as const;
 export type TransactionType = typeof transactionTypes[number];
 
 export const transactions = sqliteTable('transactions', {
@@ -21,6 +21,7 @@ export const transactions = sqliteTable('transactions', {
   to: text('to'),
   customerPhone: text('customer_phone'),
   amount: real('amount'),
+  tradeInProductId: text('trade_in_product_id').references(() => products.id),
   isFinished: integer('is_finished', { mode: 'boolean' }).default(true),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
@@ -54,6 +55,10 @@ export const transactionsRelations = relations(transactions, ({ one, many }) => 
   toStore: one(stores, {
     fields: [transactions.toStoreId],
     references: [stores.id],
+  }),
+  tradeInProduct: one(products, {
+    fields: [transactions.tradeInProductId],
+    references: [products.id],
   }),
 }));
 

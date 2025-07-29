@@ -48,6 +48,18 @@ export class TransactionService {
 
     // Store access checks have been handled by authorization middleware
 
+    // For TRADE transactions, verify trade-in product exists
+    if (data.type === "TRADE" && data.tradeInProductId) {
+      const tradeInProduct = await db
+        .select()
+        .from(products)
+        .where(and(eq(products.id, data.tradeInProductId), isNull(products.deletedAt)));
+
+      if (!tradeInProduct[0]) {
+        throw new HTTPException(404, { message: "Trade-in product not found" });
+      }
+    }
+
     // Verify all products exist and calculate total amount
     let totalAmount = 0;
     const productChecks: Array<{
@@ -124,6 +136,7 @@ export class TransactionService {
         to: data.to || null,
         customerPhone: data.customerPhone || null,
         amount: totalAmount,
+        tradeInProductId: data.tradeInProductId || null,
         isFinished: false,
         createdAt: new Date(),
       })
@@ -180,6 +193,7 @@ export class TransactionService {
       to: transaction[0].to,
       customerPhone: transaction[0].customerPhone,
       amount: transaction[0].amount,
+      tradeInProductId: transaction[0].tradeInProductId,
       isFinished: transaction[0].isFinished,
       createdAt: transaction[0].createdAt,
       items: insertedItems.map((item) => ({
@@ -201,6 +215,7 @@ export class TransactionService {
     const toStores = alias(stores, "toStores");
     const createdByUsers = alias(users, "createdByUsers");
     const approvedByUsers = alias(users, "approvedByUsers");
+    const tradeInProducts = alias(products, "tradeInProducts");
 
     const transaction = await db
       .select({
@@ -215,6 +230,7 @@ export class TransactionService {
         to: transactions.to,
         customerPhone: transactions.customerPhone,
         amount: transactions.amount,
+        tradeInProductId: transactions.tradeInProductId,
         isFinished: transactions.isFinished,
         createdAt: transactions.createdAt,
         fromStoreOwnerId: fromStores.ownerId,
@@ -223,6 +239,7 @@ export class TransactionService {
         toStoreName: toStores.name,
         createdByName: createdByUsers.name,
         approvedByName: approvedByUsers.name,
+        tradeInProductName: tradeInProducts.name,
       })
       .from(transactions)
       .leftJoin(fromStores, eq(transactions.fromStoreId, fromStores.id))
@@ -232,6 +249,7 @@ export class TransactionService {
         approvedByUsers,
         eq(transactions.approvedBy, approvedByUsers.id)
       )
+      .leftJoin(tradeInProducts, eq(transactions.tradeInProductId, tradeInProducts.id))
       .where(eq(transactions.id, id));
 
     if (!transaction[0]) {
@@ -258,6 +276,7 @@ export class TransactionService {
       to: transaction[0].to,
       customerPhone: transaction[0].customerPhone,
       amount: transaction[0].amount,
+      tradeInProductId: transaction[0].tradeInProductId,
       isFinished: transaction[0].isFinished,
       createdAt: transaction[0].createdAt,
       // Include name fields from joins
@@ -265,6 +284,7 @@ export class TransactionService {
       toStoreName: transaction[0].toStoreName,
       createdByName: transaction[0].createdByName,
       approvedByName: transaction[0].approvedByName,
+      tradeInProductName: transaction[0].tradeInProductName,
       items: items.map((item) => ({
         id: item.id,
         productId: item.productId,
@@ -430,6 +450,7 @@ export class TransactionService {
           to: transaction.to,
           customerPhone: transaction.customerPhone,
           amount: transaction.amount,
+          tradeInProductId: transaction.tradeInProductId,
           isFinished: transaction.isFinished,
           createdAt: transaction.createdAt,
           items: items.map((item) => ({
@@ -472,6 +493,14 @@ export class TransactionService {
 
     if (!existingTransaction[0]) {
       throw new HTTPException(404, { message: "Transaction not found" });
+    }
+
+    // Role-based transaction update validation
+    if (requestingUser.role === "CASHIER") {
+      // CASHIER can only update SALE transactions
+      if (existingTransaction[0].type !== "SALE") {
+        throw new HTTPException(403, { message: "CASHIER can only update SALE transactions" });
+      }
     }
 
     // Authorization middleware has already checked transaction access
@@ -560,6 +589,8 @@ export class TransactionService {
     if (data.to !== undefined) updateData.to = data.to;
     if (data.customerPhone !== undefined)
       updateData.customerPhone = data.customerPhone;
+    if (data.tradeInProductId !== undefined)
+      updateData.tradeInProductId = data.tradeInProductId;
     if (data.isFinished !== undefined) updateData.isFinished = data.isFinished;
 
     // Update amount if items were updated
@@ -600,6 +631,7 @@ export class TransactionService {
       to: updatedTransaction[0].to,
       customerPhone: updatedTransaction[0].customerPhone,
       amount: updatedTransaction[0].amount,
+      tradeInProductId: updatedTransaction[0].tradeInProductId,
       isFinished: updatedTransaction[0].isFinished,
       createdAt: updatedTransaction[0].createdAt,
       items: items.map((item) => ({

@@ -26,6 +26,7 @@ class ProductFormData {
   final String storeId;
   final String? categoryId;
   final bool isImei;
+  final bool isMustCheck;
   final List<String> imeis;
   final String? photoUrl;
 
@@ -39,6 +40,7 @@ class ProductFormData {
     required this.storeId,
     this.categoryId,
     required this.isImei,
+    required this.isMustCheck,
     required this.imeis,
     this.photoUrl,
   });
@@ -84,6 +86,7 @@ class _ProductFormState extends State<ProductForm> {
   String? _selectedStoreId;
   String? _selectedCategoryId;
   bool _isImeiProduct = false;
+  bool _isMustCheck = false;
   List<String> _imeis = [];
   String? _photoUrl;
 
@@ -130,6 +133,7 @@ class _ProductFormState extends State<ProductForm> {
     _selectedStoreId = product.storeId;
     _selectedCategoryId = product.categoryId;
     _isImeiProduct = product.isImei;
+    _isMustCheck = product.isMustCheck;
 
     // Load IMEIs if this is an IMEI product
     if (product.isImei) {
@@ -385,6 +389,7 @@ class _ProductFormState extends State<ProductForm> {
         storeId: storeId!,
         categoryId: categoryId,
         isImei: isImei,
+        isMustCheck: isMustCheck,
         imeis: imeis,
         photoUrl: photoUrl,
       );
@@ -643,6 +648,8 @@ class _ProductFormState extends State<ProductForm> {
         ),
         const SizedBox(height: 16),
         _buildImeiToggle(),
+        const SizedBox(height: 16),
+        _buildMustCheckToggle(),
       ],
     );
   }
@@ -935,6 +942,59 @@ class _ProductFormState extends State<ProductForm> {
     );
   }
 
+  Widget _buildMustCheckToggle() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_outline,
+            color: Theme.of(context).primaryColor,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Must Check Product',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                Text(
+                  'Requires verification before sale',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _isMustCheck,
+            onChanged: (value) {
+              setState(() {
+                _isMustCheck = value;
+              });
+            },
+            activeColor: Theme.of(context).primaryColor,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildImeiList() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1119,6 +1179,7 @@ class _ProductFormState extends State<ProductForm> {
   String? get storeId => _selectedStoreId;
   String? get categoryId => _selectedCategoryId;
   bool get isImei => _isImeiProduct;
+  bool get isMustCheck => _isMustCheck;
   List<String> get imeis =>
       _imeis.where((imei) => imei.trim().isNotEmpty).toList();
   String? get photoUrl => _photoUrl;

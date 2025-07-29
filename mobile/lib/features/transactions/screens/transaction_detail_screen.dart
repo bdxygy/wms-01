@@ -463,6 +463,10 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
           const SizedBox(height: 16),
           _buildTransactionInfoCard(),
           const SizedBox(height: 16),
+          if (_transaction!.isTrade && _transaction!.hasTradeInProduct) ...[
+            _buildTradeInProductCard(),
+            const SizedBox(height: 16),
+          ],
           _buildItemsListCard(),
           const SizedBox(height: 16),
           if (_transaction!.photoProofUrl != null ||
@@ -705,10 +709,13 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
     // Guard clause: ensure transaction exists
     if (_transaction == null) return const SizedBox.shrink();
 
+    final isTrade = _transaction!.type == TransactionType.trade;
     final isTransfer = _transaction!.type == TransactionType.transfer;
-    final color = isTransfer
-        ? Theme.of(context).colorScheme.secondary
-        : Theme.of(context).colorScheme.primary;
+    final color = isTrade
+        ? Colors.purple
+        : isTransfer
+            ? Theme.of(context).colorScheme.secondary
+            : Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -730,7 +737,11 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
-              isTransfer ? Icons.swap_horiz : Icons.point_of_sale,
+              isTrade
+                  ? Icons.swap_calls
+                  : isTransfer
+                      ? Icons.swap_horiz
+                      : Icons.point_of_sale,
               size: 14,
               color: color,
             ),
@@ -860,8 +871,129 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
             if (_transaction!.toStoreName != null)
               _buildModernInfoRow(
                   'To Store', _transaction!.toStoreName!, Icons.store),
+            if (_transaction!.isTrade && _transaction!.tradeInProductName != null)
+              _buildModernInfoRow('Trade-In Product', 
+                  _transaction!.tradeInProductName!, Icons.swap_calls),
+            if (_transaction!.isTrade && _transaction!.tradeInProductId != null)
+              _buildModernInfoRow('Trade-In Product ID', 
+                  _transaction!.tradeInProductId!, Icons.qr_code),
             _buildModernInfoRow('Items Count',
                 '${_transaction!.items?.length ?? 0}', Icons.inventory_2),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTradeInProductCard() {
+    // Guard clause: ensure transaction exists and has trade-in product
+    if (_transaction == null || !_transaction!.hasTradeInProduct) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.purple.withValues(alpha: 0.1),
+            Colors.purple.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.purple.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(
+              'Trade-In Product',
+              'Product accepted for trade-in',
+              Icons.swap_calls,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.purple.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.devices,
+                      color: Colors.purple,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _transaction!.tradeInProductName ?? 'Trade-In Product',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.purple[800],
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'ID: ${_transaction!.tradeInProductId}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.purple[600],
+                                fontFamily: 'monospace',
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'TRADE-IN',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.purple[800],
+                            fontSize: 10,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

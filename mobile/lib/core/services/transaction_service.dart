@@ -8,8 +8,9 @@ import '../models/user.dart';
 class TransactionTypes {
   static const String sale = 'SALE';
   static const String transfer = 'TRANSFER';
+  static const String trade = 'TRADE';
   
-  static const List<String> all = [sale, transfer];
+  static const List<String> all = [sale, transfer, trade];
   
   /// Validate if transaction type is valid
   static bool isValid(String type) => all.contains(type);
@@ -21,6 +22,8 @@ class TransactionTypes {
         return 'Sale';
       case transfer:
         return 'Transfer';
+      case trade:
+        return 'Trade';
       default:
         return type;
     }
@@ -31,6 +34,7 @@ class TransactionTypes {
     return {
       sale: getDisplayName(sale),
       transfer: getDisplayName(transfer),
+      trade: getDisplayName(trade),
     };
   }
   
@@ -41,6 +45,8 @@ class TransactionTypes {
         return sale;
       case TransactionType.transfer:
         return transfer;
+      case TransactionType.trade:
+        return trade;
     }
   }
   
@@ -51,6 +57,8 @@ class TransactionTypes {
         return TransactionType.sale;
       case transfer:
         return TransactionType.transfer;
+      case trade:
+        return TransactionType.trade;
       default:
         throw ArgumentError('Invalid transaction type: $type');
     }
@@ -639,6 +647,26 @@ class TransactionService {
     );
   }
 
+  /// Helper to create TRADE transaction request
+  CreateTransactionBackendRequest createTradeTransactionRequest({
+    required String storeId,
+    required String tradeInProductId,
+    required List<TransactionItemBackendRequest> items,
+    String? photoProofUrl,
+    String? to,
+    String? customerPhone,
+  }) {
+    return CreateTransactionBackendRequest(
+      type: TransactionTypes.trade,
+      fromStoreId: storeId,
+      tradeInProductId: tradeInProductId,
+      items: items,
+      photoProofUrl: photoProofUrl,
+      to: to,
+      customerPhone: customerPhone,
+    );
+  }
+
   // === Analytics and Reporting Methods ===
 
   /// Get transaction statistics for a date range
@@ -663,10 +691,12 @@ class TransactionService {
   TransactionStats _calculateStats(List<Transaction> transactions) {
     double totalSales = 0;
     double totalTransfers = 0;
+    double totalTrades = 0;
     int completedCount = 0;
     int pendingCount = 0;
     int saleCount = 0;
     int transferCount = 0;
+    int tradeCount = 0;
 
     for (final transaction in transactions) {
       if (transaction.isFinished) {
@@ -684,6 +714,10 @@ class TransactionService {
           transferCount++;
           totalTransfers += transaction.calculatedAmount;
           break;
+        case TransactionType.trade:
+          tradeCount++;
+          totalTrades += transaction.calculatedAmount;
+          break;
       }
     }
 
@@ -691,10 +725,12 @@ class TransactionService {
       totalTransactions: transactions.length,
       totalSales: totalSales,
       totalTransfers: totalTransfers,
+      totalTrades: totalTrades,
       completedCount: completedCount,
       pendingCount: pendingCount,
       saleCount: saleCount,
       transferCount: transferCount,
+      tradeCount: tradeCount,
     );
   }
 }
@@ -704,23 +740,27 @@ class TransactionStats {
   final int totalTransactions;
   final double totalSales;
   final double totalTransfers;
+  final double totalTrades;
   final int completedCount;
   final int pendingCount;
   final int saleCount;
   final int transferCount;
+  final int tradeCount;
 
   TransactionStats({
     required this.totalTransactions,
     required this.totalSales,
     required this.totalTransfers,
+    required this.totalTrades,
     required this.completedCount,
     required this.pendingCount,
     required this.saleCount,
     required this.transferCount,
+    required this.tradeCount,
   });
 
   double get averageTransactionValue => 
-      totalTransactions > 0 ? (totalSales + totalTransfers) / totalTransactions : 0;
+      totalTransactions > 0 ? (totalSales + totalTransfers + totalTrades) / totalTransactions : 0;
   
   double get completionRate =>
       totalTransactions > 0 ? completedCount / totalTransactions : 0;
@@ -729,13 +769,14 @@ class TransactionStats {
 /// Backend-compatible request models
 
 class CreateTransactionBackendRequest {
-  final String type; // 'SALE' or 'TRANSFER'
+  final String type; // 'SALE', 'TRANSFER', or 'TRADE'
   final String? fromStoreId;
   final String? toStoreId;
   final String? photoProofUrl;
   final String? transferProofUrl;
   final String? to;
   final String? customerPhone;
+  final String? tradeInProductId;
   final List<TransactionItemBackendRequest> items;
 
   CreateTransactionBackendRequest({
@@ -746,6 +787,7 @@ class CreateTransactionBackendRequest {
     this.transferProofUrl,
     this.to,
     this.customerPhone,
+    this.tradeInProductId,
     required this.items,
   });
 
@@ -757,6 +799,7 @@ class CreateTransactionBackendRequest {
     if (transferProofUrl != null) 'transferProofUrl': transferProofUrl,
     if (to != null) 'to': to,
     if (customerPhone != null) 'customerPhone': customerPhone,
+    if (tradeInProductId != null) 'tradeInProductId': tradeInProductId,
     'items': items.map((item) => item.toJson()).toList(),
   };
 }
@@ -766,6 +809,7 @@ class UpdateTransactionBackendRequest {
   final String? transferProofUrl;
   final String? to;
   final String? customerPhone;
+  final String? tradeInProductId;
   final bool? isFinished;
   final List<TransactionItemBackendRequest>? items;
 
@@ -774,6 +818,7 @@ class UpdateTransactionBackendRequest {
     this.transferProofUrl,
     this.to,
     this.customerPhone,
+    this.tradeInProductId,
     this.isFinished,
     this.items,
   });
@@ -784,6 +829,7 @@ class UpdateTransactionBackendRequest {
     if (transferProofUrl != null) json['transferProofUrl'] = transferProofUrl;
     if (to != null) json['to'] = to;
     if (customerPhone != null) json['customerPhone'] = customerPhone;
+    if (tradeInProductId != null) json['tradeInProductId'] = tradeInProductId;
     if (isFinished != null) json['isFinished'] = isFinished;
     if (items != null) json['items'] = items!.map((item) => item.toJson()).toList();
     return json;

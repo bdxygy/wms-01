@@ -12,6 +12,7 @@ class Product {
   final String? categoryId;
   final String sku;
   final bool isImei;
+  final bool isMustCheck;
   final String barcode;
   final int quantity;
   final double purchasePrice;
@@ -34,6 +35,7 @@ class Product {
     this.categoryId,
     required this.sku,
     required this.isImei,
+    required this.isMustCheck,
     required this.barcode,
     required this.quantity,
     required this.purchasePrice,
@@ -80,6 +82,7 @@ class Product {
     String? categoryId,
     String? sku,
     bool? isImei,
+    bool? isMustCheck,
     String? barcode,
     int? quantity,
     double? purchasePrice,
@@ -100,6 +103,7 @@ class Product {
       categoryId: categoryId ?? this.categoryId,
       sku: sku ?? this.sku,
       isImei: isImei ?? this.isImei,
+      isMustCheck: isMustCheck ?? this.isMustCheck,
       barcode: barcode ?? this.barcode,
       quantity: quantity ?? this.quantity,
       purchasePrice: purchasePrice ?? this.purchasePrice,

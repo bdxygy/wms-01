@@ -127,6 +127,57 @@ export const requireTransactionType = (transactionTypeExtractor: (c: any) => str
   });
 };
 
+export const requireTransactionPermission = (transactionTypeExtractor: (c: any) => string) => {
+  return createMiddleware<Applications>(async (c, next) => {
+    const user: User = c.get("user");
+    const transactionType = transactionTypeExtractor(c);
+    
+    // Role-based transaction type validation
+    if (user.role === "CASHIER") {
+      // CASHIER can only handle SALE transactions
+      if (transactionType !== "SALE") {
+        throw new HTTPException(403, { 
+          message: "CASHIER role can only create/update SALE transactions" 
+        });
+      }
+    } else if (user.role === "ADMIN" || user.role === "OWNER") {
+      // ADMIN and OWNER can handle all transaction types (SALE, TRANSFER, TRADE)
+      const allowedTypes = ["SALE", "TRANSFER", "TRADE"];
+      if (!allowedTypes.includes(transactionType)) {
+        throw new HTTPException(400, { 
+          message: `Invalid transaction type. Allowed: ${allowedTypes.join(", ")}` 
+        });
+      }
+    } else {
+      // STAFF and other roles cannot create/update transactions
+      throw new HTTPException(403, { 
+        message: `Role ${user.role} is not authorized to create/update transactions` 
+      });
+    }
+    
+    await next();
+  });
+};
+
+export const requireTransactionUpdatePermission = (transactionIdExtractor: (c: any) => string) => {
+  return createMiddleware<Applications>(async (c, next) => {
+    const user: User = c.get("user");
+    const transactionId = transactionIdExtractor(c);
+    
+    // For update operations, we need to check the existing transaction type
+    // This will be handled in the service layer to avoid duplicate DB queries
+    // For now, just validate the role can update transactions
+    if (user.role === "STAFF") {
+      throw new HTTPException(403, { 
+        message: "STAFF role is not authorized to update transactions" 
+      });
+    }
+    // CASHIER, ADMIN, OWNER can proceed (specific transaction type validation in service layer)
+    
+    await next();
+  });
+};
+
 // Helper middleware creators for common patterns
 export const createPermissionMiddleware = (permission: Permission) => requirePermission(permission);
 export const createResourceMiddleware = (resource: Resource, action: Action) => requireResourceAccess(resource, action);

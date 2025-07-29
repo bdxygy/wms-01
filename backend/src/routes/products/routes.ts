@@ -58,7 +58,6 @@ products.get(
   "/:id",
   authMiddleware,
   ValidationMiddleware.params(productIdParamSchema),
-  requireProductAccess(extractParamId("id")),
   getProductHandler
 );
 

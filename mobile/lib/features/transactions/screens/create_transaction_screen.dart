@@ -56,6 +56,7 @@ class _CreateTransactionScreenState extends State<CreateTransactionScreen> {
         transferProofUrl: formData.transferProofUrl,
         to: formData.customerName,
         customerPhone: formData.customerPhone,
+        tradeInProductId: formData.tradeInProductId,
         items: backendItems,
       );
       

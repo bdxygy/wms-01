@@ -7,6 +7,8 @@ enum TransactionType {
   sale,
   @JsonValue('TRANSFER')
   transfer,
+  @JsonValue('TRADE')
+  trade,
 }
 
 @JsonSerializable()
@@ -22,6 +24,7 @@ class Transaction {
   final String? to;
   final String? customerPhone;
   final double? amount;
+  final String? tradeInProductId;
   final bool isFinished;
   final DateTime createdAt;
 
@@ -30,6 +33,7 @@ class Transaction {
   final String? approvedByName;
   final String? fromStoreName;
   final String? toStoreName;
+  final String? tradeInProductName;
   final List<TransactionItem>? items;
 
   Transaction({
@@ -44,12 +48,14 @@ class Transaction {
     this.to,
     this.customerPhone,
     this.amount,
+    this.tradeInProductId,
     required this.isFinished,
     required this.createdAt,
     this.createdByName,
     this.approvedByName,
     this.fromStoreName,
     this.toStoreName,
+    this.tradeInProductName,
     this.items,
   });
 
@@ -61,9 +67,11 @@ class Transaction {
   // Helper methods
   bool get isSale => type == TransactionType.sale;
   bool get isTransfer => type == TransactionType.transfer;
+  bool get isTrade => type == TransactionType.trade;
   bool get hasPhotoProof => photoProofUrl?.isNotEmpty == true;
   bool get hasTransferProof => transferProofUrl?.isNotEmpty == true;
   bool get hasCustomerInfo => to?.isNotEmpty == true || customerPhone?.isNotEmpty == true;
+  bool get hasTradeInProduct => tradeInProductId?.isNotEmpty == true;
   
   String get statusText => isFinished ? 'Completed' : 'Pending';
   
@@ -73,6 +81,8 @@ class Transaction {
         return 'Sale';
       case TransactionType.transfer:
         return 'Transfer';
+      case TransactionType.trade:
+        return 'Trade';
     }
   }
 
@@ -95,12 +105,14 @@ class Transaction {
     String? to,
     String? customerPhone,
     double? amount,
+    String? tradeInProductId,
     bool? isFinished,
     DateTime? createdAt,
     String? createdByName,
     String? approvedByName,
     String? fromStoreName,
     String? toStoreName,
+    String? tradeInProductName,
     List<TransactionItem>? items,
   }) {
     return Transaction(
@@ -115,12 +127,14 @@ class Transaction {
       to: to ?? this.to,
       customerPhone: customerPhone ?? this.customerPhone,
       amount: amount ?? this.amount,
+      tradeInProductId: tradeInProductId ?? this.tradeInProductId,
       isFinished: isFinished ?? this.isFinished,
       createdAt: createdAt ?? this.createdAt,
       createdByName: createdByName ?? this.createdByName,
       approvedByName: approvedByName ?? this.approvedByName,
       fromStoreName: fromStoreName ?? this.fromStoreName,
       toStoreName: toStoreName ?? this.toStoreName,
+      tradeInProductName: tradeInProductName ?? this.tradeInProductName,
       items: items ?? this.items,
     );
   }

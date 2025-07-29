@@ -28,7 +28,8 @@ export const createProductHandler = async (c: Context) => {
 export const getProductHandler = async (c: Context) => {
   try {
     const { id } = getValidated<ProductIdParam>(c, "validatedParams");
-    const result = await ProductService.getProductById(id);
+    const user = c.get("user");
+    const result = await ProductService.getProductById(id, user);
     return ResponseUtils.sendSuccess(c, result);
   } catch (error) {
     return ResponseUtils.sendError(c, error);

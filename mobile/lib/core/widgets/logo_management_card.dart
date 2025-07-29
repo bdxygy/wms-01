@@ -239,6 +239,7 @@ class _LogoManagementCardState extends State<LogoManagementCard>
         barcode: '1234567890123',
         categoryId: 'sample-cat',
         isImei: false,
+        isMustCheck: false,
         quantity: 100,
         purchasePrice: 15.00,
         salePrice: 19.99,

@@ -101,6 +101,7 @@ export class ProductService {
         categoryId: data.categoryId || null,
         sku: data.sku,
         isImei: data.isImei,
+        isMustCheck: data.isMustCheck,
         barcode: barcode!,
         quantity: data.quantity,
         purchasePrice: data.purchasePrice,
@@ -123,6 +124,7 @@ export class ProductService {
       categoryId: product[0].categoryId,
       sku: product[0].sku,
       isImei: product[0].isImei,
+      isMustCheck: product[0].isMustCheck,
       barcode: product[0].barcode,
       quantity: product[0].quantity,
       purchasePrice: product[0].purchasePrice,
@@ -133,7 +135,7 @@ export class ProductService {
     };
   }
 
-  static async getProductById(id: string) {
+  static async getProductById(id: string, requestingUser: User) {
     const product = await db
       .select({
         id: products.id,
@@ -143,6 +145,7 @@ export class ProductService {
         categoryId: products.categoryId,
         sku: products.sku,
         isImei: products.isImei,
+        isMustCheck: products.isMustCheck,
         barcode: products.barcode,
         quantity: products.quantity,
         purchasePrice: products.purchasePrice,
@@ -150,12 +153,26 @@ export class ProductService {
         createdBy: products.createdBy,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
+        storeOwnerId: stores.ownerId,
       })
       .from(products)
+      .innerJoin(stores, eq(products.storeId, stores.id))
       .where(and(eq(products.id, id), isNull(products.deletedAt)));
 
     if (!product[0]) {
       throw new HTTPException(404, { message: "Product not found" });
+    }
+
+    // Check owner scoping
+    if (requestingUser.role === "OWNER") {
+      if (product[0].storeOwnerId !== requestingUser.id) {
+        throw new HTTPException(403, { message: "Access denied" });
+      }
+    } else {
+      // For non-OWNER users, check if they belong to the same owner
+      if (product[0].storeOwnerId !== requestingUser.ownerId) {
+        throw new HTTPException(403, { message: "Access denied" });
+      }
     }
 
     return {
@@ -166,6 +183,7 @@ export class ProductService {
       categoryId: product[0].categoryId,
       sku: product[0].sku,
       isImei: product[0].isImei,
+      isMustCheck: product[0].isMustCheck,
       barcode: product[0].barcode,
       quantity: product[0].quantity,
       purchasePrice: product[0].purchasePrice,
@@ -186,6 +204,7 @@ export class ProductService {
         categoryId: products.categoryId,
         sku: products.sku,
         isImei: products.isImei,
+        isMustCheck: products.isMustCheck,
         barcode: products.barcode,
         quantity: products.quantity,
         purchasePrice: products.purchasePrice,
@@ -223,6 +242,7 @@ export class ProductService {
       categoryId: product[0].categoryId,
       sku: product[0].sku,
       isImei: product[0].isImei,
+      isMustCheck: product[0].isMustCheck,
       barcode: product[0].barcode,
       quantity: product[0].quantity,
       purchasePrice: product[0].purchasePrice,
@@ -299,6 +319,7 @@ export class ProductService {
         categoryId: products.categoryId,
         sku: products.sku,
         isImei: products.isImei,
+        isMustCheck: products.isMustCheck,
         barcode: products.barcode,
         quantity: products.quantity,
         purchasePrice: products.purchasePrice,
@@ -423,6 +444,7 @@ export class ProductService {
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
     if (data.sku) updateData.sku = data.sku;
     if (data.isImei !== undefined) updateData.isImei = data.isImei;
+    if (data.isMustCheck !== undefined) updateData.isMustCheck = data.isMustCheck;
     if (data.quantity !== undefined) updateData.quantity = data.quantity;
     if (data.purchasePrice !== undefined)
       updateData.purchasePrice = data.purchasePrice;
@@ -447,6 +469,7 @@ export class ProductService {
       categoryId: updatedProduct[0].categoryId,
       sku: updatedProduct[0].sku,
       isImei: updatedProduct[0].isImei,
+      isMustCheck: updatedProduct[0].isMustCheck,
       barcode: updatedProduct[0].barcode,
       quantity: updatedProduct[0].quantity,
       purchasePrice: updatedProduct[0].purchasePrice,
@@ -468,6 +491,7 @@ export class ProductService {
         categoryId: products.categoryId,
         sku: products.sku,
         isImei: products.isImei,
+        isMustCheck: products.isMustCheck,
         barcode: products.barcode,
         quantity: products.quantity,
         purchasePrice: products.purchasePrice,
@@ -516,6 +540,7 @@ export class ProductService {
       categoryId: product.categoryId,
       sku: product.sku,
       isImei: product.isImei,
+      isMustCheck: product.isMustCheck,
       barcode: product.barcode,
       quantity: product.quantity,
       purchasePrice: product.purchasePrice,
@@ -692,6 +717,7 @@ export class ProductService {
       categoryId: result.product.categoryId,
       sku: result.product.sku,
       isImei: result.product.isImei,
+      isMustCheck: result.product.isMustCheck,
       barcode: result.product.barcode,
       quantity: result.product.quantity,
       purchasePrice: result.product.purchasePrice,

@@ -63,6 +63,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
           categoryId: formData.categoryId,
           sku: formData.sku,
           isImei: formData.isImei,
+          isMustCheck: formData.isMustCheck,
           quantity: formData.quantity,
           purchasePrice: formData.purchasePrice,
           salePrice: formData.salePrice,

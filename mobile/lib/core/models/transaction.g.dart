@@ -18,12 +18,14 @@ Transaction _$TransactionFromJson(Map<String, dynamic> json) => Transaction(
       to: json['to'] as String?,
       customerPhone: json['customerPhone'] as String?,
       amount: (json['amount'] as num?)?.toDouble(),
+      tradeInProductId: json['tradeInProductId'] as String?,
       isFinished: json['isFinished'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
       createdByName: json['createdByName'] as String?,
       approvedByName: json['approvedByName'] as String?,
       fromStoreName: json['fromStoreName'] as String?,
       toStoreName: json['toStoreName'] as String?,
+      tradeInProductName: json['tradeInProductName'] as String?,
       items: (json['items'] as List<dynamic>?)
           ?.map((e) => TransactionItem.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -42,18 +44,21 @@ Map<String, dynamic> _$TransactionToJson(Transaction instance) =>
       'to': instance.to,
       'customerPhone': instance.customerPhone,
       'amount': instance.amount,
+      'tradeInProductId': instance.tradeInProductId,
       'isFinished': instance.isFinished,
       'createdAt': instance.createdAt.toIso8601String(),
       'createdByName': instance.createdByName,
       'approvedByName': instance.approvedByName,
       'fromStoreName': instance.fromStoreName,
       'toStoreName': instance.toStoreName,
+      'tradeInProductName': instance.tradeInProductName,
       'items': instance.items,
     };
 
 const _$TransactionTypeEnumMap = {
   TransactionType.sale: 'SALE',
   TransactionType.transfer: 'TRANSFER',
+  TransactionType.trade: 'TRADE',
 };
 
 TransactionItem _$TransactionItemFromJson(Map<String, dynamic> json) =>

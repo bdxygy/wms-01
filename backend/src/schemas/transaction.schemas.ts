@@ -19,6 +19,7 @@ export const createTransactionSchema = z.object({
   transferProofUrl: z.string().url("Invalid transfer proof URL").optional(),
   to: z.string().optional(),
   customerPhone: z.string().optional(),
+  tradeInProductId: z.string().uuid("Invalid product ID format").optional(),
   items: z.array(transactionItemSchema).min(1, "At least one item is required"),
 }).refine((data) => {
   // For SALE transactions, at least one of fromStoreId or toStoreId should be provided
@@ -29,10 +30,14 @@ export const createTransactionSchema = z.object({
   if (data.type === "TRANSFER") {
     return data.fromStoreId && data.toStoreId;
   }
+  // For TRADE transactions, tradeInProductId is required
+  if (data.type === "TRADE") {
+    return data.tradeInProductId;
+  }
   return true;
 }, {
-  message: "Invalid store configuration for transaction type",
-  path: ["fromStoreId", "toStoreId"],
+  message: "Invalid configuration for transaction type",
+  path: ["fromStoreId", "toStoreId", "tradeInProductId"],
 });
 
 // Update transaction schema
@@ -41,6 +46,7 @@ export const updateTransactionSchema = z.object({
   transferProofUrl: z.string().url("Invalid transfer proof URL").optional(),
   to: z.string().optional(),
   customerPhone: z.string().optional(),
+  tradeInProductId: z.string().uuid("Invalid product ID format").optional(),
   isFinished: z.boolean().optional(),
   items: z.array(transactionItemSchema).min(1, "At least one item is required").optional(),
 });
@@ -89,6 +95,7 @@ export const transactionResponseSchema = z.object({
   to: z.string().nullable(),
   customerPhone: z.string().nullable(),
   amount: z.number().nullable(),
+  tradeInProductId: z.string().nullable(),
   isFinished: z.boolean(),
   createdAt: z.date(),
   items: z.array(transactionItemResponseSchema),
@@ -107,6 +114,7 @@ export const transactionWithRelationsSchema = z.object({
   to: z.string().nullable(),
   customerPhone: z.string().nullable(),
   amount: z.number().nullable(),
+  tradeInProductId: z.string().nullable(),
   isFinished: z.boolean(),
   createdAt: z.date(),
   items: z.array(transactionItemResponseSchema),
@@ -123,6 +131,10 @@ export const transactionWithRelationsSchema = z.object({
     name: z.string(),
   }).optional(),
   toStore: z.object({
+    id: z.string(),
+    name: z.string(),
+  }).optional(),
+  tradeInProduct: z.object({
     id: z.string(),
     name: z.string(),
   }).optional(),

@@ -4,7 +4,10 @@ import { authMiddleware } from "../../middleware/auth.middleware";
 import {
   requireOwnerOrAdmin,
   requireTransactionAccess,
+  requireTransactionPermission,
+  requireTransactionUpdatePermission,
   extractParamId,
+  extractBodyField,
 } from "../../middleware/authorization.middleware";
 import { 
   createTransactionSchema, 
@@ -21,12 +24,12 @@ import {
 
 const transactions = new Hono();
 
-// Create transaction endpoint (OWNER or ADMIN only)
+// Create transaction endpoint (role-based transaction type validation)
 transactions.post(
   "/",
   authMiddleware,
-  requireOwnerOrAdmin(),
   ValidationMiddleware.body(createTransactionSchema),
+  requireTransactionPermission(extractBodyField("type")),
   createTransactionHandler
 );
 
@@ -47,12 +50,12 @@ transactions.get(
   getTransactionHandler
 );
 
-// Update transaction endpoint (OWNER or ADMIN only)
+// Update transaction endpoint (role-based with transaction access validation)
 transactions.put(
   "/:id",
   authMiddleware,
-  requireOwnerOrAdmin(),
   ValidationMiddleware.params(transactionIdParamSchema),
+  requireTransactionUpdatePermission(extractParamId("id")),
   requireTransactionAccess(extractParamId("id")),
   ValidationMiddleware.body(updateTransactionSchema),
   updateTransactionHandler
