@@ -213,7 +213,7 @@ class ProductService {
       final response = await _apiClient.delete(ApiEndpoints.imeisDelete(imeiId));
       final apiResponse = ApiResponse<void>.fromJson(
         response.data,
-        (json) => null,
+        (json) => {},
       );
       if (!apiResponse.success) {
         throw Exception(apiResponse.error?.message ?? 'Failed to remove IMEI');

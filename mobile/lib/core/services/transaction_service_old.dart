@@ -104,10 +104,8 @@ class TransactionService {
       throw Exception('Transaction must have at least one item');
     }
 
-    // SALE transactions should have photo proof
-    if (request.type == 'SALE' && request.photoProofUrl?.isEmpty != false) {
-      throw Exception('SALE transactions require photo proof');
-    }
+    // Photo proof is now handled through separate photos table
+    // SALE transactions should have photo proof - validation moved to photos service
 
     // TRANSFER transactions must have destination store
     if (request.type == 'TRANSFER' && request.destinationStoreId?.isEmpty != false) {

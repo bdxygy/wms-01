@@ -1,6 +1,7 @@
 import { Context } from "hono";
 import { PhotoService } from "../../services/photo.service";
 import { ResponseUtils } from "../../utils/responses";
+import { ValidationMiddleware } from "../../utils/validation";
 import type { User } from "../../models/users";
 import type { PhotoType } from "../../models/photos";
 
@@ -13,33 +14,36 @@ export const uploadPhotoHandler = async (c: Context) => {
 
     // Parse multipart form data
     const body = await c.req.parseBody();
-    
-    // Get the image file
-    const imageFile = body['image'] as File;
-    if (!imageFile) {
-      return ResponseUtils.sendError(c, new Error("Image file is required"));
-    }
 
-    // Validate file type
-    if (!imageFile.type.startsWith('image/')) {
-      return ResponseUtils.sendError(c, new Error("File must be an image"));
+    // Get the image file
+    const imageFile = body["image"] as File;
+
+    console.log({
+      imageFile,
+    });
+
+    // Validate image upload
+    try {
+      ValidationMiddleware.validateImageUpload(imageFile);
+    } catch (error) {
+      return ResponseUtils.sendError(c, error);
     }
 
     // Convert File to Buffer and process with Sharp
     const arrayBuffer = await imageFile.arrayBuffer();
     const originalBuffer = Buffer.from(arrayBuffer);
-    
+
     // Process image with Sharp: resize to max height 600px, auto width, WebP format, 50% quality
-    const sharp = require('sharp');
+    const sharp = require("sharp");
     const imageBuffer = await sharp(originalBuffer)
       .resize({ height: 600, withoutEnlargement: true })
       .webp({ quality: 50 })
       .toBuffer();
 
     // Get form data
-    const type = body['type'] as PhotoType;
-    const transactionId = body['transactionId'] as string;
-    const productId = body['productId'] as string;
+    const type = body["type"] as PhotoType;
+    const transactionId = body["transactionId"] as string;
+    const productId = body["productId"] as string;
 
     // Validate required type field
     if (!type) {
@@ -48,20 +52,29 @@ export const uploadPhotoHandler = async (c: Context) => {
 
     // Validate that either transactionId or productId is provided
     if (!transactionId && !productId) {
-      return ResponseUtils.sendError(c, new Error("Either transactionId or productId must be provided"));
+      return ResponseUtils.sendError(
+        c,
+        new Error("Either transactionId or productId must be provided")
+      );
     }
 
     if (transactionId && productId) {
-      return ResponseUtils.sendError(c, new Error("Cannot specify both transactionId and productId"));
+      return ResponseUtils.sendError(
+        c,
+        new Error("Cannot specify both transactionId and productId")
+      );
     }
 
     // Create photo with image processing and Cloudinary upload
-    const photo = await PhotoService.createPhoto({
-      imageBuffer,
-      type,
-      transactionId: transactionId || undefined,
-      productId: productId || undefined,
-    }, user);
+    const photo = await PhotoService.createPhoto(
+      {
+        imageBuffer,
+        type,
+        transactionId: transactionId || undefined,
+        productId: productId || undefined,
+      },
+      user
+    );
 
     return ResponseUtils.sendCreated(c, photo[0]);
   } catch (error) {
@@ -79,8 +92,8 @@ export const getPhotosByTransactionHandler = async (c: Context) => {
     const { type } = c.req.query();
 
     const photos = await PhotoService.getPhotosByTransaction(
-      transactionId, 
-      user, 
+      transactionId,
+      user,
       type as PhotoType | undefined
     );
 
@@ -100,8 +113,8 @@ export const getPhotosByProductHandler = async (c: Context) => {
     const { type } = c.req.query();
 
     const photos = await PhotoService.getPhotosByProduct(
-      productId, 
-      user, 
+      productId,
+      user,
       type as PhotoType | undefined
     );
 
@@ -137,24 +150,23 @@ export const updatePhotoByTransactionHandler = async (c: Context) => {
 
     // Parse multipart form data
     const body = await c.req.parseBody();
-    
-    // Get the image file
-    const imageFile = body['image'] as File;
-    if (!imageFile) {
-      return ResponseUtils.sendError(c, new Error("Image file is required"));
-    }
 
-    // Validate file type
-    if (!imageFile.type.startsWith('image/')) {
-      return ResponseUtils.sendError(c, new Error("File must be an image"));
+    // Get the image file
+    const imageFile = body["image"] as File;
+
+    // Validate image upload
+    try {
+      ValidationMiddleware.validateImageUpload(imageFile);
+    } catch (error) {
+      return ResponseUtils.sendError(c, error);
     }
 
     // Convert File to Buffer and process with Sharp
     const arrayBuffer = await imageFile.arrayBuffer();
     const originalBuffer = Buffer.from(arrayBuffer);
-    
+
     // Process image with Sharp: resize to max height 600px, auto width, WebP format, 50% quality
-    const sharp = require('sharp');
+    const sharp = require("sharp");
     const imageBuffer = await sharp(originalBuffer)
       .resize({ height: 600, withoutEnlargement: true })
       .webp({ quality: 50 })
@@ -163,19 +175,29 @@ export const updatePhotoByTransactionHandler = async (c: Context) => {
     // Get photo type from query parameter
     const { type } = c.req.query();
     if (!type) {
-      return ResponseUtils.sendError(c, new Error("Photo type query parameter is required"));
+      return ResponseUtils.sendError(
+        c,
+        new Error("Photo type query parameter is required")
+      );
     }
 
     // Validate photo type
-    if (!['photoProof', 'transferProof'].includes(type)) {
-      return ResponseUtils.sendError(c, new Error("Photo type must be 'photoProof' or 'transferProof'"));
+    if (!["photoProof", "transferProof"].includes(type)) {
+      return ResponseUtils.sendError(
+        c,
+        new Error("Photo type must be 'photoProof' or 'transferProof'")
+      );
     }
 
     // Update or create photo
-    const photo = await PhotoService.updatePhotoByTransaction(transactionId, {
-      imageBuffer,
-      type: type as PhotoType,
-    }, user);
+    const photo = await PhotoService.updatePhotoByTransaction(
+      transactionId,
+      {
+        imageBuffer,
+        type: type as PhotoType,
+      },
+      user
+    );
 
     return ResponseUtils.sendSuccess(c, photo[0]);
   } catch (error) {
@@ -193,33 +215,36 @@ export const updatePhotoByProductHandler = async (c: Context) => {
 
     // Parse multipart form data
     const body = await c.req.parseBody();
-    
-    // Get the image file
-    const imageFile = body['image'] as File;
-    if (!imageFile) {
-      return ResponseUtils.sendError(c, new Error("Image file is required"));
-    }
 
-    // Validate file type
-    if (!imageFile.type.startsWith('image/')) {
-      return ResponseUtils.sendError(c, new Error("File must be an image"));
+    // Get the image file
+    const imageFile = body["image"] as File;
+
+    // Validate image upload
+    try {
+      ValidationMiddleware.validateImageUpload(imageFile);
+    } catch (error) {
+      return ResponseUtils.sendError(c, error);
     }
 
     // Convert File to Buffer and process with Sharp
     const arrayBuffer = await imageFile.arrayBuffer();
     const originalBuffer = Buffer.from(arrayBuffer);
-    
+
     // Process image with Sharp: resize to max height 600px, auto width, WebP format, 50% quality
-    const sharp = require('sharp');
+    const sharp = require("sharp");
     const imageBuffer = await sharp(originalBuffer)
       .resize({ height: 600, withoutEnlargement: true })
       .webp({ quality: 50 })
       .toBuffer();
 
     // Update or create photo
-    const photo = await PhotoService.updatePhotoByProduct(productId, {
-      imageBuffer,
-    }, user);
+    const photo = await PhotoService.updatePhotoByProduct(
+      productId,
+      {
+        imageBuffer,
+      },
+      user
+    );
 
     return ResponseUtils.sendSuccess(c, photo[0]);
   } catch (error) {

@@ -261,7 +261,7 @@ class PhotoService {
 
       debugPrint('Updating transaction photo: $transactionId, type: ${type.apiValue}');
 
-      final response = await _apiClient.upload(
+      final response = await _apiClient.putUpload(
         ApiEndpoints.photosUpdateByTransaction(transactionId),
         formData,
         queryParameters: {'type': type.apiValue},
@@ -302,7 +302,7 @@ class PhotoService {
 
       debugPrint('Updating product photo: $productId');
 
-      final response = await _apiClient.upload(
+      final response = await _apiClient.putUpload(
         ApiEndpoints.photosUpdateByProduct(productId),
         formData,
         onSendProgress: onProgress,

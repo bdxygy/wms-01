@@ -19,8 +19,6 @@ class Transaction {
   final String? approvedBy;
   final String? fromStoreId;
   final String? toStoreId;
-  final String? photoProofUrl;
-  final String? transferProofUrl;
   final String? to;
   final String? customerPhone;
   final double? amount;
@@ -43,8 +41,6 @@ class Transaction {
     this.approvedBy,
     this.fromStoreId,
     this.toStoreId,
-    this.photoProofUrl,
-    this.transferProofUrl,
     this.to,
     this.customerPhone,
     this.amount,
@@ -68,8 +64,6 @@ class Transaction {
   bool get isSale => type == TransactionType.sale;
   bool get isTransfer => type == TransactionType.transfer;
   bool get isTrade => type == TransactionType.trade;
-  bool get hasPhotoProof => photoProofUrl?.isNotEmpty == true;
-  bool get hasTransferProof => transferProofUrl?.isNotEmpty == true;
   bool get hasCustomerInfo => to?.isNotEmpty == true || customerPhone?.isNotEmpty == true;
   bool get hasTradeInProduct => tradeInProductId?.isNotEmpty == true;
   
@@ -100,8 +94,6 @@ class Transaction {
     String? approvedBy,
     String? fromStoreId,
     String? toStoreId,
-    String? photoProofUrl,
-    String? transferProofUrl,
     String? to,
     String? customerPhone,
     double? amount,
@@ -122,8 +114,6 @@ class Transaction {
       approvedBy: approvedBy ?? this.approvedBy,
       fromStoreId: fromStoreId ?? this.fromStoreId,
       toStoreId: toStoreId ?? this.toStoreId,
-      photoProofUrl: photoProofUrl ?? this.photoProofUrl,
-      transferProofUrl: transferProofUrl ?? this.transferProofUrl,
       to: to ?? this.to,
       customerPhone: customerPhone ?? this.customerPhone,
       amount: amount ?? this.amount,

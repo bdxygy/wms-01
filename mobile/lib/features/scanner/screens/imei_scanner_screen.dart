@@ -87,14 +87,17 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
       // Check torch availability
       _isTorchAvailable = await _imeiScannerService.isTorchAvailable();
       
-      // Start scanning
-      await _imeiScannerService.startScanning();
+      // Don't start scanning here - wait for MobileScanner widget to be built
       
       // Listen to IMEI scan results
       _imeiScanSubscription = _imeiScannerService.imeiScanStream?.listen(_handleImeiScanResult);
       
       if (mounted) {
         setState(() {});
+        // Start scanning after setState completes and widget is rebuilt
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _imeiScannerService.startScanning();
+        });
       }
     } catch (e) {
       _showErrorDialog('IMEI scanner initialization failed: $e');
@@ -501,7 +504,7 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (!_imeiScannerService.isReady) {
+    if (!_imeiScannerService.isReady || _imeiScannerService.scannerService.controller == null) {
       return Scaffold(
         backgroundColor: Colors.black,
         body: Center(
@@ -525,12 +528,13 @@ class _ImeiScannerScreenState extends State<ImeiScannerScreen>
       body: Stack(
         children: [
           // Camera preview (reusing the underlying scanner)
-          Positioned.fill(
-            child: MobileScanner(
-              controller: _imeiScannerService.scannerService.controller!,
-              onDetect: _imeiScannerService.scannerService.onBarcodeDetected,
+          if (_imeiScannerService.scannerService.controller != null)
+            Positioned.fill(
+              child: MobileScanner(
+                controller: _imeiScannerService.scannerService.controller!,
+                onDetect: _imeiScannerService.scannerService.onBarcodeDetected,
+              ),
             ),
-          ),
 
           // IMEI Scanner overlay
           Positioned.fill(

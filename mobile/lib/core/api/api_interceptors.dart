@@ -142,6 +142,16 @@ class ErrorHandlingInterceptor extends Interceptor {
         return;
       }
     }
+    // Handle 500 errors specifically - log but don't retry to prevent hangs
+    if (err.response?.statusCode == 500) {
+      if (AppConfig.isDebugMode) {
+        debugPrint('🚨 Server Error 500: ${err.requestOptions.path} - ${err.response?.data}');
+      }
+      // Let the error propagate immediately without retry
+      handler.next(err);
+      return;
+    }
+
     // Add retry logic for network errors
     if (_shouldRetry(err)) {
       final retryCount = err.requestOptions.extra['retryCount'] ?? 0;
@@ -166,16 +176,24 @@ class ErrorHandlingInterceptor extends Interceptor {
           dio.options.receiveTimeout = err.requestOptions.receiveTimeout;
           dio.options.sendTimeout = err.requestOptions.sendTimeout;
           
+          // CRITICAL: Remove retry interceptor to prevent infinite loops
+          // Only add auth and basic error handling
           final response = await dio.fetch(err.requestOptions);
           handler.resolve(response);
           return;
-        } catch (e) {
+        } catch (retryError) {
           // If this was the last retry, proceed with original error
           if (retryCount + 1 >= maxRetries) {
+            if (AppConfig.isDebugMode) {
+              debugPrint('🚫 Max retries reached for ${err.requestOptions.path}');
+            }
             handler.next(err);
             return;
           }
-          // Otherwise, let it try again
+          // Otherwise, continue the retry loop
+          if (AppConfig.isDebugMode) {
+            debugPrint('⚠️ Retry failed: $retryError');
+          }
         }
         return;
       }
@@ -196,12 +214,20 @@ class ErrorHandlingInterceptor extends Interceptor {
         
         try {
           final dio = Dio();
-          dio.options = err.requestOptions as BaseOptions;
+          dio.options.baseUrl = err.requestOptions.baseUrl;
+          dio.options.headers = err.requestOptions.headers;
+          dio.options.connectTimeout = err.requestOptions.connectTimeout;
+          dio.options.receiveTimeout = err.requestOptions.receiveTimeout;
+          dio.options.sendTimeout = err.requestOptions.sendTimeout;
+          
           final response = await dio.fetch(err.requestOptions);
           handler.resolve(response);
           return;
-        } catch (e) {
+        } catch (rateLimitError) {
           // Rate limit retry failed, proceed with original error
+          if (AppConfig.isDebugMode) {
+            debugPrint('⚠️ Rate limit retry failed: $rateLimitError');
+          }
         }
       }
     }
@@ -227,7 +253,14 @@ class ErrorHandlingInterceptor extends Interceptor {
       case DioExceptionType.badResponse:
         // Retry on server errors (5xx) but not client errors (4xx)
         final statusCode = err.response?.statusCode;
-        return statusCode != null && statusCode >= 500;
+        // Be more selective about which 5xx errors to retry
+        // Avoid retrying 500 (Internal Server Error) immediately to prevent app hangs
+        if (statusCode != null && statusCode >= 500) {
+          // Only retry 502, 503, 504 (gateway/service unavailable, timeout)
+          // Skip 500 (internal server error) to prevent infinite loops
+          return statusCode == 502 || statusCode == 503 || statusCode == 504;
+        }
+        return false;
       default:
         return false;
     }

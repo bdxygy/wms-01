@@ -131,8 +131,6 @@ export class TransactionService {
         approvedBy: null,
         fromStoreId: data.fromStoreId || null,
         toStoreId: data.toStoreId || null,
-        photoProofUrl: data.photoProofUrl || null,
-        transferProofUrl: data.transferProofUrl || null,
         to: data.to || null,
         customerPhone: data.customerPhone || null,
         amount: totalAmount,
@@ -188,8 +186,6 @@ export class TransactionService {
       approvedBy: transaction[0].approvedBy,
       fromStoreId: transaction[0].fromStoreId,
       toStoreId: transaction[0].toStoreId,
-      photoProofUrl: transaction[0].photoProofUrl,
-      transferProofUrl: transaction[0].transferProofUrl,
       to: transaction[0].to,
       customerPhone: transaction[0].customerPhone,
       amount: transaction[0].amount,
@@ -225,8 +221,6 @@ export class TransactionService {
         approvedBy: transactions.approvedBy,
         fromStoreId: transactions.fromStoreId,
         toStoreId: transactions.toStoreId,
-        photoProofUrl: transactions.photoProofUrl,
-        transferProofUrl: transactions.transferProofUrl,
         to: transactions.to,
         customerPhone: transactions.customerPhone,
         amount: transactions.amount,
@@ -271,8 +265,6 @@ export class TransactionService {
       approvedBy: transaction[0].approvedBy,
       fromStoreId: transaction[0].fromStoreId,
       toStoreId: transaction[0].toStoreId,
-      photoProofUrl: transaction[0].photoProofUrl,
-      transferProofUrl: transaction[0].transferProofUrl,
       to: transaction[0].to,
       customerPhone: transaction[0].customerPhone,
       amount: transaction[0].amount,
@@ -445,8 +437,6 @@ export class TransactionService {
           approvedBy: transaction.approvedBy,
           fromStoreId: transaction.fromStoreId,
           toStoreId: transaction.toStoreId,
-          photoProofUrl: transaction.photoProofUrl,
-          transferProofUrl: transaction.transferProofUrl,
           to: transaction.to,
           customerPhone: transaction.customerPhone,
           amount: transaction.amount,
@@ -582,10 +572,6 @@ export class TransactionService {
     // Prepare update data
     const updateData: any = {};
 
-    if (data.photoProofUrl !== undefined)
-      updateData.photoProofUrl = data.photoProofUrl;
-    if (data.transferProofUrl !== undefined)
-      updateData.transferProofUrl = data.transferProofUrl;
     if (data.to !== undefined) updateData.to = data.to;
     if (data.customerPhone !== undefined)
       updateData.customerPhone = data.customerPhone;
@@ -626,8 +612,6 @@ export class TransactionService {
       approvedBy: updatedTransaction[0].approvedBy,
       fromStoreId: updatedTransaction[0].fromStoreId,
       toStoreId: updatedTransaction[0].toStoreId,
-      photoProofUrl: updatedTransaction[0].photoProofUrl,
-      transferProofUrl: updatedTransaction[0].transferProofUrl,
       to: updatedTransaction[0].to,
       customerPhone: updatedTransaction[0].customerPhone,
       amount: updatedTransaction[0].amount,

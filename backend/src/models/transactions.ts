@@ -16,8 +16,6 @@ export const transactions = sqliteTable('transactions', {
   approvedBy: text('approved_by').references(() => users.id),
   fromStoreId: text('from_store_id').references(() => stores.id),
   toStoreId: text('to_store_id').references(() => stores.id),
-  photoProofUrl: text('photo_proof_url'),
-  transferProofUrl: text('transfer_proof_url'),
   to: text('to'),
   customerPhone: text('customer_phone'),
   amount: real('amount'),

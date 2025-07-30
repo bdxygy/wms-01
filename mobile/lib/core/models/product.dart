@@ -11,7 +11,9 @@ class Product {
   final String? description;
   final String? categoryId;
   final String sku;
+  @JsonKey(defaultValue: false)
   final bool isImei;
+  @JsonKey(defaultValue: false)
   final bool isMustCheck;
   final String barcode;
   final int quantity;

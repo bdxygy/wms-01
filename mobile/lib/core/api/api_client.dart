@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/app_config.dart';
 import '../constants/app_constants.dart';
@@ -75,6 +76,9 @@ class ApiClient {
         options: options,
       );
     } catch (e) {
+      if (AppConfig.isDebugMode) {
+        debugPrint('🚨 API GET Error for $path: $e');
+      }
       throw _handleError(e);
     }
   }
@@ -136,7 +140,7 @@ class ApiClient {
     }
   }
 
-  // File upload request
+  // File upload request (POST)
   Future<Response<T>> upload<T>(
     String path,
     FormData formData, {
@@ -145,11 +149,38 @@ class ApiClient {
     ProgressCallback? onSendProgress,
   }) async {
     try {
+      // Let Dio automatically set multipart/form-data with proper boundary
+      final uploadOptions = options ?? Options();
+      
       return await _dio.post<T>(
         path,
         data: formData,
         queryParameters: queryParameters,
-        options: options,
+        options: uploadOptions,
+        onSendProgress: onSendProgress,
+      );
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // File upload request (PUT) for updates
+  Future<Response<T>> putUpload<T>(
+    String path,
+    FormData formData, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    ProgressCallback? onSendProgress,
+  }) async {
+    try {
+      // Let Dio automatically set multipart/form-data with proper boundary
+      final uploadOptions = options ?? Options();
+      
+      return await _dio.put<T>(
+        path,
+        data: formData,
+        queryParameters: queryParameters,
+        options: uploadOptions,
         onSendProgress: onSendProgress,
       );
     } catch (e) {
@@ -180,6 +211,10 @@ class ApiClient {
 
   // Error handler
   ApiException _handleError(dynamic error) {
+    if (AppConfig.isDebugMode) {
+      debugPrint('🔍 Handling API error: ${error.runtimeType} - $error');
+    }
+    
     if (error is DioException) {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
@@ -279,6 +314,19 @@ class ApiClient {
           details: data,
         );
       case 500:
+        // Check if this is actually an auth error disguised as 500
+        if (message.toLowerCase().contains('authorization') || 
+            message.toLowerCase().contains('token') ||
+            message.toLowerCase().contains('auth')) {
+          return AuthException(
+            message: 'Authentication required. Please login again.',
+            code: ErrorCodes.unauthorizedAccess,
+          );
+        }
+        return ServerException(
+          message: 'Server error. Please try again later.',
+          code: ErrorCodes.serverError,
+        );
       case 502:
       case 503:
       case 504:

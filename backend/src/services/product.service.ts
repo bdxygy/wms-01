@@ -661,7 +661,7 @@ export class ProductService {
     }
 
     // Start a transaction to update product and replace IMEIs
-    const result = await db.transaction(async (tx) => {
+    const result = db.transaction((tx) => {
       // Prepare update data for product
 
       existingProduct = {
@@ -675,18 +675,19 @@ export class ProductService {
       };
 
       // Update product
-      const updatedProduct = await tx
+      const updatedProduct = tx
         .update(products)
         .set(updateData)
         .where(eq(products.id, id))
-        .returning();
+        .returning()
+        .get();
 
-      if (!updatedProduct[0]) {
+      if (!updatedProduct) {
         throw new HTTPException(500, { message: "Failed to update product" });
       }
 
       // Remove all existing IMEIs for this product
-      await tx.delete(productImeis).where(eq(productImeis.productId, id));
+      tx.delete(productImeis).where(eq(productImeis.productId, id)).run();
 
       // Add new IMEIs
       const imeiRecords = data.imeis.map((imei) => ({
@@ -698,13 +699,14 @@ export class ProductService {
         updatedAt: new Date(),
       }));
 
-      const insertedImeis = await tx
+      const insertedImeis = tx
         .insert(productImeis)
         .values(imeiRecords)
-        .returning();
+        .returning()
+        .all();
 
       return {
-        product: updatedProduct[0],
+        product: updatedProduct,
         imeis: insertedImeis,
       };
     });

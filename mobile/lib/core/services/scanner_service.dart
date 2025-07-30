@@ -36,8 +36,9 @@ class ScannerService {
         return false;
       }
 
-      // Initialize controller
+      // Initialize controller with autoStart: false to prevent automatic starting
       _controller = MobileScannerController(
+        autoStart: false,
         detectionSpeed: DetectionSpeed.noDuplicates,
         facing: CameraFacing.back,
         torchEnabled: false,

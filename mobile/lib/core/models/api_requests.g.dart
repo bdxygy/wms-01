@@ -212,7 +212,6 @@ CreateTransactionRequest _$CreateTransactionRequestFromJson(
       type: json['type'] as String,
       storeId: json['storeId'] as String,
       destinationStoreId: json['destinationStoreId'] as String?,
-      photoProofUrl: json['photoProofUrl'] as String?,
       items: (json['items'] as List<dynamic>)
           .map(
               (e) => TransactionItemRequest.fromJson(e as Map<String, dynamic>))
@@ -226,7 +225,6 @@ Map<String, dynamic> _$CreateTransactionRequestToJson(
       'storeId': instance.storeId,
       if (instance.destinationStoreId case final value?)
         'destinationStoreId': value,
-      if (instance.photoProofUrl case final value?) 'photoProofUrl': value,
       'items': instance.items,
     };
 
@@ -253,7 +251,6 @@ UpdateTransactionRequest _$UpdateTransactionRequestFromJson(
     UpdateTransactionRequest(
       type: json['type'] as String?,
       destinationStoreId: json['destinationStoreId'] as String?,
-      photoProofUrl: json['photoProofUrl'] as String?,
       items: (json['items'] as List<dynamic>?)
           ?.map(
               (e) => TransactionItemRequest.fromJson(e as Map<String, dynamic>))
@@ -266,7 +263,6 @@ Map<String, dynamic> _$UpdateTransactionRequestToJson(
       if (instance.type case final value?) 'type': value,
       if (instance.destinationStoreId case final value?)
         'destinationStoreId': value,
-      if (instance.photoProofUrl case final value?) 'photoProofUrl': value,
       if (instance.items case final value?) 'items': value,
     };
 

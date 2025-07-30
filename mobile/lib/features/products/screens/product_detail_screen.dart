@@ -514,9 +514,9 @@ ${l10n.products_label_quantity}: ${_product!.quantity}''';
         );
         
         // Close the photo viewer if it's open
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
+        // if (Navigator.canPop(context)) {
+        //   Navigator.pop(context);
+        // }
       }
     } catch (e) {
       if (mounted) {
@@ -589,9 +589,9 @@ ${l10n.products_label_quantity}: ${_product!.quantity}''';
           );
           
           // Close the photo viewer if it's open
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
+          // if (Navigator.canPop(context)) {
+          //   Navigator.pop(context);
+          // }
         }
       } catch (e) {
         if (mounted) {

@@ -8,6 +8,13 @@
       "when": 1753828688883,
       "tag": "0000_tough_daredevil",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1753886503906,
+      "tag": "0001_right_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

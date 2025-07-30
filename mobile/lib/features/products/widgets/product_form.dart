@@ -101,8 +101,8 @@ class _ProductFormState extends State<ProductForm> {
   // Photo state
   Photo? _selectedPhoto;
   Uint8List? _photoFile;
-  bool _isUploadingPhoto = false;
-  double _uploadProgress = 0.0;
+  final bool _isUploadingPhoto = false;
+  final double _uploadProgress = 0.0;
 
   // Data lists
   List<Store> _stores = [];
@@ -414,36 +414,7 @@ class _ProductFormState extends State<ProductForm> {
     try {
       String? finalPhotoUrl = _photoUrl;
 
-      // Handle photo upload during product save
-      if (_photoFile != null) {
-        try {
-          final l10n = AppLocalizations.of(context)!;
-          _showSuccessMessage(l10n.product_uploading_photo);
-
-          // For new products, we'll upload photo after product creation
-          // For existing products, upload immediately
-          if (widget.initialProduct != null) {
-            final uploadedPhoto = await _photoService.updateProductPhoto(
-              widget.initialProduct!.id,
-              _photoFile!,
-              onProgress: (sent, total) {
-                final progress = PhotoService.calculateUploadProgress(sent, total);
-                if (mounted) {
-                  setState(() => _uploadProgress = progress);
-                }
-              },
-            );
-            finalPhotoUrl = uploadedPhoto.secureUrl;
-          }
-        } catch (e) {
-          // Don't block product save if photo upload fails
-          debugPrint('Photo upload failed (non-blocking): $e');
-          if (mounted) {
-            final l10n = AppLocalizations.of(context)!;
-            _showError('${l10n.product_photo_upload_failed}: $e');
-          }
-        }
-      }
+      // Photo upload is handled by parent component after product creation
 
       final formData = ProductFormData(
         productName: productName,
@@ -1480,8 +1451,7 @@ class _ProductFormState extends State<ProductForm> {
         _selectedPhoto = null; // Clear network photo when new file is selected
       });
 
-      final l10n = AppLocalizations.of(context)!;
-      _showSuccessMessage(l10n.product_photo_selected);
+      // Photo selected successfully - no need for snackbar notification
     } catch (e) {
       debugPrint('Error selecting photo: $e');
       if (mounted) {

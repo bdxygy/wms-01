@@ -230,7 +230,7 @@ class LanguageSelectorDialog extends StatelessWidget {
                 isSelected,
                 onLanguageSelected,
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

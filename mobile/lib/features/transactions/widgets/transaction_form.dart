@@ -135,8 +135,9 @@ class _TransactionFormState extends State<TransactionForm> {
     _selectedType = transaction.type;
     _selectedStoreId = transaction.fromStoreId;
     _selectedDestinationStoreId = transaction.toStoreId;
-    _photoProofUrl = transaction.photoProofUrl;
-    _transferProofUrl = transaction.transferProofUrl;
+    // Photo URLs are now managed through separate photos table
+    // _photoProofUrl = null; // Will be fetched from photos service if needed
+    // _transferProofUrl = null; // Will be fetched from photos service if needed
     // Note: Photo IDs are not available in Transaction model
     // They would need to be fetched separately if needed for editing
     _customerNameController.text = transaction.to ?? '';

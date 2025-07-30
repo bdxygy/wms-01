@@ -121,7 +121,7 @@ class Photo {
     if (height != null) transformations.add('h_$height');
     if (quality != null) transformations.add('q_$quality');
 
-    return '$baseUrl/upload/${transformations.join(',')}/v1/$imagePath';
+    return '$baseUrl/upload/${transformations.join(',')}/$imagePath';
   }
 
   /// Get thumbnail URL (200x200)

@@ -76,7 +76,7 @@ class _TransactionFormState extends State<TransactionForm> {
   
   // Data
   List<Store> _stores = [];
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _isInitialized = false;
 
   @override
@@ -117,8 +117,9 @@ class _TransactionFormState extends State<TransactionForm> {
       _selectedType = transaction.type;
       _selectedStoreId = transaction.fromStoreId;
       _selectedDestinationStoreId = transaction.toStoreId;
-      _photoProofUrl = transaction.photoProofUrl;
-      _transferProofUrl = transaction.transferProofUrl;
+      // Photo URLs are now managed through separate photos table
+      // _photoProofUrl = null; // Will be fetched from photos service if needed
+      // _transferProofUrl = null; // Will be fetched from photos service if needed
       _customerNameController.text = transaction.to ?? '';
       _customerPhoneController.text = transaction.customerPhone ?? '';
       _items = transaction.items?.map((item) => TransactionItemRequest(

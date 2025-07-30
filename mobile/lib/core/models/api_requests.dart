@@ -245,14 +245,12 @@ class CreateTransactionRequest {
   final String type;
   final String storeId;
   final String? destinationStoreId;
-  final String? photoProofUrl;
   final List<TransactionItemRequest> items;
 
   CreateTransactionRequest({
     required this.type,
     required this.storeId,
     this.destinationStoreId,
-    this.photoProofUrl,
     required this.items,
   });
 
@@ -286,13 +284,11 @@ class TransactionItemRequest {
 class UpdateTransactionRequest {
   final String? type;
   final String? destinationStoreId;
-  final String? photoProofUrl;
   final List<TransactionItemRequest>? items;
 
   UpdateTransactionRequest({
     this.type,
     this.destinationStoreId,
-    this.photoProofUrl,
     this.items,
   });
 

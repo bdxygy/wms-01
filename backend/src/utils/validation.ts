@@ -62,4 +62,26 @@ export class ValidationMiddleware {
       }
     };
   }
+
+  /**
+   * Validate uploaded image file
+   */
+  static validateImageUpload(imageFile: File | null): void {
+    if (!imageFile) {
+      throw new Error("Image file is required");
+    }
+
+    // Validate image file extension
+    const validExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"];
+    const fileName = imageFile.name?.toLowerCase() || "";
+    const hasValidExtension = validExtensions.some((ext) =>
+      fileName.endsWith(ext)
+    );
+
+    if (!hasValidExtension) {
+      throw new Error(
+        `File must have a valid image extension: ${validExtensions.join(", ")}`
+      );
+    }
+  }
 }

@@ -89,8 +89,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
       // Check torch availability
       _isTorchAvailable = await _scannerService.isTorchAvailable();
 
-      // Start scanning
-      await _scannerService.startScanning();
+      // Don't start scanning here - wait for MobileScanner widget to be built
 
       // Listen to scan results
       _scanSubscription =
@@ -98,6 +97,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
       if (mounted) {
         setState(() {});
+        // Start scanning after setState completes and widget is rebuilt
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scannerService.startScanning();
+        });
       }
     } catch (e) {
       _showErrorDialog('Scanner initialization failed: $e');

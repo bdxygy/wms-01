@@ -15,8 +15,6 @@ export const createTransactionSchema = z.object({
   type: z.enum(transactionTypes).default("SALE"),
   fromStoreId: z.string().uuid("Invalid store ID format").optional(),
   toStoreId: z.string().uuid("Invalid store ID format").optional(),
-  photoProofUrl: z.string().url("Invalid photo proof URL").optional(),
-  transferProofUrl: z.string().url("Invalid transfer proof URL").optional(),
   to: z.string().optional(),
   customerPhone: z.string().optional(),
   tradeInProductId: z.string().uuid("Invalid product ID format").optional(),
@@ -42,8 +40,6 @@ export const createTransactionSchema = z.object({
 
 // Update transaction schema
 export const updateTransactionSchema = z.object({
-  photoProofUrl: z.string().url("Invalid photo proof URL").optional(),
-  transferProofUrl: z.string().url("Invalid transfer proof URL").optional(),
   to: z.string().optional(),
   customerPhone: z.string().optional(),
   tradeInProductId: z.string().uuid("Invalid product ID format").optional(),
