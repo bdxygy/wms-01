@@ -6,7 +6,6 @@ import '../../../core/widgets/main_navigation_scaffold.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/services/transaction_service.dart';
 import '../../../core/models/transaction.dart';
-import '../../../core/models/api_response.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/routing/app_router.dart';
@@ -42,7 +41,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   List<Transaction> _transactions = [];
-  PaginatedResponse<Transaction>? _currentResponse;
   bool _isLoading = false;
   bool _isLoadingMore = false;
   String? _error;
@@ -121,7 +119,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       if (!mounted) return;
 
       setState(() {
-        _currentResponse = response;
+        // Store response for potential future use
         if (refresh || _currentPage == 1) {
           _transactions = response.data;
         } else {

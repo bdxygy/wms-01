@@ -309,6 +309,7 @@ class _LogoManagementCardState extends State<LogoManagementCard>
       );
 
       final sampleTransaction = {
+        'id': 'TXN-${DateTime.now().millisecondsSinceEpoch}',
         'type': 'SALE',
         'createdAt': DateTime.now().toIso8601String(),
         'items': [

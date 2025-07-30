@@ -51,7 +51,7 @@ class BarcodeUtils {
     }
     
     // QR Code (very flexible)
-    if (code.length >= 1 && code.length <= 4000) {
+    if (code.isNotEmpty && code.length <= 4000) {
       return 'QR Code';
     }
     
@@ -133,7 +133,7 @@ class BarcodeUtils {
            (_isNumeric(code) && code.length >= 6 && code.length <= 8) || // UPC-E
            (_isAlphanumeric(code) && code.length >= 4 && code.length <= 50) || // Code 128
            _isCode39Valid(code) || // Code 39
-           (code.length >= 1 && code.length <= 4000); // QR Code
+           (code.isNotEmpty && code.length <= 4000); // QR Code
   }
   
   static bool _isNumeric(String str) {

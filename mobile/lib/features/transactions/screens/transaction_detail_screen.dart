@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../core/widgets/loading.dart';
@@ -8,8 +9,10 @@ import '../../../core/widgets/barcode_quantity_dialog.dart';
 import '../../../core/widgets/wms_app_bar.dart';
 import '../../../core/services/transaction_service.dart';
 import '../../../core/services/print_launcher.dart';
+import '../../../core/services/photo_service.dart';
 import '../../../core/models/transaction.dart';
 import '../../../core/models/user.dart';
+import '../../../core/models/photo.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/utils/number_utils.dart';
@@ -47,11 +50,19 @@ class TransactionDetailScreen extends StatefulWidget {
 class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   final TransactionService _transactionService = TransactionService();
   final PrintLauncher _printLauncher = PrintLauncher();
+  final PhotoService _photoService = PhotoService();
 
   Transaction? _transaction;
   bool _isLoading = true;
   String? _error;
   bool _isUpdating = false;
+  
+  // Photo state management
+  Photo? _photoProof;
+  Photo? _transferProof;
+  bool _isLoadingPhotos = false;
+  bool _isUploadingPhoto = false;
+  double _uploadProgress = 0.0;
 
   @override
   void initState() {
@@ -79,6 +90,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         _transaction = transaction;
         _isLoading = false;
       });
+      
+      // Load transaction photos after transaction is loaded
+      _loadTransactionPhotos();
     } catch (e) {
       // Guard clause: ensure still mounted before updating state
       if (!mounted) return;
@@ -366,14 +380,419 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
     );
   }
 
-  void _viewPhoto(String photoUrl) {
-    // Guard clause: validate photo URL
-    if (photoUrl.isEmpty) return;
+  /// Load transaction photos (photoProof and transferProof)
+  Future<void> _loadTransactionPhotos() async {
+    if (_transaction == null || !mounted) return;
 
-    // TODO: Implement photo viewing with PhotoViewer
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Photo viewer coming soon')),
+    setState(() {
+      _isLoadingPhotos = true;
+    });
+
+    try {
+      final photoMap = await _photoService.getAllTransactionPhotos(_transaction!.id);
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _photoProof = photoMap[PhotoType.photoProof];
+        _transferProof = photoMap[PhotoType.transferProof];
+        _isLoadingPhotos = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() {
+        _isLoadingPhotos = false;
+      });
+      
+      debugPrint('Error loading transaction photos: $e');
+    }
+  }
+
+  /// View photo in fullscreen
+  void _viewPhoto(Photo photo) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => _NetworkPhotoViewer(
+          photo: photo,
+          title: '${photo.type.displayName} - ${_transaction?.id.substring(0, 8) ?? 'Transaction'}',
+        ),
+      ),
     );
+  }
+
+  /// Add photo proof
+  Future<void> _addPhotoProof() async {
+    if (_transaction == null || _isUploadingPhoto) return;
+    
+    final l10n = AppLocalizations.of(context)!;
+    
+    try {
+      setState(() {
+        _isUploadingPhoto = true;
+        _uploadProgress = 0.0;
+      });
+      
+      final photo = await _photoService.uploadTransactionPhotoProofWithPicker(
+        _transaction!.id,
+        context: context,
+        onProgress: (sent, total) {
+          if (mounted) {
+            setState(() {
+              _uploadProgress = PhotoService.calculateUploadProgress(sent, total);
+            });
+          }
+        },
+      );
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      if (photo != null) {
+        setState(() {
+          _photoProof = photo;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.transactions_message_photoProofAdded),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_error_photoProofAddFailed(e.toString())),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  /// Add transfer proof
+  Future<void> _addTransferProof() async {
+    if (_transaction == null || _isUploadingPhoto) return;
+    
+    final l10n = AppLocalizations.of(context)!;
+    
+    try {
+      setState(() {
+        _isUploadingPhoto = true;
+        _uploadProgress = 0.0;
+      });
+      
+      final photo = await _photoService.uploadTransactionTransferProofWithPicker(
+        _transaction!.id,
+        context: context,
+        onProgress: (sent, total) {
+          if (mounted) {
+            setState(() {
+              _uploadProgress = PhotoService.calculateUploadProgress(sent, total);
+            });
+          }
+        },
+      );
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      if (photo != null) {
+        setState(() {
+          _transferProof = photo;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.transactions_message_transferProofAdded),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_error_transferProofAddFailed(e.toString())),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  /// Update photo proof
+  Future<void> _updatePhotoProof() async {
+    if (_transaction == null || _isUploadingPhoto) return;
+    
+    final l10n = AppLocalizations.of(context)!;
+    
+    try {
+      setState(() {
+        _isUploadingPhoto = true;
+        _uploadProgress = 0.0;
+      });
+      
+      final photo = await _photoService.updateTransactionPhotoProofWithPicker(
+        _transaction!.id,
+        context: context,
+        onProgress: (sent, total) {
+          if (mounted) {
+            setState(() {
+              _uploadProgress = PhotoService.calculateUploadProgress(sent, total);
+            });
+          }
+        },
+      );
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      if (photo != null) {
+        setState(() {
+          _photoProof = photo;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.transactions_message_photoProofUpdated),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_error_photoProofUpdateFailed(e.toString())),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  /// Update transfer proof
+  Future<void> _updateTransferProof() async {
+    if (_transaction == null || _isUploadingPhoto) return;
+    
+    final l10n = AppLocalizations.of(context)!;
+    
+    try {
+      setState(() {
+        _isUploadingPhoto = true;
+        _uploadProgress = 0.0;
+      });
+      
+      final photo = await _photoService.updateTransactionTransferProofWithPicker(
+        _transaction!.id,
+        context: context,
+        onProgress: (sent, total) {
+          if (mounted) {
+            setState(() {
+              _uploadProgress = PhotoService.calculateUploadProgress(sent, total);
+            });
+          }
+        },
+      );
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      if (photo != null) {
+        setState(() {
+          _transferProof = photo;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.transactions_message_transferProofUpdated),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() {
+        _isUploadingPhoto = false;
+        _uploadProgress = 0.0;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_error_transferProofUpdateFailed(e.toString())),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  /// Remove photo proof
+  Future<void> _removePhotoProof() async {
+    if (_photoProof == null) return;
+    
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.transactions_title_removePhotoProof),
+        content: Text(l10n.transactions_message_removePhotoProofConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_button_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(l10n.common_button_remove),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed != true || !mounted) return;
+    
+    try {
+      await _photoService.deletePhoto(_photoProof!.id);
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _photoProof = null;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_message_photoProofRemoved),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_error_photoProofRemoveFailed(e.toString())),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  /// Remove transfer proof
+  Future<void> _removeTransferProof() async {
+    if (_transferProof == null) return;
+    
+    final l10n = AppLocalizations.of(context)!;
+    
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.transactions_title_removeTransferProof),
+        content: Text(l10n.transactions_message_removeTransferProofConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_button_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(l10n.common_button_remove),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed != true || !mounted) return;
+    
+    try {
+      await _photoService.deletePhoto(_transferProof!.id);
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _transferProof = null;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_message_transferProofRemoved),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.transactions_error_transferProofRemoveFailed(e.toString())),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   @override
@@ -469,11 +888,8 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
           ],
           _buildItemsListCard(),
           const SizedBox(height: 16),
-          if (_transaction!.photoProofUrl != null ||
-              _transaction!.transferProofUrl != null) ...[
-            _buildProofSection(),
-            const SizedBox(height: 16),
-          ],
+          _buildPhotoSection(),
+          const SizedBox(height: 16),
           _buildAuditInfoCard(),
           const SizedBox(height: 80), // Space for FAB
         ],
@@ -698,6 +1114,83 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
                       ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            
+            // QR Code Section
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.8),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Transaction QR Code',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                            width: 1,
+                          ),
+                        ),
+                        child: QrImageView(
+                          data: _transaction!.id,
+                          size: 80,
+                          padding: const EdgeInsets.all(8),
+                          backgroundColor: Colors.white,
+                          eyeStyle: const QrEyeStyle(
+                            eyeShape: QrEyeShape.square,
+                            color: Colors.black,
+                          ),
+                          dataModuleStyle: const QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.square,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Scan for quick access',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'This QR code contains the transaction ID for easy verification and tracking.',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    fontSize: 12,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -1000,33 +1493,6 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildItemsListCard() {
     // Guard clause: ensure transaction exists
@@ -1086,68 +1552,15 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
     );
   }
 
-  Widget _buildItemRow(TransactionItem item) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                Text(
-                  'ID: ${item.productId}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                        fontFamily: 'monospace',
-                      ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              '${item.quantity}x',
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              NumberUtils.formatDoubleAsInt(item.price),
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.right,
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              NumberUtils.formatDoubleAsInt(item.amount ?? 0.0),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildProofSection() {
-    // Guard clause: ensure transaction exists
+  /// Build photo management section
+  Widget _buildPhotoSection() {
     if (_transaction == null) return const SizedBox.shrink();
-
+    
+    final l10n = AppLocalizations.of(context)!;
+    final isTransfer = _transaction!.type == TransactionType.transfer;
+    final canEdit = _canEditTransaction();
+    
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -1169,25 +1582,25 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionHeader(
-              'Proof Documentation',
-              'Photo and transfer proof files',
+              l10n.transactions_title_photoManagement,
+              l10n.transactions_subtitle_photoManagement,
               Icons.photo_library,
             ),
             const SizedBox(height: 16),
-            if (_transaction!.photoProofUrl != null) ...[
-              _buildModernProofItem(
-                'Photo Proof',
-                _transaction!.photoProofUrl!,
-                Icons.photo_camera,
-              ),
-              const SizedBox(height: 12),
+            
+            // Photo Proof Section (for all transaction types)
+            _buildPhotoProofSection(canEdit),
+            
+            // Transfer Proof Section (only for TRANSFER transactions)
+            if (isTransfer) ...[
+              const SizedBox(height: 16),
+              _buildTransferProofSection(canEdit),
             ],
-            if (_transaction!.transferProofUrl != null) ...[
-              _buildModernProofItem(
-                'Transfer Proof',
-                _transaction!.transferProofUrl!,
-                Icons.receipt_long,
-              ),
+            
+            // Upload progress indicator
+            if (_isUploadingPhoto) ...[
+              const SizedBox(height: 16),
+              _buildUploadProgressIndicator(),
             ],
           ],
         ),
@@ -1195,43 +1608,375 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
     );
   }
 
-  Widget _buildProofItem(String label, String url, IconData icon) {
-    return Row(
+  /// Build photo proof section
+  Widget _buildPhotoProofSection(bool canEdit) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          children: [
+            Icon(
+              Icons.photo_camera,
+              size: 20,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.transactions_label_photoProof,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (canEdit && !_isUploadingPhoto) ...
+              _buildPhotoActions(
+                photo: _photoProof,
+                onAdd: _addPhotoProof,
+                onUpdate: _updatePhotoProof,
+                onRemove: _removePhotoProof,
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_isLoadingPhotos)
+          _buildPhotoLoadingState()
+        else if (_photoProof != null)
+          _buildPhotoDisplay(_photoProof!)
+        else
+          _buildNoPhotoState(l10n.transactions_message_noPhotoProof),
+      ],
+    );
+  }
+
+  /// Build transfer proof section
+  Widget _buildTransferProofSection(bool canEdit) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.receipt_long,
+              size: 20,
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.transactions_label_transferProof,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (canEdit && !_isUploadingPhoto) ...
+              _buildPhotoActions(
+                photo: _transferProof,
+                onAdd: _addTransferProof,
+                onUpdate: _updateTransferProof,
+                onRemove: _removeTransferProof,
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (_isLoadingPhotos)
+          _buildPhotoLoadingState()
+        else if (_transferProof != null)
+          _buildPhotoDisplay(_transferProof!)
+        else
+          _buildNoPhotoState(l10n.transactions_message_noTransferProof),
+      ],
+    );
+  }
+
+  /// Build photo action buttons
+  List<Widget> _buildPhotoActions({
+    required Photo? photo,
+    required VoidCallback onAdd,
+    required VoidCallback onUpdate,
+    required VoidCallback onRemove,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    if (photo == null) {
+      return [
+        FilledButton.tonal(
+          onPressed: onAdd,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            minimumSize: Size.zero,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              const Icon(Icons.add_photo_alternate, size: 16),
+              const SizedBox(width: 4),
+              Text(l10n.common_button_add),
+            ],
+          ),
+        ),
+      ];
+    }
+    
+    return [
+      PopupMenuButton<String>(
+        onSelected: (value) {
+          switch (value) {
+            case 'change':
+              onUpdate();
+              break;
+            case 'remove':
+              onRemove();
+              break;
+          }
+        },
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: 'change',
+            child: Row(
+              children: [
+                const Icon(Icons.edit, size: 16),
+                const SizedBox(width: 8),
+                Text(l10n.common_button_change),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'remove',
+            child: Row(
+              children: [
+                const Icon(Icons.delete, size: 16, color: Colors.red),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.common_button_remove,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ],
+            ),
+          ),
+        ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Icon(Icons.more_vert, size: 16),
+        ),
+      ),
+    ];
+  }
+
+  /// Build photo display widget
+  Widget _buildPhotoDisplay(Photo photo) {
+    return GestureDetector(
+      onTap: () => _viewPhoto(photo),
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.network(
+                  photo.mediumUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.broken_image,
+                              color: Theme.of(context).colorScheme.error,
+                              size: 24,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              AppLocalizations.of(context)!.common_error_loadImageFailed,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    photo.type.displayName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
                       fontWeight: FontWeight.w500,
                     ),
+                  ),
+                ),
               ),
-              Text(
-                url,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                overflow: TextOverflow.ellipsis,
+              Positioned(
+                bottom: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Icon(
+                    Icons.zoom_in,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
               ),
             ],
           ),
         ),
-        TextButton(
-          onPressed: () {
-            // TODO: Implement photo viewing
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Photo viewing coming soon')),
-            );
-          },
-          child: const Text('View'),
-        ),
-      ],
+      ),
     );
   }
+
+  /// Build no photo state
+  Widget _buildNoPhotoState(String message) {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.photo_outlined,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build photo loading state
+  Widget _buildPhotoLoadingState() {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  /// Build upload progress indicator
+  Widget _buildUploadProgressIndicator() {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.cloud_upload,
+                color: Theme.of(context).primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.transactions_message_uploadingPhoto,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              Text(
+                '${_uploadProgress.toInt()}%',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: _uploadProgress / 100,
+            backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildAuditInfoCard() {
     // Guard clause: ensure transaction exists
@@ -1457,65 +2202,6 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
     );
   }
 
-  Widget _buildModernProofItem(String label, String url, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 20, color: Theme.of(context).primaryColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  url,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          FilledButton.tonal(
-            onPressed: () => _viewPhoto(url),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              minimumSize: Size.zero,
-            ),
-            child: const Text('View'),
-          ),
-        ],
-      ),
-    );
-  }
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
@@ -1523,5 +2209,191 @@ ${l10n.transactions_label_date}: ${_formatDateTime(_transaction!.createdAt)}''';
 
   String _formatDateTime(DateTime date) {
     return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+/// Network Photo Viewer for displaying photos from URLs
+class _NetworkPhotoViewer extends StatefulWidget {
+  final Photo photo;
+  final String? title;
+
+  const _NetworkPhotoViewer({
+    required this.photo,
+    this.title,
+  });
+
+  @override
+  State<_NetworkPhotoViewer> createState() => _NetworkPhotoViewerState();
+}
+
+class _NetworkPhotoViewerState extends State<_NetworkPhotoViewer> {
+  bool _showOverlay = true;
+  TransformationController? _transformationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _transformationController = TransformationController();
+  }
+
+  @override
+  void dispose() {
+    _transformationController?.dispose();
+    super.dispose();
+  }
+
+  void _toggleOverlay() {
+    setState(() {
+      _showOverlay = !_showOverlay;
+    });
+  }
+
+  void _resetZoom() {
+    _transformationController?.value = Matrix4.identity();
+  }
+
+  void _showPhotoInfo() {
+    final l10n = AppLocalizations.of(context)!;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.transactions_title_photoInfo),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoRow(l10n.transactions_label_photoType, widget.photo.type.displayName),
+            const SizedBox(height: 8),
+            _buildInfoRow(l10n.transactions_label_photoId, widget.photo.id.substring(0, 8)),
+            const SizedBox(height: 8),
+            _buildInfoRow(l10n.transactions_label_uploadedAt, _formatDateTime(widget.photo.createdAt)),
+            const SizedBox(height: 8),
+            _buildInfoRow(l10n.transactions_label_uploadedBy, widget.photo.createdBy),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.common_button_close),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDateTime(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: _showOverlay
+          ? AppBar(
+              title: Text(widget.title ?? l10n.transactions_title_photoViewer),
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              actions: [
+                IconButton(
+                  onPressed: _showPhotoInfo,
+                  icon: const Icon(Icons.info_outline),
+                  tooltip: l10n.transactions_title_photoInfo,
+                ),
+                IconButton(
+                  onPressed: _resetZoom,
+                  icon: const Icon(Icons.fullscreen_exit),
+                  tooltip: l10n.transactions_action_resetZoom,
+                ),
+              ],
+            )
+          : null,
+      body: GestureDetector(
+        onTap: _toggleOverlay,
+        child: Center(
+          child: InteractiveViewer(
+            transformationController: _transformationController,
+            minScale: 0.5,
+            maxScale: 3.0,
+            child: Image.network(
+              widget.photo.secureUrl,
+              fit: BoxFit.contain,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.common_message_loading,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.broken_image,
+                        color: Colors.white,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.common_error_loadImageFailed,
+                        style: const TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

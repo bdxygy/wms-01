@@ -53,6 +53,9 @@ dependencies:
   print_bluetooth_thermal: ^1.1.4
   esc_pos_utils_plus: ^2.0.4
 
+  # QR Code Generation
+  qr_flutter: ^4.1.0
+
   # Serialization & UI
   json_annotation: ^4.8.1
   flex_color_scheme: ^8.2.0

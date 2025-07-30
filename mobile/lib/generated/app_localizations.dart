@@ -3482,6 +3482,72 @@ abstract class AppLocalizations {
   /// **'In Stock'**
   String get products_status_inStock;
 
+  /// No description provided for @product_photo_section_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Product Photo'**
+  String get product_photo_section_title;
+
+  /// No description provided for @product_photo_section_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add or manage product image'**
+  String get product_photo_section_subtitle;
+
+  /// No description provided for @product_no_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo added'**
+  String get product_no_photo;
+
+  /// No description provided for @product_add_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get product_add_photo;
+
+  /// No description provided for @product_change_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Photo'**
+  String get product_change_photo;
+
+  /// No description provided for @product_remove_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Photo'**
+  String get product_remove_photo;
+
+  /// No description provided for @product_uploading_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo...'**
+  String get product_uploading_photo;
+
+  /// No description provided for @product_photo_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo selected successfully'**
+  String get product_photo_selected;
+
+  /// No description provided for @product_photo_selection_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to select photo'**
+  String get product_photo_selection_failed;
+
+  /// No description provided for @product_photo_removed.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo removed successfully'**
+  String get product_photo_removed;
+
+  /// No description provided for @product_photo_upload_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo upload failed'**
+  String get product_photo_upload_failed;
+
   /// No description provided for @transactions_action_printReceipt.
   ///
   /// In en, this message translates to:
@@ -3817,6 +3883,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Printer not connected. Setting up printer...'**
   String get common_error_printerNotConnected;
+
+  /// No description provided for @transactions_title_photoInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Information'**
+  String get transactions_title_photoInfo;
+
+  /// No description provided for @transactions_label_photoType.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Type'**
+  String get transactions_label_photoType;
+
+  /// No description provided for @transactions_label_photoId.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo ID'**
+  String get transactions_label_photoId;
+
+  /// No description provided for @transactions_label_uploadedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded At'**
+  String get transactions_label_uploadedAt;
+
+  /// No description provided for @transactions_label_uploadedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded By'**
+  String get transactions_label_uploadedBy;
+
+  /// No description provided for @transactions_title_photoViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Viewer'**
+  String get transactions_title_photoViewer;
+
+  /// No description provided for @transactions_action_resetZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Zoom'**
+  String get transactions_action_resetZoom;
+
+  /// No description provided for @transactions_title_photoManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Management'**
+  String get transactions_title_photoManagement;
+
+  /// No description provided for @transactions_subtitle_photoManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload and manage transaction photos'**
+  String get transactions_subtitle_photoManagement;
+
+  /// No description provided for @transactions_label_photoProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Proof'**
+  String get transactions_label_photoProof;
+
+  /// No description provided for @transactions_message_noPhotoProof.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo proof available'**
+  String get transactions_message_noPhotoProof;
+
+  /// No description provided for @transactions_label_transferProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Proof'**
+  String get transactions_label_transferProof;
+
+  /// No description provided for @transactions_message_noTransferProof.
+  ///
+  /// In en, this message translates to:
+  /// **'No transfer proof available'**
+  String get transactions_message_noTransferProof;
+
+  /// No description provided for @transactions_message_uploadingPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo...'**
+  String get transactions_message_uploadingPhoto;
+
+  /// No description provided for @common_button_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get common_button_close;
+
+  /// No description provided for @common_button_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get common_button_add;
+
+  /// No description provided for @common_button_change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get common_button_change;
+
+  /// No description provided for @common_button_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get common_button_remove;
+
+  /// No description provided for @common_message_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get common_message_loading;
+
+  /// No description provided for @common_error_loadImageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image'**
+  String get common_error_loadImageFailed;
+
+  /// No description provided for @transactions_message_photoProofAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo proof added successfully'**
+  String get transactions_message_photoProofAdded;
+
+  /// No description provided for @transactions_message_transferProofAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer proof added successfully'**
+  String get transactions_message_transferProofAdded;
+
+  /// No description provided for @transactions_message_photoProofUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo proof updated successfully'**
+  String get transactions_message_photoProofUpdated;
+
+  /// No description provided for @transactions_message_transferProofUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer proof updated successfully'**
+  String get transactions_message_transferProofUpdated;
+
+  /// No description provided for @transactions_title_removePhotoProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Photo Proof'**
+  String get transactions_title_removePhotoProof;
+
+  /// No description provided for @transactions_message_removePhotoProofConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this photo proof?'**
+  String get transactions_message_removePhotoProofConfirm;
+
+  /// No description provided for @transactions_message_photoProofRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo proof removed successfully'**
+  String get transactions_message_photoProofRemoved;
+
+  /// No description provided for @transactions_title_removeTransferProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Transfer Proof'**
+  String get transactions_title_removeTransferProof;
+
+  /// No description provided for @transactions_message_removeTransferProofConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this transfer proof?'**
+  String get transactions_message_removeTransferProofConfirm;
+
+  /// No description provided for @transactions_message_transferProofRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer proof removed successfully'**
+  String get transactions_message_transferProofRemoved;
+
+  /// No description provided for @transactions_error_photoProofAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add photo proof: {error}'**
+  String transactions_error_photoProofAddFailed(String error);
+
+  /// No description provided for @transactions_error_transferProofAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add transfer proof: {error}'**
+  String transactions_error_transferProofAddFailed(String error);
+
+  /// No description provided for @transactions_error_photoProofUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update photo proof: {error}'**
+  String transactions_error_photoProofUpdateFailed(String error);
+
+  /// No description provided for @transactions_error_transferProofUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update transfer proof: {error}'**
+  String transactions_error_transferProofUpdateFailed(String error);
+
+  /// No description provided for @transactions_error_photoProofRemoveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove photo proof: {error}'**
+  String transactions_error_photoProofRemoveFailed(String error);
+
+  /// No description provided for @transactions_error_transferProofRemoveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove transfer proof: {error}'**
+  String transactions_error_transferProofRemoveFailed(String error);
 }
 
 class _AppLocalizationsDelegate

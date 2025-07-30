@@ -348,14 +348,6 @@ class _ProductImeiManagementScreenState extends State<ProductImeiManagementScree
     );
   }
 
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

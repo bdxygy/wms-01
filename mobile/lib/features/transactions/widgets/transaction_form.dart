@@ -7,12 +7,14 @@ import '../../../core/models/api_requests.dart';
 import '../../../core/models/store.dart';
 import '../../../core/models/user.dart';
 import '../../../core/models/product.dart';
+import '../../../core/models/photo.dart';
 import '../../../core/services/store_service.dart';
 import '../../../core/services/product_service.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/utils/scanner_launcher.dart';
+import 'transaction_photo_upload.dart';
 
 // Transaction form data model
 class TransactionFormData {
@@ -75,14 +77,15 @@ class _TransactionFormState extends State<TransactionForm> {
   String? _selectedStoreId;
   String? _selectedDestinationStoreId;
   String? _photoProofUrl;
+  String? _photoProofId;
   String? _transferProofUrl;
+  String? _transferProofId;
   String? _selectedTradeInProductId;
   Product? _selectedTradeInProduct;
   List<TransactionItemRequest> _items = [];
 
   List<Store> _stores = [];
   List<Product> _searchResults = [];
-  final bool _isLoading = false;
   bool _isSearching = false;
   bool _showSearchResults = false;
 
@@ -134,6 +137,8 @@ class _TransactionFormState extends State<TransactionForm> {
     _selectedDestinationStoreId = transaction.toStoreId;
     _photoProofUrl = transaction.photoProofUrl;
     _transferProofUrl = transaction.transferProofUrl;
+    // Note: Photo IDs are not available in Transaction model
+    // They would need to be fetched separately if needed for editing
     _customerNameController.text = transaction.to ?? '';
     _customerPhoneController.text = transaction.customerPhone ?? '';
     _items = transaction.items
@@ -387,6 +392,22 @@ class _TransactionFormState extends State<TransactionForm> {
     );
   }
 
+  /// Handle photo proof changes
+  void _onPhotoProofChanged(String? photoUrl, String? photoId) {
+    setState(() {
+      _photoProofUrl = photoUrl;
+      _photoProofId = photoId;
+    });
+  }
+
+  /// Handle transfer proof changes
+  void _onTransferProofChanged(String? photoUrl, String? photoId) {
+    setState(() {
+      _transferProofUrl = photoUrl;
+      _transferProofId = photoId;
+    });
+  }
+
   void _submitForm() {
     // Guard clause: Form validation
     if (!_validateForm()) return;
@@ -442,6 +463,8 @@ class _TransactionFormState extends State<TransactionForm> {
                       _buildCustomerSection(),
                       const SizedBox(height: 16),
                     ],
+                    _buildPhotoSections(),
+                    const SizedBox(height: 16),
                     _buildCompactSummary(),
                     const SizedBox(height: 16),
                     _buildActionButtons(),
@@ -1276,6 +1299,40 @@ class _TransactionFormState extends State<TransactionForm> {
             ),
           ],
         ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoSections() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Photo Proof section (for all transaction types)
+        TransactionPhotoUpload(
+          type: PhotoType.photoProof,
+          initialPhotoUrl: _photoProofUrl,
+          existingPhotoId: _photoProofId,
+          transactionId: widget.initialTransaction?.id,
+          onPhotoChanged: _onPhotoProofChanged,
+          title: 'Photo Proof',
+          subtitle: 'Optional photo evidence for this transaction',
+          isRequired: false,
+        ),
+
+        // Transfer Proof section (only for TRANSFER transactions)
+        if (_selectedType == TransactionType.transfer) ...[
+          const SizedBox(height: 16),
+          TransactionPhotoUpload(
+            type: PhotoType.transferProof,
+            initialPhotoUrl: _transferProofUrl,
+            existingPhotoId: _transferProofId,
+            transactionId: widget.initialTransaction?.id,
+            onPhotoChanged: _onTransferProofChanged,
+            title: 'Transfer Proof',
+            subtitle: 'Photo proof of goods being transferred',
+            isRequired: false,
+          ),
+        ],
       ],
     );
   }

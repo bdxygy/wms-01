@@ -1,1 +1,0 @@
-ALTER TABLE `transaction_items` ADD `purchase_price` real DEFAULT 0 NOT NULL;

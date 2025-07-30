@@ -421,7 +421,4 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  void _navigateToSettings() {
-    AppRouter.goToSettings(context);
-  }
 }

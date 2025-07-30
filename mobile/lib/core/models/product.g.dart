@@ -20,6 +20,7 @@ Product _$ProductFromJson(Map<String, dynamic> json) => Product(
       quantity: (json['quantity'] as num).toInt(),
       purchasePrice: (json['purchasePrice'] as num).toDouble(),
       salePrice: (json['salePrice'] as num?)?.toDouble(),
+      photoUrl: json['photoUrl'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       deletedAt: json['deletedAt'] == null
@@ -46,6 +47,7 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
       'quantity': instance.quantity,
       'purchasePrice': instance.purchasePrice,
       'salePrice': instance.salePrice,
+      'photoUrl': instance.photoUrl,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
       'deletedAt': instance.deletedAt?.toIso8601String(),

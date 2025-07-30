@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1753244867916,
-      "tag": "0000_lush_grim_reaper",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1753251102494,
-      "tag": "0001_oval_doctor_strange",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1753253355353,
-      "tag": "0002_true_domino",
+      "when": 1753828688883,
+      "tag": "0000_tough_daredevil",
       "breakpoints": true
     }
   ]

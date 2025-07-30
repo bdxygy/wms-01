@@ -1,1 +1,0 @@
-ALTER TABLE `products` ADD `is_must_check` integer DEFAULT false;

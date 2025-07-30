@@ -12,6 +12,7 @@ import { productRoutes } from "./routes/products/routes";
 import { transactionRoutes } from "./routes/transactions/routes";
 import { storeRoutes } from "./routes/stores/routes";
 import { imeiRoutes } from "./routes/imeis/routes";
+import { photoRoutes } from "./routes/photos/routes";
 
 const app = createApp();
 
@@ -36,6 +37,7 @@ app.route("/api/v1/products", productRoutes);
 app.route("/api/v1/transactions", transactionRoutes);
 app.route("/api/v1/stores", storeRoutes);
 app.route("/api/v1", imeiRoutes);
+app.route("/api/v1/photos", photoRoutes);
 
 // Health check endpoint
 app.get("/health", (c) => {

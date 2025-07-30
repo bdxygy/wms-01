@@ -70,7 +70,7 @@ class _CategoryFormDialogState extends State<CategoryFormDialog> {
         // Create new category
         final request = CreateCategoryRequest(
           name: _nameController.text.trim(),
-          storeId: Provider.of<StoreContextProvider>(context, listen: false)!
+          storeId: Provider.of<StoreContextProvider>(context, listen: false)
               .selectedStore!
               .id,
           description: _descriptionController.text.trim().isEmpty

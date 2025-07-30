@@ -61,6 +61,7 @@ CREATE TABLE `products` (
 	`sku` text NOT NULL,
 	`is_imei` integer DEFAULT false,
 	`barcode` text NOT NULL,
+	`is_must_check` integer DEFAULT false,
 	`quantity` integer DEFAULT 1 NOT NULL,
 	`purchase_price` real NOT NULL,
 	`sale_price` real,
@@ -80,6 +81,7 @@ CREATE TABLE `transaction_items` (
 	`product_id` text NOT NULL,
 	`name` text NOT NULL,
 	`price` real NOT NULL,
+	`purchase_price` real DEFAULT 0 NOT NULL,
 	`quantity` integer NOT NULL,
 	`amount` real,
 	`created_at` integer NOT NULL,
@@ -99,12 +101,14 @@ CREATE TABLE `transactions` (
 	`to` text,
 	`customer_phone` text,
 	`amount` real,
+	`trade_in_product_id` text,
 	`is_finished` integer DEFAULT true,
 	`created_at` integer NOT NULL,
 	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`from_store_id`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`to_store_id`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`to_store_id`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`trade_in_product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `product_checks` (
@@ -118,6 +122,22 @@ CREATE TABLE `product_checks` (
 	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`checked_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`store_id`) REFERENCES `stores`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE TABLE `photos` (
+	`id` text PRIMARY KEY NOT NULL,
+	`public_id` text NOT NULL,
+	`secure_url` text NOT NULL,
+	`type` text NOT NULL,
+	`transaction_id` text,
+	`product_id` text,
+	`created_by` text NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	`deleted_at` integer,
+	FOREIGN KEY (`transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `product_imeis` (

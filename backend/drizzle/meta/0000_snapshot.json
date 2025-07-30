@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "575d4fec-765f-47a2-83df-68dec8b27e5a",
+  "id": "c20db244-4f7d-4025-a3f5-abd9d93a3d7d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "categories": {
@@ -446,6 +446,14 @@
           "notNull": true,
           "autoincrement": false
         },
+        "is_must_check": {
+          "name": "is_must_check",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
         "quantity": {
           "name": "quantity",
           "type": "integer",
@@ -590,6 +598,14 @@
           "notNull": true,
           "autoincrement": false
         },
+        "purchase_price": {
+          "name": "purchase_price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
         "quantity": {
           "name": "quantity",
           "type": "integer",
@@ -725,6 +741,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "trade_in_product_id": {
+          "name": "trade_in_product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "is_finished": {
           "name": "is_finished",
           "type": "integer",
@@ -788,6 +811,19 @@
           "tableTo": "stores",
           "columnsFrom": [
             "to_store_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "transactions_trade_in_product_id_products_id_fk": {
+          "name": "transactions_trade_in_product_id_products_id_fk",
+          "tableFrom": "transactions",
+          "tableTo": "products",
+          "columnsFrom": [
+            "trade_in_product_id"
           ],
           "columnsTo": [
             "id"
@@ -887,6 +923,126 @@
           "tableTo": "stores",
           "columnsFrom": [
             "store_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "photos": {
+      "name": "photos",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "public_id": {
+          "name": "public_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "secure_url": {
+          "name": "secure_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "photos_transaction_id_transactions_id_fk": {
+          "name": "photos_transaction_id_transactions_id_fk",
+          "tableFrom": "photos",
+          "tableTo": "transactions",
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "photos_product_id_products_id_fk": {
+          "name": "photos_product_id_products_id_fk",
+          "tableFrom": "photos",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "photos_created_by_users_id_fk": {
+          "name": "photos_created_by_users_id_fk",
+          "tableFrom": "photos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by"
           ],
           "columnsTo": [
             "id"

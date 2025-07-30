@@ -7,6 +7,7 @@ class ApiEndpoints {
   static const String products = '/products';
   static const String transactions = '/transactions';
   static const String imeis = '/imeis';
+  static const String photos = '/photos';
 
   // Authentication endpoints
   static const String authLogin = '$auth/login';
@@ -56,6 +57,14 @@ class ApiEndpoints {
   static const String transactionsCreate = transactions;
   static String transactionsById(String id) => '$transactions/$id';
   static String transactionsUpdate(String id) => '$transactions/$id';
+
+  // Photo endpoints
+  static const String photosUpload = photos;
+  static String photosByTransactionId(String transactionId) => '$photos/transaction/$transactionId';
+  static String photosByProductId(String productId) => '$photos/product/$productId';
+  static String photosUpdateByTransaction(String transactionId) => '$photos/transaction/$transactionId';
+  static String photosUpdateByProduct(String productId) => '$photos/product/$productId';
+  static String photosDelete(String photoId) => '$photos/$photoId';
 
   // Utility methods for query parameters
   static Map<String, dynamic> paginationParams({

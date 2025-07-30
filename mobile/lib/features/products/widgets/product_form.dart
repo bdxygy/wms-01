@@ -6,14 +6,18 @@ import 'package:nanoid2/nanoid2.dart';
 import '../../../core/models/product.dart';
 import '../../../core/models/store.dart';
 import '../../../core/models/category.dart';
+import '../../../core/models/photo.dart';
 import '../../../core/services/store_service.dart';
 import '../../../core/services/category_service.dart';
 import '../../../core/services/product_service.dart';
+import '../../../core/services/photo_service.dart';
+import '../../../core/services/image_picker_service.dart';
 import '../../../core/validators/product_validators.dart';
 import '../../../core/providers/store_context_provider.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/utils/scanner_launcher.dart';
 import '../../../core/utils/number_utils.dart';
+import '../../../generated/app_localizations.dart';
 
 /// Form data model for product creation/editing
 class ProductFormData {
@@ -29,6 +33,7 @@ class ProductFormData {
   final bool isMustCheck;
   final List<String> imeis;
   final String? photoUrl;
+  final Uint8List? photoFile;
 
   ProductFormData({
     required this.productName,
@@ -43,6 +48,7 @@ class ProductFormData {
     required this.isMustCheck,
     required this.imeis,
     this.photoUrl,
+    this.photoFile,
   });
 }
 
@@ -72,6 +78,8 @@ class _ProductFormState extends State<ProductForm> {
   final StoreService _storeService = StoreService();
   final CategoryService _categoryService = CategoryService();
   final ProductService _productService = ProductService();
+  final PhotoService _photoService = PhotoService();
+  final ImagePickerService _imagePickerService = ImagePickerService();
 
   // Form controllers
   final TextEditingController _nameController = TextEditingController();
@@ -89,6 +97,12 @@ class _ProductFormState extends State<ProductForm> {
   bool _isMustCheck = false;
   List<String> _imeis = [];
   String? _photoUrl;
+
+  // Photo state
+  Photo? _selectedPhoto;
+  Uint8List? _photoFile;
+  bool _isUploadingPhoto = false;
+  double _uploadProgress = 0.0;
 
   // Data lists
   List<Store> _stores = [];
@@ -134,10 +148,16 @@ class _ProductFormState extends State<ProductForm> {
     _selectedCategoryId = product.categoryId;
     _isImeiProduct = product.isImei;
     _isMustCheck = product.isMustCheck;
+    _photoUrl = product.photoUrl;
 
     // Load IMEIs if this is an IMEI product
     if (product.isImei) {
       _loadProductImeis(product.id);
+    }
+
+    // Load existing photo if available
+    if (product.photoUrl != null) {
+      _loadExistingPhoto(product.id);
     }
   }
 
@@ -226,6 +246,19 @@ class _ProductFormState extends State<ProductForm> {
       });
     } catch (e) {
       debugPrint('Failed to load product IMEIs: $e');
+    }
+  }
+
+  Future<void> _loadExistingPhoto(String productId) async {
+    try {
+      final photo = await _photoService.getProductPhoto(productId);
+      if (!mounted) return;
+
+      setState(() {
+        _selectedPhoto = photo;
+      });
+    } catch (e) {
+      debugPrint('Failed to load existing photo: $e');
     }
   }
 
@@ -379,6 +412,39 @@ class _ProductFormState extends State<ProductForm> {
     setState(() => _isSaving = true);
 
     try {
+      String? finalPhotoUrl = _photoUrl;
+
+      // Handle photo upload during product save
+      if (_photoFile != null) {
+        try {
+          final l10n = AppLocalizations.of(context)!;
+          _showSuccessMessage(l10n.product_uploading_photo);
+
+          // For new products, we'll upload photo after product creation
+          // For existing products, upload immediately
+          if (widget.initialProduct != null) {
+            final uploadedPhoto = await _photoService.updateProductPhoto(
+              widget.initialProduct!.id,
+              _photoFile!,
+              onProgress: (sent, total) {
+                final progress = PhotoService.calculateUploadProgress(sent, total);
+                if (mounted) {
+                  setState(() => _uploadProgress = progress);
+                }
+              },
+            );
+            finalPhotoUrl = uploadedPhoto.secureUrl;
+          }
+        } catch (e) {
+          // Don't block product save if photo upload fails
+          debugPrint('Photo upload failed (non-blocking): $e');
+          if (mounted) {
+            final l10n = AppLocalizations.of(context)!;
+            _showError('${l10n.product_photo_upload_failed}: $e');
+          }
+        }
+      }
+
       final formData = ProductFormData(
         productName: productName,
         sku: sku,
@@ -391,10 +457,17 @@ class _ProductFormState extends State<ProductForm> {
         isImei: isImei,
         isMustCheck: isMustCheck,
         imeis: imeis,
-        photoUrl: photoUrl,
+        photoUrl: finalPhotoUrl,
+        photoFile: _photoFile,
       );
 
       await widget.onSave?.call(formData);
+
+      // For new products, upload photo after product creation
+      if (_photoFile != null && widget.initialProduct == null) {
+        // This will be handled by the parent component after product creation
+        // Pass the photo file through a callback or state management
+      }
     } catch (e) {
       if (!mounted) return;
       _showError('Failed to save product: $e');
@@ -410,6 +483,16 @@ class _ProductFormState extends State<ProductForm> {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -446,6 +529,10 @@ class _ProductFormState extends State<ProductForm> {
 
                     // Store & Category Section
                     _buildStoreSection(),
+                    const SizedBox(height: 24),
+
+                    // Product Photo Section
+                    _buildPhotoSection(),
                     const SizedBox(height: 24),
 
                     // IMEI Section (if enabled)
@@ -713,6 +800,22 @@ class _ProductFormState extends State<ProductForm> {
               : null,
           enabled: _selectedStoreId != null,
         ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoSection() {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          l10n.product_photo_section_title,
+          l10n.product_photo_section_subtitle,
+          Icons.photo_camera,
+        ),
+        const SizedBox(height: 16),
+        _buildPhotoUploadWidget(),
       ],
     );
   }
@@ -1160,6 +1263,245 @@ class _ProductFormState extends State<ProductForm> {
     );
   }
 
+  Widget _buildPhotoUploadWidget() {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_selectedPhoto != null || _photoFile != null) ...[
+            // Photo preview
+            _buildPhotoPreview(),
+            const SizedBox(height: 16),
+            // Action buttons for existing photo
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isUploadingPhoto ? null : _changePhoto,
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: Text(l10n.product_change_photo),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isUploadingPhoto ? null : _removePhoto,
+                    icon: const Icon(Icons.delete, size: 16),
+                    label: Text(l10n.product_remove_photo),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (_isUploadingPhoto) ...[
+              const SizedBox(height: 16),
+              _buildUploadProgress(),
+            ],
+          ] else ...[
+            // Add photo button
+            Center(
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: 48,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.product_no_photo,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _isUploadingPhoto ? null : _addPhoto,
+                      icon: const Icon(Icons.add_a_photo, size: 16),
+                      label: Text(l10n.product_add_photo),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoPreview() {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.grey[100],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: _photoFile != null
+            ? Image.memory(
+                _photoFile!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+              )
+            : _selectedPhoto != null
+                ? Image.network(
+                    _selectedPhoto!.mediumUrl,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 200,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: double.infinity,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : Container(
+                    width: double.infinity,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.image,
+                        size: 48,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+      ),
+    );
+  }
+
+  Widget _buildUploadProgress() {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.cloud_upload,
+              size: 16,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n.product_uploading_photo,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${_uploadProgress.toStringAsFixed(0)}%',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        LinearProgressIndicator(
+          value: _uploadProgress / 100,
+          backgroundColor: Colors.grey[300],
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Theme.of(context).primaryColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Photo management methods
+  Future<void> _addPhoto() async {
+    await _selectAndSetPhoto();
+  }
+
+  Future<void> _changePhoto() async {
+    await _selectAndSetPhoto();
+  }
+
+  Future<void> _selectAndSetPhoto() async {
+    try {
+      final imageBytes = await _imagePickerService.pickImage(context);
+      if (imageBytes == null || !mounted) return;
+
+      setState(() {
+        _photoFile = imageBytes;
+        _selectedPhoto = null; // Clear network photo when new file is selected
+      });
+
+      final l10n = AppLocalizations.of(context)!;
+      _showSuccessMessage(l10n.product_photo_selected);
+    } catch (e) {
+      debugPrint('Error selecting photo: $e');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        _showError('${l10n.product_photo_selection_failed}: $e');
+      }
+    }
+  }
+
+  void _removePhoto() {
+    setState(() {
+      _photoFile = null;
+      _selectedPhoto = null;
+      _photoUrl = null;
+    });
+
+    final l10n = AppLocalizations.of(context)!;
+    _showSuccessMessage(l10n.product_photo_removed);
+  }
+
   // Getters for form data using guard clauses
   String get productName => _nameController.text.trim();
   String get sku => _skuController.text.trim();
@@ -1182,5 +1524,6 @@ class _ProductFormState extends State<ProductForm> {
   bool get isMustCheck => _isMustCheck;
   List<String> get imeis =>
       _imeis.where((imei) => imei.trim().isNotEmpty).toList();
-  String? get photoUrl => _photoUrl;
+  String? get photoUrl => _photoUrl ?? _selectedPhoto?.secureUrl;
+  Uint8List? get photoFile => _photoFile;
 }

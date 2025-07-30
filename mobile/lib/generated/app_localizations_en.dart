@@ -1811,6 +1811,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get products_status_inStock => 'In Stock';
 
   @override
+  String get product_photo_section_title => 'Product Photo';
+
+  @override
+  String get product_photo_section_subtitle => 'Add or manage product image';
+
+  @override
+  String get product_no_photo => 'No photo added';
+
+  @override
+  String get product_add_photo => 'Add Photo';
+
+  @override
+  String get product_change_photo => 'Change Photo';
+
+  @override
+  String get product_remove_photo => 'Remove Photo';
+
+  @override
+  String get product_uploading_photo => 'Uploading photo...';
+
+  @override
+  String get product_photo_selected => 'Photo selected successfully';
+
+  @override
+  String get product_photo_selection_failed => 'Failed to select photo';
+
+  @override
+  String get product_photo_removed => 'Photo removed successfully';
+
+  @override
+  String get product_photo_upload_failed => 'Photo upload failed';
+
+  @override
   String get transactions_action_printReceipt => 'Print Receipt';
 
   @override
@@ -1996,4 +2029,134 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get common_error_printerNotConnected =>
       'Printer not connected. Setting up printer...';
+
+  @override
+  String get transactions_title_photoInfo => 'Photo Information';
+
+  @override
+  String get transactions_label_photoType => 'Photo Type';
+
+  @override
+  String get transactions_label_photoId => 'Photo ID';
+
+  @override
+  String get transactions_label_uploadedAt => 'Uploaded At';
+
+  @override
+  String get transactions_label_uploadedBy => 'Uploaded By';
+
+  @override
+  String get transactions_title_photoViewer => 'Photo Viewer';
+
+  @override
+  String get transactions_action_resetZoom => 'Reset Zoom';
+
+  @override
+  String get transactions_title_photoManagement => 'Photo Management';
+
+  @override
+  String get transactions_subtitle_photoManagement =>
+      'Upload and manage transaction photos';
+
+  @override
+  String get transactions_label_photoProof => 'Photo Proof';
+
+  @override
+  String get transactions_message_noPhotoProof => 'No photo proof available';
+
+  @override
+  String get transactions_label_transferProof => 'Transfer Proof';
+
+  @override
+  String get transactions_message_noTransferProof =>
+      'No transfer proof available';
+
+  @override
+  String get transactions_message_uploadingPhoto => 'Uploading photo...';
+
+  @override
+  String get common_button_close => 'Close';
+
+  @override
+  String get common_button_add => 'Add';
+
+  @override
+  String get common_button_change => 'Change';
+
+  @override
+  String get common_button_remove => 'Remove';
+
+  @override
+  String get common_message_loading => 'Loading...';
+
+  @override
+  String get common_error_loadImageFailed => 'Failed to load image';
+
+  @override
+  String get transactions_message_photoProofAdded =>
+      'Photo proof added successfully';
+
+  @override
+  String get transactions_message_transferProofAdded =>
+      'Transfer proof added successfully';
+
+  @override
+  String get transactions_message_photoProofUpdated =>
+      'Photo proof updated successfully';
+
+  @override
+  String get transactions_message_transferProofUpdated =>
+      'Transfer proof updated successfully';
+
+  @override
+  String get transactions_title_removePhotoProof => 'Remove Photo Proof';
+
+  @override
+  String get transactions_message_removePhotoProofConfirm =>
+      'Are you sure you want to remove this photo proof?';
+
+  @override
+  String get transactions_message_photoProofRemoved =>
+      'Photo proof removed successfully';
+
+  @override
+  String get transactions_title_removeTransferProof => 'Remove Transfer Proof';
+
+  @override
+  String get transactions_message_removeTransferProofConfirm =>
+      'Are you sure you want to remove this transfer proof?';
+
+  @override
+  String get transactions_message_transferProofRemoved =>
+      'Transfer proof removed successfully';
+
+  @override
+  String transactions_error_photoProofAddFailed(String error) {
+    return 'Failed to add photo proof: $error';
+  }
+
+  @override
+  String transactions_error_transferProofAddFailed(String error) {
+    return 'Failed to add transfer proof: $error';
+  }
+
+  @override
+  String transactions_error_photoProofUpdateFailed(String error) {
+    return 'Failed to update photo proof: $error';
+  }
+
+  @override
+  String transactions_error_transferProofUpdateFailed(String error) {
+    return 'Failed to update transfer proof: $error';
+  }
+
+  @override
+  String transactions_error_photoProofRemoveFailed(String error) {
+    return 'Failed to remove photo proof: $error';
+  }
+
+  @override
+  String transactions_error_transferProofRemoveFailed(String error) {
+    return 'Failed to remove transfer proof: $error';
+  }
 }

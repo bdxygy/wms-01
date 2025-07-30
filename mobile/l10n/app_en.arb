@@ -789,6 +789,17 @@
   "products_status_outOfStock": "Out of Stock",
   "products_status_lowStock": "Low Stock",
   "products_status_inStock": "In Stock",
+  "product_photo_section_title": "Product Photo",
+  "product_photo_section_subtitle": "Add or manage product image",
+  "product_no_photo": "No photo added",
+  "product_add_photo": "Add Photo",
+  "product_change_photo": "Change Photo",
+  "product_remove_photo": "Remove Photo",
+  "product_uploading_photo": "Uploading photo...",
+  "product_photo_selected": "Photo selected successfully",
+  "product_photo_selection_failed": "Failed to select photo",
+  "product_photo_removed": "Photo removed successfully",
+  "product_photo_upload_failed": "Photo upload failed",
 
   "transactions_action_printReceipt": "Print Receipt",
   "transactions_action_markFinished": "Mark Finished",
@@ -926,6 +937,87 @@
   "common_error_printerNotConnected": "Printer not connected. Setting up printer...",
   "common_error_permissionRequired": "Permission required: {error}",
   "@common_error_permissionRequired": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "transactions_title_photoInfo": "Photo Information",
+  "transactions_label_photoType": "Photo Type",
+  "transactions_label_photoId": "Photo ID",
+  "transactions_label_uploadedAt": "Uploaded At",
+  "transactions_label_uploadedBy": "Uploaded By",
+  "transactions_title_photoViewer": "Photo Viewer",
+  "transactions_action_resetZoom": "Reset Zoom",
+  "transactions_title_photoManagement": "Photo Management",
+  "transactions_subtitle_photoManagement": "Upload and manage transaction photos",
+  "transactions_label_photoProof": "Photo Proof",
+  "transactions_message_noPhotoProof": "No photo proof available",
+  "transactions_label_transferProof": "Transfer Proof",
+  "transactions_message_noTransferProof": "No transfer proof available",
+  "transactions_message_uploadingPhoto": "Uploading photo...",
+  "common_button_close": "Close",
+  "common_button_add": "Add",
+  "common_button_change": "Change",
+  "common_button_remove": "Remove",
+  "common_message_loading": "Loading...",
+  "common_error_loadImageFailed": "Failed to load image",
+
+  "transactions_message_photoProofAdded": "Photo proof added successfully",
+  "transactions_message_transferProofAdded": "Transfer proof added successfully",
+  "transactions_message_photoProofUpdated": "Photo proof updated successfully",
+  "transactions_message_transferProofUpdated": "Transfer proof updated successfully",
+  "transactions_title_removePhotoProof": "Remove Photo Proof",
+  "transactions_message_removePhotoProofConfirm": "Are you sure you want to remove this photo proof?",
+  "transactions_message_photoProofRemoved": "Photo proof removed successfully",
+  "transactions_title_removeTransferProof": "Remove Transfer Proof",
+  "transactions_message_removeTransferProofConfirm": "Are you sure you want to remove this transfer proof?",
+  "transactions_message_transferProofRemoved": "Transfer proof removed successfully",
+
+  "transactions_error_photoProofAddFailed": "Failed to add photo proof: {error}",
+  "@transactions_error_photoProofAddFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_transferProofAddFailed": "Failed to add transfer proof: {error}",
+  "@transactions_error_transferProofAddFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_photoProofUpdateFailed": "Failed to update photo proof: {error}",
+  "@transactions_error_photoProofUpdateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_transferProofUpdateFailed": "Failed to update transfer proof: {error}",
+  "@transactions_error_transferProofUpdateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_photoProofRemoveFailed": "Failed to remove photo proof: {error}",
+  "@transactions_error_photoProofRemoveFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactions_error_transferProofRemoveFailed": "Failed to remove transfer proof: {error}",
+  "@transactions_error_transferProofRemoveFailed": {
     "placeholders": {
       "error": {
         "type": "String"

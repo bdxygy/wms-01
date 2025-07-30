@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../generated/app_localizations.dart';
 import '../services/logo_service.dart';
@@ -221,9 +222,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
               
               const SizedBox(height: 16),
               
-              // Receipt title
+              // Receipt title based on transaction type
               Text(
-                'RECEIPT',
+                _getReceiptTitle(),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -248,6 +249,7 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
               _buildReceiptRow('Date:', _formatDate()),
               if (widget.user != null)
                 _buildReceiptRow('Cashier:', widget.user!.name),
+              ..._buildTypeSpecificDetails(),
               
               const SizedBox(height: 12),
               
@@ -299,9 +301,57 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
               
               const SizedBox(height: 20),
               
+              // QR Code for transaction verification
+              if (_getTransactionId() != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Transaction ID:',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      QrImageView(
+                        data: _getTransactionId()!,
+                        version: QrVersions.auto,
+                        size: 80,
+                        gapless: false,
+                        dataModuleStyle: const QrDataModuleStyle(
+                          color: Colors.black,
+                          dataModuleShape: QrDataModuleShape.square,
+                        ),
+                        eyeStyle: const QrEyeStyle(
+                          eyeShape: QrEyeShape.square,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _getTransactionId()!,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              
               // Footer
               Text(
-                'Thank you for your purchase!',
+                _getFooterMessage(),
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.black,
@@ -418,6 +468,20 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
     return widget.transaction?['type'] ?? 'SALE';
   }
 
+  String _getReceiptTitle() {
+    final transactionType = _getTransactionType().toUpperCase();
+    switch (transactionType) {
+      case 'SALE':
+        return 'SALES RECEIPT';
+      case 'TRANSFER':
+        return 'TRANSFER RECEIPT';
+      case 'TRADE':
+        return 'TRADE RECEIPT';
+      default:
+        return 'RECEIPT';
+    }
+  }
+
   String _formatDate() {
     final dateStr = widget.transaction?['createdAt'] ?? DateTime.now().toIso8601String();
     try {
@@ -429,23 +493,88 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
   }
 
   List<Map<String, dynamic>> _getSampleItems() {
-    return [
-      {
-        'productName': 'Sample Product 1',
-        'quantity': 2,
-        'price': 15.99,
-      },
-      {
-        'productName': 'Sample Product 2',
-        'quantity': 1,
-        'price': 29.99,
-      },
-      {
-        'productName': 'Sample Product 3',
-        'quantity': 3,
-        'price': 8.50,
-      },
-    ];
+    final transactionType = _getTransactionType().toUpperCase();
+    
+    switch (transactionType) {
+      case 'TRANSFER':
+        return [
+          {
+            'productName': 'Product A (Transfer Item)',
+            'quantity': 5,
+            'price': 25.00,
+          },
+          {
+            'productName': 'Product B (Transfer Item)',
+            'quantity': 3,
+            'price': 15.50,
+          },
+        ];
+      case 'TRADE':
+        return [
+          {
+            'productName': 'Trade Item X',
+            'quantity': 1,
+            'price': 100.00,
+          },
+          {
+            'productName': 'Trade Item Y',
+            'quantity': 2,
+            'price': 50.00,
+          },
+        ];
+      default: // SALE
+        return [
+          {
+            'productName': 'Sample Product 1',
+            'quantity': 2,
+            'price': 15.99,
+          },
+          {
+            'productName': 'Sample Product 2',
+            'quantity': 1,
+            'price': 29.99,
+          },
+          {
+            'productName': 'Sample Product 3',
+            'quantity': 3,
+            'price': 8.50,
+          },
+        ];
+    }
+  }
+
+  List<Widget> _buildTypeSpecificDetails() {
+    final transactionType = _getTransactionType().toUpperCase();
+    
+    switch (transactionType) {
+      case 'TRANSFER':
+        return [
+          _buildReceiptRow('From:', widget.transaction?['from'] ?? 'Store A'),
+          _buildReceiptRow('To:', widget.transaction?['to'] ?? 'Store B'),
+        ];
+      case 'TRADE':
+        return [
+          _buildReceiptRow('Trade Partner:', widget.transaction?['tradeWith'] ?? widget.transaction?['to'] ?? 'Trade Customer'),
+        ];
+      default: // SALE
+        return [
+          _buildReceiptRow('Customer:', widget.transaction?['to'] ?? 'Walk-in Customer'),
+        ];
+    }
+  }
+
+  String _getFooterMessage() {
+    final transactionType = _getTransactionType().toUpperCase();
+    switch (transactionType) {
+      case 'SALE':
+        return 'Thank you for your purchase!';
+      case 'TRANSFER':
+        return 'Transfer completed successfully!';
+      case 'TRADE':
+        return 'Trade transaction completed!';
+      default:
+        return 'Transaction completed!';
+    }
   }
 
   double _calculateTotal() {
@@ -455,5 +584,9 @@ class _ReceiptPreviewDialogState extends State<ReceiptPreviewDialog> {
       final price = (item['price'] as num?)?.toDouble() ?? 0.0;
       return total + (quantity * price);
     });
+  }
+
+  String? _getTransactionId() {
+    return widget.transaction?['id'] ?? 'TXN-${DateTime.now().millisecondsSinceEpoch}';
   }
 }

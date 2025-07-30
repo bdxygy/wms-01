@@ -119,7 +119,9 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
           }
         }
       } else {
-        _showErrorDialog(AppLocalizations.of(context)!.photoCaptureFailed);
+        if (mounted) {
+          _showErrorDialog(AppLocalizations.of(context)!.photoCaptureFailed);
+        }
       }
     } catch (e) {
      debugPrint('❌ CameraScreen: Photo capture error: $e');

@@ -414,68 +414,9 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
   }
 
-  IconData _getRoleIcon(String role) {
-    switch (role.toUpperCase()) {
-      case 'OWNER':
-        return Icons.business_center;
-      case 'ADMIN':
-        return Icons.admin_panel_settings;
-      case 'STAFF':
-        return Icons.person_outline;
-      case 'CASHIER':
-        return Icons.point_of_sale;
-      default:
-        return Icons.help_outline;
-    }
-  }
 
-  IconData _getStatIcon(String role, int index) {
-    switch (role.toUpperCase()) {
-      case 'OWNER':
-        return [Icons.store, Icons.people, Icons.trending_up][index];
-      case 'ADMIN':
-        return [Icons.inventory, Icons.receipt, Icons.group][index];
-      case 'STAFF':
-        return [Icons.assignment, Icons.check_circle, Icons.schedule][index];
-      case 'CASHIER':
-        return [Icons.point_of_sale, Icons.receipt_long, Icons.payments][index];
-      default:
-        return Icons.help_outline;
-    }
-  }
 
-  String _getStatValue(String role, int index) {
-    // TODO: Replace with real data
-    switch (role.toUpperCase()) {
-      case 'OWNER':
-        return ['5', '24', '↑15%'][index];
-      case 'ADMIN':
-        return ['1,234', '89', '12'][index];
-      case 'STAFF':
-        return ['8', '45', '6h'][index];
-      case 'CASHIER':
-        return ['15', '₫2.5M', '42'][index];
-      default:
-        return '-';
-    }
-  }
 
-  String _getStatLabel(String role, int index) {
-    final l10n = AppLocalizations.of(context)!;
-
-    switch (role.toUpperCase()) {
-      case 'OWNER':
-        return [l10n.stores, l10n.staff, l10n.growth][index];
-      case 'ADMIN':
-        return [l10n.products, l10n.orders, l10n.staff][index];
-      case 'STAFF':
-        return [l10n.tasks, l10n.completed, l10n.today][index];
-      case 'CASHIER':
-        return [l10n.sales, l10n.revenue, l10n.items][index];
-      default:
-        return '-';
-    }
-  }
 
   String _getLocalizedRole(String role) {
     final l10n = AppLocalizations.of(context)!;

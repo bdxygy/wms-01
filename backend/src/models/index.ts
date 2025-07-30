@@ -5,3 +5,4 @@ export * from './categories';
 export * from './products';
 export * from './transactions';
 export * from './product_checks';
+export * from './photos';

@@ -185,7 +185,7 @@ class ScannerService {
     }
     
     // QR codes (more flexible)
-    if (code.length >= 1 && code.length <= 1000) {
+    if (code.isNotEmpty && code.length <= 1000) {
       return true;
     }
     

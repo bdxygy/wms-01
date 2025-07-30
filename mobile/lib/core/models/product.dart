@@ -17,6 +17,7 @@ class Product {
   final int quantity;
   final double purchasePrice;
   final double? salePrice;
+  final String? photoUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -40,6 +41,7 @@ class Product {
     required this.quantity,
     required this.purchasePrice,
     this.salePrice,
+    this.photoUrl,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -87,6 +89,7 @@ class Product {
     int? quantity,
     double? purchasePrice,
     double? salePrice,
+    String? photoUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -108,6 +111,7 @@ class Product {
       quantity: quantity ?? this.quantity,
       purchasePrice: purchasePrice ?? this.purchasePrice,
       salePrice: salePrice ?? this.salePrice,
+      photoUrl: photoUrl ?? this.photoUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,

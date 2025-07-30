@@ -491,9 +491,11 @@ class PrintLauncher {
       bytes += generator.feed(1);
     }
 
-    // Receipt title
+    // Receipt title based on transaction type
+    final transactionType = transaction['type'] ?? 'SALE';
+    final receiptTitle = _getReceiptTitle(transactionType);
     bytes += generator.text(
-      'RECEIPT',
+      receiptTitle,
       styles: PosStyles(
         align: PosAlign.center,
         bold: true,
@@ -523,13 +525,49 @@ class PrintLauncher {
       ]);
     }
 
+    // Transaction type-specific details
     bytes += generator.row([
-      PosColumn(text: 'To:', width: 6, styles: PosStyles(bold: true)),
+      PosColumn(text: 'Type:', width: 6, styles: PosStyles(bold: true)),
       PosColumn(
-          text: transaction['to'],
+          text: transactionType,
           width: 6,
           styles: PosStyles(align: PosAlign.right)),
     ]);
+
+    // Type-specific fields
+    if (transactionType == 'TRANSFER') {
+      bytes += generator.row([
+        PosColumn(text: 'From:', width: 6, styles: PosStyles(bold: true)),
+        PosColumn(
+            text: transaction['from'] ?? 'N/A',
+            width: 6,
+            styles: PosStyles(align: PosAlign.right)),
+      ]);
+      bytes += generator.row([
+        PosColumn(text: 'To:', width: 6, styles: PosStyles(bold: true)),
+        PosColumn(
+            text: transaction['to'] ?? 'N/A',
+            width: 6,
+            styles: PosStyles(align: PosAlign.right)),
+      ]);
+    } else if (transactionType == 'TRADE') {
+      bytes += generator.row([
+        PosColumn(text: 'Trade With:', width: 6, styles: PosStyles(bold: true)),
+        PosColumn(
+            text: transaction['tradeWith'] ?? transaction['to'] ?? 'N/A',
+            width: 6,
+            styles: PosStyles(align: PosAlign.right)),
+      ]);
+    } else {
+      // SALE type
+      bytes += generator.row([
+        PosColumn(text: 'Customer:', width: 6, styles: PosStyles(bold: true)),
+        PosColumn(
+            text: transaction['to'] ?? 'Walk-in Customer',
+            width: 6,
+            styles: PosStyles(align: PosAlign.right)),
+      ]);
+    }
 
     bytes += generator.hr();
 
@@ -584,10 +622,34 @@ class PrintLauncher {
 
     bytes += generator.feed(2);
 
-    // Footer
+    // QR Code for transaction ID
+    bytes += generator.feed(1);
     bytes += generator.text(
-      'Thank you for your purchase!',
+      'Transaction ID:',
+      styles: PosStyles(align: PosAlign.center, bold: true),
+    );
+    bytes += generator.text(
+      transaction['id'] ?? 'N/A',
+      styles: PosStyles(align: PosAlign.center, fontType: PosFontType.fontB),
+    );
+    
+    try {
+      bytes += generator.qrcode(transaction['id'] ?? 'N/A');
+    } catch (e) {
+      debugPrint('Error generating QR code: $e');
+    }
+
+    bytes += generator.feed(1);
+
+    // Type-appropriate footer message
+    final footerMessage = _getFooterMessage(transactionType);
+    bytes += generator.text(
+      footerMessage,
       styles: PosStyles(align: PosAlign.center),
+    );
+    bytes += generator.text(
+      'Scan QR code for verification',
+      styles: PosStyles(align: PosAlign.center, fontType: PosFontType.fontB),
     );
 
     bytes += generator.feed(3);
@@ -623,9 +685,11 @@ class PrintLauncher {
       bytes += generator.feed(1);
     }
 
-    // Payment note title
+    // Payment note title based on transaction type
+    final transactionType = transaction['type'] ?? 'SALE';
+    final paymentNoteTitle = _getPaymentNoteTitle(transactionType);
     bytes += generator.text(
-      'PAYMENT NOTE',
+      paymentNoteTitle,
       styles: PosStyles(
         align: PosAlign.center,
         bold: true,
@@ -635,7 +699,6 @@ class PrintLauncher {
     bytes += generator.hr();
 
     // Basic transaction info
-    final transactionType = transaction['type'] ?? 'SALE';
     final createdAt =
         transaction['createdAt'] ?? DateTime.now().toIso8601String();
     final totalAmount = (transaction['totalAmount'] as num?)?.toDouble() ?? 0.0;
@@ -792,6 +855,48 @@ class PrintLauncher {
       return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return isoString;
+    }
+  }
+
+  /// Get receipt title based on transaction type
+  String _getReceiptTitle(String transactionType) {
+    switch (transactionType.toUpperCase()) {
+      case 'SALE':
+        return 'SALES RECEIPT';
+      case 'TRANSFER':
+        return 'TRANSFER RECEIPT';
+      case 'TRADE':
+        return 'TRADE RECEIPT';
+      default:
+        return 'RECEIPT';
+    }
+  }
+
+  /// Get footer message based on transaction type
+  String _getFooterMessage(String transactionType) {
+    switch (transactionType.toUpperCase()) {
+      case 'SALE':
+        return 'Thank you for your purchase!';
+      case 'TRANSFER':
+        return 'Transfer completed successfully!';
+      case 'TRADE':
+        return 'Trade transaction completed!';
+      default:
+        return 'Transaction completed!';
+    }
+  }
+
+  /// Get payment note title based on transaction type
+  String _getPaymentNoteTitle(String transactionType) {
+    switch (transactionType.toUpperCase()) {
+      case 'SALE':
+        return 'PAYMENT NOTE';
+      case 'TRANSFER':
+        return 'TRANSFER NOTE';
+      case 'TRADE':
+        return 'TRADE NOTE';
+      default:
+        return 'PAYMENT NOTE';
     }
   }
 

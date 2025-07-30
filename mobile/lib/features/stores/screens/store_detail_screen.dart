@@ -69,18 +69,18 @@ class _StoreDetailScreenState extends State<StoreDetailScreen> {
     if (_store == null) return;
 
     final l10n = AppLocalizations.of(context)!;
-    final storeInfo = '''${l10n.stores_title_details ?? 'Store Details'}:
-${l10n.stores_label_name ?? 'Name'}: ${_store!.name}
-${l10n.stores_label_type ?? 'Type'}: ${_store!.type}
-${l10n.stores_label_status ?? 'Status'}: ${_store!.isActive ? l10n.active : l10n.inactive}
-${l10n.stores_label_address ?? 'Address'}: ${_store!.addressLine1}, ${_store!.city}, ${_store!.province}
-${l10n.stores_label_phone ?? 'Phone'}: ${_store!.phoneNumber}
-${_store!.email?.isNotEmpty == true ? '${l10n.stores_label_email ?? 'Email'}: ${_store!.email}' : ''}''';
+    final storeInfo = '''${l10n.stores_title_details}:
+${l10n.stores_label_name}: ${_store!.name}
+${l10n.stores_label_type}: ${_store!.type}
+${l10n.stores_label_status}: ${_store!.isActive ? l10n.active : l10n.inactive}
+${l10n.stores_label_address}: ${_store!.addressLine1}, ${_store!.city}, ${_store!.province}
+${l10n.stores_label_phone}: ${_store!.phoneNumber}
+${_store!.email?.isNotEmpty == true ? '${l10n.stores_label_email}: ${_store!.email}' : ''}''';
 
     Clipboard.setData(ClipboardData(text: storeInfo));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l10n.common_message_copiedToClipboard ?? 'Store information copied to clipboard'),
+        content: Text(l10n.common_message_copiedToClipboard),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -167,7 +167,7 @@ ${_store!.email?.isNotEmpty == true ? '${l10n.stores_label_email ?? 'Email'}: ${
     
     return WMSAppBar(
       icon: Icons.store,
-      title: _store?.name ?? l10n.stores_title_details ?? 'Store Details',
+      title: _store?.name ?? l10n.stores_title_details,
       badge: _store?.isActive == true
         ? WMSAppBarBadge.active(Theme.of(context))
         : _store?.isActive == false
@@ -180,7 +180,7 @@ ${_store!.email?.isNotEmpty == true ? '${l10n.stores_label_email ?? 'Email'}: ${
         ? [
             WMSAppBarMenuItem.delete(
               onTap: _deleteStore,
-              title: l10n.stores_action_deleteStore ?? 'Delete Store',
+              title: l10n.stores_action_deleteStore,
             ),
           ]
         : null,
