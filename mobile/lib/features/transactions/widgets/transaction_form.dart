@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +28,8 @@ class TransactionFormData {
   final String? customerPhone;
   final String? tradeInProductId;
   final List<TransactionItemRequest> items;
+  final Uint8List? pendingPhotoProofBytes;
+  final Uint8List? pendingTransferProofBytes;
 
   TransactionFormData({
     required this.type,
@@ -38,6 +41,8 @@ class TransactionFormData {
     this.customerPhone,
     this.tradeInProductId,
     required this.items,
+    this.pendingPhotoProofBytes,
+    this.pendingTransferProofBytes,
   });
 
   double get totalAmount {
@@ -48,6 +53,7 @@ class TransactionFormData {
 class TransactionForm extends StatefulWidget {
   final Transaction? initialTransaction;
   final bool isEditing;
+  final bool isLoading;
   final Function(TransactionFormData) onSave;
   final VoidCallback onCancel;
 
@@ -55,6 +61,7 @@ class TransactionForm extends StatefulWidget {
     super.key,
     this.initialTransaction,
     required this.isEditing,
+    this.isLoading = false,
     required this.onSave,
     required this.onCancel,
   });
@@ -72,6 +79,11 @@ class _TransactionFormState extends State<TransactionForm> {
   final _customerPhoneController = TextEditingController();
   final _searchController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
+  final _tradeInSearchController = TextEditingController();
+
+  // Store photo data for upload after transaction creation
+  Uint8List? _pendingPhotoProofBytes;
+  Uint8List? _pendingTransferProofBytes;
 
   TransactionType _selectedType = TransactionType.sale;
   String? _selectedStoreId;
@@ -87,6 +99,9 @@ class _TransactionFormState extends State<TransactionForm> {
   List<Store> _stores = [];
   List<Product> _searchResults = [];
   bool _isSearching = false;
+  List<Product> _tradeInSearchResults = [];
+  bool _isTradeInSearching = false;
+  bool _showTradeInSearchResults = false;
   bool _showSearchResults = false;
 
   @override
@@ -102,6 +117,7 @@ class _TransactionFormState extends State<TransactionForm> {
     _customerPhoneController.dispose();
     _searchController.dispose();
     _quantityController.dispose();
+    _tradeInSearchController.dispose();
     super.dispose();
   }
 
@@ -213,10 +229,79 @@ class _TransactionFormState extends State<TransactionForm> {
     }
   }
 
-  void _addProduct(Product product) {
-    // Guard clause: Invalid quantity
+  Future<void> _searchTradeInProducts(String query) async {
+    // Guard clause: Empty query
+    if (query.trim().isEmpty) {
+      setState(() {
+        _tradeInSearchResults = [];
+        _showTradeInSearchResults = false;
+      });
+      return;
+    }
+
+    // Guard clause: No store selected
+    if (_selectedStoreId == null) return;
+
+    setState(() {
+      _isTradeInSearching = true;
+      _showTradeInSearchResults = true;
+    });
+
+    try {
+      final response = await _productService.getProducts(
+        search: query.trim(),
+        storeId: _selectedStoreId!,
+        limit: 8, // Reduced for mobile
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _tradeInSearchResults = response.data;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Trade-in search failed: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isTradeInSearching = false);
+      }
+    }
+  }
+
+  void _selectTradeInProduct(Product product) {
+    setState(() {
+      _selectedTradeInProduct = product;
+      _selectedTradeInProductId = product.id;
+      _tradeInSearchController.clear();
+      _tradeInSearchResults = [];
+      _showTradeInSearchResults = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Trade-in product selected: ${product.name}'),
+        backgroundColor: Colors.purple,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  bool _addProduct(Product product) {
+    // Guard clause: Product out of stock
+    if (product.quantity <= 0) {
+      _showError('Product "${product.name}" is out of stock and cannot be added');
+      return false;
+    }
+
+    // Guard clause: Invalid quantity input
     final quantity = int.tryParse(_quantityController.text) ?? 1;
-    if (quantity <= 0) return;
+    if (quantity <= 0) {
+      _showError('Quantity must be greater than 0 to add items');
+      return false;
+    }
 
     final existingIndex =
         _items.indexWhere((item) => item.productId == product.id);
@@ -246,6 +331,8 @@ class _TransactionFormState extends State<TransactionForm> {
       _searchResults = [];
       _showSearchResults = false;
     });
+    
+    return true;
   }
 
   void _removeItem(int index) {
@@ -308,11 +395,10 @@ class _TransactionFormState extends State<TransactionForm> {
           return;
         }
 
-        // Auto-add the found product
-        _addProduct(product);
-
-        // Show success message
-        if (mounted) {
+        // Auto-add the found product and show success only if added
+        final wasAdded = _addProduct(product);
+        
+        if (wasAdded && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Product added: ${product.name}'),
@@ -394,22 +480,31 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   /// Handle photo proof changes
-  void _onPhotoProofChanged(String? photoUrl, String? photoId) {
+  void _onPhotoProofChanged(String? photoUrl, String? photoId, [Uint8List? imageBytes]) {
     setState(() {
       _photoProofUrl = photoUrl;
       _photoProofId = photoId;
+      if (imageBytes != null) {
+        _pendingPhotoProofBytes = imageBytes;
+      }
     });
   }
 
   /// Handle transfer proof changes
-  void _onTransferProofChanged(String? photoUrl, String? photoId) {
+  void _onTransferProofChanged(String? photoUrl, String? photoId, [Uint8List? imageBytes]) {
     setState(() {
       _transferProofUrl = photoUrl;
       _transferProofId = photoId;
+      if (imageBytes != null) {
+        _pendingTransferProofBytes = imageBytes;
+      }
     });
   }
 
   void _submitForm() {
+    // Guard clause: Don't submit if already loading
+    if (widget.isLoading) return;
+    
     // Guard clause: Form validation
     if (!_validateForm()) return;
 
@@ -427,6 +522,8 @@ class _TransactionFormState extends State<TransactionForm> {
           : _customerPhoneController.text.trim(),
       tradeInProductId: _selectedTradeInProductId,
       items: _items,
+      pendingPhotoProofBytes: _pendingPhotoProofBytes,
+      pendingTransferProofBytes: _pendingTransferProofBytes,
     );
 
     widget.onSave(formData);
@@ -804,25 +901,107 @@ class _TransactionFormState extends State<TransactionForm> {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
+              // Search bar with scan button (similar to items form)
               if (_selectedTradeInProduct == null) ...[
-                // Scan button for trade-in product
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _scanBarcodeForTradeInProduct,
-                        icon: const Icon(Icons.qr_code_scanner, size: 20),
-                        label: const Text('Scan Barcode'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.purple,
-                          side: BorderSide(color: Colors.purple.withValues(alpha: 0.5)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      flex: 3,
+                      child: TextFormField(
+                        controller: _tradeInSearchController,
+                        decoration: _buildCompactInputDecoration('Search trade-in products...').copyWith(
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          suffixIcon: _isTradeInSearching
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                )
+                              : null,
+                        ),
+                        onChanged: _searchTradeInProducts,
+                        onTap: () {
+                          if (_tradeInSearchController.text.isNotEmpty) {
+                            setState(() => _showTradeInSearchResults = true);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Barcode scan button
+                    InkWell(
+                      onTap: _scanBarcodeForTradeInProduct,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.purple.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.qr_code_scanner,
+                          color: Colors.purple,
+                          size: 20,
                         ),
                       ),
                     ),
                   ],
                 ),
+
+                // Search Results for trade-in products
+                if (_showTradeInSearchResults && _tradeInSearchResults.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: _tradeInSearchResults.length,
+                      separatorBuilder: (context, index) => Divider(
+                        height: 1,
+                        color: Colors.purple.withValues(alpha: 0.2),
+                      ),
+                      itemBuilder: (context, index) {
+                        final product = _tradeInSearchResults[index];
+                        final price = product.salePrice ?? product.purchasePrice;
+                        final formattedPrice = Provider.of<AppProvider>(context, listen: false).formatCurrency(price);
+                        return ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          title: Text(
+                            product.name,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          subtitle: Text(
+                            'Price: $formattedPrice | Stock: ${product.quantity}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.add_circle, size: 20, color: Colors.purple),
+                            onPressed: () => _selectTradeInProduct(product),
+                          ),
+                          onTap: () => _selectTradeInProduct(product),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ] else ...[
                 // Selected trade-in product display
                 Container(
@@ -934,33 +1113,27 @@ class _TransactionFormState extends State<TransactionForm> {
           return;
         }
 
-        // Set the trade-in product
-        setState(() {
-          _selectedTradeInProduct = product;
-          _selectedTradeInProductId = product.id;
-        });
-
-        // Show success message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Trade-in product selected: ${product.name}'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+        // Set the trade-in product using the new method
+        _selectTradeInProduct(product);
       },
       onProductNotFound: (barcode) {
         // Guard clause: ensure widget is mounted after scan
         if (!mounted) return;
 
-        // Show product not found message
+        // Show product not found message with manual search option
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('No product found with barcode: $barcode'),
+            content: Text('No trade-in product found with barcode: $barcode'),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'Search Manually',
+              textColor: Colors.white,
+              onPressed: () {
+                _tradeInSearchController.text = barcode;
+                _searchTradeInProducts(barcode);
+              },
+            ),
           ),
         );
       },
@@ -1473,7 +1646,7 @@ class _TransactionFormState extends State<TransactionForm> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: widget.onCancel,
+              onPressed: widget.isLoading ? null : widget.onCancel,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 side: BorderSide(color: Theme.of(context).primaryColor),
@@ -1488,15 +1661,33 @@ class _TransactionFormState extends State<TransactionForm> {
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: _submitForm,
+              onPressed: widget.isLoading ? null : _submitForm,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: Text(widget.isEditing
-                  ? 'Update Transaction'
-                  : 'Create Transaction'),
+              child: widget.isLoading
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(widget.isEditing
+                            ? 'Updating...'
+                            : 'Creating...'),
+                      ],
+                    )
+                  : Text(widget.isEditing
+                      ? 'Update Transaction'
+                      : 'Create Transaction'),
             ),
           ),
         ],

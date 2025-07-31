@@ -8,6 +8,8 @@ import '../../../core/auth/auth_provider.dart';
 import '../../../core/models/user.dart';
 import '../../../core/widgets/main_navigation_scaffold.dart';
 import '../../../core/widgets/loading.dart';
+import '../../../core/mixins/refresh_list_mixin.dart';
+import '../../../core/routing/app_router.dart';
 
 class StoresListScreen extends StatefulWidget {
   const StoresListScreen({super.key});
@@ -16,7 +18,8 @@ class StoresListScreen extends StatefulWidget {
   State<StoresListScreen> createState() => _StoresListScreenState();
 }
 
-class _StoresListScreenState extends State<StoresListScreen> {
+class _StoresListScreenState extends State<StoresListScreen> 
+    with WidgetsBindingObserver, RefreshListMixin<StoresListScreen> {
   final StoreService _storeService = StoreService();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -34,6 +37,7 @@ class _StoresListScreenState extends State<StoresListScreen> {
   @override
   void initState() {
     super.initState();
+    setupRefreshListener();
     _loadStores();
     _scrollController.addListener(_onScroll);
     _searchController.addListener(_onSearchChanged);
@@ -43,7 +47,13 @@ class _StoresListScreenState extends State<StoresListScreen> {
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    disposeRefreshListener();
     super.dispose();
+  }
+
+  @override
+  Future<void> refreshData() async {
+    await _refreshStores();
   }
 
   void _onScroll() {
@@ -218,7 +228,9 @@ class _StoresListScreenState extends State<StoresListScreen> {
       currentRoute: 'stores',
       floatingActionButton: isOwner
           ? FloatingActionButton.extended(
-              onPressed: () => context.pushNamed('createStore'),
+              onPressed: () => navigateAndRefresh(
+                AppRouter.pushToCreateStore(context)
+              ),
               icon: const Icon(Icons.add),
               label: Text(l10n.createStore),
             )

@@ -4,8 +4,8 @@ import 'package:wms_mobile/core/utils/number_utils.dart';
 import '../models/currency.dart';
 
 class AppProvider extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.system;
-  Locale _locale = const Locale('en', 'US');
+  ThemeMode _themeMode = ThemeMode.light;
+  Locale _locale = const Locale('id', 'ID');
   Currency _currency = SupportedCurrencies.usd;
   bool _isInitialized = false;
 
@@ -74,12 +74,12 @@ class AppProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
 
       // Load theme mode
-      final themeIndex = prefs.getInt('theme_mode') ?? 0;
+      final themeIndex = prefs.getInt('theme_mode') ?? 1; // Default to light mode (index 1)
       _themeMode = ThemeMode.values[themeIndex];
 
       // Load locale
-      final languageCode = prefs.getString('language_code') ?? 'en';
-      final countryCode = prefs.getString('country_code') ?? 'US';
+      final languageCode = prefs.getString('language_code') ?? 'id';
+      final countryCode = prefs.getString('country_code') ?? 'ID';
       _locale = Locale(languageCode, countryCode);
 
       // Load currency
@@ -133,8 +133,8 @@ class AppProvider extends ChangeNotifier {
       await prefs.remove('country_code');
       await prefs.remove('currency_code');
 
-      _themeMode = ThemeMode.system;
-      _locale = const Locale('en', 'US');
+      _themeMode = ThemeMode.light;
+      _locale = const Locale('id', 'ID');
       _currency = SupportedCurrencies.usd;
       notifyListeners();
     } catch (e) {

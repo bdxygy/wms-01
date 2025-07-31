@@ -135,7 +135,7 @@ export class TransactionService {
         customerPhone: data.customerPhone || null,
         amount: totalAmount,
         tradeInProductId: data.tradeInProductId || null,
-        isFinished: false,
+        isFinished: true,
         createdAt: new Date(),
       })
       .returning();
@@ -164,19 +164,17 @@ export class TransactionService {
       .values(itemsToInsert)
       .returning();
 
-    // For SALE transactions, reduce product quantities
-    if (data.type === "SALE") {
-      for (let i = 0; i < data.items.length; i++) {
-        const item = data.items[i];
-        const product = productChecks[i];
+    // For all transaction types (SALE, TRANSFER, TRADE), reduce product quantities
+    for (let i = 0; i < data.items.length; i++) {
+      const item = data.items[i];
+      const product = productChecks[i];
 
-        await db
-          .update(products)
-          .set({
-            quantity: product.quantity - item.quantity,
-          })
-          .where(eq(products.id, item.productId));
-      }
+      await db
+        .update(products)
+        .set({
+          quantity: product.quantity - item.quantity,
+        })
+        .where(eq(products.id, item.productId));
     }
 
     return {
@@ -495,7 +493,7 @@ export class TransactionService {
 
     // Authorization middleware has already checked transaction access
 
-    // If updating items, validate them
+    // If updating items, validate them and handle stock adjustments
     if (data.items) {
       let totalAmount = 0;
       const productChecks: Array<{
@@ -506,6 +504,12 @@ export class TransactionService {
         purchasePrice: number | null;
         storeOwnerId: string;
       }> = [];
+
+      // First, get existing transaction items to restore stock
+      const existingItems = await db
+        .select()
+        .from(transactionItems)
+        .where(eq(transactionItems.transactionId, id));
 
       for (const item of data.items) {
         const product = await db
@@ -548,6 +552,23 @@ export class TransactionService {
         totalAmount += item.amount;
       }
 
+      // Restore stock from existing transaction items (add back the quantities)
+      for (const existingItem of existingItems) {
+        const product = await db
+          .select()
+          .from(products)
+          .where(eq(products.id, existingItem.productId));
+
+        if (product[0]) {
+          await db
+            .update(products)
+            .set({
+              quantity: product[0].quantity + existingItem.quantity,
+            })
+            .where(eq(products.id, existingItem.productId));
+        }
+      }
+
       // Delete existing items
       await db
         .delete(transactionItems)
@@ -567,6 +588,19 @@ export class TransactionService {
       }));
 
       await db.insert(transactionItems).values(itemsToInsert);
+
+      // Reduce stock for new transaction items (for all transaction types)
+      for (let i = 0; i < data.items.length; i++) {
+        const item = data.items[i];
+        const product = productChecks[i];
+
+        await db
+          .update(products)
+          .set({
+            quantity: product.quantity - item.quantity,
+          })
+          .where(eq(products.id, item.productId));
+      }
     }
 
     // Prepare update data

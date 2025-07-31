@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../models/product.dart';
 import '../models/user.dart';
 import '../models/store.dart';
+import '../utils/number_utils.dart';
 import '../widgets/bluetooth_setup_dialog.dart';
 
 /// Global service for thermal printer operations via Bluetooth
@@ -13,6 +14,11 @@ class PrintLauncher {
   static final PrintLauncher _instance = PrintLauncher._internal();
   factory PrintLauncher() => _instance;
   PrintLauncher._internal();
+
+  /// Format currency with symbol and proper number formatting
+  String _formatCurrency(double amount, String symbol) {
+    return '$symbol${NumberUtils.formatWithDots(amount.toInt())}';
+  }
 
 
   /// Check if all required Bluetooth permissions are granted
@@ -200,6 +206,7 @@ class PrintLauncher {
     required Product product,
     Store? store,
     User? user,
+    String? currencySymbol,
   }) async {
     if (!await isConnected) {
       throw Exception('Printer not connected');
@@ -210,6 +217,7 @@ class PrintLauncher {
         product: product,
         store: store,
         user: user,
+        currencySymbol: currencySymbol,
       );
 
       debugPrint('Printing product barcode...');
@@ -226,6 +234,7 @@ class PrintLauncher {
     required int quantity,
     Store? store,
     User? user,
+    String? currencySymbol,
   }) async {
     if (!await isConnected) {
       throw Exception('Printer not connected');
@@ -243,6 +252,7 @@ class PrintLauncher {
         product: product,
         store: store,
         user: user,
+        currencySymbol: currencySymbol,
       );
 
       // Print each barcode with a small delay between prints
@@ -382,6 +392,7 @@ class PrintLauncher {
     required Product product,
     Store? store,
     User? user,
+    String? currencySymbol,
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
@@ -446,7 +457,7 @@ class PrintLauncher {
     // Price (if available)
     if (product.salePrice != null) {
       bytes += generator.text(
-        '\$${product.salePrice!.toInt()}',
+        _formatCurrency(product.salePrice!, currencySymbol ?? '\$'),
         styles: PosStyles(
           align: PosAlign.center,
           bold: true,
@@ -469,6 +480,7 @@ class PrintLauncher {
     required Map<String, dynamic> transaction,
     Store? store,
     User? user,
+    String? currencySymbol,
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
@@ -589,11 +601,11 @@ class PrintLauncher {
 
       bytes += generator.row([
         PosColumn(
-          text: '$quantity x \$${price.toInt()}',
+          text: '$quantity x ${_formatCurrency(price, currencySymbol ?? '\$')}',
           width: 8,
         ),
         PosColumn(
-          text: '\$${subtotal.toInt()}',
+          text: _formatCurrency(subtotal, currencySymbol ?? '\$'),
           width: 4,
           styles: PosStyles(align: PosAlign.right),
         ),
@@ -753,7 +765,7 @@ class PrintLauncher {
   }
 
   /// Generate test ticket to verify printer functionality
-  Future<List<int>> _generateTestTicket() async {
+  Future<List<int>> _generateTestTicket([String? currencySymbol]) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];
@@ -813,7 +825,7 @@ class PrintLauncher {
     bytes += generator.row([
       PosColumn(text: 'Test Product', width: 6),
       PosColumn(
-          text: '\$10.00', width: 6, styles: PosStyles(align: PosAlign.right)),
+          text: _formatCurrency(10.0, currencySymbol ?? '\$'), width: 6, styles: PosStyles(align: PosAlign.right)),
     ]);
 
     bytes += generator.hr();

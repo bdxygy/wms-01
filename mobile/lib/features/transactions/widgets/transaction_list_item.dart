@@ -86,9 +86,7 @@ class TransactionListItem extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        transaction.type == TransactionType.sale 
-                            ? Icons.person 
-                            : Icons.store,
+                        _getInfoIcon(),
                         size: 16,
                         color: Colors.grey[600],
                       ),
@@ -170,19 +168,31 @@ class TransactionListItem extends StatelessWidget {
   }
 
   Widget _buildTypeBadge(BuildContext context) {
-    final isTransfer = transaction.type == TransactionType.transfer;
+    Color badgeColor;
+    IconData badgeIcon;
+    
+    switch (transaction.type) {
+      case TransactionType.transfer:
+        badgeColor = Theme.of(context).colorScheme.secondary;
+        badgeIcon = Icons.swap_horiz;
+        break;
+      case TransactionType.trade:
+        badgeColor = Colors.purple;
+        badgeIcon = Icons.swap_calls;
+        break;
+      case TransactionType.sale:
+        badgeColor = Theme.of(context).colorScheme.primary;
+        badgeIcon = Icons.point_of_sale;
+        break;
+    }
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isTransfer 
-            ? Theme.of(context).colorScheme.secondary.withValues(alpha:0.1)
-            : Theme.of(context).colorScheme.primary.withValues(alpha:0.1),
+        color: badgeColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isTransfer 
-              ? Theme.of(context).colorScheme.secondary
-              : Theme.of(context).colorScheme.primary,
+          color: badgeColor,
           width: 1,
         ),
       ),
@@ -190,25 +200,31 @@ class TransactionListItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isTransfer ? Icons.swap_horiz : Icons.point_of_sale,
+            badgeIcon,
             size: 14,
-            color: isTransfer 
-                ? Theme.of(context).colorScheme.secondary
-                : Theme.of(context).colorScheme.primary,
+            color: badgeColor,
           ),
           const SizedBox(width: 4),
           Text(
             transaction.type.name.toUpperCase(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isTransfer 
-                  ? Theme.of(context).colorScheme.secondary
-                  : Theme.of(context).colorScheme.primary,
+              color: badgeColor,
             ),
           ),
         ],
       ),
     );
+  }
+
+  IconData _getInfoIcon() {
+    switch (transaction.type) {
+      case TransactionType.sale:
+      case TransactionType.trade:
+        return Icons.person; // Customer for SALE and TRADE
+      case TransactionType.transfer:
+        return Icons.store; // Destination store for TRANSFER
+    }
   }
 
   Widget _buildStatusIndicator(BuildContext context) {

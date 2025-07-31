@@ -46,14 +46,21 @@ export class ImeiService {
 
     // Authorization middleware has already checked product access
 
-    // Check if IMEI already exists
+    // Check if IMEI already exists in the same store
     const existingImei = await db
       .select()
       .from(productImeis)
-      .where(eq(productImeis.imei, data.imei));
+      .innerJoin(products, eq(productImeis.productId, products.id))
+      .where(
+        and(
+          eq(productImeis.imei, data.imei),
+          eq(products.storeId, product[0].storeId),
+          isNull(products.deletedAt)
+        )
+      );
 
     if (existingImei.length > 0) {
-      throw new HTTPException(400, { message: "IMEI already exists" });
+      throw new HTTPException(400, { message: "IMEI already exists in this store" });
     }
 
     // Create IMEI record
@@ -265,16 +272,25 @@ export class ImeiService {
       });
     }
 
-    // Validate IMEI uniqueness
+    // Validate IMEI uniqueness within the same store
     const existingImeis = await db
-      .select()
+      .select({
+        imei: productImeis.imei,
+      })
       .from(productImeis)
-      .where(inArray(productImeis.imei, data.imeis));
+      .innerJoin(products, eq(productImeis.productId, products.id))
+      .where(
+        and(
+          inArray(productImeis.imei, data.imeis),
+          eq(products.storeId, data.storeId),
+          isNull(products.deletedAt)
+        )
+      );
 
     if (existingImeis.length > 0) {
-      const duplicateImeis = existingImeis.map((imei) => imei.imei);
+      const duplicateImeis = existingImeis.map((item) => item.imei);
       throw new HTTPException(400, {
-        message: `IMEIs already exist: ${duplicateImeis.join(", ")}`,
+        message: `IMEIs already exist in this store: ${duplicateImeis.join(", ")}`,
       });
     }
 

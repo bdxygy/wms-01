@@ -13,6 +13,7 @@ import '../../../core/providers/app_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/app_bars.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/mixins/refresh_list_mixin.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -21,7 +22,8 @@ class ProductListScreen extends StatefulWidget {
   State<ProductListScreen> createState() => _ProductListScreenState();
 }
 
-class _ProductListScreenState extends State<ProductListScreen> {
+class _ProductListScreenState extends State<ProductListScreen> 
+    with WidgetsBindingObserver, RefreshListMixin<ProductListScreen> {
   final ProductService _productService = ProductService();
   final CategoryService _categoryService = CategoryService();
   final StoreService _storeService = StoreService();
@@ -52,6 +54,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _searchController.addListener(_onSearchChanged);
+    setupRefreshListener();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
@@ -65,7 +68,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    disposeRefreshListener();
     super.dispose();
+  }
+
+  @override
+  Future<void> refreshData() async {
+    await _refreshProducts();
   }
 
   void _onScroll() {
@@ -335,7 +344,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
       floatingActionButton: canEdit
           ? FloatingActionButton(
-              onPressed: () => AppRouter.goToCreateProduct(context),
+              onPressed: () => navigateAndRefresh(
+                AppRouter.pushToCreateProduct(context)
+              ),
               backgroundColor: Theme.of(context).primaryColor,
               child: const Icon(Icons.add, color: Colors.white),
             )

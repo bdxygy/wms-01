@@ -17,7 +17,7 @@ class TransactionPhotoUpload extends StatefulWidget {
   final String? initialPhotoUrl;
   final String? existingPhotoId;
   final String? transactionId;
-  final Function(String? photoUrl, String? photoId) onPhotoChanged;
+  final Function(String? photoUrl, String? photoId, [Uint8List? imageBytes]) onPhotoChanged;
   final String title;
   final String? subtitle;
   final bool isRequired;
@@ -56,7 +56,7 @@ class _TransactionPhotoUploadState extends State<TransactionPhotoUpload> {
     _currentPhotoId = widget.existingPhotoId;
   }
 
-  /// Handle photo selection and upload
+  /// Handle photo selection (and upload if transaction exists)
   Future<void> _selectAndUploadPhoto() async {
     if (!mounted) return;
 
@@ -74,15 +74,16 @@ class _TransactionPhotoUploadState extends State<TransactionPhotoUpload> {
 
       setState(() {
         _localImageBytes = imageBytes;
-        _isUploading = true;
-        _uploadProgress = 0.0;
       });
 
-      Photo uploadedPhoto;
-
-      // Determine upload method based on whether we have a transaction ID
+      // If transaction exists, upload immediately
       if (widget.transactionId != null) {
-        // Transaction already exists, update/upload photo
+        setState(() {
+          _isUploading = true;
+          _uploadProgress = 0.0;
+        });
+
+        Photo uploadedPhoto;
         if (widget.type == PhotoType.photoProof) {
           uploadedPhoto = await _photoService.updateTransactionPhotoProof(
             widget.transactionId!,
@@ -98,19 +99,61 @@ class _TransactionPhotoUploadState extends State<TransactionPhotoUpload> {
         } else {
           throw Exception('Invalid photo type for transaction: ${widget.type}');
         }
-      } else {
-        // Transaction doesn't exist yet, prepare for later upload
-        // For now, store the image bytes locally and return a placeholder URL
-        _showSuccessMessage('Photo selected. Will be uploaded when transaction is created.');
+
         setState(() {
+          _currentPhotoUrl = uploadedPhoto.secureUrl;
+          _currentPhotoId = uploadedPhoto.id;
           _isUploading = false;
           _uploadProgress = 100.0;
         });
-        
-        // Create a temporary local identifier for the photo
+
+        widget.onPhotoChanged(_currentPhotoUrl, _currentPhotoId);
+        _showSuccessMessage('Photo uploaded successfully');
+      } else {
+        // Transaction doesn't exist yet, store locally for later upload
         final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
-        widget.onPhotoChanged('local_image_$tempId', tempId);
-        return;
+        widget.onPhotoChanged('local_image_$tempId', tempId, imageBytes);
+        // Don't show snackbar for photo selection, only when actually uploaded
+      }
+
+    } catch (e) {
+      debugPrint('Error with photo: $e');
+      setState(() {
+        _isUploading = false;
+        _uploadProgress = 0.0;
+        _errorMessage = 'Failed to process photo: $e';
+        _localImageBytes = null;
+      });
+      _showErrorMessage('Failed to process photo: $e');
+    }
+  }
+
+  /// Upload stored photo using transaction ID
+  Future<bool> uploadStoredPhoto(String transactionId) async {
+    if (_localImageBytes == null) return false;
+    
+    try {
+      setState(() {
+        _isUploading = true;
+        _uploadProgress = 0.0;
+        _errorMessage = null;
+      });
+
+      Photo uploadedPhoto;
+      if (widget.type == PhotoType.photoProof) {
+        uploadedPhoto = await _photoService.updateTransactionPhotoProof(
+          transactionId,
+          _localImageBytes!,
+          onProgress: _onUploadProgress,
+        );
+      } else if (widget.type == PhotoType.transferProof) {
+        uploadedPhoto = await _photoService.updateTransactionTransferProof(
+          transactionId,
+          _localImageBytes!,
+          onProgress: _onUploadProgress,
+        );
+      } else {
+        throw Exception('Invalid photo type for transaction: ${widget.type}');
       }
 
       setState(() {
@@ -120,20 +163,23 @@ class _TransactionPhotoUploadState extends State<TransactionPhotoUpload> {
         _uploadProgress = 100.0;
       });
 
+      // Update parent with actual photo data
       widget.onPhotoChanged(_currentPhotoUrl, _currentPhotoId);
-      _showSuccessMessage('Photo uploaded successfully');
-
+      
+      return true;
     } catch (e) {
-      debugPrint('Error uploading photo: $e');
+      debugPrint('Error uploading stored photo: $e');
       setState(() {
         _isUploading = false;
         _uploadProgress = 0.0;
         _errorMessage = 'Failed to upload photo: $e';
-        _localImageBytes = null;
       });
-      _showErrorMessage('Failed to upload photo: $e');
+      return false;
     }
   }
+
+  /// Check if has locally stored photo ready for upload
+  bool get hasStoredPhoto => _localImageBytes != null && (_currentPhotoId?.startsWith('temp_') ?? false);
 
   /// Handle photo removal
   Future<void> _removePhoto() async {

@@ -454,8 +454,28 @@ class AppRouter {
     context.goNamed('product-detail', pathParameters: {'id': productId});
   }
 
+  /// Navigate to product detail by pushing onto the stack (preserves navigation history)
+  static Future<dynamic> pushToProductDetail(BuildContext context, String productId) {
+    return context.pushNamed('product-detail', pathParameters: {'id': productId});
+  }
+
   static void goToCreateProduct(BuildContext context) {
     context.goNamed('create-product');
+  }
+
+  /// Navigate to create product and return Future for refresh handling
+  static Future<dynamic> pushToCreateProduct(BuildContext context) {
+    return context.pushNamed('create-product');
+  }
+
+  // Store navigation helpers
+  static void goToCreateStore(BuildContext context) {
+    context.goNamed('createStore');
+  }
+
+  /// Navigate to create store and return Future for refresh handling
+  static Future<dynamic> pushToCreateStore(BuildContext context) {
+    return context.pushNamed('createStore');
   }
 
   static void goToEditProduct(BuildContext context, String productId) {
@@ -520,6 +540,11 @@ class AppRouter {
   // Transaction navigation helpers
   static void goToCreateTransaction(BuildContext context) {
     context.goNamed('create-transaction');
+  }
+
+  /// Navigate to create transaction and return Future for refresh handling
+  static Future<dynamic> pushToCreateTransaction(BuildContext context) {
+    return context.pushNamed('create-transaction');
   }
 
   static void goToTransactionDetail(

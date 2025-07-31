@@ -636,13 +636,20 @@ export class ProductService {
     }
 
     if (imeis.length) {
-      // Check all provided IMEIs for conflicts with other products
+      // Check provided IMEIs for conflicts with other products in the same store
       const allExistingImeis = await db
         .select({
           imei: productImeis.imei,
           productId: productImeis.productId,
         })
-        .from(productImeis);
+        .from(productImeis)
+        .innerJoin(products, eq(productImeis.productId, products.id))
+        .where(
+          and(
+            eq(products.storeId, existingProduct.storeId),
+            isNull(products.deletedAt)
+          )
+        );
 
       const conflictingImeis = data.imeis.filter((imei) => {
         const existing = allExistingImeis.find(
@@ -653,7 +660,7 @@ export class ProductService {
 
       if (conflictingImeis.length > 0) {
         throw new HTTPException(400, {
-          message: `IMEIs already exist in other products: ${conflictingImeis.join(
+          message: `IMEIs already exist in other products in this store: ${conflictingImeis.join(
             ", "
           )}`,
         });

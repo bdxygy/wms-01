@@ -9,6 +9,7 @@ import '../../../core/models/transaction.dart';
 import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/mixins/refresh_list_mixin.dart';
 import '../widgets/transaction_filter_sheet.dart';
 
 /// Modern Transaction List Screen with comprehensive transaction management
@@ -35,7 +36,8 @@ class TransactionsScreen extends StatefulWidget {
   State<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionsScreenState extends State<TransactionsScreen> {
+class _TransactionsScreenState extends State<TransactionsScreen> 
+    with WidgetsBindingObserver, RefreshListMixin<TransactionsScreen> {
   final TransactionService _transactionService = TransactionService();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
@@ -64,6 +66,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    setupRefreshListener();
     _loadTransactions();
   }
 
@@ -71,7 +74,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    disposeRefreshListener();
     super.dispose();
+  }
+
+  @override
+  Future<void> refreshData() async {
+    await _loadTransactions(refresh: true);
   }
 
   void _onScroll() {
@@ -474,7 +483,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
       floatingActionButton: _canCreateTransactions()
           ? FloatingActionButton(
-              onPressed: () => AppRouter.goToCreateTransaction(context),
+              onPressed: () => navigateAndRefresh(
+                AppRouter.pushToCreateTransaction(context)
+              ),
               backgroundColor: Theme.of(context).primaryColor,
               tooltip: l10n.add,
               child: const Icon(Icons.add, color: Colors.white),

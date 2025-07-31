@@ -28,6 +28,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 *See [Mobile Development Phases](docs/mobile-development-phases.md) for complete phase details and architecture information.*
 
 ### Latest Achievements ✅
+- **IMEI Per-Store Uniqueness**: Enhanced business logic to allow same IMEI across different stores while preventing duplicates within same store
+- **Integration Test Infrastructure**: Created comprehensive product creation route tests with proper authentication and database setup
 - **Flutter Code Quality Optimization**: Massive code quality improvement - Flutter analyze issues reduced from 149 to 12 (92% improvement)
 - **Critical Error Resolution**: Fixed all undefined_getter errors for localization keys, resolved null safety warnings
 - **Localization Enhancement**: Added 41+ missing translation keys for photo management and common UI elements
@@ -148,6 +150,9 @@ Task(description="Optimize transaction service", prompt="Analyze transaction ser
 ## 🚀 **Next Development Priorities**
 
 ### Recent Completions ✅
+- **IMEI Per-Store Uniqueness Implementation**: Multi-store IMEI business logic allowing same IMEI across different stores
+- **Backend Service Layer Enhancement**: Updated `ImeiService.addImei`, `ImeiService.createProductWithImeis`, and `ProductService.updateProductWithImeis`
+- **Integration Testing Framework**: Comprehensive test suite for product creation routes with authentication flow
 - **Flutter Code Quality Optimization**: Resolved 149→12 Flutter analyze issues (92% improvement, all critical errors fixed)
 - **Photo Management Localization**: Added complete i18n support for photo upload, management, and viewer features
 - **Code Quality Enhancement**: Eliminated unused code, fixed null safety warnings, optimized performance
@@ -170,6 +175,8 @@ All agents are now configured to understand:
 - **Role-based access control** system
 - **Transaction type handling** (TRANSFER, TRADE, SALE)
 - **QR code integration** in receipts
+- **IMEI per-store uniqueness** business logic (same IMEI allowed across different stores, unique within same store)
+- **Integration testing infrastructure** with comprehensive product creation test coverage
 - **Production-ready status** of mobile application
 
 This memory ensures all agents provide contextually relevant guidance aligned with the WMS project goals and current state.
