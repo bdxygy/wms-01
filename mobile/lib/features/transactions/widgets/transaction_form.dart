@@ -321,7 +321,7 @@ class _TransactionFormState extends State<TransactionForm> {
         productId: product.id,
         name: product.name,
         quantity: quantity,
-        price: product.salePrice ?? product.purchasePrice,
+        price: product.salePrice ?? product.purchasePrice ?? 0.0,
       ));
     }
 
@@ -975,7 +975,7 @@ class _TransactionFormState extends State<TransactionForm> {
                       ),
                       itemBuilder: (context, index) {
                         final product = _tradeInSearchResults[index];
-                        final price = product.salePrice ?? product.purchasePrice;
+                        final price = product.salePrice ?? product.purchasePrice ?? 0.0;
                         final formattedPrice = Provider.of<AppProvider>(context, listen: false).formatCurrency(price);
                         return ListTile(
                           dense: true,
@@ -1266,7 +1266,7 @@ class _TransactionFormState extends State<TransactionForm> {
               ),
               itemBuilder: (context, index) {
                 final product = _searchResults[index];
-                final price = product.salePrice ?? product.purchasePrice;
+                final price = product.salePrice ?? product.purchasePrice ?? 0.0;
                 final formattedPrice =
                     Provider.of<AppProvider>(context, listen: false)
                         .formatCurrency(price);

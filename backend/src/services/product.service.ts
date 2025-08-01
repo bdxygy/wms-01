@@ -163,17 +163,8 @@ export class ProductService {
       throw new HTTPException(404, { message: "Product not found" });
     }
 
-    // Check owner scoping
-    if (requestingUser.role === "OWNER") {
-      if (product[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // For non-OWNER users, check if they belong to the same owner
-      if (product[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    }
+    // All authenticated users can view product details
+    // No owner scoping restrictions for product viewing
 
     return {
       id: product[0].id,
@@ -186,7 +177,10 @@ export class ProductService {
       isMustCheck: product[0].isMustCheck,
       barcode: product[0].barcode,
       quantity: product[0].quantity,
-      purchasePrice: product[0].purchasePrice,
+      // Hide purchase price from STAFF and CASHIER roles
+      purchasePrice: (requestingUser.role === "STAFF" || requestingUser.role === "CASHIER") 
+        ? null 
+        : product[0].purchasePrice,
       salePrice: product[0].salePrice,
       createdBy: product[0].createdBy,
       createdAt: product[0].createdAt,
@@ -222,17 +216,8 @@ export class ProductService {
       throw new HTTPException(404, { message: "Product not found" });
     }
 
-    // Check if user can access this product (owner scoped)
-    if (requestingUser.role === "OWNER") {
-      if (product[0].storeOwnerId !== requestingUser.id) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    } else {
-      // For non-OWNER users, check if they belong to the same owner
-      if (product[0].storeOwnerId !== requestingUser.ownerId) {
-        throw new HTTPException(403, { message: "Access denied" });
-      }
-    }
+    // All authenticated users can access products by barcode
+    // No owner scoping restrictions for product barcode lookup
 
     return {
       id: product[0].id,
@@ -245,7 +230,10 @@ export class ProductService {
       isMustCheck: product[0].isMustCheck,
       barcode: product[0].barcode,
       quantity: product[0].quantity,
-      purchasePrice: product[0].purchasePrice,
+      // Hide purchase price from STAFF and CASHIER roles
+      purchasePrice: (requestingUser.role === "STAFF" || requestingUser.role === "CASHIER") 
+        ? null 
+        : product[0].purchasePrice,
       salePrice: product[0].salePrice,
       createdBy: product[0].createdBy,
       createdAt: product[0].createdAt,
@@ -257,12 +245,8 @@ export class ProductService {
     // Build where conditions
     const conditions = [];
 
-    // Owner scoping - only show products from stores owned by the user's owner
-    if (requestingUser.role === "OWNER") {
-      conditions.push(eq(stores.ownerId, requestingUser.id));
-    } else {
-      conditions.push(eq(stores.ownerId, requestingUser.ownerId!));
-    }
+    // All authenticated users can view all products
+    // No owner scoping restrictions for product listing
 
     // Store filter
     if (query.storeId) {
@@ -335,8 +319,17 @@ export class ProductService {
       .offset(offset)
       .orderBy(products.createdAt);
 
+    // Transform product list to hide purchase price from STAFF and CASHIER roles
+    const transformedProductList = productList.map(product => ({
+      ...product,
+      // Hide purchase price from STAFF and CASHIER roles
+      purchasePrice: (requestingUser.role === "STAFF" || requestingUser.role === "CASHIER") 
+        ? null 
+        : product.purchasePrice,
+    }));
+
     return {
-      products: productList,
+      products: transformedProductList,
       pagination: {
         page: query.page,
         limit: query.limit,

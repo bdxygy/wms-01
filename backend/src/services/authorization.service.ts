@@ -114,7 +114,11 @@ export class AuthorizationService {
   static async checkOwnerScope(user: User, ownerId: string): Promise<boolean> {
     if (user.role === "OWNER") {
       return user.id === ownerId;
+    } else if (user.role === "ADMIN") {
+      // ADMIN users have access to all resources (similar to OWNER)
+      return true;
     } else {
+      // STAFF and CASHIER users need to belong to the same owner
       return user.ownerId === ownerId;
     }
   }
@@ -132,7 +136,11 @@ export class AuthorizationService {
     // Check owner scope
     if (requestingUser.role === "OWNER") {
       return targetUser[0].ownerId === requestingUser.id || targetUser[0].id === requestingUser.id;
+    } else if (requestingUser.role === "ADMIN") {
+      // ADMIN users have access to all users (similar to OWNER)
+      return true;
     } else {
+      // STAFF and CASHIER users need to belong to the same owner
       return targetUser[0].ownerId === requestingUser.ownerId;
     }
   }
@@ -170,7 +178,11 @@ export class AuthorizationService {
     if (requestingUser.role === "OWNER") {
       return category[0].createdBy === requestingUser.id || 
              category[0].createdByOwnerId === requestingUser.id;
+    } else if (requestingUser.role === "ADMIN") {
+      // ADMIN users have access to all categories (similar to OWNER)
+      return true;
     } else {
+      // STAFF and CASHIER users need to belong to the same owner
       return category[0].createdByOwnerId === requestingUser.ownerId;
     }
   }
@@ -214,6 +226,18 @@ export class AuthorizationService {
       return false;
     }
 
+    // For ADMIN users, allow access to all stores (similar to OWNER behavior)
+    if (requestingUser.role === "ADMIN") {
+      // Check if any of the transaction stores exist
+      const existingStores = await db
+        .select()
+        .from(stores)
+        .where(or(...storeIds.map(storeId => eq(stores.id, storeId!))));
+      
+      return existingStores.length > 0;
+    }
+
+    // For OWNER and other roles, check owner scope
     const userStores = await db
       .select()
       .from(stores)

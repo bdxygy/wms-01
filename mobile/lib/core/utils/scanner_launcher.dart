@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/product_service.dart';
+import '../utils/barcode_utils.dart';
 import '../widgets/global_barcode_scanner.dart';
 
 /// Utility class for launching the global barcode scanner with different configurations
@@ -97,8 +98,10 @@ class ScannerLauncher {
               final product = await productService.getProductByBarcode(result.formattedCode);
               onProductFound(product);
             } catch (e) {
+              // Call the not found callback to handle UI (snackbar, etc.)
               onProductNotFound(result.formattedCode);
-              throw Exception('Product not found: ${e.toString()}');
+              // Don't throw exception after callback - the error was handled
+              return;
             }
           },
           onDismiss: onDismiss,
@@ -153,8 +156,10 @@ class ScannerLauncher {
               final product = await productService.getProductByImei(result.formattedCode);
               onProductFound(product);
             } catch (e) {
+              // Call the not found callback to handle UI (snackbar, etc.)
               onImeiNotFound(result.formattedCode);
-              throw Exception('No product found with this IMEI: ${e.toString()}');
+              // Don't throw exception after callback - the error was handled
+              return;
             }
           },
           onDismiss: onDismiss,

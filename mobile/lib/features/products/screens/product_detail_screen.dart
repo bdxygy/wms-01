@@ -319,7 +319,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 ${l10n.products_label_name}: ${_product!.name}
 ${l10n.products_label_sku}: ${_product!.sku}
 ${l10n.products_label_barcode}: ${_product!.barcode}
-${l10n.products_label_price}: ${Provider.of<AppProvider>(context, listen: false).formatCurrency(_product!.salePrice ?? _product!.purchasePrice)}
+${l10n.products_label_price}: ${Provider.of<AppProvider>(context, listen: false).formatCurrency(_product!.salePrice ?? _product!.purchasePrice ?? 0.0)}
 ${l10n.products_label_quantity}: ${_product!.quantity}''';
 
     Clipboard.setData(ClipboardData(text: productInfo));
@@ -1110,13 +1110,14 @@ ${l10n.products_label_quantity}: ${_product!.quantity}''';
           const SizedBox(height: 20),
           Column(
             children: [
-              _buildPriceCard(
-                l10n.products_label_purchasePrice,
-                Provider.of<AppProvider>(context, listen: false)
-                    .formatCurrency(_product!.purchasePrice),
-                Icons.shopping_cart_outlined,
-                Colors.blue,
-              ),
+              if (_product!.purchasePrice != null)
+                _buildPriceCard(
+                  l10n.products_label_purchasePrice,
+                  Provider.of<AppProvider>(context, listen: false)
+                      .formatCurrency(_product!.purchasePrice!),
+                  Icons.shopping_cart_outlined,
+                  Colors.blue,
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
               ),

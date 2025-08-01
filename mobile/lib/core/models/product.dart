@@ -17,7 +17,7 @@ class Product {
   final bool isMustCheck;
   final String barcode;
   final int quantity;
-  final double purchasePrice;
+  final double? purchasePrice;
   final double? salePrice;
   final String? photoUrl;
   final DateTime createdAt;
@@ -41,7 +41,7 @@ class Product {
     required this.isMustCheck,
     required this.barcode,
     required this.quantity,
-    required this.purchasePrice,
+    this.purchasePrice,
     this.salePrice,
     this.photoUrl,
     required this.createdAt,
@@ -63,12 +63,12 @@ class Product {
   bool get isElectronic => isImei;
   bool get inStock => quantity > 0;
   
-  double get profitMargin => hasSalePrice 
-      ? ((salePrice! - purchasePrice) / purchasePrice) * 100 
+  double get profitMargin => hasSalePrice && purchasePrice != null
+      ? ((salePrice! - purchasePrice!) / purchasePrice!) * 100 
       : 0.0;
   
-  double get profitAmount => hasSalePrice 
-      ? (salePrice! - purchasePrice) 
+  double get profitAmount => hasSalePrice && purchasePrice != null
+      ? (salePrice! - purchasePrice!) 
       : 0.0;
 
   String get stockStatus {

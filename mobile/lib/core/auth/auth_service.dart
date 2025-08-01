@@ -73,7 +73,11 @@ class AuthService {
   Future<AuthResponse?> refreshToken() async {
     try {
       final refreshToken = await _storage.getRefreshToken();
-      if (refreshToken == null) {
+      if (refreshToken == null || refreshToken.isEmpty) {
+        if (AppConfig.isDebugMode) {
+         debugPrint('🔄 No refresh token available, clearing auth data');
+        }
+        await logout();
         throw AuthException(
           message: 'No refresh token available',
           code: 'NO_REFRESH_TOKEN',
@@ -189,6 +193,15 @@ class AuthService {
 
   // Check if token needs refresh
   Future<bool> needsTokenRefresh() async {
+    // First check if we have a refresh token available
+    final refreshToken = await _storage.getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      if (AppConfig.isDebugMode) {
+       debugPrint('🔄 No refresh token available, cannot refresh');
+      }
+      return false;
+    }
+    
     return await _storage.isTokenNearExpiry();
   }
 
@@ -202,8 +215,17 @@ class AuthService {
 
       // If token is near expiry, try to refresh it
       if (await needsTokenRefresh()) {
-        final refreshResult = await refreshToken();
-        return refreshResult != null;
+        try {
+          final refreshResult = await refreshToken();
+          return refreshResult != null;
+        } catch (e) {
+          // If refresh fails, clear auth data and return false
+          if (AppConfig.isDebugMode) {
+           debugPrint('❌ Token refresh failed, clearing auth data: $e');
+          }
+          await logout();
+          return false;
+        }
       }
 
       // Validate token with server by making a test API call

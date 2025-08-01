@@ -568,7 +568,7 @@ class _ProductSearchScreenState extends State<ProductSearchScreen>
         _buildDetailRow('Barcode', product.barcode),
         if (product.salePrice != null)
           _buildDetailRow('Sale Price', '${product.salePrice!.toInt()}'),
-        _buildDetailRow('Purchase Price', '${product.purchasePrice.toInt()}'),
+        _buildDetailRow('Purchase Price', '${product.purchasePrice?.toInt() ?? 0}'),
         _buildDetailRow('Quantity', '${product.quantity}'),
         if (product.categoryName != null)
           _buildDetailRow('Category', product.categoryName!),

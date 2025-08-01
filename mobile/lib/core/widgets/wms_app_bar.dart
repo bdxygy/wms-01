@@ -176,6 +176,7 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildTitle(BuildContext context, ThemeData theme) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         // Icon with background
         Container(
@@ -190,7 +191,7 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
             size: 20,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
 
         // Title and subtitle
         Expanded(
@@ -223,9 +224,10 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
 
         // Status badge
         if (badge != null) ...[
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
               color: badge!.backgroundColor,
               borderRadius: BorderRadius.circular(12),
@@ -240,6 +242,9 @@ class WMSAppBar extends StatelessWidget implements PreferredSizeWidget {
                 fontWeight: FontWeight.w600,
                 fontSize: 10,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
             ),
           ),
         ],

@@ -18,7 +18,7 @@ Product _$ProductFromJson(Map<String, dynamic> json) => Product(
       isMustCheck: json['isMustCheck'] as bool? ?? false,
       barcode: json['barcode'] as String,
       quantity: (json['quantity'] as num).toInt(),
-      purchasePrice: (json['purchasePrice'] as num).toDouble(),
+      purchasePrice: (json['purchasePrice'] as num?)?.toDouble(),
       salePrice: (json['salePrice'] as num?)?.toDouble(),
       photoUrl: json['photoUrl'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),

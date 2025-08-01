@@ -96,9 +96,20 @@ class AuthProvider extends ChangeNotifier {
           _setState(AuthState.authenticated);
         }
         
-        // Ensure token is still valid
-        final isValid = await _authService.ensureValidToken();
-        if (!isValid) {
+        // Ensure token is still valid (with error handling)
+        try {
+          final isValid = await _authService.ensureValidToken();
+          if (!isValid) {
+            if (AppConfig.isDebugMode) {
+             debugPrint('🔄 Token validation failed, logging out');
+            }
+            await logout();
+            return;
+          }
+        } catch (e) {
+          if (AppConfig.isDebugMode) {
+           debugPrint('❌ Token validation error: $e, logging out');
+          }
           await logout();
           return;
         }

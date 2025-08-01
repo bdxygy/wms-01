@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../utils/imei_utils.dart';
-import '../services/scanner_service.dart';
 import '../services/product_search_service.dart';
 import '../models/product.dart';
 
@@ -10,15 +9,11 @@ class ImeiScannerService {
   static final ImeiScannerService _instance = ImeiScannerService._internal();
   factory ImeiScannerService() => _instance;
   ImeiScannerService._internal();
-
-  final ScannerService _scannerService = ScannerService();
-  
-  /// Get access to the underlying scanner service
-  ScannerService get scannerService => _scannerService;
   final ProductSearchService _productSearchService = ProductSearchService();
   
   StreamController<ImeiScanResult>? _imeiScanController;
   final List<ImeiScanResult> _scanHistory = [];
+  bool _isInitialized = false;
   
   /// Stream of IMEI scan results
   Stream<ImeiScanResult>? get imeiScanStream => _imeiScanController?.stream;
@@ -29,26 +24,17 @@ class ImeiScannerService {
   /// Initialize IMEI scanner service
   Future<bool> initialize() async {
     try {
-      // Initialize the underlying scanner service
-      final scannerInitialized = await _scannerService.initialize();
-      if (!scannerInitialized) {
-        return false;
-      }
-      
       // Initialize IMEI scan result stream
       _imeiScanController = StreamController<ImeiScanResult>.broadcast();
-      
-      // Listen to general scan results and filter for IMEI
-      _scannerService.scanResultStream?.listen(_handleScanResult);
-      
+      _isInitialized = true;
       return true;
     } catch (e) {
       return false;
     }
   }
   
-  /// Handle scan results and filter for IMEI
-  void _handleScanResult(String scannedCode) {
+  /// Process scanned code and check if it's an IMEI
+  void processScannedCode(String scannedCode) {
     // Check if the scanned code is likely an IMEI
     if (ImeiUtils.isLikelyImei(scannedCode)) {
       final result = ImeiScanResult.fromScan(scannedCode, 'camera');
@@ -68,14 +54,14 @@ class ImeiScannerService {
     _imeiScanController?.add(result);
   }
   
-  /// Start IMEI scanning
+  /// Start IMEI scanning (placeholder - actual scanning handled by scanner widgets)
   Future<bool> startScanning() async {
-    return await _scannerService.startScanning();
+    return _isInitialized;
   }
   
-  /// Stop IMEI scanning
+  /// Stop IMEI scanning (placeholder - actual scanning handled by scanner widgets)
   Future<void> stopScanning() async {
-    await _scannerService.stopScanning();
+    // No-op - scanning is now handled by individual scanner widgets
   }
   
   /// Manually enter IMEI
@@ -199,24 +185,24 @@ class ImeiScannerService {
   }
   
   /// Check if IMEI scanner is ready
-  bool get isReady => _scannerService.isInitialized && _imeiScanController != null;
+  bool get isReady => _isInitialized && _imeiScanController != null;
   
-  /// Check if currently scanning
-  bool get isScanning => _scannerService.isScanning;
+  /// Check if currently scanning (placeholder - actual scanning handled by scanner widgets)
+  bool get isScanning => _isInitialized;
   
-  /// Toggle torch for IMEI scanning
+  /// Toggle torch for IMEI scanning (placeholder - handled by scanner widgets)
   Future<void> toggleTorch() async {
-    await _scannerService.toggleTorch();
+    // No-op - torch control is now handled by individual scanner widgets
   }
   
-  /// Switch camera for IMEI scanning
+  /// Switch camera for IMEI scanning (placeholder - handled by scanner widgets)
   Future<void> switchCamera() async {
-    await _scannerService.switchCamera();
+    // No-op - camera switching is now handled by individual scanner widgets
   }
   
-  /// Check if torch is available
+  /// Check if torch is available (placeholder - handled by scanner widgets)
   Future<bool> isTorchAvailable() async {
-    return await _scannerService.isTorchAvailable();
+    return true; // Assume available - actual check is done by scanner widgets
   }
   
   /// Simulate IMEI scan for testing

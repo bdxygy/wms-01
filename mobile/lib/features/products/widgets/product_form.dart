@@ -138,8 +138,9 @@ class _ProductFormState extends State<ProductForm> {
     _nameController.text = product.name;
     _descriptionController.text = product.description ?? '';
     _skuController.text = product.sku;
-    _purchasePriceController.text =
-        NumberUtils.formatWithDots(product.purchasePrice.toInt());
+    _purchasePriceController.text = product.purchasePrice != null
+        ? NumberUtils.formatWithDots(product.purchasePrice!.toInt())
+        : '';
     _salePriceController.text = product.salePrice != null
         ? NumberUtils.formatWithDots(product.salePrice!.toInt())
         : '';
@@ -1163,7 +1164,7 @@ class _ProductFormState extends State<ProductForm> {
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 12),
                           isDense: true,
-                          suffixIcon: Container(
+                          suffixIcon: SizedBox(
                             width: 48,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,

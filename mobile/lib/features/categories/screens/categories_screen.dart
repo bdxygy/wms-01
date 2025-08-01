@@ -207,7 +207,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.delete + ' ' + l10n.categories.substring(0, l10n.categories.length - 1)),
+        title: Text('${l10n.delete} ${l10n.categories.substring(0, l10n.categories.length - 1)}'),
         content: Text(
           'Are you sure you want to delete "${category.name}"?',
           overflow: TextOverflow.ellipsis,

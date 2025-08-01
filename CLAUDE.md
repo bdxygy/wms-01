@@ -28,6 +28,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 *See [Mobile Development Phases](docs/mobile-development-phases.md) for complete phase details and architecture information.*
 
 ### Latest Achievements ✅
+- **Scanner UX Enhancement**: Replaced all error dialogs and exceptions with seamless SnackBar notifications, ensuring smooth user experience without app hangs
+- **Scanner System Overhaul**: Migrated all scanner functionality to use ScannerLauncher, fixed ADMIN user scanner hangs, and resolved 404 error handling issues
+- **Product Schema Integration**: Updated mobile Product model to handle nullable purchasePrice for role-based access control (STAFF/CASHIER see null purchasePrice)
+- **Error Handling Standards**: Established critical error handling rules to prevent app hangs caused by unnecessary exception throwing after callbacks
 - **IMEI Per-Store Uniqueness**: Enhanced business logic to allow same IMEI across different stores while preventing duplicates within same store
 - **Integration Test Infrastructure**: Created comprehensive product creation route tests with proper authentication and database setup
 - **Flutter Code Quality Optimization**: Massive code quality improvement - Flutter analyze issues reduced from 149 to 12 (92% improvement)
@@ -146,6 +150,39 @@ Task(description="Optimize transaction service", prompt="Analyze transaction ser
 - **✅ ALWAYS use ResponseUtils** from `src/utils/responses.ts`
 - **✅ ALWAYS use Zod schemas** for validation
 - **🔐 ROLE-BASED AUTHORIZATION**: All endpoints enforce proper role permissions and owner scoping
+
+## ⚠️ **Critical Error Handling Rules**
+
+### **Exception/Error Throwing Guidelines**
+
+**🚫 NEVER throw exceptions after calling callback functions** - This can cause app hangs and poor UX:
+
+```dart
+// ❌ WRONG - Don't do this
+} catch (e) {
+  onProductNotFound(barcode);
+  throw Exception('Product not found'); // This causes app hang!
+}
+
+// ✅ CORRECT - Do this instead
+} catch (e) {
+  onProductNotFound(barcode);
+  // Let callback handle UI response, don't throw
+}
+```
+
+**✅ ONLY throw exceptions in these scenarios:**
+1. **Input validation failures** (invalid format, missing required data)
+2. **System/Infrastructure errors** (network, database connection issues)
+3. **Within try-catch blocks** where the exception will be properly handled
+4. **When no callback exists** to handle the error scenario
+
+**📋 Exception Best Practices:**
+- **Always use meaningful error messages** that help debugging
+- **Never throw after UI callbacks** (onSuccess, onError, onNotFound, etc.)
+- **Let callback functions handle user-facing error messages**
+- **Use proper error propagation** in service layers
+- **Test error scenarios** to ensure they don't cause hangs or crashes
 
 ## 🚀 **Next Development Priorities**
 

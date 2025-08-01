@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/models/api_requests.dart';
 import '../../../core/models/product.dart';
 import '../../../core/services/product_service.dart';
+import '../../../core/utils/scanner_launcher.dart';
 import '../../../core/widgets/cards.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/validators/transaction_validators.dart';
@@ -100,7 +101,7 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
         productId: product.id,
         name: product.name,
         quantity: 1,
-        price: product.salePrice ?? product.purchasePrice,
+        price: product.salePrice ?? product.purchasePrice ?? 0.0,
       );
       
       widget.onItemsChanged([...widget.items, newItem]);
@@ -163,22 +164,36 @@ class _TransactionItemManagerState extends State<TransactionItemManager> {
   }
 
   void _openBarcodeScanner() {
-    // TODO: Implement barcode scanning navigation
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Barcode scanning will be implemented in the next phase'),
-        backgroundColor: Colors.orange,
-      ),
+    ScannerLauncher.forProductSearch(
+      context,
+      onProductFound: (product) {
+        _addProductToTransaction(product);
+      },
+      onProductNotFound: (barcode) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No product found with barcode: $barcode'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      },
     );
   }
 
   void _openImeiScanner() {
-    // TODO: Implement IMEI scanning navigation
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('IMEI scanning will be implemented in the next phase'),
-        backgroundColor: Colors.orange,
-      ),
+    ScannerLauncher.forImeiProductSearch(
+      context,
+      onProductFound: (product) {
+        _addProductToTransaction(product);
+      },
+      onImeiNotFound: (imei) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No product found with IMEI: $imei'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      },
     );
   }
 
@@ -423,7 +438,7 @@ class _SearchResultCard extends StatelessWidget {
                   ],
                   const SizedBox(height: 4),
                   Text(
-                    '${(product.salePrice ?? product.purchasePrice).toInt()}',
+                    '${(product.salePrice ?? product.purchasePrice ?? 0.0).toInt()}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).primaryColor,

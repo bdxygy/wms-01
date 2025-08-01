@@ -130,7 +130,7 @@ class _ScannerOverlayState extends State<ScannerOverlay>
 
   Widget _buildScanLine() {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: widget.scanAreaSize - 4,
         height: widget.scanAreaSize - 4,
         child: AnimatedBuilder(
@@ -295,7 +295,7 @@ class _ScannerOverlayState extends State<ScannerOverlay>
 
   Widget _buildCornerDecorations() {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: widget.scanAreaSize,
         height: widget.scanAreaSize,
         child: CustomPaint(

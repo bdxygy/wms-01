@@ -13,6 +13,7 @@ import '../../../core/providers/app_provider.dart';
 import '../../../core/widgets/loading.dart';
 import '../../../core/widgets/app_bars.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/utils/scanner_launcher.dart';
 import '../../../core/mixins/refresh_list_mixin.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -22,7 +23,7 @@ class ProductListScreen extends StatefulWidget {
   State<ProductListScreen> createState() => _ProductListScreenState();
 }
 
-class _ProductListScreenState extends State<ProductListScreen> 
+class _ProductListScreenState extends State<ProductListScreen>
     with WidgetsBindingObserver, RefreshListMixin<ProductListScreen> {
   final ProductService _productService = ProductService();
   final CategoryService _categoryService = CategoryService();
@@ -38,6 +39,7 @@ class _ProductListScreenState extends State<ProductListScreen>
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasMoreProducts = true;
+  bool _isScannerActive = false;
   String? _error;
 
   int _currentPage = 1;
@@ -80,7 +82,9 @@ class _ProductListScreenState extends State<ProductListScreen>
   void _onScroll() {
     // Guard clause: Check scroll position for pagination
     if (_scrollController.position.pixels <
-        _scrollController.position.maxScrollExtent - 200) return;
+        _scrollController.position.maxScrollExtent - 200) {
+      return;
+    }
     if (_isLoadingMore || !_hasMoreProducts) return;
 
     _loadMoreProducts();
@@ -260,36 +264,170 @@ class _ProductListScreenState extends State<ProductListScreen>
     _refreshProducts();
   }
 
-  void _scanBarcode() {
-    AppRouter.goToScanner(
-      context,
-      title: 'Scan Product Barcode',
-      subtitle: 'Find products by barcode',
-      onBarcodeScanned: (result) {
-        if (result.isValid) {
-          _searchProductByBarcode(result.code);
-        }
-      },
+  void _scanBarcode() async {
+    // Prevent multiple concurrent scanner launches
+    if (_isScannerActive) {
+      debugPrint('Scanner already active, ignoring request');
+      return;
+    }
+
+    setState(() {
+      _isScannerActive = true;
+    });
+
+    try {
+      // Use the same approach as transaction form which works
+      await ScannerLauncher.forProductSearch(
+        context,
+        title: 'Scan Product Barcode',
+        subtitle: 'Scan barcode to search for product',
+        onProductFound: (product) {
+          debugPrint('Product found: ${product.id}');
+          if (mounted) {
+            // Successfully found product, navigate to detail
+            AppRouter.goToProductDetail(context, product.id);
+          }
+        },
+        onProductNotFound: (barcode) {
+          debugPrint('Product not found for barcode: "$barcode"');
+          if (mounted) {
+            // Product not found, show helpful message
+            _showProductNotFoundSnackBar(barcode);
+          }
+        },
+        onDismiss: () {
+          debugPrint('Scanner dismissed by user');
+        },
+      );
+    } catch (e) {
+      debugPrint('Scanner error: $e');
+      if (mounted) {
+        // Handle any scanner-related errors
+        _handleScannerError(e);
+      }
+    } finally {
+      // Always reset scanner state
+      if (mounted) {
+        setState(() {
+          _isScannerActive = false;
+        });
+      }
+    }
+  }
+
+  void _showProductNotFoundSnackBar(String barcode) {
+    final user = context.read<AuthProvider>().user;
+    final canCreateProducts = user?.canCreateProducts ?? false;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Product not found with barcode: $barcode'),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 4),
+        action: canCreateProducts
+            ? SnackBarAction(
+                label: 'Create Product',
+                textColor: Colors.white,
+                onPressed: () {
+                  AppRouter.goToCreateProduct(context);
+                },
+              )
+            : null,
+      ),
     );
   }
 
-  Future<void> _searchProductByBarcode(String barcode) async {
-    try {
-      final product = await _productService.getProductByBarcode(barcode);
+  void _handleScannerError(dynamic error) {
+    String errorMessage;
+    Color backgroundColor = Colors.red;
+    bool showRetryAction = true;
 
-      if (mounted) {
-        AppRouter.goToProductDetail(context, product.id);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('No product found: $barcode'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    final errorString = error.toString().toLowerCase();
+
+    if (errorString.contains('invalid barcode format')) {
+      errorMessage = 'Invalid barcode format. Please try again.';
+      backgroundColor = Colors.orange;
+    } else if (errorString.contains('camera permission') ||
+        errorString.contains('permission denied')) {
+      errorMessage =
+          'Camera permission required. Please enable camera access in settings.';
+      _showCameraPermissionDialog();
+      return;
+    } else if (errorString.contains('camera not available') ||
+        errorString.contains('no camera found')) {
+      errorMessage = 'Camera not available. Please check your device camera.';
+      showRetryAction = false;
+    } else if (errorString.contains('network') ||
+        errorString.contains('connection')) {
+      errorMessage =
+          'Network error. Please check your connection and try again.';
+    } else if (errorString.contains('timeout') ||
+        errorString.contains('timed out')) {
+      errorMessage = 'Request timed out. Please try again.';
+    } else if (errorString.contains('unauthorized') ||
+        errorString.contains('401')) {
+      errorMessage = 'Session expired. Please login again.';
+      showRetryAction = false;
+      // Could trigger a logout here if needed
+    } else if (errorString.contains('forbidden') ||
+        errorString.contains('403')) {
+      errorMessage =
+          'Access denied. You may not have permission to search products.';
+      showRetryAction = false;
+    } else if (errorString.contains('server error') ||
+        errorString.contains('500')) {
+      errorMessage = 'Server error. Please try again later.';
+    } else if (errorString.contains('not found') ||
+        errorString.contains('404')) {
+      errorMessage = 'Service not available. Please contact support.';
+      showRetryAction = false;
+    } else {
+      errorMessage = 'Scanner error occurred. Please try again.';
+      debugPrint('Unhandled scanner error: $error');
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(errorMessage),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 5),
+        action: showRetryAction
+            ? SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: () {
+                  _scanBarcode();
+                },
+              )
+            : null,
+      ),
+    );
+  }
+
+  void _showCameraPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Camera Permission Required'),
+        content: const Text(
+          'This app needs camera permission to scan barcodes. Please enable camera access in your device settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // TODO: Open app settings if available
+              // You could use a package like permission_handler or app_settings
+            },
+            child: const Text('Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   bool get _hasActiveFilters {
@@ -314,6 +452,8 @@ class _ProductListScreenState extends State<ProductListScreen>
             onPressed: _scanBarcode,
             tooltip: 'Scan Barcode',
           ),
+          // Temporary test button
+
           IconButton(
             icon: Icon(
               _showFilters ? Icons.filter_list : Icons.filter_list_outlined,
@@ -344,9 +484,8 @@ class _ProductListScreenState extends State<ProductListScreen>
       ),
       floatingActionButton: canEdit
           ? FloatingActionButton(
-              onPressed: () => navigateAndRefresh(
-                AppRouter.pushToCreateProduct(context)
-              ),
+              onPressed: () =>
+                  navigateAndRefresh(AppRouter.pushToCreateProduct(context)),
               backgroundColor: Theme.of(context).primaryColor,
               child: const Icon(Icons.add, color: Colors.white),
             )
@@ -844,8 +983,10 @@ class _CompactProductCard extends StatelessWidget {
                     child: _buildInfoChip(
                       context,
                       Icons.attach_money,
-                      Provider.of<AppProvider>(context, listen: false).formatCurrency(
-                          product.salePrice ?? product.purchasePrice),
+                      Provider.of<AppProvider>(context, listen: false)
+                          .formatCurrency(product.salePrice ??
+                              product.purchasePrice ??
+                              0.0),
                     ),
                   ),
                   const SizedBox(width: 8),

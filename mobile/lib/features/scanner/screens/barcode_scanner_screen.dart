@@ -2,17 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import 'package:go_router/go_router.dart';
-
-import '../../../core/services/scanner_service.dart';
-import '../../../core/services/product_service.dart';
 import '../../../core/utils/barcode_utils.dart';
-import '../../../core/widgets/scanner_overlay.dart';
 import '../../../generated/app_localizations.dart';
 
-/// Professional barcode scanner screen with custom overlay and controls
+/// Simple, reliable barcode scanner screen
 class BarcodeScannerScreen extends StatefulWidget {
   final String? title;
   final String? subtitle;
@@ -39,17 +35,10 @@ class BarcodeScannerScreen extends StatefulWidget {
 
 class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     with WidgetsBindingObserver {
-  final ScannerService _scannerService = ScannerService();
-  final ProductService _productService = ProductService();
-  StreamSubscription<String>? _scanSubscription;
-
-  bool _isFlashOn = false;
-  final bool _canSwitchCamera = true;
-  bool _isTorchAvailable = false;
+  MobileScannerController? _controller;
+  bool _isInitialized = false;
   bool _isProcessing = false;
-  bool _isSearchingProduct = false;
-
-  final List<BarcodeScanResult> _scanHistory = [];
+  bool _isTorchOn = false;
   String? _lastScannedCode;
   DateTime? _lastScanTime;
 
@@ -57,58 +46,92 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initializeScanner();
+    _initializeController();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _scanSubscription?.cancel();
-    _scannerService.dispose();
+    _disposeController();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive) {
-      _scannerService.stopScanning();
-    } else if (state == AppLifecycleState.resumed) {
-      _scannerService.startScanning();
+    if (!_isInitialized || _controller == null) return;
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _controller!.start();
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        _controller!.stop();
+        break;
     }
   }
 
-  Future<void> _initializeScanner() async {
+  Future<void> _initializeController() async {
     try {
-      final success = await _scannerService.initialize();
-      if (!success) {
-        _showErrorDialog(
-            'Failed to initialize scanner. Please check camera permissions.');
-        return;
-      }
+      _controller = MobileScannerController(
+        autoStart: true, // Let MobileScanner widget handle the start
+        detectionSpeed: DetectionSpeed.noDuplicates,
+        facing: CameraFacing.back,
+        torchEnabled: false,
+        returnImage: false,
+        formats: [
+          // Linear/1D Barcodes
+          BarcodeFormat.codabar,
+          BarcodeFormat.code39,
+          BarcodeFormat.code93,
+          BarcodeFormat.code128,
+          BarcodeFormat.ean8,
+          BarcodeFormat.ean13,
+          BarcodeFormat.itf,
+          BarcodeFormat.upcA,
+          BarcodeFormat.upcE,
+          // 2D Barcodes
+          BarcodeFormat.aztec,
+          BarcodeFormat.dataMatrix,
+          BarcodeFormat.pdf417,
+          BarcodeFormat.qrCode,
+        ],
+      );
 
-      // Check torch availability
-      _isTorchAvailable = await _scannerService.isTorchAvailable();
-
-      // Don't start scanning here - wait for MobileScanner widget to be built
-
-      // Listen to scan results
-      _scanSubscription =
-          _scannerService.scanResultStream?.listen(_handleScanResult);
-
+      // Don't start here - let the MobileScanner widget handle initialization
       if (mounted) {
-        setState(() {});
-        // Start scanning after setState completes and widget is rebuilt
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scannerService.startScanning();
+        setState(() {
+          _isInitialized = true;
         });
       }
     } catch (e) {
-      _showErrorDialog('Scanner initialization failed: $e');
+      debugPrint('Scanner initialization error: $e');
+      if (mounted) {
+        _showErrorDialog('Failed to initialize camera. Please check permissions.');
+      }
     }
   }
 
-  void _handleScanResult(String code) {
-    if (_isProcessing || _isSearchingProduct) return;
+  Future<void> _disposeController() async {
+    if (_controller != null) {
+      try {
+        await _controller!.dispose();
+      } catch (e) {
+        debugPrint('Scanner dispose error: $e');
+      }
+      _controller = null;
+    }
+  }
+
+  void _onBarcodeDetected(BarcodeCapture capture) {
+    if (_isProcessing || capture.barcodes.isEmpty) return;
+
+    final barcode = capture.barcodes.first;
+    final code = barcode.rawValue;
+
+    if (code == null || code.isEmpty) return;
 
     // Prevent duplicate scans
     final now = DateTime.now();
@@ -122,330 +145,69 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     _lastScanTime = now;
     _isProcessing = true;
 
-    // Stop scanning while processing
-    _scannerService.stopScanning();
+    // Provide haptic feedback
+    HapticFeedback.mediumImpact();
 
-    // Validate barcode
-    final result = _processBarcode(code);
+    // Process the barcode
+    _processBarcode(code);
+  }
 
-    if (result.isValid) {
-      // Show loading immediately and search for product
-      _searchProductByBarcode(result.formattedCode);
-    } else {
-      // Show error for invalid barcode
-      _showScanResult(result);
+  void _processBarcode(String code) {
+    try {
+      // Create result object
+      final result = BarcodeScanResult.success(code);
+
+      if (widget.onBarcodeScanned != null) {
+        // Call the callback
+        widget.onBarcodeScanned!(result);
+        
+        // Close scanner if auto-close is enabled
+        if (widget.autoClose && mounted) {
+          context.pop();
+        }
+      } else {
+        // Show result dialog if no callback
+        _showScanResult(result);
+      }
+    } catch (e) {
+      debugPrint('Barcode processing error: $e');
+      _showErrorDialog('Error processing barcode: $e');
+    } finally {
       _isProcessing = false;
     }
   }
 
-  BarcodeScanResult _processBarcode(String code) {
-    try {
-      // Clean and detect barcode type
-      final cleanCode = BarcodeUtils.cleanBarcode(code);
-      final detectedType = BarcodeUtils.detectBarcodeType(cleanCode);
-
-      // Check if type is allowed
-      if (widget.allowedTypes != null &&
-          widget.allowedTypes!.isNotEmpty &&
-          !widget.allowedTypes!.contains(detectedType)) {
-        return BarcodeScanResult.error(
-            code, 'Barcode type $detectedType not allowed');
-      }
-
-      // Validate barcode
-      final isValid =
-          BarcodeUtils.isValidBarcode(cleanCode, expectedType: detectedType);
-
-      if (isValid) {
-        return BarcodeScanResult.success(cleanCode, type: detectedType);
-      } else {
-        return BarcodeScanResult.error(code, 'Invalid barcode format');
-      }
-    } catch (e) {
-      return BarcodeScanResult.error(code, 'Barcode processing error: $e');
-    }
-  }
-
   void _showScanResult(BarcodeScanResult result) {
-    // Provide haptic feedback
-    if (result.isValid) {
-      HapticFeedback.mediumImpact();
-    } else {
-      HapticFeedback.lightImpact();
-    }
-
-    // Show result dialog for invalid barcodes only
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => _buildResultDialog(dialogContext, result),
-    );
-  }
-
-  Widget _buildResultDialog(
-      BuildContext dialogContext, BarcodeScanResult result) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(
-            Icons.error,
-            color: Colors.red,
-          ),
-          const SizedBox(width: 8),
-          Text('Invalid Barcode'),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Code: ${result.code}'),
-          const SizedBox(height: 8),
-          Text(
-            'Error: ${result.errorMessage}',
-            style: TextStyle(color: Colors.red[700]),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: _scanAnother,
-          child: const Text('Try Again'),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
-          child: Text(l10n.ok),
-        ),
-      ],
-    );
-  }
-
-  void _handleConfirmedScan(BarcodeScanResult result) {
-    widget.onBarcodeScanned?.call(result);
-
-    if (widget.autoClose) {
-      context.go('/dashboard');
-    }
-  }
-
-  Future<void> _searchProductByBarcode(String barcode) async {
-    setState(() {
-      _isSearchingProduct = true;
-      _isProcessing = true; // Ensure processing flag is also set
-    });
-
-    try {
-      final product = await _productService.getProductByBarcode(barcode);
-
-      if (mounted) {
-        // Navigate directly to product detail
-        context.go('/products/${product.id}');
-      }
-    } catch (e) {
-      if (mounted) {
-        // Show error if product not found
-        _showProductNotFoundDialog(barcode, e.toString());
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSearchingProduct = false;
-          _isProcessing = false;
-        });
-        _scannerService.startScanning();
-      }
-    }
-  }
-
-  void _showProductNotFoundDialog(String barcode, String error) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Product Not Found'),
+      builder: (context) => AlertDialog(
+        title: const Text('Barcode Scanned'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Barcode: $barcode'),
+            Text('Code: ${result.code}'),
             const SizedBox(height: 8),
-            Text(
-              'Error: ${error.contains('not found') ? 'No product found with this barcode' : error}',
-              style: TextStyle(color: Colors.red[700]),
-            ),
+            Text('Type: ${result.typeDescription}'),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: _scanAnother,
-            child: const Text('Scan Another'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _continueScanning() {
-    _isProcessing = false;
-    _isSearchingProduct = false;
-    _scannerService.startScanning();
-  }
-
-  void _scanAnother() {
-    // Close any open dialogs and restart scanning
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    }
-    _continueScanning();
-  }
-
-  Future<void> _toggleFlash() async {
-    if (!_isTorchAvailable) return;
-
-    try {
-      await _scannerService.toggleTorch();
-      setState(() {
-        _isFlashOn = !_isFlashOn;
-      });
-    } catch (e) {
-      _showErrorDialog('Failed to toggle flash: $e');
-    }
-  }
-
-  Future<void> _switchCamera() async {
-    try {
-      await _scannerService.switchCamera();
-    } catch (e) {
-      _showErrorDialog('Failed to switch camera: $e');
-    }
-  }
-
-  void _showManualEntry() {
-    showDialog(
-      context: context,
-      builder: (context) => _buildManualEntryDialog(),
-    );
-  }
-
-  Widget _buildManualEntryDialog() {
-    final controller = TextEditingController();
-
-    return AlertDialog(
-      title: const Text('Enter Barcode Manually'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'Barcode',
-              hintText: 'Enter barcode number...',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.text,
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (value) {
-              // Auto-format as user types
-              final cleaned = BarcodeUtils.cleanBarcode(value);
-              if (cleaned !=
-                  value.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '')) {
-                controller.text = cleaned;
-                controller.selection = TextSelection.fromPosition(
-                  TextPosition(offset: cleaned.length),
-                );
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Supported formats: EAN-8, EAN-13, UPC-A, Code 128, Code 39, QR Code',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            final code = controller.text.trim();
-            if (code.isNotEmpty) {
-              Navigator.of(context).pop();
-              final result = _processBarcode(code);
-              if (result.isValid) {
-                _searchProductByBarcode(result.formattedCode);
-              } else {
-                _showScanResult(result);
-              }
-            }
-          },
-          child: const Text('Validate'),
-        ),
-      ],
-    );
-  }
-
-  void _showScanHistory() {
-    showDialog(
-      context: context,
-      builder: (context) => _buildHistoryDialog(),
-    );
-  }
-
-  Widget _buildHistoryDialog() {
-    return AlertDialog(
-      title: const Text('Scan History'),
-      content: SizedBox(
-        width: double.maxFinite,
-        height: 400,
-        child: _scanHistory.isEmpty
-            ? const Center(child: Text('No scans yet'))
-            : ListView.builder(
-                itemCount: _scanHistory.length,
-                itemBuilder: (context, index) {
-                  final result = _scanHistory[index];
-                  return ListTile(
-                    leading: Icon(
-                      result.isValid ? Icons.check_circle : Icons.error,
-                      color: result.isValid ? Colors.green : Colors.red,
-                    ),
-                    title: Text(result.formattedCode),
-                    subtitle: Text(result.typeDescription),
-                    trailing: Text(
-                      '${result.timestamp.hour}:${result.timestamp.minute.toString().padLeft(2, '0')}',
-                    ),
-                    onTap: () {
-                      if (result.isValid) {
-                        Navigator.of(context).pop(); // Close history dialog
-                        context.go(
-                            '/dashboard'); // Close scanner and go to dashboard
-                        _handleConfirmedScan(result);
-                      }
-                    },
-                  );
-                },
-              ),
-      ),
-      actions: [
-        if (_scanHistory.isNotEmpty)
-          TextButton(
             onPressed: () {
-              setState(() {
-                _scanHistory.clear();
-              });
               Navigator.of(context).pop();
+              _isProcessing = false;
             },
-            child: const Text('Clear History'),
+            child: const Text('Scan Again'),
           ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
-        ),
-      ],
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -453,12 +215,62 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Scanner Error'),
+        title: const Text('Error'),
         content: Text(message),
         actions: [
           TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _toggleTorch() async {
+    if (!_isInitialized || _controller == null) return;
+
+    try {
+      await _controller!.toggleTorch();
+      setState(() {
+        _isTorchOn = !_isTorchOn;
+      });
+    } catch (e) {
+      debugPrint('Torch toggle error: $e');
+    }
+  }
+
+  void _showManualEntry() {
+    final controller = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter Barcode Manually'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter barcode...',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (controller.text.isNotEmpty) {
+                _processBarcode(controller.text);
+              }
+            },
+            child: const Text('Submit'),
           ),
         ],
       ),
@@ -467,126 +279,182 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (!_scannerService.isInitialized) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(color: Colors.white),
-              const SizedBox(height: 16),
-              Text(
-                'Initializing scanner...',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Camera preview
-          if (_scannerService.controller != null)
-            Positioned.fill(
-              child: MobileScanner(
-                controller: _scannerService.controller!,
-                onDetect: _scannerService.onBarcodeDetected,
-              ),
+      appBar: AppBar(
+        title: Text(widget.title ?? l10n.scanBarcode),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        actions: [
+          if (widget.allowManualEntry)
+            IconButton(
+              onPressed: _showManualEntry,
+              icon: const Icon(Icons.keyboard),
+              tooltip: 'Manual Entry',
             ),
-
-          // Scanner overlay
-          Positioned.fill(
-            child: ScannerOverlay(
-              title: widget.title ?? 'Scan Barcode',
-              subtitle: widget.subtitle ?? 'Position barcode within the frame',
-              onFlashToggle: _isTorchAvailable ? _toggleFlash : null,
-              onCameraSwitch: _canSwitchCamera ? _switchCamera : null,
-              onManualEntry: widget.allowManualEntry ? _showManualEntry : null,
-              onClose: () {
-                context.go('/dashboard');
-              },
-              isFlashOn: _isFlashOn,
-              canSwitchCamera: _canSwitchCamera,
-            ),
+          IconButton(
+            onPressed: _toggleTorch,
+            icon: Icon(_isTorchOn ? Icons.flash_on : Icons.flash_off),
+            tooltip: 'Toggle Flash',
           ),
-
-          // History button (if enabled)
-          if (widget.showHistory && _scanHistory.isNotEmpty)
-            Positioned(
-              top: 100,
-              right: 16,
-              child: SafeArea(
-                child: FloatingActionButton.small(
-                  onPressed: _showScanHistory,
-                  backgroundColor: Colors.black.withValues(alpha: 0.7),
-                  foregroundColor: Colors.white,
-                  child: Stack(
-                    children: [
-                      const Icon(Icons.history),
-                      if (_scanHistory.isNotEmpty)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(1),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            child: Text(
-                              '${_scanHistory.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-          // Loading overlay for product search
-          if (_isSearchingProduct)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.8),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircularProgressIndicator(color: Colors.white),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Searching for product...',
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Please wait a moment',
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
+      backgroundColor: Colors.black,
+      body: _isInitialized && _controller != null
+          ? Stack(
+              children: [
+                // Scanner view
+                MobileScanner(
+                  controller: _controller!,
+                  onDetect: _onBarcodeDetected,
+                ),
+                
+                // Overlay with scan area
+                Container(
+                  decoration: ShapeDecoration(
+                    shape: ScannerOverlayShape(),
+                  ),
+                ),
+                
+                // Instructions
+                Positioned(
+                  bottom: 100,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            widget.subtitle ?? 'Position barcode within the frame',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ),
     );
   }
+}
+
+/// Custom shape for scanner overlay
+class ScannerOverlayShape extends ShapeBorder {
+  const ScannerOverlayShape();
+
+  @override
+  EdgeInsetsGeometry get dimensions => const EdgeInsets.all(10);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return Path()..fillType = PathFillType.evenOdd..addRect(rect);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    Path outerPath = Path()..addRect(rect);
+    Path innerPath = Path();
+    
+    // Create the scan area (square in center)
+    final scanAreaSize = rect.width * 0.7;
+    final left = rect.center.dx - scanAreaSize / 2;
+    final top = rect.center.dy - scanAreaSize / 2;
+    final scanRect = Rect.fromLTWH(left, top, scanAreaSize, scanAreaSize);
+    
+    innerPath.addRRect(RRect.fromRectAndRadius(scanRect, const Radius.circular(12)));
+    
+    return Path.combine(PathOperation.difference, outerPath, innerPath);
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    const double scanAreaOpacity = 0.8;
+    final paint = Paint()
+      ..color = Colors.black.withValues(alpha: scanAreaOpacity)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(getOuterPath(rect), paint);
+    
+    // Draw corner indicators
+    final scanAreaSize = rect.width * 0.7;
+    final left = rect.center.dx - scanAreaSize / 2;
+    final top = rect.center.dy - scanAreaSize / 2;
+    final scanRect = Rect.fromLTWH(left, top, scanAreaSize, scanAreaSize);
+    
+    final cornerPaint = Paint()
+      ..color = Colors.green
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4;
+    
+    final cornerLength = 30.0;
+    
+    // Top-left corner
+    canvas.drawLine(
+      Offset(scanRect.left, scanRect.top + cornerLength),
+      Offset(scanRect.left, scanRect.top),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(scanRect.left, scanRect.top),
+      Offset(scanRect.left + cornerLength, scanRect.top),
+      cornerPaint,
+    );
+    
+    // Top-right corner
+    canvas.drawLine(
+      Offset(scanRect.right - cornerLength, scanRect.top),
+      Offset(scanRect.right, scanRect.top),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(scanRect.right, scanRect.top),
+      Offset(scanRect.right, scanRect.top + cornerLength),
+      cornerPaint,
+    );
+    
+    // Bottom-left corner
+    canvas.drawLine(
+      Offset(scanRect.left, scanRect.bottom - cornerLength),
+      Offset(scanRect.left, scanRect.bottom),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(scanRect.left, scanRect.bottom),
+      Offset(scanRect.left + cornerLength, scanRect.bottom),
+      cornerPaint,
+    );
+    
+    // Bottom-right corner
+    canvas.drawLine(
+      Offset(scanRect.right - cornerLength, scanRect.bottom),
+      Offset(scanRect.right, scanRect.bottom),
+      cornerPaint,
+    );
+    canvas.drawLine(
+      Offset(scanRect.right, scanRect.bottom),
+      Offset(scanRect.right, scanRect.bottom - cornerLength),
+      cornerPaint,
+    );
+  }
+
+  @override
+  ShapeBorder scale(double t) => ScannerOverlayShape();
 }

@@ -10,6 +10,7 @@ import '../../../core/auth/auth_provider.dart';
 import '../../../core/providers/app_provider.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/mixins/refresh_list_mixin.dart';
+import '../../../core/utils/scanner_launcher.dart';
 import '../widgets/transaction_filter_sheet.dart';
 
 /// Modern Transaction List Screen with comprehensive transaction management
@@ -36,7 +37,7 @@ class TransactionsScreen extends StatefulWidget {
   State<TransactionsScreen> createState() => _TransactionsScreenState();
 }
 
-class _TransactionsScreenState extends State<TransactionsScreen> 
+class _TransactionsScreenState extends State<TransactionsScreen>
     with WidgetsBindingObserver, RefreshListMixin<TransactionsScreen> {
   final TransactionService _transactionService = TransactionService();
   final ScrollController _scrollController = ScrollController();
@@ -89,7 +90,9 @@ class _TransactionsScreenState extends State<TransactionsScreen>
 
     // Guard clause: check scroll position for pagination trigger
     if (_scrollController.position.pixels <
-        _scrollController.position.maxScrollExtent - 200) return;
+        _scrollController.position.maxScrollExtent - 200) {
+      return;
+    }
 
     _loadMoreTransactions();
   }
@@ -256,6 +259,59 @@ class _TransactionsScreenState extends State<TransactionsScreen>
     });
   }
 
+  /// Launch QR scanner to search for transactions by QR code (transaction ID)
+  void _scanTransactionQR() async {
+    try {
+      await ScannerLauncher.forCustomAction(
+        context,
+        title: 'Scan Transaction QR Code',
+        subtitle: 'Scan QR code to find transaction',
+        allowedTypes: ['QR_CODE'],
+        onScanResult: (result) async {
+          if (!result.isValid) {
+            throw Exception('Invalid QR code format');
+          }
+
+          final scannedCode = result.formattedCode;
+
+          // Guard clause: ensure widget is mounted after scan
+          if (!mounted) return;
+
+          try {
+            // Try to navigate to transaction detail (assuming scannedCode is transaction ID)
+            AppRouter.goToTransactionDetail(context, scannedCode);
+          } catch (e) {
+            // Guard clause: ensure widget is mounted after error
+            if (!mounted) return;
+
+            // Try searching by the scanned code as customer name or transaction data
+            _searchController.text = scannedCode;
+            _onSearchChanged(scannedCode);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    'No transaction found for QR code. Searching by "$scannedCode"...'),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Scanner error: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   void _onTransactionTap(Transaction transaction) {
     AppRouter.goToTransactionDetail(context, transaction.id);
   }
@@ -345,8 +401,7 @@ class _TransactionsScreenState extends State<TransactionsScreen>
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText:
-                            '${l10n.search} customers...',
+                        hintText: '${l10n.search} customers...',
                         prefixIcon: Icon(
                           Icons.search,
                           size: 20,
@@ -371,6 +426,33 @@ class _TransactionsScreenState extends State<TransactionsScreen>
                   ),
                 ),
                 const SizedBox(width: 12),
+                // QR Scanner Button
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.qr_code_scanner,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    onPressed: _scanTransactionQR,
+                    tooltip: 'Scan Transaction QR Code',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Filter Button
                 Container(
                   decoration: BoxDecoration(
                     color: _hasActiveFilters()
@@ -484,8 +566,7 @@ class _TransactionsScreenState extends State<TransactionsScreen>
       floatingActionButton: _canCreateTransactions()
           ? FloatingActionButton(
               onPressed: () => navigateAndRefresh(
-                AppRouter.pushToCreateTransaction(context)
-              ),
+                  AppRouter.pushToCreateTransaction(context)),
               backgroundColor: Theme.of(context).primaryColor,
               tooltip: l10n.add,
               child: const Icon(Icons.add, color: Colors.white),
@@ -686,8 +767,8 @@ class _TransactionsScreenState extends State<TransactionsScreen>
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        Provider.of<AppProvider>(context, listen: false).formatCurrency(
-                            transaction.calculatedAmount),
+                        Provider.of<AppProvider>(context, listen: false)
+                            .formatCurrency(transaction.calculatedAmount),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -824,9 +905,16 @@ class _TransactionsScreenState extends State<TransactionsScreen>
 
   Widget _buildTransactionTypeBadge(Transaction transaction) {
     final isTransfer = transaction.type == TransactionType.transfer;
-    final color = isTransfer
-        ? Theme.of(context).colorScheme.secondary
-        : Theme.of(context).colorScheme.primary;
+    final isTrade = transaction.type == TransactionType.trade;
+    var color = Theme.of(context).colorScheme.primary;
+
+    if (isTransfer) {
+      color = Theme.of(context).colorScheme.secondary;
+    }
+
+    if (isTrade) {
+      color = Colors.purple;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
